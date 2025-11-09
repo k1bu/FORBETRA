@@ -1,0 +1,225 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  INDIVIDUAL
+  COACH
+  STAKEHOLDER
+  ADMIN
+}
+
+enum CycleStatus {
+  PLANNED
+  ACTIVE
+  PAUSED
+  COMPLETED
+}
+
+enum ReflectionType {
+  INTENTION
+  EFFORT
+  PROGRESS
+}
+
+enum SubgoalMetric {
+  EFFORT
+  PROGRESS
+  BOTH
+}
+
+enum TokenType {
+  AUTH_MAGIC_LINK
+  FEEDBACK_INVITE
+  RESET_PASSWORD
+}
+
+model User {
+  id        String   @id @default(cuid())
+  clerkUserId String? @unique
+  email     String   @unique
+  name      String?
+  role      UserRole @default(INDIVIDUAL)
+  phone     String?
+  timezone  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  objectives           Objective[]
+  cycles               Cycle[]
+  reflections          Reflection[]
+  stakeholders         Stakeholder[]        @relation("IndividualStakeholders")
+  stakeholdersInvited  Stakeholder[]        @relation("StakeholderInviter")
+  coachNotesAuthored   CoachNote[]          @relation("CoachNotesAuthored")
+  coachNotesReceived   CoachNote[]          @relation("CoachNotesReceived")
+  tokens               Token[]              @relation("UserTokens")
+}
+
+model Objective {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  title       String
+  description String?
+  startDate   DateTime @default(now())
+  endDate     DateTime?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  subgoals    Subgoal[]
+  cycles      Cycle[]
+  stakeholders Stakeholder[]
+
+  @@index([userId])
+}
+
+model Cycle {
+  id          String      @id @default(cuid())
+  userId      String
+  objectiveId String
+  label       String?
+  startDate   DateTime
+  endDate     DateTime?
+  status      CycleStatus @default(PLANNED)
+  summary     String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  user      User      @relation(fields: [userId], references: [id])
+  objective Objective @relation(fields: [objectiveId], references: [id])
+  reflections Reflection[]
+  coachNotes  CoachNote[]
+
+  @@index([userId])
+  @@index([objectiveId])
+}
+
+model Subgoal {
+  id          String        @id @default(cuid())
+  objectiveId String
+  label       String
+  description String?
+  metricType  SubgoalMetric @default(BOTH)
+  order       Int?
+  active      Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  objective  Objective @relation(fields: [objectiveId], references: [id])
+  reflections Reflection[]
+
+  @@index([objectiveId])
+}
+
+model Reflection {
+  id             String         @id @default(cuid())
+  cycleId        String
+  userId         String
+  subgoalId      String
+  reflectionType ReflectionType
+  weekNumber     Int
+  checkInDate    DateTime       @default(now())
+  effortScore    Int?
+  progressScore  Int?
+  notes          String?
+  submittedAt    DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  cycle     Cycle    @relation(fields: [cycleId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+  subgoal   Subgoal  @relation(fields: [subgoalId], references: [id])
+  feedbacks Feedback[]
+  tokens    Token[]
+
+  @@index([cycleId])
+  @@index([userId])
+  @@index([subgoalId])
+  @@unique([cycleId, weekNumber, reflectionType, subgoalId])
+}
+
+model Feedback {
+  id            String    @id @default(cuid())
+  reflectionId  String
+  stakeholderId String
+  effortScore   Int?
+  progressScore Int?
+  comment       String?
+  submittedAt   DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  reflection Reflection  @relation(fields: [reflectionId], references: [id])
+  stakeholder Stakeholder @relation(fields: [stakeholderId], references: [id])
+
+  @@unique([stakeholderId, reflectionId])
+  @@index([reflectionId])
+}
+
+model Stakeholder {
+  id            String    @id @default(cuid())
+  individualId  String
+  objectiveId   String?
+  invitedById   String?
+  name          String
+  email         String
+  phone         String?
+  relationship  String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  individual User      @relation("IndividualStakeholders", fields: [individualId], references: [id])
+  objective  Objective? @relation(fields: [objectiveId], references: [id])
+  invitedBy  User?     @relation("StakeholderInviter", fields: [invitedById], references: [id])
+  feedbacks  Feedback[]
+  tokens     Token[]
+
+  @@unique([individualId, email])
+  @@index([objectiveId])
+}
+
+model CoachNote {
+  id            String   @id @default(cuid())
+  coachId       String
+  individualId  String
+  cycleId       String?
+  weekNumber    Int?
+  content       String
+  createdAt     DateTime @default(now())
+
+  coach      User   @relation("CoachNotesAuthored", fields: [coachId], references: [id])
+  individual User   @relation("CoachNotesReceived", fields: [individualId], references: [id])
+  cycle      Cycle? @relation(fields: [cycleId], references: [id])
+}
+
+model Token {
+  id            String     @id @default(cuid())
+  type          TokenType
+  tokenHash     String     @unique
+  userId        String?
+  stakeholderId String?
+  reflectionId  String?
+  expiresAt     DateTime
+  usedAt        DateTime?
+  metadata      Json?
+  createdAt     DateTime   @default(now())
+
+  user        User?        @relation("UserTokens", fields: [userId], references: [id])
+  stakeholder Stakeholder? @relation(fields: [stakeholderId], references: [id])
+  reflection  Reflection?  @relation(fields: [reflectionId], references: [id])
+
+  @@index([expiresAt])
+  @@index([userId])
+  @@index([stakeholderId])
+  @@index([reflectionId])
+}
