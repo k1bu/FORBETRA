@@ -312,8 +312,7 @@ export const load: PageServerLoad = async (event) => {
 					type: nextPrompt.type,
 					date: nextPrompt.date.toISOString()
 				}
-			: null,
-		overduePrompts
+			: null
 	};
 };
 

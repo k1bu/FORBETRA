@@ -95,7 +95,7 @@
 						<div
 							class="h-full rounded-full bg-black transition-all"
 							style={`width: ${data.cycle.completion}%`}
-						/>
+						></div>
 					</div>
 					<p class="text-xs text-neutral-500">
 						{data.cycle.reflectionsRecorded} reflections submitted so far.
