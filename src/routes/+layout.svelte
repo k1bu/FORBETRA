@@ -2,20 +2,12 @@
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import type { Snippet } from 'svelte';
-	import { ClerkProvider, SignedIn, UserButton, useUser } from 'svelte-clerk';
+	import { ClerkProvider, SignedIn, UserButton } from 'svelte-clerk';
 	import type { LayoutData } from './$types';
 
 	const { children, data }: { children: Snippet; data: LayoutData } = $props();
 
-	const { user } = useUser();
-
-	const clientRoleRaw = $derived.by(() => user?.publicMetadata?.role ?? null);
-	const clientRole = $derived.by(() =>
-		typeof clientRoleRaw === 'string' && clientRoleRaw.length > 0
-			? clientRoleRaw.toUpperCase()
-			: null
-	);
-	const displayRole = $derived.by(() => clientRole ?? data.dbUser?.role ?? null);
+	const displayRole = data.dbUser?.role ?? null;
 </script>
 
 <svelte:head>
