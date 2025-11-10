@@ -35,8 +35,6 @@ import { ClerkProvider, SignedIn, UserButton } from 'svelte-clerk';
 						{/if}
 						<span class="text-sm text-neutral-500">Role: {data.dbUser.role}</span>
 					</div>
-				{:else}
-					<span class="text-sm text-neutral-500">Loading role…</span>
 				{/if}
 				<UserButton />
 			</nav>
