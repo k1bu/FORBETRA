@@ -9,7 +9,7 @@
 	<section class="landing relative flex min-h-screen w-full flex-col bg-[#F7F8FA] md:flex-row">
 		<nav class="absolute inset-x-0 top-0 z-20 flex items-center justify-start px-8 py-6 text-sm text-slate-500" aria-hidden="true"></nav>
 
-		<div class="left-panel relative flex w-full flex-col justify-start px-10 pb-16 pt-32 md:w-1/2 md:px-16">
+		<div class="left-panel relative flex w-full flex-col items-start justify-center gap-12 px-10 pb-16 pt-32 md:w-1/2 md:px-16">
 			<div
 				class="pointer-events-none absolute inset-0 animate-gradientSlow bg-[length:200%_200%] opacity-70"
 				style="background-image: radial-gradient(circle at 20% 20%, rgba(59,130,246,0.12), transparent 55%), radial-gradient(circle at 80% 30%, rgba(148,163,184,0.18), transparent 60%), radial-gradient(circle at 50% 80%, rgba(226,232,240,0.25), transparent 50%);"
@@ -20,7 +20,7 @@
 				style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2240%22 height=%2240%22 viewBox=%220 0 40 40%22%3E%3Cpath d=%22M0 39.5L0 40 40 40 40 39.5 0 39.5z M39.5 0 39.5 40 40 40 40 0 39.5 0z%22 fill=%22%23cbd5f5%22 fill-opacity=%220.25%22/%3E%3C/svg%3E');"
 				aria-hidden="true"
 			/>
-			<div class="relative z-10 max-w-xl rounded-3xl border-2 border-[#3B82F6] bg-white/85 p-12 backdrop-blur">
+			<div class="relative z-10 max-w-xl rounded-3xl border-2 border-[#3B82F6] bg-white/85 p-12 backdrop-blur md:ml-4">
 				<div class="space-y-5">
 					<p class="text-xs uppercase tracking-[0.6em] text-slate-400">Human. Data. Better.</p>
 					<h1 class="text-5xl font-semibold tracking-[0.18em] text-slate-900">FORBETRA</h1>
