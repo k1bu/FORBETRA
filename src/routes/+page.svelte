@@ -7,13 +7,7 @@
 
 <SignedOut>
 	<section class="landing relative flex min-h-screen w-full flex-col bg-[#F7F8FA] md:flex-row">
-		<nav class="absolute inset-x-0 top-0 z-20 flex items-center justify-between px-8 py-6 text-sm text-slate-500">
-			<a href="/" class="font-semibold tracking-[0.3em] text-slate-800">FORBETRA</a>
-			<div class="flex items-center gap-6">
-				<a href="#approach" class="transition hover:text-slate-800">Approach</a>
-				<a href="#contact" class="transition hover:text-slate-800">Contact</a>
-			</div>
-		</nav>
+		<nav class="absolute inset-x-0 top-0 z-20 flex items-center justify-start px-8 py-6 text-sm text-slate-500" aria-hidden="true"></nav>
 
 		<div class="left-panel relative flex w-full flex-col justify-start px-10 pb-16 pt-32 md:w-1/2 md:px-16">
 			<div
