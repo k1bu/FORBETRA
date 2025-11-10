@@ -5,6 +5,7 @@ import type { Actions, PageServerLoad } from './$types';
 import { randomBytes } from 'node:crypto';
 import { sendEmail } from '$lib/notifications/email';
 import { sendSms } from '$lib/notifications/sms';
+import { Prisma } from '@prisma/client';
 
 const stdDev = (values: number[]) => {
 	if (values.length === 0) return null;
@@ -359,7 +360,7 @@ export const actions: Actions = {
 		const stakeholderId = formData.get('stakeholderId');
 
 		if (typeof stakeholderId !== 'string' || stakeholderId.length === 0) {
-			return fail(400, { error: 'Missing stakeholder selection.' });
+			return fail(400, { action: 'feedback', error: 'Missing stakeholder selection.' });
 		}
 
 		const stakeholder = await prisma.stakeholder.findFirst({
@@ -370,7 +371,7 @@ export const actions: Actions = {
 		});
 
 		if (!stakeholder) {
-			return fail(404, { error: 'Stakeholder not found.' });
+			return fail(404, { action: 'feedback', error: 'Stakeholder not found.' });
 		}
 
 		const objective = await prisma.objective.findFirst({
@@ -383,19 +384,19 @@ export const actions: Actions = {
 		});
 
 		if (!objective) {
-			return fail(400, { error: 'No active objective available.' });
+			return fail(400, { action: 'feedback', error: 'No active objective available.' });
 		}
 
 		const primarySubgoal = objective.subgoals[0];
 
 		if (!primarySubgoal) {
-			return fail(400, { error: 'Add a subgoal before requesting feedback.' });
+			return fail(400, { action: 'feedback', error: 'Add a subgoal before requesting feedback.' });
 		}
 
 		const cycle = objective.cycles[0];
 
 		if (!cycle) {
-			return fail(400, { error: 'No active cycle found.' });
+			return fail(400, { action: 'feedback', error: 'No active cycle found.' });
 		}
 
 		const weekNumber = computeWeekNumber(cycle.startDate);
@@ -457,9 +458,68 @@ export const actions: Actions = {
 		}
 
 		return {
+			action: 'feedback',
 			success: true,
 			feedbackLink,
 			expiresAt: expiresAt.toISOString()
+		};
+	},
+	addStakeholder: async (event) => {
+		const { dbUser } = requireRole(event, 'INDIVIDUAL');
+
+		const formData = await event.request.formData();
+		const name = String(formData.get('name') ?? '').trim();
+		const email = String(formData.get('email') ?? '').trim().toLowerCase();
+		const relationship = String(formData.get('relationship') ?? '').trim();
+
+		const values = { name, email, relationship };
+
+		if (!name || !email) {
+			return fail(400, {
+				action: 'stakeholder',
+				error: 'Add a name and valid email to invite a stakeholder.',
+				values
+			});
+		}
+
+		const objective = await prisma.objective.findFirst({
+			where: { userId: dbUser.id, active: true },
+			orderBy: { createdAt: 'desc' },
+			select: { id: true }
+		});
+
+		if (!objective) {
+			return fail(400, {
+				action: 'stakeholder',
+				error: 'Create an objective before adding stakeholders.',
+				values
+			});
+		}
+
+		try {
+			await prisma.stakeholder.create({
+				data: {
+					individualId: dbUser.id,
+					objectiveId: objective.id,
+					name,
+					email,
+					relationship: relationship.length > 0 ? relationship : null
+				}
+			});
+		} catch (error) {
+			if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+				return fail(400, {
+					action: 'stakeholder',
+					error: 'You already have a stakeholder with that email.',
+					values
+				});
+			}
+			throw error;
+		}
+
+		return {
+			action: 'stakeholder',
+			success: true
 		};
 	}
 };

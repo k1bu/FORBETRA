@@ -3,6 +3,19 @@
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
 
+	const stakeholderFormValues =
+		form?.action === 'stakeholder' && form?.values
+			? {
+					name: form.values.name ?? '',
+					email: form.values.email ?? '',
+					relationship: form.values.relationship ?? ''
+				}
+			: { name: '', email: '', relationship: '' };
+
+	const stakeholderError =
+		form?.action === 'stakeholder' && form?.error ? form.error : null;
+	const stakeholderSuccess = form?.action === 'stakeholder' && form?.success ? true : false;
+
 	const formatDateTime = (value: string | null) => {
 		if (!value) return '—';
 		return new Intl.DateTimeFormat('en-US', {
@@ -73,20 +86,24 @@
 		{/if}
 	</header>
 
-	{#if form?.error}
-		<div class="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{form.error}</div>
-	{:else if form?.feedbackLink}
-		<div
-			class="space-y-2 rounded border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700"
-		>
-			<p>Feedback link generated:</p>
-			<p class="font-mono break-all">{form.feedbackLink}</p>
-			{#if form.expiresAt}
-				<p class="text-xs text-emerald-700">
-					Expires {formatDateTime(form.expiresAt)}.
-				</p>
-			{/if}
-		</div>
+	{#if form?.action === 'feedback'}
+		{#if form.error}
+			<div class="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+				{form.error}
+			</div>
+		{:else if form.feedbackLink}
+			<div
+				class="space-y-2 rounded border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700"
+			>
+				<p>Feedback link generated:</p>
+				<p class="font-mono break-all">{form.feedbackLink}</p>
+				{#if form.expiresAt}
+					<p class="text-xs text-emerald-700">
+						Expires {formatDateTime(form.expiresAt)}.
+					</p>
+				{/if}
+			</div>
+		{/if}
 	{/if}
 
 	{#if data.cycle}
@@ -319,6 +336,67 @@
 					Invite a stakeholder to share perspectives on your progress.
 				</p>
 			{/if}
+
+			<section class="mt-4 space-y-3 rounded border border-neutral-200 bg-neutral-50 p-3 text-sm">
+				<h3 class="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+					Add a stakeholder
+				</h3>
+				<p class="text-xs text-neutral-500">
+					Aim for 3–5 people who regularly observe your leadership. We’ll email them once feedback
+					requests are ready.
+				</p>
+				{#if stakeholderError}
+					<div class="rounded border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+						{stakeholderError}
+					</div>
+				{:else if stakeholderSuccess}
+					<div class="rounded border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
+						Stakeholder added. You can generate a feedback link right away.
+					</div>
+				{/if}
+				<form method="post" action="?/addStakeholder" class="space-y-3 text-sm">
+					<label class="block space-y-1">
+						<span class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Name</span>
+						<input
+							name="name"
+							type="text"
+							class="w-full rounded border border-neutral-300 px-3 py-2 text-sm"
+							placeholder="e.g. Alex Jensen"
+							value={stakeholderFormValues.name}
+							required
+						/>
+					</label>
+					<label class="block space-y-1">
+						<span class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Email</span>
+						<input
+							name="email"
+							type="email"
+							class="w-full rounded border border-neutral-300 px-3 py-2 text-sm"
+							placeholder="alex@example.com"
+							value={stakeholderFormValues.email}
+							required
+						/>
+					</label>
+					<label class="block space-y-1">
+						<span class="text-xs font-semibold uppercase tracking-wide text-neutral-500"
+							>Relationship (optional)</span
+						>
+						<input
+							name="relationship"
+							type="text"
+							class="w-full rounded border border-neutral-300 px-3 py-2 text-sm"
+							placeholder="Manager, peer, direct report..."
+							value={stakeholderFormValues.relationship}
+						/>
+					</label>
+					<button
+						type="submit"
+						class="inline-flex items-center rounded bg-black px-3 py-2 text-xs font-semibold uppercase tracking-wide text-white"
+					>
+						Add stakeholder
+					</button>
+				</form>
+			</section>
 		</article>
 	</section>
 </section>
