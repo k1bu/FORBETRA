@@ -9,12 +9,13 @@
 
 	const { user } = useUser();
 
-	$: clientRoleRaw = user?.publicMetadata?.role;
-	$: clientRole =
+	const clientRoleRaw = $derived.by(() => user?.publicMetadata?.role ?? null);
+	const clientRole = $derived.by(() =>
 		typeof clientRoleRaw === 'string' && clientRoleRaw.length > 0
 			? clientRoleRaw.toUpperCase()
-			: null;
-	$: displayRole = clientRole ?? data.dbUser?.role ?? null;
+			: null
+	);
+	const displayRole = $derived.by(() => clientRole ?? data.dbUser?.role ?? null);
 </script>
 
 <svelte:head>
