@@ -1,8 +1,23 @@
 import { fail, redirect } from '@sveltejs/kit';
-import prisma from '$lib/server/prisma';
+import { onboardingContexts } from '$lib/content/onboardingTemplates';
 import { requireRole } from '$lib/server/auth';
+import prisma from '$lib/server/prisma';
 import { onboardingSchema } from '$lib/validation/onboarding';
 import type { Actions, PageServerLoad } from './$types';
+import type { ZodIssue } from 'zod';
+
+const MAX_SUBGOALS = 5;
+const MAX_STAKEHOLDERS = 5;
+
+const formatErrors = (issues: ZodIssue[]) =>
+	issues.reduce((acc, issue) => {
+		const path = issue.path.join('.');
+		if (!acc[path]) {
+			acc[path] = [];
+		}
+		acc[path].push(issue.message);
+		return acc;
+	}, {} as Record<string, string[]>);
 
 export const load: PageServerLoad = async (event) => {
 	const { dbUser } = requireRole(event, 'INDIVIDUAL');
@@ -24,7 +39,8 @@ export const load: PageServerLoad = async (event) => {
 		defaults: {
 			startDate: new Date().toISOString().slice(0, 10),
 			durationWeeks: 12
-		}
+		},
+		contexts: onboardingContexts
 	};
 };
 
@@ -33,15 +49,62 @@ export const actions: Actions = {
 		const { dbUser } = requireRole(event, 'INDIVIDUAL');
 
 		const formData = await event.request.formData();
-		const submission = Object.fromEntries(formData) as Record<string, string>;
 
-		const parsed = onboardingSchema.safeParse(submission);
+		const objectiveTitle = (formData.get('objectiveTitle') ?? '').toString().trim();
+		const objectiveDescription = (formData.get('objectiveDescription') ?? '').toString().trim();
+		const cycleLabel = (formData.get('cycleLabel') ?? '').toString().trim();
+		const cycleStartDate = (formData.get('cycleStartDate') ?? '').toString();
+		const cycleDurationWeeksRaw = (formData.get('cycleDurationWeeks') ?? '').toString();
+		const cycleDurationWeeksValue = Number.parseInt(cycleDurationWeeksRaw, 10);
+
+		const subgoals = Array.from({ length: MAX_SUBGOALS }, (_, index) => {
+			const label = (formData.get(`subgoalLabel${index + 1}`) ?? '').toString().trim();
+			const description = (formData.get(`subgoalDescription${index + 1}`) ?? '')
+				.toString()
+				.trim();
+			return { label, description };
+		}).filter((subgoal) => subgoal.label.length > 0 || subgoal.description.length > 0);
+
+		const stakeholders = Array.from({ length: MAX_STAKEHOLDERS }, (_, index) => {
+			const name = (formData.get(`stakeholderName${index + 1}`) ?? '').toString().trim();
+			const email = (formData.get(`stakeholderEmail${index + 1}`) ?? '').toString().trim();
+			const relationship = (formData.get(`stakeholderRelationship${index + 1}`) ?? '')
+				.toString()
+				.trim();
+			return { name, email, relationship };
+		}).filter((stakeholder) => stakeholder.name || stakeholder.email || stakeholder.relationship);
+
+		const submission = {
+			objectiveTitle,
+			objectiveDescription,
+			subgoals,
+			stakeholders,
+			cycleLabel,
+			cycleStartDate,
+			cycleDurationWeeks: cycleDurationWeeksRaw
+		};
+
+		const parsed = onboardingSchema.safeParse({
+			objectiveTitle: submission.objectiveTitle,
+			objectiveDescription:
+				submission.objectiveDescription.length > 0 ? submission.objectiveDescription : undefined,
+			subgoals: submission.subgoals.map((subgoal) => ({
+				label: subgoal.label,
+				description: subgoal.description.length > 0 ? subgoal.description : undefined
+			})),
+			stakeholders: submission.stakeholders.map((stakeholder) => ({
+				name: stakeholder.name,
+				email: stakeholder.email,
+				relationship: stakeholder.relationship.length > 0 ? stakeholder.relationship : undefined
+			})),
+			cycleLabel: submission.cycleLabel.length > 0 ? submission.cycleLabel : undefined,
+			cycleStartDate: submission.cycleStartDate,
+			cycleDurationWeeks: cycleDurationWeeksValue
+		});
 
 		if (!parsed.success) {
-			const errors = parsed.error.flatten();
-
 			return fail(400, {
-				errors: errors.fieldErrors,
+				errors: formatErrors(parsed.error.issues),
 				values: submission
 			});
 		}
@@ -57,24 +120,28 @@ export const actions: Actions = {
 				}
 			});
 
-			await tx.subgoal.create({
-				data: {
-					objectiveId: objective.id,
-					label: data.subgoalLabel,
-					description: data.subgoalDescription ?? null
-				}
-			});
-
-			if (data.stakeholderEmail && data.stakeholderName) {
-				await tx.stakeholder.create({
+			for (const subgoal of data.subgoals) {
+				await tx.subgoal.create({
 					data: {
-						individualId: dbUser.id,
 						objectiveId: objective.id,
-						name: data.stakeholderName,
-						email: data.stakeholderEmail,
-						relationship: data.stakeholderRelationship ?? null
+						label: subgoal.label,
+						description: subgoal.description ?? null
 					}
 				});
+			}
+
+			if (data.stakeholders && data.stakeholders.length > 0) {
+				for (const stakeholder of data.stakeholders) {
+					await tx.stakeholder.create({
+						data: {
+							individualId: dbUser.id,
+							objectiveId: objective.id,
+							name: stakeholder.name,
+							email: stakeholder.email,
+							relationship: stakeholder.relationship ?? null
+						}
+					});
+				}
 			}
 
 			const startDate = new Date(data.cycleStartDate);
@@ -91,6 +158,58 @@ export const actions: Actions = {
 					status: 'ACTIVE'
 				}
 			});
+
+			const pendingInvites = await tx.coachInvite.findMany({
+				where: {
+					email: dbUser.email.toLowerCase(),
+					acceptedAt: null,
+					cancelledAt: null,
+					expiresAt: {
+						gt: new Date()
+					}
+				},
+				select: {
+					id: true,
+					coachId: true,
+					tokenHash: true
+				}
+			});
+
+			for (const invite of pendingInvites) {
+				await tx.coachInvite.update({
+					where: { id: invite.id },
+					data: {
+						acceptedAt: new Date(),
+						individualId: dbUser.id
+					}
+				});
+
+				await tx.coachClient.upsert({
+					where: {
+						coachId_individualId: {
+							coachId: invite.coachId,
+							individualId: dbUser.id
+						}
+					},
+					update: {
+						archivedAt: null
+					},
+					create: {
+						coachId: invite.coachId,
+						individualId: dbUser.id
+					}
+				});
+
+				await tx.token.updateMany({
+					where: {
+						tokenHash: invite.tokenHash,
+						type: 'COACH_INVITE'
+					},
+					data: {
+						usedAt: new Date()
+					}
+				});
+			}
 		});
 
 		throw redirect(303, '/onboarding/complete');

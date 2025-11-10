@@ -8,6 +8,66 @@ const ALLOWED_ROLES = new Set<UserRole>(['INDIVIDUAL', 'COACH', 'STAKEHOLDER', '
 
 const clerkHandle = withClerkHandler();
 
+const linkPendingCoachInvites = async (user: { id: string; email: string; role: UserRole }) => {
+	if (user.role !== 'INDIVIDUAL') return;
+
+	const pendingInvites = await prisma.coachInvite.findMany({
+		where: {
+			email: user.email.toLowerCase(),
+			acceptedAt: null,
+			cancelledAt: null,
+			expiresAt: {
+				gt: new Date()
+			}
+		},
+		select: {
+			id: true,
+			coachId: true,
+			tokenHash: true
+		}
+	});
+
+	if (pendingInvites.length === 0) return;
+
+	await prisma.$transaction(async (tx) => {
+		for (const invite of pendingInvites) {
+			await tx.coachInvite.update({
+				where: { id: invite.id },
+				data: {
+					acceptedAt: new Date(),
+					individualId: user.id
+				}
+			});
+
+			await tx.coachClient.upsert({
+				where: {
+					coachId_individualId: {
+						coachId: invite.coachId,
+						individualId: user.id
+					}
+				},
+				update: {
+					archivedAt: null
+				},
+				create: {
+					coachId: invite.coachId,
+					individualId: user.id
+				}
+			});
+
+			await tx.token.updateMany({
+				where: {
+					tokenHash: invite.tokenHash,
+					type: 'COACH_INVITE'
+				},
+				data: {
+					usedAt: new Date()
+				}
+			});
+		}
+	});
+};
+
 export const handle = sequence(clerkHandle, async ({ event, resolve }) => {
 	const auth = event.locals.auth();
 
@@ -52,6 +112,8 @@ export const handle = sequence(clerkHandle, async ({ event, resolve }) => {
 			}
 		});
 
+		await linkPendingCoachInvites(dbUser);
+
 		event.locals.dbUser = dbUser;
 		return resolve(event);
 	}
@@ -71,6 +133,8 @@ export const handle = sequence(clerkHandle, async ({ event, resolve }) => {
 	}
 
 	if (Object.keys(updates).length === 0) {
+		await linkPendingCoachInvites(existingUser);
+
 		event.locals.dbUser = existingUser;
 		return resolve(event);
 	}
@@ -79,6 +143,8 @@ export const handle = sequence(clerkHandle, async ({ event, resolve }) => {
 		where: { id: existingUser.id },
 		data: updates
 	});
+
+	await linkPendingCoachInvites(dbUser);
 
 	event.locals.dbUser = dbUser;
 

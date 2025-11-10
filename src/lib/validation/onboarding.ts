@@ -1,53 +1,36 @@
 import { z } from 'zod';
 
-export const onboardingSchema = z
-	.object({
-		objectiveTitle: z
-			.string({ required_error: 'Objective title is required' })
-			.trim()
-			.min(3, 'Objective title must be at least 3 characters'),
-		objectiveDescription: z
-			.string()
-			.trim()
-			.max(1000, 'Keep the description under 1000 characters')
-			.optional(),
-		subgoalLabel: z
-			.string({ required_error: 'Subgoal label is required' })
-			.trim()
-			.min(3, 'Subgoal label must be at least 3 characters'),
-		subgoalDescription: z.string().trim().max(500, 'Subgoal description too long').optional(),
-		stakeholderName: z.string().trim().max(120, 'Stakeholder name too long').optional(),
-		stakeholderEmail: z.string().trim().email('Stakeholder email must be valid').optional(),
-		stakeholderRelationship: z
-			.string()
-			.trim()
-			.max(120, 'Relationship description too long')
-			.optional(),
-		cycleLabel: z.string().trim().max(80, 'Cycle label is too long').optional(),
-		cycleStartDate: z
-			.string({ required_error: 'Start date is required' })
-			.refine((value) => !Number.isNaN(Date.parse(value)), 'Provide a valid start date'),
-		cycleDurationWeeks: z.coerce
-			.number({
-				required_error: 'Select a cycle length',
-				invalid_type_error: 'Cycle length must be a number'
-			})
-			.int()
-			.min(4, 'Pick at least 4 weeks')
-			.max(16, 'Keep cycles to 16 weeks or fewer')
-	})
-	.refine(
-		(data) => {
-			if (!data.stakeholderEmail && !data.stakeholderName && !data.stakeholderRelationship) {
-				return true;
-			}
+const subgoalSchema = z.object({
+	label: z.string().trim().min(3, 'Subgoal label must be at least 3 characters').max(200, 'Keep the subgoal label concise'),
+	description: z.string().trim().max(500, 'Keep the subgoal details under 500 characters').optional()
+});
 
-			return Boolean(data.stakeholderEmail && data.stakeholderName);
-		},
-		{
-			message: 'Provide both name and email when adding a stakeholder',
-			path: ['stakeholderName']
-		}
-	);
+const stakeholderSchema = z.object({
+	name: z.string().trim().min(1, 'Stakeholder name is required').max(120, 'Stakeholder name too long'),
+	email: z.string().trim().min(1, 'Stakeholder email is required').email('Stakeholder email must be valid'),
+	relationship: z.string().trim().max(120, 'Relationship description too long').optional()
+});
+
+export const onboardingSchema = z.object({
+	objectiveTitle: z
+		.string()
+		.trim()
+		.min(3, 'Objective title must be at least 3 characters')
+		.max(200, 'Keep the objective title concise'),
+	objectiveDescription: z.string().trim().max(1000, 'Keep the description under 1000 characters').optional(),
+	subgoals: z.array(subgoalSchema).min(1, 'Add at least one subgoal').max(5, 'Keep it to five subgoals or fewer'),
+	stakeholders: z.array(stakeholderSchema).max(5, 'Add up to five stakeholders').optional().default([]),
+	cycleLabel: z.string().trim().max(80, 'Cycle label is too long').optional(),
+	cycleStartDate: z
+		.string()
+		.refine((value) => value.length > 0, 'Start date is required')
+		.refine((value) => !Number.isNaN(Date.parse(value)), 'Provide a valid start date'),
+	cycleDurationWeeks: z
+		.number()
+		.refine((value) => Number.isFinite(value), 'Select a cycle length')
+		.int()
+		.min(4, 'Pick at least 4 weeks')
+		.max(16, 'Keep cycles to 16 weeks or fewer')
+});
 
 export type OnboardingFormData = z.infer<typeof onboardingSchema>;
