@@ -2,10 +2,19 @@
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import type { Snippet } from 'svelte';
-import { ClerkProvider, SignedIn, UserButton } from 'svelte-clerk';
+	import { ClerkProvider, SignedIn, UserButton, useUser } from 'svelte-clerk';
 	import type { LayoutData } from './$types';
 
 	const { children, data }: { children: Snippet; data: LayoutData } = $props();
+
+	const { user } = useUser();
+
+	$: clientRoleRaw = user?.publicMetadata?.role;
+	$: clientRole =
+		typeof clientRoleRaw === 'string' && clientRoleRaw.length > 0
+			? clientRoleRaw.toUpperCase()
+			: null;
+	$: displayRole = clientRole ?? data.dbUser?.role ?? null;
 </script>
 
 <svelte:head>
@@ -33,7 +42,9 @@ import { ClerkProvider, SignedIn, UserButton } from 'svelte-clerk';
 								</button>
 							</form>
 						{/if}
-						<span class="text-sm text-neutral-500">Role: {data.dbUser.role}</span>
+						{#if displayRole}
+							<span class="text-sm text-neutral-500">Role: {displayRole}</span>
+						{/if}
 					</div>
 				{/if}
 				<UserButton />
