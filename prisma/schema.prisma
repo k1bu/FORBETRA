@@ -43,6 +43,7 @@ enum TokenType {
   AUTH_MAGIC_LINK
   FEEDBACK_INVITE
   RESET_PASSWORD
+  COACH_INVITE
 }
 
 model User {
@@ -64,6 +65,10 @@ model User {
   coachNotesAuthored   CoachNote[]          @relation("CoachNotesAuthored")
   coachNotesReceived   CoachNote[]          @relation("CoachNotesReceived")
   tokens               Token[]              @relation("UserTokens")
+  coachClientsManaged  CoachClient[]        @relation("CoachClientsCoach")
+  coachClientsOwned    CoachClient[]        @relation("CoachClientsIndividual")
+  coachInvitationsSent CoachInvite[]        @relation("CoachInvites")
+  coachInvitationsLinked CoachInvite[]      @relation("CoachInviteIndividual")
 }
 
 model Objective {
@@ -222,4 +227,41 @@ model Token {
   @@index([userId])
   @@index([stakeholderId])
   @@index([reflectionId])
+}
+
+model CoachClient {
+  id            String   @id @default(cuid())
+  coachId       String
+  individualId  String
+  createdAt     DateTime @default(now())
+  archivedAt    DateTime?
+
+  coach      User @relation("CoachClientsCoach", fields: [coachId], references: [id])
+  individual User @relation("CoachClientsIndividual", fields: [individualId], references: [id])
+
+  @@unique([coachId, individualId])
+  @@index([coachId])
+  @@index([individualId])
+}
+
+model CoachInvite {
+  id            String   @id @default(cuid())
+  coachId       String
+  email         String
+  name          String?
+  message       String?
+  tokenHash     String   @unique
+  expiresAt     DateTime
+  acceptedAt    DateTime?
+  cancelledAt   DateTime?
+  individualId  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  coach      User  @relation("CoachInvites", fields: [coachId], references: [id])
+  individual User? @relation("CoachInviteIndividual", fields: [individualId], references: [id])
+
+  @@unique([coachId, email], map: "CoachInvite_coachId_email_key")
+  @@index([coachId])
+  @@index([email])
 }
