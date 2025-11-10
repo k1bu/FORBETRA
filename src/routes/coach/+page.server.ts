@@ -1,10 +1,9 @@
 import prisma from '$lib/server/prisma';
 import { requireRole } from '$lib/server/auth';
-import { fail, redirect } from '@sveltejs/kit';
-import { randomBytes } from 'crypto';
-import { createHash } from 'crypto';
+import { fail } from '@sveltejs/kit';
+import { randomBytes, createHash } from 'crypto';
 import type { Actions, PageServerLoad } from './$types';
-import type { TokenType } from '@prisma/client';
+import type { Prisma, TokenType } from '@prisma/client';
 
 const toIsoDate = (value: Date | null | undefined) => (value ? value.toISOString() : null);
 
@@ -360,22 +359,24 @@ export const actions: Actions = {
 		const message = String(formData.get('message') ?? '').trim();
 
 		if (!email || !email.includes('@')) {
-			return fail(400, { error: 'Please provide a valid email address.' });
+			return fail(400, {
+				error: 'Please provide a valid email address.',
+				values: { email, name, message }
+			});
 		}
 
 		const existingInvite = await prisma.coachInvite.findFirst({
 			where: {
 				coachId: dbUser.id,
-				email,
-				cancelledAt: null,
-				acceptedAt: null
+				email
 			}
 		});
 
-		if (existingInvite) {
+		if (existingInvite && !existingInvite.cancelledAt && !existingInvite.acceptedAt) {
 			return fail(400, {
 				error: 'An active invitation already exists for this email.',
-				inviteId: existingInvite.id
+				inviteId: existingInvite.id,
+				values: { email, name, message }
 			});
 		}
 
@@ -383,37 +384,82 @@ export const actions: Actions = {
 		const tokenHash = generateTokenHash(tokenRaw);
 		const expiresAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
 
-		const invite = await prisma.$transaction(async (tx) => {
-			const createdInvite = await tx.coachInvite.create({
-				data: {
-					coachId: dbUser.id,
-					email,
-					name: name.length > 0 ? name : null,
-					message: message.length > 0 ? message : null,
-					tokenHash,
-					expiresAt
+		try {
+			const invite = await prisma.$transaction(async (tx) => {
+				if (existingInvite) {
+					await tx.token.deleteMany({
+						where: {
+							tokenHash: existingInvite.tokenHash,
+							type: 'COACH_INVITE'
+						}
+					});
+
+					const updatedInvite = await tx.coachInvite.update({
+						where: { id: existingInvite.id },
+						data: {
+							name: name.length > 0 ? name : existingInvite.name,
+							message: message.length > 0 ? message : existingInvite.message,
+							tokenHash,
+							expiresAt,
+							acceptedAt: null,
+							cancelledAt: null,
+							individualId: null
+						}
+					});
+
+					await tx.token.create({
+						data: {
+							type: 'COACH_INVITE' satisfies TokenType,
+							tokenHash,
+							userId: dbUser.id,
+							expiresAt
+						}
+					});
+
+					return updatedInvite;
 				}
+
+				const createdInvite = await tx.coachInvite.create({
+					data: {
+						coachId: dbUser.id,
+						email,
+						name: name.length > 0 ? name : null,
+						message: message.length > 0 ? message : null,
+						tokenHash,
+						expiresAt
+					}
+				});
+
+				await tx.token.create({
+					data: {
+						type: 'COACH_INVITE' satisfies TokenType,
+						tokenHash,
+						userId: dbUser.id,
+						expiresAt
+					}
+				});
+
+				return createdInvite;
 			});
 
-			await tx.token.create({
-				data: {
-					type: 'COACH_INVITE' satisfies TokenType,
-					tokenHash,
-					userId: dbUser.id,
-					expiresAt
-				}
-			});
+			const inviteUrl = new URL(`/coach/invite/${tokenRaw}`, event.url.origin).toString();
 
-			return createdInvite;
-		});
+			return {
+				success: true,
+				inviteId: invite.id,
+				inviteUrl
+			};
+		} catch (error) {
+			if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+				return fail(400, {
+					error: 'An invitation already exists for this email. Cancel or reuse the existing invite.',
+					values: { email, name, message }
+				});
+			}
 
-		const inviteUrl = new URL(`/coach/invite/${tokenRaw}`, event.url.origin).toString();
-
-		return {
-			success: true,
-			inviteId: invite.id,
-			inviteUrl
-		};
+			console.error('Failed to create coach invite', error);
+			throw error;
+		}
 	},
 	cancelInvite: async (event) => {
 		const { dbUser } = requireRole(event, 'COACH');
