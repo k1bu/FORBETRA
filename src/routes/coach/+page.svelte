@@ -72,23 +72,27 @@ export let data: {
 	coach: { name: string };
 	clients: ClientSummary[];
 	invitations: InvitationSummary[];
-		rosterSummary: {
-			total: number;
-			active: number;
-			archived: number;
-			pendingInvites: number;
-		};
-	form?: {
-		error?: string;
-		success?: boolean;
-		inviteUrl?: string;
-		inviteId?: string;
-		values?: {
-			email?: string;
-			name?: string;
-			message?: string;
-		};
+	rosterSummary: {
+		total: number;
+		active: number;
+		archived: number;
+		pendingInvites: number;
 	};
+};
+
+export let form:
+	| {
+			error?: string;
+			success?: boolean;
+			inviteUrl?: string;
+			inviteId?: string;
+			values?: {
+				email?: string;
+				name?: string;
+				message?: string;
+			};
+	  }
+	| null;
 };
 
 	const formatDate = (value: string | null | undefined) => {
@@ -194,17 +198,17 @@ $: filteredClients = data.clients.filter((client) => {
 				</p>
 			</header>
 
-			{#if data.form?.error}
+			{#if form?.error}
 				<div class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-					{data.form.error}
+					{form.error}
 				</div>
-			{:else if data.form?.success}
+			{:else if form?.success}
 				<div class="space-y-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
 					<p>Invitation created successfully.</p>
-					{#if data.form.inviteUrl}
+					{#if form.inviteUrl}
 						<div class="rounded border border-emerald-300 bg-white px-3 py-2 text-xs text-emerald-700">
 							<p class="font-semibold uppercase tracking-wide text-emerald-800">Invite link</p>
-							<p class="break-all font-medium">{data.form.inviteUrl}</p>
+							<p class="break-all font-medium">{form.inviteUrl}</p>
 							<p class="text-[11px] text-emerald-500">
 								Copy and share this link with your individual. It expires in 14 days.
 							</p>
@@ -223,7 +227,7 @@ $: filteredClients = data.clients.filter((client) => {
 							class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
 							placeholder="alex@example.com"
 							required
-							value={data.form?.values?.email}
+							value={form?.values?.email}
 						/>
 					</label>
 					<label class="space-y-1 text-sm">
@@ -233,7 +237,7 @@ $: filteredClients = data.clients.filter((client) => {
 							name="name"
 							class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
 							placeholder="Alex Jensen"
-							value={data.form?.values?.name}
+							value={form?.values?.name}
 						/>
 					</label>
 				</div>
@@ -244,7 +248,7 @@ $: filteredClients = data.clients.filter((client) => {
 						rows="3"
 						class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
 						placeholder="Add context for why you’re inviting them."
-					>{data.form?.values?.message}</textarea>
+					>{form?.values?.message}</textarea>
 				</label>
 				<button
 					type="submit"
