@@ -111,10 +111,18 @@
 					</a>
 				</div>
 			{:else if data.dbUser.role === 'COACH'}
-				<p class="text-sm text-slate-600">
-					Coach dashboards surface your roster and performance alerts. We’ll notify you as soon as new
-					insights land.
-				</p>
+				<div class="space-y-3 text-sm text-slate-600">
+					<p>
+						Coach dashboards surface your roster and performance alerts. We’ll notify you as soon as new
+						insights land.
+					</p>
+					<a
+						href="/coach"
+						class="inline-flex items-center justify-center rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900"
+					>
+						Go to coach dashboard
+					</a>
+				</div>
 			{:else if data.dbUser.role === 'STAKEHOLDER'}
 				<p class="text-sm text-slate-600">
 					Stay tuned—feedback prompts arrive when your participant submits reflections for the week.
