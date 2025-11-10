@@ -42,6 +42,7 @@
 	"dependencies": {
 		"@prisma/client": "^6.19.0",
 		"svelte-clerk": "^0.17.8",
+		"svix": "^1.81.0",
 		"twilio": "^5.10.4",
 		"zod": "^4.1.12"
 	}

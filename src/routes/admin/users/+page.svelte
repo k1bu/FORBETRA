@@ -14,7 +14,7 @@
 		<div class="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{form.error}</div>
 	{:else if form?.success}
 		<div class="rounded border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
-			Role updated successfully.
+			{form.message ?? 'Action completed successfully.'}
 		</div>
 	{/if}
 
@@ -51,6 +51,7 @@
 						</td>
 						<td class="px-4 py-3">
 							<form method="post" class="flex flex-wrap items-center gap-2">
+								<input type="hidden" name="intent" value="update" />
 								<input type="hidden" name="userId" value={user.id} />
 								<label
 									class="text-xs font-semibold text-neutral-500 uppercase"
@@ -72,6 +73,25 @@
 									class="rounded bg-black px-3 py-1 text-xs font-medium text-white uppercase"
 								>
 									Update
+								</button>
+							</form>
+							<form method="post" class="mt-2">
+								<input type="hidden" name="intent" value="delete" />
+								<input type="hidden" name="userId" value={user.id} />
+								<button
+									type="submit"
+									class="rounded border border-red-200 px-3 py-1 text-xs font-medium uppercase text-red-600 hover:bg-red-50"
+									on:click={(event) => {
+										if (
+											!confirm(
+												`Delete ${user.email}? This will remove their account and related access.`
+											)
+										) {
+											event.preventDefault();
+										}
+									}}
+								>
+									Delete user
 								</button>
 							</form>
 						</td>

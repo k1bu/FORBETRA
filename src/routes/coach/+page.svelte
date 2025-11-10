@@ -43,6 +43,12 @@
 			subgoalCount: number;
 			stakeholderCount: number;
 			respondedStakeholders: number;
+			insights: {
+				avgEffort: number | null;
+				avgProgress: number | null;
+				consistencyScore: number | null;
+				alignmentRatio: number | null;
+			} | null;
 		} | null;
 		stakeholders: StakeholderSummary[];
 	};
@@ -63,6 +69,21 @@
 			dateStyle: 'medium',
 			timeStyle: 'short'
 		}).format(new Date(value));
+	};
+
+	const formatAverage = (value: number | null | undefined) => {
+		if (value === null || value === undefined) return '—';
+		return value.toFixed(1);
+	};
+
+	const formatPercent = (value: number | null | undefined) => {
+		if (value === null || value === undefined) return '—';
+		return `${Math.round(value * 100)}%`;
+	};
+
+	const formatScore = (value: number | null | undefined) => {
+		if (value === null || value === undefined) return '—';
+		return `${value}/100`;
 	};
 </script>
 
@@ -122,6 +143,22 @@
 								{client.objective.respondedStakeholders}/{client.objective.stakeholderCount}
 							</p>
 						</section>
+
+						{#if client.objective.insights}
+							<section
+								class="space-y-1 rounded border border-neutral-200 bg-white/70 p-3 text-xs text-neutral-600"
+							>
+								<p class="font-semibold text-neutral-700">Insights</p>
+								<p>Avg. effort (4-week): {formatAverage(client.objective.insights.avgEffort)}</p>
+								<p>
+									Avg. progress (4-week): {formatAverage(client.objective.insights.avgProgress)}
+								</p>
+								<p>Consistency: {formatScore(client.objective.insights.consistencyScore)}</p>
+								<p>
+									Stakeholder alignment: {formatPercent(client.objective.insights.alignmentRatio)}
+								</p>
+							</section>
+						{/if}
 
 						<section class="space-y-2">
 							<h3 class="text-sm font-semibold text-neutral-700">Recent reflections</h3>

@@ -6,6 +6,14 @@ import { randomBytes } from 'node:crypto';
 import { sendEmail } from '$lib/notifications/email';
 import { sendSms } from '$lib/notifications/sms';
 
+const stdDev = (values: number[]) => {
+	if (values.length === 0) return null;
+	const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
+	const variance =
+		values.reduce((sum, value) => sum + Math.pow(value - mean, 2), 0) / values.length;
+	return Math.sqrt(variance);
+};
+
 type PromptType = 'INTENTION' | 'EFFORT' | 'PROGRESS';
 
 const promptWeekdays: Record<PromptType, number> = {
@@ -279,6 +287,27 @@ export const load: PageServerLoad = async (event) => {
 		? reflectionTrendSummary
 		: { weeks: [], avgEffort: null, avgProgress: null };
 
+	const effortSeries = reflectionTrend
+		.map((week) => week.effortScore)
+		.filter((value): value is number => value !== null);
+	const progressSeries = reflectionTrend
+		.map((week) => week.progressScore)
+		.filter((value): value is number => value !== null);
+
+	const effortStd = stdDev(effortSeries);
+	const progressStd = stdDev(progressSeries);
+
+	const stdValues = [effortStd, progressStd].filter((value): value is number => value !== null);
+	const combinedStd =
+		stdValues.length > 0
+			? stdValues.reduce((sum, value) => sum + value, 0) / stdValues.length
+			: null;
+	const consistencyScore =
+		combinedStd !== null ? Math.max(0, Math.round(100 - combinedStd * 10)) : null;
+
+	const alignmentRatio =
+		objective.stakeholders.length > 0 ? respondedThisWeek / objective.stakeholders.length : null;
+
 	return {
 		objective: {
 			id: objective.id,
@@ -293,6 +322,12 @@ export const load: PageServerLoad = async (event) => {
 		stakeholders,
 		feedbackSummary,
 		reflectionTrend: normalizedReflectionTrend,
+		insights: {
+			avgEffort: normalizedReflectionTrend.avgEffort,
+			avgProgress: normalizedReflectionTrend.avgProgress,
+			consistencyScore,
+			alignmentRatio
+		},
 		overduePrompts,
 		cycle: cycle
 			? {

@@ -20,6 +20,14 @@ const weekNumberForDate = (startDate: Date, target: Date) => {
 	return Math.max(1, Math.floor(diff / msPerWeek) + 1);
 };
 
+const stdDev = (values: number[]) => {
+	if (values.length === 0) return null;
+	const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
+	const variance =
+		values.reduce((sum, value) => sum + Math.pow(value - mean, 2), 0) / values.length;
+	return Math.sqrt(variance);
+};
+
 export const load: PageServerLoad = async (event) => {
 	const { dbUser } = requireRole(event, 'COACH');
 
@@ -99,6 +107,78 @@ export const load: PageServerLoad = async (event) => {
 			totalWeeks > 0 ? Math.min(100, Math.round((weeksElapsed / totalWeeks) * 100)) : 0;
 		const currentWeek = cycle ? computeWeekNumber(cycle.startDate) : null;
 
+		const reflectionTrendMap = new Map<
+			number,
+			{
+				weekNumber: number;
+				effortScores: number[];
+				progressScores: number[];
+			}
+		>();
+
+		cycle?.reflections.forEach((reflection) => {
+			const weekEntry = reflectionTrendMap.get(reflection.weekNumber) ?? {
+				weekNumber: reflection.weekNumber,
+				effortScores: [],
+				progressScores: []
+			};
+
+			if (reflection.effortScore !== null && reflection.effortScore !== undefined) {
+				weekEntry.effortScores.push(reflection.effortScore);
+			}
+			if (reflection.progressScore !== null && reflection.progressScore !== undefined) {
+				weekEntry.progressScores.push(reflection.progressScore);
+			}
+
+			reflectionTrendMap.set(reflection.weekNumber, weekEntry);
+		});
+
+		const trendWeeks = Array.from(reflectionTrendMap.values())
+			.sort((a, b) => b.weekNumber - a.weekNumber)
+			.slice(0, 4);
+
+		const effortSeries: number[] = [];
+		const progressSeries: number[] = [];
+
+		const reflectionTrend = trendWeeks.map((week) => {
+			const effortAverage =
+				week.effortScores.length > 0
+					? Number(
+							(
+								week.effortScores.reduce((sum, score) => sum + score, 0) / week.effortScores.length
+							).toFixed(1)
+						)
+					: null;
+			if (effortAverage !== null) effortSeries.push(effortAverage);
+
+			const progressAverage =
+				week.progressScores.length > 0
+					? Number(
+							(
+								week.progressScores.reduce((sum, score) => sum + score, 0) /
+								week.progressScores.length
+							).toFixed(1)
+						)
+					: null;
+			if (progressAverage !== null) progressSeries.push(progressAverage);
+
+			return {
+				weekNumber: week.weekNumber,
+				effortScore: effortAverage,
+				progressScore: progressAverage
+			};
+		});
+
+		const effortStd = stdDev(effortSeries);
+		const progressStd = stdDev(progressSeries);
+		const stdValues = [effortStd, progressStd].filter((value): value is number => value !== null);
+		const combinedStd =
+			stdValues.length > 0
+				? stdValues.reduce((sum, value) => sum + value, 0) / stdValues.length
+				: null;
+		const consistencyScore =
+			combinedStd !== null ? Math.max(0, Math.round(100 - combinedStd * 10)) : null;
+
 		let respondedStakeholders = 0;
 		const stakeholders =
 			objective?.stakeholders.map((stakeholder) => {
@@ -125,16 +205,24 @@ export const load: PageServerLoad = async (event) => {
 				};
 			}) ?? [];
 
-		const recentReflections =
-			cycle?.reflections.map((reflection) => ({
-				id: reflection.id,
-				weekNumber: reflection.weekNumber,
-				reflectionType: reflection.reflectionType,
-				submittedAt: reflection.submittedAt?.toISOString() ?? null,
-				effortScore: reflection.effortScore,
-				progressScore: reflection.progressScore,
-				notes: reflection.notes ?? ''
-			})) ?? [];
+		const alignmentRatio = objective?.stakeholders.length
+			? respondedStakeholders / objective.stakeholders.length
+			: null;
+
+		const avgEffort =
+			effortSeries.length > 0
+				? Number(
+						(effortSeries.reduce((sum, value) => sum + value, 0) / effortSeries.length).toFixed(1)
+					)
+				: null;
+		const avgProgress =
+			progressSeries.length > 0
+				? Number(
+						(progressSeries.reduce((sum, value) => sum + value, 0) / progressSeries.length).toFixed(
+							1
+						)
+					)
+				: null;
 
 		return {
 			id: individual.id,
@@ -155,12 +243,20 @@ export const load: PageServerLoad = async (event) => {
 									completion,
 									weeksElapsed,
 									currentWeek: currentWeek ?? null,
-									recentReflections
+									recentReflections: reflectionTrend
 								}
 							: null,
 						subgoalCount: objective.subgoals.length,
 						stakeholderCount: stakeholders.length,
-						respondedStakeholders
+						respondedStakeholders,
+						insights: cycle
+							? {
+									avgEffort,
+									avgProgress,
+									consistencyScore,
+									alignmentRatio
+								}
+							: null
 					}
 				: null,
 			stakeholders

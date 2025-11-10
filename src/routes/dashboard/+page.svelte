@@ -3,8 +3,37 @@
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
 
-	const formatDate = (value: string | null) => {
-		if (!value) return 'TBD';
+	const formatDateTime = (value: string | null) => {
+		if (!value) return '—';
+		return new Intl.DateTimeFormat('en-US', {
+			dateStyle: 'medium',
+			timeStyle: 'short'
+		}).format(new Date(value));
+	};
+
+	const formatAverage = (value: number | null | undefined) => {
+		if (value === null || value === undefined) {
+			return '—';
+		}
+		return value.toFixed(1);
+	};
+
+	const formatPercent = (value: number | null | undefined) => {
+		if (value === null || value === undefined) {
+			return '—';
+		}
+		return `${Math.round(value * 100)}%`;
+	};
+
+	const formatScore = (value: number | null | undefined) => {
+		if (value === null || value === undefined) {
+			return '—';
+		}
+		return `${value}/100`;
+	};
+
+	const formatDate = (value: string | null | undefined) => {
+		if (!value) return '—';
 		return new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(new Date(value));
 	};
 
@@ -32,19 +61,6 @@
 			default:
 				return '/dashboard';
 		}
-	};
-
-	const formatDateTime = (value: string | null) => {
-		if (!value) return '—';
-		return new Intl.DateTimeFormat('en-US', {
-			dateStyle: 'medium',
-			timeStyle: 'short'
-		}).format(new Date(value));
-	};
-
-	const formatAverage = (value: number | null | undefined) => {
-		if (value === null || value === undefined) return '—';
-		return value.toFixed(1);
 	};
 </script>
 
@@ -199,12 +215,26 @@
 					</div>
 				</article>
 			{/if}
-		</section>
-	{:else}
-		<section
-			class="rounded-lg border border-dashed border-neutral-300 bg-white p-6 text-center text-neutral-600"
-		>
-			<p>No cycle is active yet. Start one from the onboarding flow to begin tracking.</p>
+
+			{#if data.insights}
+				<article class="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm lg:col-span-3">
+					<h2 class="text-sm font-semibold text-neutral-500 uppercase">Weekly insights</h2>
+					<ul class="mt-3 space-y-2 text-sm text-neutral-600">
+						<li>
+							<strong>Avg. effort (4-week)</strong>: {formatAverage(data.insights.avgEffort)}
+						</li>
+						<li>
+							<strong>Avg. progress (4-week)</strong>: {formatAverage(data.insights.avgProgress)}
+						</li>
+						<li>
+							<strong>Consistency</strong>: {formatScore(data.insights.consistencyScore)}
+						</li>
+						<li>
+							<strong>Stakeholder alignment</strong>: {formatPercent(data.insights.alignmentRatio)}
+						</li>
+					</ul>
+				</article>
+			{/if}
 		</section>
 	{/if}
 
