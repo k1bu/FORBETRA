@@ -93,7 +93,6 @@ export let form:
 			};
 	  }
 	| null;
-};
 
 	const formatDate = (value: string | null | undefined) => {
 		if (!value) return '—';
@@ -503,6 +502,5 @@ $: filteredClients = data.clients.filter((client) => {
 		<p class="text-center text-sm text-slate-400">
 			Invite individuals and they’ll appear in your roster with analytics once they onboard.
 		</p>
-	{:else}
 	{/if}
 </section>

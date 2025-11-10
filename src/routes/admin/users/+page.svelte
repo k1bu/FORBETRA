@@ -81,7 +81,7 @@
 								<button
 									type="submit"
 									class="rounded border border-red-200 px-3 py-1 text-xs font-medium uppercase text-red-600 hover:bg-red-50"
-									on:click={(event) => {
+									onclick={(event) => {
 										if (
 											!confirm(
 												`Delete ${user.email}? This will remove their account and related access.`

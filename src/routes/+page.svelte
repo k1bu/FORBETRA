@@ -24,7 +24,7 @@
 				<div class="space-y-5">
 					<p class="text-xs uppercase tracking-[0.6em] text-slate-400">Human. Data. Better.</p>
 					<h1 class="text-5xl font-semibold tracking-[0.18em] text-slate-900">FORBETRA</h1>
-					<div class="h-[2px] w-24 rounded-full bg-[#F2EDE6]" />
+					<div class="h-[2px] w-24 rounded-full bg-[#F2EDE6]"></div>
 					<p class="text-lg leading-relaxed text-slate-500">
 						FORBETRA is a tool to help you improve. Structure your development, align with stakeholders
 						invested in your growth, and make true progress.
@@ -54,7 +54,7 @@
 		</div>
 
 		<div class="right-panel relative flex w-full items-center justify-center px-8 pb-16 pt-32 md:w-1/2 md:px-20">
-			<div class="absolute inset-0 md:border-l md:border-slate-200" aria-hidden="true" />
+			<div class="absolute inset-0 md:border-l md:border-slate-200" aria-hidden="true"></div>
 			<div class="relative z-10 w-full max-w-xl space-y-8 rounded-3xl bg-white/90 p-12 shadow-[0_30px_60px_-34px_rgba(15,23,42,0.35)] backdrop-blur">
 				<header class="space-y-3 text-center md:text-left">
 					<h2 class="text-3xl font-semibold text-slate-900">Welcome to FORBETRA</h2>
