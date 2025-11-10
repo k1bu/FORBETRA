@@ -94,6 +94,10 @@ export let form:
 	  }
 	| null;
 
+	const defaultInviteMessage =
+		`Hi there—I'd love for you to join me in FORBETRA so we can track your progress together. ` +
+		`The link above will guide you through creating your account and connecting with me as your coach.`;
+
 	const formatDate = (value: string | null | undefined) => {
 		if (!value) return '—';
 		return new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(new Date(value));
@@ -247,7 +251,7 @@ $: filteredClients = data.clients.filter((client) => {
 						rows="3"
 						class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
 						placeholder="Add context for why you’re inviting them."
-					>{form?.values?.message}</textarea>
+					>{form?.values?.message ?? defaultInviteMessage}</textarea>
 				</label>
 				<button
 					type="submit"
