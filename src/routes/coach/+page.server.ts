@@ -39,68 +39,88 @@ const createInviteToken = () => randomBytes(32).toString('hex');
 export const load: PageServerLoad = async (event) => {
 	const { dbUser } = requireRole(event, 'COACH');
 
-	const individuals = await prisma.user.findMany({
-		where: {
-			role: 'INDIVIDUAL',
-			coachNotesReceived: {
-				some: {
-					coachId: dbUser.id
-				}
-			}
-		},
-		orderBy: { createdAt: 'asc' },
+	const coachClients = await prisma.coachClient.findMany({
+		where: { coachId: dbUser.id },
+		orderBy: [
+			{ archivedAt: 'asc' },
+			{ createdAt: 'asc' }
+		],
 		select: {
 			id: true,
-			email: true,
-			name: true,
-			objectives: {
-				where: { active: true },
-				orderBy: { createdAt: 'desc' },
-				include: {
-					subgoals: {
-						orderBy: { createdAt: 'asc' }
-					},
-					cycles: {
-						orderBy: { startDate: 'desc' },
-						take: 1,
+			individualId: true,
+			createdAt: true,
+			archivedAt: true
+		}
+	});
+
+	const individualIds = coachClients.map((entry) => entry.individualId);
+
+	const individuals = individualIds.length
+		? await prisma.user.findMany({
+				where: {
+					id: { in: individualIds }
+				},
+				select: {
+					id: true,
+					email: true,
+					name: true,
+					objectives: {
+						where: { active: true },
+						orderBy: { createdAt: 'desc' },
 						include: {
-							reflections: {
-								orderBy: { submittedAt: 'desc' },
-								take: 5,
-								select: {
-									id: true,
-									weekNumber: true,
-									reflectionType: true,
-									submittedAt: true,
-									effortScore: true,
-									progressScore: true,
-									notes: true
-								}
-							}
-						}
-					},
-					stakeholders: {
-						orderBy: { createdAt: 'asc' },
-						include: {
-							feedbacks: {
-								orderBy: { submittedAt: 'desc' },
+							subgoals: {
+								orderBy: { createdAt: 'asc' }
+							},
+							cycles: {
+								orderBy: { startDate: 'desc' },
 								take: 1,
-								select: {
-									submittedAt: true,
-									effortScore: true,
-									progressScore: true
+								include: {
+									reflections: {
+										orderBy: { submittedAt: 'desc' },
+										take: 5,
+										select: {
+											id: true,
+											weekNumber: true,
+											reflectionType: true,
+											submittedAt: true,
+											effortScore: true,
+											progressScore: true,
+											notes: true
+										}
+									}
+								}
+							},
+							stakeholders: {
+								orderBy: { createdAt: 'asc' },
+								include: {
+									feedbacks: {
+										orderBy: { submittedAt: 'desc' },
+										take: 1,
+										select: {
+											submittedAt: true,
+											effortScore: true,
+											progressScore: true
+										}
+									}
 								}
 							}
 						}
 					}
 				}
-			}
-		}
-	});
+			})
+		: [];
+
+	const individualLookup = new Map(individuals.map((individual) => [individual.id, individual]));
 
 	const now = new Date();
 
-	const clientSummaries = individuals.map((individual) => {
+	const clientSummaries = coachClients
+		.map((relationship) => {
+			const individual = individualLookup.get(relationship.individualId);
+			if (!individual) {
+				return null;
+			}
+
 		const objective = individual.objectives[0] ?? null;
 		const cycle = objective?.cycles[0] ?? null;
 		const cycleEnd = cycle?.endDate ?? null;
@@ -267,9 +287,13 @@ export const load: PageServerLoad = async (event) => {
 							: null
 					}
 				: null,
-			stakeholders
+			stakeholders,
+			archived: relationship.archivedAt !== null,
+			joinedAt: relationship.createdAt.toISOString(),
+			archivedAt: relationship.archivedAt?.toISOString() ?? null
 		};
-	});
+		})
+		.filter((value): value is NonNullable<typeof value> => value !== null);
 
 	const invitations = await prisma.coachInvite.findMany({
 		where: { coachId: dbUser.id },
@@ -314,7 +338,15 @@ export const load: PageServerLoad = async (event) => {
 					}
 				: null,
 			createdAt: invite.createdAt.toISOString()
-		}))
+		})),
+		rosterSummary: {
+			total: coachClients.length,
+			active: coachClients.filter((entry) => entry.archivedAt === null).length,
+			archived: coachClients.filter((entry) => entry.archivedAt !== null).length,
+			pendingInvites: invitations.filter(
+				(invite) => !invite.acceptedAt && !invite.cancelledAt && invite.expiresAt > new Date()
+			).length
+		}
 	};
 };
 
