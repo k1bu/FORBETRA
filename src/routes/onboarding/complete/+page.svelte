@@ -81,7 +81,7 @@
 					Make changes
 				</button>
 			</form>
-			<form method="get" action="/dashboard">
+			<form method="get" action="/individual">
 				<button type="submit" class="rounded bg-black px-4 py-2 text-sm font-medium text-white">
 					Go to dashboard
 				</button>

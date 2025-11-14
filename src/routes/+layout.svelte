@@ -22,11 +22,9 @@
 				{#if data.dbUser}
 					<div class="flex items-center gap-3">
 						{#if data.dbUser.role === 'INDIVIDUAL'}
-							<form method="get" action="/dashboard">
-								<button type="submit" class="text-sm text-neutral-600 hover:text-black">
-									Individual Dashboard
-								</button>
-							</form>
+							<a href="/individual" class="text-sm text-neutral-600 hover:text-black">
+								Individual Hub
+							</a>
 						{/if}
 						{#if data.dbUser.role === 'ADMIN'}
 							<form method="get" action="/admin/users">

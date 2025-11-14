@@ -103,10 +103,39 @@ export const handle = sequence(clerkHandle, async ({ event, resolve }) => {
 	}
 
 	if (!existingUser) {
+		// Check if user exists by email (e.g., from seed script) but without clerkUserId
+		const userByEmail = await prisma.user.findUnique({
+			where: { email: primaryEmail.toLowerCase() }
+		});
+
+		if (userByEmail) {
+			// User exists but not linked to Clerk - link them now
+			// Preserve existing role (database is source of truth) unless Clerk metadata has a valid role
+			const finalRole =
+				metadataRole && ALLOWED_ROLES.has(metadataRole)
+					? metadataRole
+					: userByEmail.role;
+
+			const dbUser = await prisma.user.update({
+				where: { id: userByEmail.id },
+				data: {
+					clerkUserId: auth.userId,
+					name: fullName ?? userByEmail.name,
+					role: finalRole
+				}
+			});
+
+			await linkPendingCoachInvites(dbUser);
+
+			event.locals.dbUser = dbUser;
+			return resolve(event);
+		}
+
+		// No user exists - create new one
 		const dbUser = await prisma.user.create({
 			data: {
 				clerkUserId: auth.userId,
-				email: primaryEmail,
+				email: primaryEmail.toLowerCase(),
 				name: fullName,
 				role: resolvedRole
 			}
@@ -120,8 +149,8 @@ export const handle = sequence(clerkHandle, async ({ event, resolve }) => {
 
 	const updates: Prisma.UserUpdateInput = {};
 
-	if (existingUser.email !== primaryEmail) {
-		updates.email = primaryEmail;
+	if (existingUser.email.toLowerCase() !== primaryEmail.toLowerCase()) {
+		updates.email = primaryEmail.toLowerCase();
 	}
 
 	if (existingUser.name !== fullName) {

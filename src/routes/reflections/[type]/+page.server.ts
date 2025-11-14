@@ -16,7 +16,8 @@ const ensureType = (param: string | undefined) => {
 	return typeMap[normalized] ?? null;
 };
 
-const computeWeekNumber = (startDate: Date) => {
+// Helper to compute week number from start date
+const computeWeekNumber = (startDate: Date): number => {
 	const now = new Date();
 	const diff = now.getTime() - startDate.getTime();
 	const msPerWeek = 7 * 24 * 60 * 60 * 1000;
@@ -27,7 +28,7 @@ export const load: PageServerLoad = async (event) => {
 	const reflectionType = ensureType(event.params.type);
 
 	if (!reflectionType) {
-		throw redirect(303, '/dashboard');
+		throw redirect(303, '/individual');
 	}
 
 	const { dbUser } = requireRole(event, 'INDIVIDUAL');
@@ -95,7 +96,7 @@ export const actions: Actions = {
 		const reflectionType = ensureType(event.params.type);
 
 		if (!reflectionType) {
-			throw redirect(303, '/dashboard');
+			throw redirect(303, '/individual');
 		}
 
 		const { dbUser } = requireRole(event, 'INDIVIDUAL');

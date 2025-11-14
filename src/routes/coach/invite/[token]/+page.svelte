@@ -145,7 +145,7 @@
 					<p class="font-semibold text-emerald-800">You’re connected!</p>
 					<p>
 						We’ve linked your account with {data.invite.coach.name}. Return to your
-						<a href="/dashboard" class="font-semibold text-emerald-900 underline"> dashboard</a> to keep going.
+						<a href="/individual" class="font-semibold text-emerald-900 underline"> dashboard</a> to keep going.
 					</p>
 				</div>
 			{/if}

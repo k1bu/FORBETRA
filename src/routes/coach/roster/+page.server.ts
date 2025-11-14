@@ -1,14 +1,18 @@
 import prisma from '$lib/server/prisma';
 import { requireRole } from '$lib/server/auth';
-import type { PageServerLoad } from './$types';
+import { fail } from '@sveltejs/kit';
+import type { Actions, PageServerLoad } from './$types';
 import { buildClientSummary } from '$lib/server/buildClientSummary';
 
 export const load: PageServerLoad = async (event) => {
 	const { dbUser } = requireRole(event, 'COACH');
 
-	// Load minimal data for hub overview
 	const coachClients = await prisma.coachClient.findMany({
 		where: { coachId: dbUser.id },
+		orderBy: [
+			{ archivedAt: 'asc' },
+			{ createdAt: 'asc' }
+		],
 		select: {
 			id: true,
 			individualId: true,
@@ -19,7 +23,6 @@ export const load: PageServerLoad = async (event) => {
 
 	const individualIds = coachClients.map((entry) => entry.individualId);
 
-	// Load individuals with full relations for summary calculations
 	const individuals = individualIds.length
 		? await prisma.user.findMany({
 				where: {
@@ -32,7 +35,6 @@ export const load: PageServerLoad = async (event) => {
 					objectives: {
 						where: { active: true },
 						orderBy: { createdAt: 'desc' },
-						take: 1,
 						include: {
 							subgoals: {
 								orderBy: { createdAt: 'asc' },
@@ -100,7 +102,6 @@ export const load: PageServerLoad = async (event) => {
 
 	const individualLookup = new Map(individuals.map((individual) => [individual.id, individual]));
 
-	// Build minimal client summaries for metrics only
 	const clientSummaries = coachClients
 		.map((relationship) => {
 			const individual = individualLookup.get(relationship.individualId);
@@ -109,71 +110,102 @@ export const load: PageServerLoad = async (event) => {
 		})
 		.filter((value): value is NonNullable<typeof value> => value !== null);
 
-	const invitations = await prisma.coachInvite.findMany({
-		where: { coachId: dbUser.id },
-		select: {
-			id: true,
-			acceptedAt: true,
-			cancelledAt: true,
-			expiresAt: true
-		}
-	});
-
-	// Calculate summary metrics
-	const totalAlerts = clientSummaries.reduce((sum, client) => sum + client.alerts.length, 0);
-	const highPriorityAlerts = clientSummaries.reduce(
-		(sum, client) => sum + client.alerts.filter((a) => a.severity === 'high').length,
-		0
-	);
-	const consistencyScores = clientSummaries
-		.map((c) => c.objective?.insights?.consistencyScore)
-		.filter((s): s is number => s !== null);
-	const avgConsistency =
-		consistencyScores.length > 0
-			? Math.round(consistencyScores.reduce((sum, s) => sum + s, 0) / consistencyScores.length)
-			: null;
-	const alignmentRatios = clientSummaries
-		.map((c) => c.objective?.insights?.alignmentRatio)
-		.filter((r): r is number => r !== null);
-	const avgAlignment =
-		alignmentRatios.length > 0
-			? Math.round((alignmentRatios.reduce((sum, r) => sum + r, 0) / alignmentRatios.length) * 100)
-			: null;
-
-	// Get recent alerts for preview (top 5 high priority)
-	const recentAlerts = clientSummaries
-		.flatMap((client) =>
-			client.alerts.map((alert) => ({
-				clientName: client.name,
-				clientId: client.id,
-				alert
-			}))
-		)
-		.sort((a, b) => {
-			const severityOrder = { high: 3, medium: 2, low: 1 };
-			return severityOrder[b.alert.severity] - severityOrder[a.alert.severity];
-		})
-		.slice(0, 5);
-
 	return {
 		coach: {
 			name: dbUser.name ?? 'Coach'
 		},
-		rosterSummary: {
-			total: coachClients.length,
-			active: coachClients.filter((entry) => entry.archivedAt === null).length,
-			archived: coachClients.filter((entry) => entry.archivedAt !== null).length,
-			pendingInvites: invitations.filter(
-				(invite) => !invite.acceptedAt && !invite.cancelledAt && invite.expiresAt > new Date()
-			).length
-		},
-		analytics: {
-			totalAlerts,
-			highPriorityAlerts,
-			avgConsistency,
-			avgAlignment
-		},
-		recentAlerts
+		clients: clientSummaries
 	};
+};
+
+export const actions: Actions = {
+	createNote: async (event) => {
+		const { dbUser } = requireRole(event, 'COACH');
+
+		const formData = await event.request.formData();
+		const individualId = String(formData.get('individualId') ?? '').trim();
+		const cycleId = String(formData.get('cycleId') ?? '').trim();
+		const weekNumberRaw = String(formData.get('weekNumber') ?? '').trim();
+		const content = String(formData.get('content') ?? '').trim();
+
+		if (!individualId) {
+			return fail(400, { error: 'Client identifier is required.' });
+		}
+
+		if (!content || content.length < 10) {
+			return fail(400, { error: 'Note content must be at least 10 characters.' });
+		}
+
+		// Verify coach-client relationship
+		const relationship = await prisma.coachClient.findUnique({
+			where: {
+				coachId_individualId: {
+					coachId: dbUser.id,
+					individualId
+				}
+			}
+		});
+
+		if (!relationship) {
+			return fail(403, { error: 'You do not have access to this client.' });
+		}
+
+		const weekNumber = weekNumberRaw ? parseInt(weekNumberRaw, 10) : null;
+		const cycleIdOrNull = cycleId || null;
+
+		try {
+			await prisma.coachNote.create({
+				data: {
+					coachId: dbUser.id,
+					individualId,
+					cycleId: cycleIdOrNull,
+					weekNumber,
+					content
+				}
+			});
+
+			return { noteSuccess: true };
+		} catch (error) {
+			console.error('Failed to create coach note', error);
+			return fail(500, { noteError: 'Unable to save note. Please try again.' });
+		}
+	},
+	archiveClient: async (event) => {
+		const { dbUser } = requireRole(event, 'COACH');
+		const formData = await event.request.formData();
+		const individualId = String(formData.get('individualId') ?? '').trim();
+		const archive = String(formData.get('archive') ?? 'true') === 'true';
+
+		if (!individualId) {
+			return fail(400, { error: 'Client identifier is required.' });
+		}
+
+		const relationship = await prisma.coachClient.findUnique({
+			where: {
+				coachId_individualId: {
+					coachId: dbUser.id,
+					individualId
+				}
+			}
+		});
+
+		if (!relationship) {
+			return fail(403, { error: 'You do not have access to this client.' });
+		}
+
+		await prisma.coachClient.update({
+			where: {
+				coachId_individualId: {
+					coachId: dbUser.id,
+					individualId
+				}
+			},
+			data: {
+				archivedAt: archive ? new Date() : null
+			}
+		});
+
+		return { success: true };
+	}
 };
 

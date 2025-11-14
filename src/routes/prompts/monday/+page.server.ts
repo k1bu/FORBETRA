@@ -14,7 +14,8 @@ const intentionSchema = z.object({
 		.max(1500, 'Keep intentions under 1500 characters')
 });
 
-const computeWeekNumber = (startDate: Date) => {
+// Helper to compute week number from start date
+const computeWeekNumber = (startDate: Date): number => {
 	const now = new Date();
 	const diff = now.getTime() - startDate.getTime();
 	const msPerWeek = 7 * 24 * 60 * 60 * 1000;
@@ -55,6 +56,26 @@ export const load: PageServerLoad = async (event) => {
 		}
 	});
 
+	// Get coach notes for this user and cycle/week
+	const coachNotes = await prisma.coachNote.findMany({
+		where: {
+			individualId: dbUser.id,
+			cycleId: cycle.id,
+			OR: [
+				{ weekNumber: weekNumber },
+				{ weekNumber: null } // General notes (no specific week)
+			]
+		},
+		orderBy: { createdAt: 'desc' },
+		include: {
+			coach: {
+				select: {
+					name: true
+				}
+			}
+		}
+	});
+
 	return {
 		prompt,
 		cycle: {
@@ -73,7 +94,13 @@ export const load: PageServerLoad = async (event) => {
 					subgoalId: existing.subgoalId,
 					intention: existing.notes ?? ''
 				}
-			: null
+			: null,
+		coachNotes: coachNotes.map((note) => ({
+			id: note.id,
+			content: note.content,
+			coachName: note.coach.name ?? 'Your coach',
+			createdAt: note.createdAt.toISOString()
+		}))
 	};
 };
 

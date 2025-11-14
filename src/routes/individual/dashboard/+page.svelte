@@ -71,7 +71,7 @@
 			case 'PROGRESS':
 				return '/reflections/checkin';
 			default:
-				return '/dashboard';
+				return '/individual';
 		}
 	};
 
@@ -99,6 +99,24 @@
 </script>
 
 <section class="mx-auto flex max-w-6xl flex-col gap-8 p-4 pb-12">
+	<!-- Back to Hub Link -->
+	<div class="flex items-center justify-between">
+		<a
+			href="/individual"
+			class="group flex items-center gap-2 text-sm font-medium text-neutral-600 transition-colors hover:text-neutral-900"
+		>
+			<svg
+				class="h-4 w-4 transition-transform group-hover:-translate-x-1"
+				fill="none"
+				stroke="currentColor"
+				viewBox="0 0 24 24"
+			>
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+			</svg>
+			Back to Hub
+		</a>
+	</div>
+
 	<!-- Hero Header -->
 	<header class="relative overflow-hidden rounded-3xl border-2 border-neutral-200 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-8 shadow-lg">
 		<div class="absolute right-0 top-0 h-64 w-64 rounded-full bg-gradient-to-br from-blue-200/30 to-purple-200/30 blur-3xl"></div>

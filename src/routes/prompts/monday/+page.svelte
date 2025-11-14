@@ -17,6 +17,18 @@
 		</p>
 	</header>
 
+	{#if data.coachNotes && data.coachNotes.length > 0}
+		<section class="space-y-3 rounded-lg border border-blue-200 bg-blue-50 p-4">
+			<h2 class="text-sm font-semibold text-blue-900">Message from your coach</h2>
+			{#each data.coachNotes as note (note.id)}
+				<div class="rounded border border-blue-200 bg-white p-3">
+					<p class="text-sm text-blue-900">{note.content}</p>
+					<p class="mt-1 text-xs text-blue-600">— {note.coachName}</p>
+				</div>
+			{/each}
+		</section>
+	{/if}
+
 	{#if form?.error}
 		<div class="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{form.error}</div>
 	{:else if form?.success}

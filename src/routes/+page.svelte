@@ -104,7 +104,7 @@
 						Complete onboarding
 					</a>
 					<a
-						href="/dashboard"
+						href="/individual"
 						class="rounded-2xl border border-slate-300 px-5 py-3 text-center text-sm font-semibold text-slate-800 transition hover:border-slate-400 hover:bg-slate-50"
 					>
 						View dashboard
@@ -113,7 +113,7 @@
 			{:else if data.dbUser.role === 'COACH'}
 				<div class="space-y-3 text-sm text-slate-600">
 					<p>
-						Coach dashboards surface your roster and performance alerts. We’ll notify you as soon as new
+						Coach dashboards surface your roster and performance alerts. We'll notify you as soon as new
 						insights land.
 					</p>
 					<a
@@ -134,7 +134,7 @@
 			{/if}
 		{:else}
 			<p class="text-center text-slate-500">
-				We’re finalizing your profile. Refresh this page if things don’t update in a few seconds.
+				We're finalizing your profile. Refresh this page if things don't update in a few seconds.
 			</p>
 		{/if}
 	</section>

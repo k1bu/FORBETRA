@@ -6,9 +6,12 @@ import { buildClientSummary } from '$lib/server/buildClientSummary';
 export const load: PageServerLoad = async (event) => {
 	const { dbUser } = requireRole(event, 'COACH');
 
-	// Load minimal data for hub overview
 	const coachClients = await prisma.coachClient.findMany({
 		where: { coachId: dbUser.id },
+		orderBy: [
+			{ archivedAt: 'asc' },
+			{ createdAt: 'asc' }
+		],
 		select: {
 			id: true,
 			individualId: true,
@@ -19,7 +22,6 @@ export const load: PageServerLoad = async (event) => {
 
 	const individualIds = coachClients.map((entry) => entry.individualId);
 
-	// Load individuals with full relations for summary calculations
 	const individuals = individualIds.length
 		? await prisma.user.findMany({
 				where: {
@@ -32,7 +34,6 @@ export const load: PageServerLoad = async (event) => {
 					objectives: {
 						where: { active: true },
 						orderBy: { createdAt: 'desc' },
-						take: 1,
 						include: {
 							subgoals: {
 								orderBy: { createdAt: 'asc' },
@@ -100,7 +101,6 @@ export const load: PageServerLoad = async (event) => {
 
 	const individualLookup = new Map(individuals.map((individual) => [individual.id, individual]));
 
-	// Build minimal client summaries for metrics only
 	const clientSummaries = coachClients
 		.map((relationship) => {
 			const individual = individualLookup.get(relationship.individualId);
@@ -109,22 +109,21 @@ export const load: PageServerLoad = async (event) => {
 		})
 		.filter((value): value is NonNullable<typeof value> => value !== null);
 
-	const invitations = await prisma.coachInvite.findMany({
-		where: { coachId: dbUser.id },
-		select: {
-			id: true,
-			acceptedAt: true,
-			cancelledAt: true,
-			expiresAt: true
-		}
-	});
-
-	// Calculate summary metrics
+	// Calculate analytics
 	const totalAlerts = clientSummaries.reduce((sum, client) => sum + client.alerts.length, 0);
 	const highPriorityAlerts = clientSummaries.reduce(
 		(sum, client) => sum + client.alerts.filter((a) => a.severity === 'high').length,
 		0
 	);
+	const mediumPriorityAlerts = clientSummaries.reduce(
+		(sum, client) => sum + client.alerts.filter((a) => a.severity === 'medium').length,
+		0
+	);
+	const lowPriorityAlerts = clientSummaries.reduce(
+		(sum, client) => sum + client.alerts.filter((a) => a.severity === 'low').length,
+		0
+	);
+
 	const consistencyScores = clientSummaries
 		.map((c) => c.objective?.insights?.consistencyScore)
 		.filter((s): s is number => s !== null);
@@ -132,6 +131,7 @@ export const load: PageServerLoad = async (event) => {
 		consistencyScores.length > 0
 			? Math.round(consistencyScores.reduce((sum, s) => sum + s, 0) / consistencyScores.length)
 			: null;
+
 	const alignmentRatios = clientSummaries
 		.map((c) => c.objective?.insights?.alignmentRatio)
 		.filter((r): r is number => r !== null);
@@ -140,40 +140,39 @@ export const load: PageServerLoad = async (event) => {
 			? Math.round((alignmentRatios.reduce((sum, r) => sum + r, 0) / alignmentRatios.length) * 100)
 			: null;
 
-	// Get recent alerts for preview (top 5 high priority)
-	const recentAlerts = clientSummaries
-		.flatMap((client) =>
-			client.alerts.map((alert) => ({
-				clientName: client.name,
-				clientId: client.id,
-				alert
-			}))
-		)
-		.sort((a, b) => {
-			const severityOrder = { high: 3, medium: 2, low: 1 };
-			return severityOrder[b.alert.severity] - severityOrder[a.alert.severity];
-		})
-		.slice(0, 5);
+	const avgEffortScores = clientSummaries
+		.map((c) => c.objective?.insights?.avgEffort)
+		.filter((e): e is number => e !== null);
+	const overallAvgEffort =
+		avgEffortScores.length > 0
+			? Number((avgEffortScores.reduce((sum, e) => sum + e, 0) / avgEffortScores.length).toFixed(1))
+			: null;
+
+	const avgProgressScores = clientSummaries
+		.map((c) => c.objective?.insights?.avgProgress)
+		.filter((p): p is number => p !== null);
+	const overallAvgProgress =
+		avgProgressScores.length > 0
+			? Number(
+					(avgProgressScores.reduce((sum, p) => sum + p, 0) / avgProgressScores.length).toFixed(1)
+				)
+			: null;
 
 	return {
 		coach: {
 			name: dbUser.name ?? 'Coach'
 		},
-		rosterSummary: {
-			total: coachClients.length,
-			active: coachClients.filter((entry) => entry.archivedAt === null).length,
-			archived: coachClients.filter((entry) => entry.archivedAt !== null).length,
-			pendingInvites: invitations.filter(
-				(invite) => !invite.acceptedAt && !invite.cancelledAt && invite.expiresAt > new Date()
-			).length
-		},
+		clients: clientSummaries,
 		analytics: {
 			totalAlerts,
 			highPriorityAlerts,
+			mediumPriorityAlerts,
+			lowPriorityAlerts,
 			avgConsistency,
-			avgAlignment
-		},
-		recentAlerts
+			avgAlignment,
+			overallAvgEffort,
+			overallAvgProgress
+		}
 	};
 };
 

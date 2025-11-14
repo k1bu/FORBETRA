@@ -48,13 +48,76 @@ export const actions: Actions = {
 
 			try {
 				const existingUser = await prisma.user.findUnique({
-					where: { id: userId }
+					where: { id: userId },
+					include: {
+						objectives: true,
+						coachNotesAuthored: true,
+						coachNotesReceived: true
+					}
 				});
 
 				if (!existingUser) {
 					return fail(404, { error: 'User not found. It may have already been removed.' });
 				}
 
+				// Delete related records first to avoid foreign key constraints
+				await prisma.$transaction(async (tx) => {
+					// Get all cycles for this user's objectives
+					const objectiveIds = existingUser.objectives.map((o) => o.id);
+					const cycles = await tx.cycle.findMany({
+						where: { objectiveId: { in: objectiveIds } }
+					});
+					const cycleIds = cycles.map((c) => c.id);
+
+					// Get all reflections linked to cycles
+					const reflections = await tx.reflection.findMany({
+						where: { cycleId: { in: cycleIds } }
+					});
+					const reflectionIds = reflections.map((r) => r.id);
+
+					// Delete feedback linked to reflections
+					await tx.feedback.deleteMany({
+						where: { reflectionId: { in: reflectionIds } }
+					});
+
+					// Delete reflections
+					await tx.reflection.deleteMany({
+						where: { cycleId: { in: cycleIds } }
+					});
+
+					// Delete cycles
+					await tx.cycle.deleteMany({ where: { objectiveId: { in: objectiveIds } } });
+
+					// Delete subgoals linked to objectives
+					await tx.subgoal.deleteMany({ where: { objectiveId: { in: objectiveIds } } });
+
+					// Delete objectives
+					await tx.objective.deleteMany({ where: { userId: userId } });
+
+					// Delete coach notes
+					await tx.coachNote.deleteMany({
+						where: {
+							OR: [{ coachId: userId }, { individualId: userId }]
+						}
+					});
+
+					// Delete other related records
+					await tx.coachClient.deleteMany({
+						where: { OR: [{ coachId: userId }, { individualId: userId }] }
+					});
+					await tx.coachInvite.deleteMany({
+						where: { OR: [{ coachId: userId }, { individualId: userId }] }
+					});
+					await tx.stakeholder.deleteMany({
+						where: { OR: [{ individualId: userId }, { invitedById: userId }] }
+					});
+					await tx.token.deleteMany({ where: { userId: userId } });
+
+					// Finally delete the user
+					await tx.user.delete({ where: { id: userId } });
+				});
+
+				// Delete from Clerk if linked
 				if (existingUser.clerkUserId) {
 					try {
 						await clerkClient.users.deleteUser(existingUser.clerkUserId);
@@ -65,10 +128,6 @@ export const actions: Actions = {
 						});
 					}
 				}
-
-				await prisma.user.delete({
-					where: { id: userId }
-				});
 
 				return { success: true, message: 'User deleted successfully.' };
 			} catch (error) {
