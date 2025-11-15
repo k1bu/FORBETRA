@@ -6,7 +6,6 @@ import { z } from 'zod';
 import type { Actions, PageServerLoad } from './$types';
 
 const intentionSchema = z.object({
-	subgoalId: z.string({ required_error: 'Choose a focus area' }),
 	intention: z
 		.string({ required_error: 'Intention is required' })
 		.trim()
@@ -78,6 +77,11 @@ export const load: PageServerLoad = async (event) => {
 
 	return {
 		prompt,
+		objective: {
+			id: objective.id,
+			title: objective.title,
+			description: objective.description
+		},
 		cycle: {
 			id: cycle.id,
 			label: cycle.label ?? 'Cycle',
@@ -85,13 +89,13 @@ export const load: PageServerLoad = async (event) => {
 		},
 		subgoals: objective.subgoals.map((subgoal) => ({
 			id: subgoal.id,
-			label: subgoal.label
+			label: subgoal.label,
+			description: subgoal.description
 		})),
 		weekNumber,
 		existing: existing
 			? {
 					id: existing.id,
-					subgoalId: existing.subgoalId,
 					intention: existing.notes ?? ''
 				}
 			: null,
@@ -112,11 +116,16 @@ export const actions: Actions = {
 			where: { userId: dbUser.id, active: true },
 			orderBy: { createdAt: 'desc' },
 			include: {
-				cycles: { orderBy: { startDate: 'desc' }, take: 1 }
+				cycles: { orderBy: { startDate: 'desc' }, take: 1 },
+				subgoals: { orderBy: { createdAt: 'asc' }, take: 1 }
 			}
 		});
 
-		const cycle = objective?.cycles[0];
+		if (!objective) {
+			return fail(400, { error: 'No active objective found. Complete onboarding first.' });
+		}
+
+		const cycle = objective.cycles[0];
 
 		if (!cycle) {
 			return fail(400, { error: 'No active cycle found. Complete onboarding first.' });
@@ -137,6 +146,13 @@ export const actions: Actions = {
 		const data = parsed.data;
 		const weekNumber = computeWeekNumber(cycle.startDate);
 
+		// Get the first subgoal to use as default (intentions are objective-level, not subgoal-specific)
+		const firstSubgoal = objective.subgoals[0];
+
+		if (!firstSubgoal) {
+			return fail(400, { error: 'No subgoals found. Please complete onboarding first.' });
+		}
+
 		try {
 			await prisma.reflection.upsert({
 				where: {
@@ -144,7 +160,7 @@ export const actions: Actions = {
 						cycleId: cycle.id,
 						weekNumber,
 						reflectionType: 'INTENTION',
-						subgoalId: data.subgoalId
+						subgoalId: firstSubgoal.id
 					}
 				},
 				update: {
@@ -155,7 +171,7 @@ export const actions: Actions = {
 				create: {
 					cycleId: cycle.id,
 					userId: dbUser.id,
-					subgoalId: data.subgoalId,
+					subgoalId: firstSubgoal.id,
 					reflectionType: 'INTENTION',
 					weekNumber,
 					notes: data.intention,

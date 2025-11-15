@@ -127,7 +127,7 @@
 			</div>
 			<h1 class="mb-3 text-4xl font-bold text-neutral-900">Your Objective: {data.objective.title}</h1>
 			{#if data.objective.description}
-				<p class="mb-6 max-w-3xl text-lg leading-relaxed text-neutral-700">{data.objective.description}</p>
+				<p class="mb-6 text-lg leading-relaxed text-neutral-700">{data.objective.description}</p>
 			{/if}
 			{#if data.subgoals.length}
 				<div class="mt-6 space-y-3">
@@ -149,6 +149,22 @@
 							</div>
 						{/each}
 					</div>
+				</div>
+			{/if}
+
+			<!-- Identity Anchor Display -->
+			{#if data.identityAnchor}
+				<div class="mt-6 rounded-xl border-2 border-purple-200/50 bg-white/60 p-5 backdrop-blur-sm">
+					<div class="mb-3 flex items-center gap-2">
+						<span class="text-xl">🎯</span>
+						<h2 class="text-sm font-semibold uppercase tracking-wide text-purple-700">Your Identity Anchor</h2>
+					</div>
+					<p class="text-base leading-relaxed text-neutral-800 italic">
+						"{data.identityAnchor}"
+					</p>
+					<p class="mt-2 text-xs text-neutral-600">
+						This anchor reminds you of who you're choosing to become throughout this cycle.
+					</p>
 				</div>
 			{/if}
 		</div>

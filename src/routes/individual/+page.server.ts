@@ -10,6 +10,7 @@ export const load: PageServerLoad = async (event) => {
 		where: { userId: dbUser.id, active: true },
 		orderBy: { createdAt: 'desc' },
 		include: {
+			subgoals: { orderBy: { createdAt: 'asc' } },
 			cycles: {
 				orderBy: { startDate: 'desc' },
 				take: 1,
@@ -29,8 +30,29 @@ export const load: PageServerLoad = async (event) => {
 		}
 	});
 
+	// Check if this is the user's first visit (no objective exists at all)
+	const hasAnyObjective = await prisma.objective.findFirst({
+		where: { userId: dbUser.id },
+		select: { id: true }
+	});
+	const isFirstVisit = !hasAnyObjective;
+
+	// Check if onboarding is complete
+	// Onboarding is complete if: objective exists, has at least one subgoal, and has at least one cycle
+	const isOnboardingComplete = !!(
+		objective &&
+		objective.subgoals.length > 0 &&
+		objective.cycles.length > 0
+	);
+
+	// If no objective, return early with onboarding status
 	if (!objective) {
-		throw redirect(303, '/onboarding');
+		return {
+			isFirstVisit,
+			isOnboardingComplete: false,
+			objective: null,
+			summary: null
+		};
 	}
 
 	const cycle = objective.cycles[0] ?? null;
@@ -133,18 +155,24 @@ export const load: PageServerLoad = async (event) => {
 	}
 
 	return {
-		objective: {
-			id: objective.id,
-			title: objective.title
-		},
-		summary: {
-			completionRate,
-			currentStreak,
-			totalCompleted,
-			totalExpected,
-			openExperiences,
-			missedExperiences,
-			totalStakeholders: objective.stakeholders.length
-		}
+		isFirstVisit,
+		isOnboardingComplete,
+		objective: objective
+			? {
+					id: objective.id,
+					title: objective.title
+				}
+			: null,
+		summary: isOnboardingComplete
+			? {
+					completionRate,
+					currentStreak,
+					totalCompleted,
+					totalExpected,
+					openExperiences,
+					missedExperiences,
+					totalStakeholders: objective.stakeholders.length
+				}
+			: null
 	};
 };

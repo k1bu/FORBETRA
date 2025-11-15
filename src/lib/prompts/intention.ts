@@ -9,7 +9,7 @@ export const MONDAY_PROMPTS: IntentionPrompt[] = [
 		week: 1,
 		heading: 'Identity anchor',
 		question:
-			"Who do you need to be this cycle to realize your objective? Describe the core qualities you'll embody this week."
+			"Completing this identity anchor is one of the most important steps for your entire improvement cycle. Research shows that connecting your objective to your identity—who you're becoming, not just what you're doing—significantly increases success rates. Take time to reflect deeply on how achieving your objective will transform how you show up and perform."
 	},
 	{
 		week: 2,

@@ -303,6 +303,17 @@ export const load: PageServerLoad = async (event) => {
 		}
 	>();
 
+	// Get identity anchor (week 1 intention)
+	let identityAnchor: string | null = null;
+	if (cycle) {
+		const week1Intention = cycle.reflections.find(
+			(r) => r.reflectionType === 'INTENTION' && r.weekNumber === 1
+		);
+		if (week1Intention && week1Intention.notes) {
+			identityAnchor = week1Intention.notes;
+		}
+	}
+
 	if (cycle) {
 		cycle.reflections.forEach((reflection) => {
 			const weekEntry = reflectionTrendMap.get(reflection.weekNumber) ?? {
@@ -559,6 +570,7 @@ export const load: PageServerLoad = async (event) => {
 			label: subgoal.label,
 			description: subgoal.description
 		})),
+		identityAnchor,
 		stakeholders,
 		feedbackSummary,
 		reflectionTrend: normalizedReflectionTrend,
