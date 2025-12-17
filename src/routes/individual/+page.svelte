@@ -3,6 +3,11 @@
 	import PerformanceEffortChart from '$lib/components/PerformanceEffortChart.svelte';
 
 	const { data }: { data: PageData } = $props();
+
+	// Defensive checks to prevent runtime errors
+	if (!data) {
+		throw new Error('Page data is missing');
+	}
 </script>
 
 <section class="mx-auto flex max-w-7xl flex-col gap-8 p-4 pb-12">
@@ -200,7 +205,7 @@
 	{/if}
 
 	<!-- Performance/Effort Visualization -->
-	{#if data.isOnboardingComplete && data.cycle && data.visualizationData}
+	{#if data.isOnboardingComplete && data.cycle && data.visualizationData && data.visualizationData.individual && data.visualizationData.stakeholders && data.visualizationData.stakeholderList}
 		<div class="rounded-2xl border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 p-6 shadow-lg">
 			<PerformanceEffortChart
 				individualData={data.visualizationData.individual}
