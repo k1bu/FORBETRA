@@ -1,17 +1,19 @@
 <script lang="ts">
 	import type { ActionData, PageData } from './$types';
+	import HistoricRatingsChart from '$lib/components/HistoricRatingsChart.svelte';
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
 
 	let effortScore = $state(data.previousEntry?.effortScore ?? 5);
-	let progressScore = $state(data.previousEntry?.progressScore ?? 5);
+	let performanceScore = $state(data.previousEntry?.performanceScore ?? 5);
 	let isSubmitting = $state(false);
+	let showBehavioralIndicators = $state(false);
 
 	// Update scores when previousEntry changes
 	$effect(() => {
 		if (data.previousEntry) {
 			effortScore = data.previousEntry.effortScore ?? 5;
-			progressScore = data.previousEntry.progressScore ?? 5;
+			performanceScore = data.previousEntry.performanceScore ?? 5;
 		}
 	});
 
@@ -20,32 +22,58 @@
 
 	const getScoreLabel = (score: number, type: 'effort' | 'progress') => {
 		if (type === 'effort') {
-			if (score <= 2) return 'Getting started';
-			if (score <= 4) return 'Building momentum';
-			if (score <= 6) return 'Steady progress';
-			if (score <= 8) return 'Strong effort';
-			return 'Exceptional dedication';
+			if (score <= 2) return 'Minimal focus';
+			if (score <= 4) return 'Inconsistent focus';
+			if (score <= 6) return 'Consistent focus';
+			if (score <= 8) return 'Strong focus';
+			return 'Exceptional focus';
 		} else {
-			if (score <= 2) return 'Early stages';
-			if (score <= 4) return 'Noticing changes';
-			if (score <= 6) return 'Clear progress';
-			if (score <= 8) return 'Significant gains';
-			return 'Outstanding results';
+			if (score <= 2) return 'Limited impact';
+			if (score <= 4) return 'Emerging impact';
+			if (score <= 6) return 'Clear impact';
+			if (score <= 8) return 'Strong impact';
+			return 'Exceptional impact';
 		}
 	};
 
 	const getScoreColor = (score: number) => {
-		if (score <= 3) return 'text-amber-600';
+		if (score <= 2) return 'text-yellow-600';
+		if (score <= 4) return 'text-orange-600';
 		if (score <= 6) return 'text-blue-600';
 		if (score <= 8) return 'text-emerald-600';
 		return 'text-purple-600';
 	};
 
 	const getScoreBgColor = (score: number) => {
-		if (score <= 3) return 'bg-amber-50 border-amber-200';
+		if (score <= 2) return 'bg-yellow-50 border-yellow-200';
+		if (score <= 4) return 'bg-orange-50 border-orange-200';
 		if (score <= 6) return 'bg-blue-50 border-blue-200';
 		if (score <= 8) return 'bg-emerald-50 border-emerald-200';
 		return 'bg-purple-50 border-purple-200';
+	};
+
+	const getButtonSelectedColors = (score: number) => {
+		if (score <= 2) return 'border-yellow-500 bg-yellow-500 text-white';
+		if (score <= 4) return 'border-orange-500 bg-orange-500 text-white';
+		if (score <= 6) return 'border-blue-500 bg-blue-500 text-white';
+		if (score <= 8) return 'border-emerald-500 bg-emerald-500 text-white';
+		return 'border-purple-500 bg-purple-500 text-white';
+	};
+
+	const getButtonHoverColors = (score: number) => {
+		if (score <= 2) return 'hover:border-yellow-300 hover:bg-yellow-50';
+		if (score <= 4) return 'hover:border-orange-300 hover:bg-orange-50';
+		if (score <= 6) return 'hover:border-blue-300 hover:bg-blue-50';
+		if (score <= 8) return 'hover:border-emerald-300 hover:bg-emerald-50';
+		return 'hover:border-purple-300 hover:bg-purple-50';
+	};
+
+	const getFocusRing = (score: number) => {
+		if (score <= 2) return 'focus:ring-yellow-500';
+		if (score <= 4) return 'focus:ring-orange-500';
+		if (score <= 6) return 'focus:ring-blue-500';
+		if (score <= 8) return 'focus:ring-emerald-500';
+		return 'focus:ring-purple-500';
 	};
 
 	const handleSubmit = () => {
@@ -72,6 +100,12 @@
 		</a>
 	</div>
 
+	{#if data.isPreview}
+		<div class="fixed top-4 right-4 z-50 max-w-xs rounded-lg border border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100 p-3 text-xs text-blue-800 shadow-lg">
+			<p class="font-semibold">👁️ Preview Mode</p>
+			<p class="mt-1 text-xs">Submissions will be saved normally.</p>
+		</div>
+	{/if}
 	<!-- Header with encouraging messaging -->
 	<header class="space-y-3 text-center">
 		<div class="inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-1.5 text-xs font-medium text-blue-700">
@@ -82,7 +116,7 @@
 		<p class="text-base text-neutral-600">
 			Take a moment to reflect on your progress. Every check-in moves you forward.
 		</p>
-		{#if !data.isAvailable}
+		{#if !data.isPreview && !data.isAvailable}
 			<div class="mx-auto max-w-md rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-amber-100 p-4 text-sm text-amber-800">
 				<p class="font-medium">⏰ Coming soon</p>
 				<p class="mt-1">This check-in will be available on {formatDate(data.availableDate)}.</p>
@@ -119,55 +153,97 @@
 	{/if}
 
 	<div class="mx-auto w-full max-w-2xl space-y-6">
-		<!-- Objective Card with Visual Appeal -->
-		<div class="group relative overflow-hidden rounded-2xl border-2 border-neutral-200 bg-gradient-to-br from-white to-neutral-50 p-8 shadow-lg transition-all hover:border-blue-300 hover:shadow-xl">
-			<div class="absolute right-0 top-0 h-32 w-32 rounded-bl-full bg-gradient-to-br from-blue-100/50 to-transparent"></div>
-			<div class="relative">
-				<div class="mb-4 flex items-start justify-between">
-					<div class="flex-1">
-						<div class="mb-2 inline-flex items-center gap-2 rounded-lg bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
-							<span>🎯</span>
-							Your Objective
-						</div>
-						<h2 class="mt-3 text-2xl font-bold text-neutral-900">{data.objective.title}</h2>
-						{#if data.objective.description}
-							<p class="mt-2 text-base leading-relaxed text-neutral-600">{data.objective.description}</p>
-						{/if}
-					</div>
-				</div>
-
-				<!-- Subgoals as Visual Reference Cards -->
-				<div class="mt-6 rounded-xl border border-neutral-200 bg-white/80 p-5 backdrop-blur-sm">
-					<div class="mb-3 flex items-center gap-2">
-						<span class="text-lg">📋</span>
-						<p class="text-sm font-semibold text-neutral-700">Your behavioral indicators</p>
-					</div>
-					<p class="mb-4 text-xs leading-relaxed text-neutral-600">
-						Use these as reference points when rating your overall effort and progress. They help define what success looks like for your objective.
-					</p>
-					<div class="grid gap-3 sm:grid-cols-1">
-						{#each data.subgoals as subgoal, index (subgoal.id)}
-							<div class="flex items-start gap-3 rounded-lg border border-neutral-100 bg-neutral-50/50 p-3 transition-all hover:border-blue-200 hover:bg-blue-50/30">
-								<span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">
-									{index + 1}
-								</span>
-								<div class="flex-1">
-									<p class="font-semibold text-neutral-900">{subgoal.label}</p>
-									{#if subgoal.description}
-										<p class="mt-1 text-xs text-neutral-600">{subgoal.description}</p>
-									{/if}
-								</div>
-							</div>
-						{/each}
-					</div>
-				</div>
-			</div>
-		</div>
-
 		<!-- Interactive Check-in Form -->
 		<form method="post" onsubmit={handleSubmit} class="space-y-6">
+			<!-- Hidden inputs for form submission -->
+			<input type="hidden" name="effortScore" value={effortScore} />
+			<input type="hidden" name="performanceScore" value={performanceScore} />
+			
+			<!-- Simple Objective Display -->
+			<div class="rounded-xl border border-neutral-200 bg-neutral-50/50 px-5 py-4">
+				<div class="flex items-center gap-3 text-base text-neutral-600">
+					<span class="text-xl">🎯</span>
+					<span class="font-medium">Objective:</span>
+					<span class="font-semibold text-lg text-neutral-900">{data.objective.title}</span>
+				</div>
+			</div>
+			
+			<!-- Collapsible Behavioral Indicators -->
+			<div class="rounded-xl border border-neutral-200 bg-white">
+				<button
+					type="button"
+					onclick={() => (showBehavioralIndicators = !showBehavioralIndicators)}
+					class="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-neutral-50"
+				>
+					<div class="flex items-center gap-2">
+						<span class="text-lg">📋</span>
+						<span class="text-sm font-medium text-neutral-700">View behavioral indicators</span>
+					</div>
+					<svg
+						class="h-5 w-5 text-neutral-500 transition-transform {showBehavioralIndicators
+							? 'rotate-180'
+							: ''}"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+					</svg>
+				</button>
+				{#if showBehavioralIndicators}
+					<div class="border-t border-neutral-200 px-4 py-4">
+						<p class="mb-3 text-xs leading-relaxed text-neutral-600">
+							Use these as reference points when rating your overall effort and progress. They help define what success looks like for your objective.
+						</p>
+						<div class="space-y-2">
+							{#each data.subgoals as subgoal, index (subgoal.id)}
+								<div class="flex items-start gap-3 rounded-lg border border-neutral-100 bg-neutral-50/50 p-3">
+									<span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">
+										{index + 1}
+									</span>
+									<div class="flex-1">
+										<p class="font-semibold text-neutral-900">{subgoal.label}</p>
+										{#if subgoal.description}
+											<p class="mt-1 text-xs text-neutral-600">{subgoal.description}</p>
+										{/if}
+									</div>
+								</div>
+							{/each}
+						</div>
+					</div>
+				{/if}
+			</div>
+			
+			{#if data.currentWeek > 1 && data.previousRatings}
+				{@const historicRatings = data.historicRatings ?? []}
+				<div class="rounded-xl border border-blue-100/50 bg-gradient-to-br from-blue-50/40 to-blue-50/60 p-4">
+					<div class="mb-3">
+						<p class="text-sm font-semibold text-blue-800">Your last ratings:</p>
+					</div>
+					<div class="flex gap-6 text-sm">
+						<div class="flex items-center gap-2">
+							<span class="text-blue-600">Effort:</span>
+							<span class="font-bold text-lg text-blue-800">
+								{data.previousRatings.effortScore !== null ? data.previousRatings.effortScore : '—'}
+							</span>
+						</div>
+						<div class="flex items-center gap-2">
+							<span class="text-blue-600">Performance:</span>
+							<span class="font-bold text-lg text-blue-800">
+								{data.previousRatings.performanceScore !== null ? data.previousRatings.performanceScore : '—'}
+							</span>
+						</div>
+					</div>
+					<p class="mt-2 text-xs text-blue-600">Use this as context - adjust freely based on this week.</p>
+					{#if historicRatings.length > 1}
+						<div class="mt-4">
+							<HistoricRatingsChart historicRatings={historicRatings} />
+						</div>
+					{/if}
+				</div>
+			{/if}
 			<!-- Effort Score with Enhanced UI -->
-			<div class="group rounded-2xl border-2 border-neutral-200 bg-white p-6 shadow-sm transition-all hover:border-blue-300 hover:shadow-md">
+			<div class="group rounded-2xl border-2 border-neutral-200 bg-white p-6 shadow-sm transition-all hover:border-neutral-400 hover:shadow-md">
 				<div class="mb-4 flex items-center justify-between">
 					<div class="flex items-center gap-3">
 						<span class="text-2xl">💪</span>
@@ -175,7 +251,9 @@
 							<label for="effort-score" class="text-lg font-bold text-neutral-900">
 								Focused Effort
 							</label>
-							<p class="text-xs text-neutral-500">How much energy did you invest this week?</p>
+							<p class="text-xs text-neutral-500">
+								How much attention did you give to your objective: "{data.objective.title}" this week?
+							</p>
 						</div>
 					</div>
 					<div
@@ -187,19 +265,27 @@
 					</div>
 				</div>
 
-				<input
-					type="range"
-					name="effortScore"
-					id="effort-score"
-					min="0"
-					max="10"
-					step="1"
-					bind:value={effortScore}
-					disabled={!data.isAvailable || data.isLocked}
-					class="h-3 w-full cursor-pointer appearance-none rounded-lg bg-gradient-to-r from-amber-200 via-blue-200 to-emerald-200 disabled:cursor-not-allowed disabled:opacity-50 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:ring-2 [&::-webkit-slider-thumb]:ring-blue-400 [&::-webkit-slider-thumb]:transition-all hover:[&::-webkit-slider-thumb]:scale-110"
-				/>
+				<!-- Button Grid (Primary Input) -->
+				<div class="mb-4 grid grid-cols-6 gap-2 sm:grid-cols-11">
+					{#each Array(11) as _, i}
+						{@const isSelected = effortScore === i}
+						{@const buttonColors = getButtonSelectedColors(i)}
+						{@const hoverColors = getButtonHoverColors(i)}
+						{@const focusRing = getFocusRing(i)}
+						<button
+							type="button"
+							onclick={() => (effortScore = i)}
+							disabled={!data.isAvailable || data.isLocked}
+							class="flex h-10 w-full items-center justify-center rounded-lg border-2 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-50 {isSelected
+								? buttonColors + ' shadow-md'
+								: 'border-neutral-300 bg-white text-neutral-700 ' + hoverColors} focus:outline-none focus:ring-2 {focusRing} focus:ring-offset-2"
+						>
+							{i}
+						</button>
+					{/each}
+				</div>
 
-				<div class="mt-3 flex items-center justify-between">
+				<div class="mb-2 flex items-center justify-between">
 					<span class="text-xs font-medium text-neutral-500">Minimal</span>
 					<div
 						class="rounded-full px-3 py-1 text-xs font-semibold {getScoreBgColor(
@@ -210,10 +296,13 @@
 					</div>
 					<span class="text-xs font-medium text-neutral-500">Exceptional</span>
 				</div>
+				<p class="text-xs text-neutral-400 italic">
+					Consider attention, preparation, and prioritization toward the objective.
+				</p>
 			</div>
 
 			<!-- Progress Score with Enhanced UI -->
-			<div class="group rounded-2xl border-2 border-neutral-200 bg-white p-6 shadow-sm transition-all hover:border-emerald-300 hover:shadow-md">
+			<div class="group rounded-2xl border-2 border-neutral-200 bg-white p-6 shadow-sm transition-all hover:border-neutral-400 hover:shadow-md">
 				<div class="mb-4 flex items-center justify-between">
 					<div class="flex items-center gap-3">
 						<span class="text-2xl">📈</span>
@@ -221,41 +310,54 @@
 							<label for="progress-score" class="text-lg font-bold text-neutral-900">
 								Performance
 							</label>
-							<p class="text-xs text-neutral-500">How satisfied are you with your progress?</p>
+							<p class="text-xs text-neutral-500">
+								How effective was your performance related to your objective: "{data.objective.title}" this week?
+							</p>
 						</div>
 					</div>
 					<div
 						class="flex h-16 w-16 items-center justify-center rounded-full border-2 transition-all {getScoreBgColor(
-							progressScore
+							performanceScore
 						)}"
 					>
-						<span class="text-2xl font-bold {getScoreColor(progressScore)}">{progressScore}</span>
+						<span class="text-2xl font-bold {getScoreColor(performanceScore)}">{performanceScore}</span>
 					</div>
 				</div>
 
-				<input
-					type="range"
-					name="progressScore"
-					id="progress-score"
-					min="0"
-					max="10"
-					step="1"
-					bind:value={progressScore}
-					disabled={!data.isAvailable || data.isLocked}
-					class="h-3 w-full cursor-pointer appearance-none rounded-lg bg-gradient-to-r from-amber-200 via-blue-200 to-emerald-200 disabled:cursor-not-allowed disabled:opacity-50 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:ring-2 [&::-webkit-slider-thumb]:ring-emerald-400 [&::-webkit-slider-thumb]:transition-all hover:[&::-webkit-slider-thumb]:scale-110"
-				/>
+				<!-- Button Grid (Primary Input) -->
+				<div class="mb-4 grid grid-cols-6 gap-2 sm:grid-cols-11">
+					{#each Array(11) as _, i}
+						{@const isSelected = performanceScore === i}
+						{@const buttonColors = getButtonSelectedColors(i)}
+						{@const hoverColors = getButtonHoverColors(i)}
+						{@const focusRing = getFocusRing(i)}
+						<button
+							type="button"
+							onclick={() => (performanceScore = i)}
+							disabled={!data.isAvailable || data.isLocked}
+							class="flex h-10 w-full items-center justify-center rounded-lg border-2 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-50 {isSelected
+								? buttonColors + ' shadow-md'
+								: 'border-neutral-300 bg-white text-neutral-700 ' + hoverColors} focus:outline-none focus:ring-2 {focusRing} focus:ring-offset-2"
+						>
+							{i}
+						</button>
+					{/each}
+				</div>
 
-				<div class="mt-3 flex items-center justify-between">
-					<span class="text-xs font-medium text-neutral-500">No progress</span>
+				<div class="mb-2 flex items-center justify-between">
+					<span class="text-xs font-medium text-neutral-500">Limited</span>
 					<div
 						class="rounded-full px-3 py-1 text-xs font-semibold {getScoreBgColor(
-							progressScore
-						)} {getScoreColor(progressScore)}"
+							performanceScore
+						)} {getScoreColor(performanceScore)}"
 					>
-						{getScoreLabel(progressScore, 'progress')}
+						{getScoreLabel(performanceScore, 'progress')}
 					</div>
-					<span class="text-xs font-medium text-neutral-500">Outstanding</span>
+					<span class="text-xs font-medium text-neutral-500">Exceptional</span>
 				</div>
+				<p class="text-xs text-neutral-400 italic">
+					Consider outcomes, behavior change, and visible impact related to the objective.
+				</p>
 			</div>
 
 			<!-- Notes with Better UX -->
@@ -276,7 +378,7 @@
 					placeholder="Share a win, an obstacle you overcame, or something you learned this week..."
 				>{data.previousEntry?.notes ?? ''}</textarea>
 				<p class="mt-2 text-xs text-neutral-500">
-					💡 Tip: Capturing context helps you and your stakeholders see the full picture of your growth.
+					💡 Tip: Capturing context helps you and your coach see the full picture of your growth.
 				</p>
 			</div>
 

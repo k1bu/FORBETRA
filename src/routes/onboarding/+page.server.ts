@@ -3,6 +3,8 @@ import { onboardingContexts } from '$lib/content/onboardingTemplates';
 import { requireRole } from '$lib/server/auth';
 import prisma from '$lib/server/prisma';
 import { onboardingSchema } from '$lib/validation/onboarding';
+import { sendEmail } from '$lib/notifications/email';
+import { emailTemplates } from '$lib/notifications/emailTemplates';
 import type { Actions, PageServerLoad } from './$types';
 import type { ZodIssue } from 'zod';
 
@@ -10,14 +12,17 @@ const MAX_SUBGOALS = 5;
 const MAX_STAKEHOLDERS = 5;
 
 const formatErrors = (issues: ZodIssue[]) =>
-	issues.reduce((acc, issue) => {
-		const path = issue.path.join('.');
-		if (!acc[path]) {
-			acc[path] = [];
-		}
-		acc[path].push(issue.message);
-		return acc;
-	}, {} as Record<string, string[]>);
+	issues.reduce(
+		(acc, issue) => {
+			const path = issue.path.join('.');
+			if (!acc[path]) {
+				acc[path] = [];
+			}
+			acc[path].push(issue.message);
+			return acc;
+		},
+		{} as Record<string, string[]>
+	);
 
 export const load: PageServerLoad = async (event) => {
 	const { dbUser } = requireRole(event, 'INDIVIDUAL');
@@ -56,12 +61,13 @@ export const actions: Actions = {
 		const cycleStartDate = (formData.get('cycleStartDate') ?? '').toString();
 		const cycleDurationWeeksRaw = (formData.get('cycleDurationWeeks') ?? '').toString();
 		const cycleDurationWeeksValue = Number.parseInt(cycleDurationWeeksRaw, 10);
+		const reminderDays = (formData.get('reminderDays') ?? 'wednesday_friday').toString() as
+			| 'wednesday_friday'
+			| 'tuesday_thursday';
 
 		const subgoals = Array.from({ length: MAX_SUBGOALS }, (_, index) => {
 			const label = (formData.get(`subgoalLabel${index + 1}`) ?? '').toString().trim();
-			const description = (formData.get(`subgoalDescription${index + 1}`) ?? '')
-				.toString()
-				.trim();
+			const description = (formData.get(`subgoalDescription${index + 1}`) ?? '').toString().trim();
 			return { label, description };
 		}).filter((subgoal) => subgoal.label.length > 0 || subgoal.description.length > 0);
 
@@ -141,6 +147,27 @@ export const actions: Actions = {
 							relationship: stakeholder.relationship ?? null
 						}
 					});
+
+					// Send welcome email to stakeholder (after transaction)
+					// We'll do this outside the transaction to avoid blocking
+					setTimeout(async () => {
+						try {
+							const template = emailTemplates.welcomeStakeholder({
+								individualName: dbUser.name || undefined,
+								stakeholderName: stakeholder.name || undefined,
+								appUrl:
+									process.env.PUBLIC_APP_URL || process.env.VERCEL_URL
+										? `https://${process.env.PUBLIC_APP_URL || process.env.VERCEL_URL}`
+										: 'https://app.forbetra.com'
+							});
+							await sendEmail({
+								to: stakeholder.email,
+								...template
+							});
+						} catch (error) {
+							console.error('[email:error] Failed to send stakeholder welcome email', error);
+						}
+					}, 0);
 				}
 			}
 
@@ -157,6 +184,12 @@ export const actions: Actions = {
 					endDate,
 					status: 'ACTIVE'
 				}
+			});
+
+			// Store reminder days preference in User model
+			await tx.user.update({
+				where: { id: dbUser.id },
+				data: { reminderDays }
 			});
 
 			const pendingInvites = await tx.coachInvite.findMany({
@@ -212,6 +245,6 @@ export const actions: Actions = {
 			}
 		});
 
-		throw redirect(303, '/onboarding/complete');
+		throw redirect(303, '/onboarding/initial-ratings');
 	}
 };

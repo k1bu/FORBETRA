@@ -29,8 +29,8 @@ enum CycleStatus {
 
 enum ReflectionType {
   INTENTION
-  EFFORT
-  PROGRESS
+  RATING_A
+  RATING_B
 }
 
 enum SubgoalMetric {
@@ -54,6 +54,7 @@ model User {
   role      UserRole @default(INDIVIDUAL)
   phone     String?
   timezone  String?
+  reminderDays String? // 'wednesday_friday' or 'tuesday_thursday'
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -137,7 +138,7 @@ model Reflection {
   weekNumber     Int
   checkInDate    DateTime       @default(now())
   effortScore    Int?
-  progressScore  Int?
+  performanceScore  Int?
   notes          String?
   submittedAt    DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
@@ -159,7 +160,7 @@ model Feedback {
   reflectionId  String
   stakeholderId String
   effortScore   Int?
-  progressScore Int?
+  performanceScore Int?
   comment       String?
   submittedAt   DateTime  @default(now())
   updatedAt     DateTime  @updatedAt

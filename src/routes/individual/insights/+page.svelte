@@ -1,5 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import CorrelationView from '$lib/components/CorrelationView.svelte';
+	import GapLensView from '$lib/components/GapLensView.svelte';
 
 	const { data }: { data: PageData } = $props();
 
@@ -92,7 +94,7 @@
 									<span class="font-semibold {getScoreColor(week.effortScore)}">{formatAverage(week.effortScore)}</span>
 								</td>
 								<td class="px-4 py-3">
-									<span class="font-semibold {getScoreColor(week.progressScore)}">{formatAverage(week.progressScore)}</span>
+									<span class="font-semibold {getScoreColor(week.performanceScore)}">{formatAverage(week.performanceScore)}</span>
 								</td>
 							</tr>
 						{/each}
@@ -137,6 +139,27 @@
 					<p class="text-2xl font-bold text-emerald-600">{formatPercent(data.insights.alignmentRatio)}</p>
 				</div>
 			</div>
+		</div>
+	{/if}
+
+	<!-- Correlation View -->
+	{#if data.correlationData && (data.correlationData.individual.length > 0 || data.correlationData.stakeholders.length > 0)}
+		<div class="rounded-2xl border-2 border-neutral-200 bg-white p-6 shadow-sm">
+			<CorrelationView
+				individualData={data.correlationData.individual}
+				stakeholderData={data.correlationData.stakeholders}
+			/>
+		</div>
+	{/if}
+
+	<!-- Gap Lens View -->
+	{#if data.gapLensData && (data.gapLensData.effort.length > 0 || data.gapLensData.performance.length > 0)}
+		<div class="rounded-2xl border-2 border-neutral-200 bg-white p-6 shadow-sm">
+			<GapLensView
+				effortGaps={data.gapLensData.effort}
+				performanceGaps={data.gapLensData.performance}
+				stakeholders={data.gapLensData.stakeholders ?? []}
+			/>
 		</div>
 	{/if}
 </section>

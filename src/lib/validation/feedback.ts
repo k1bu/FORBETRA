@@ -9,7 +9,7 @@ export const stakeholderFeedbackSchema = z
 			.min(0, 'Minimum score is 0')
 			.max(10, 'Maximum score is 10')
 			.optional(),
-		progressScore: z.coerce
+		performanceScore: z.coerce
 			.number({ invalid_type_error: 'Provide a number between 0 and 10' })
 			.int()
 			.min(0, 'Minimum score is 0')
@@ -17,7 +17,7 @@ export const stakeholderFeedbackSchema = z
 			.optional(),
 		comment: z.string().trim().max(2000, 'Keep comments under 2000 characters').optional()
 	})
-	.refine((data) => Boolean(data.effortScore ?? data.progressScore ?? data.comment), {
+	.refine((data) => Boolean(data.effortScore ?? data.performanceScore ?? data.comment), {
 		message: 'Provide at least one score or a comment.',
 		path: ['comment']
 	});

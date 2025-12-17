@@ -23,12 +23,12 @@
 		objectiveDescription: form?.values?.objectiveDescription ?? '',
 		subgoals: (form?.values?.subgoals as SubgoalFormValue[] | undefined) ?? [],
 		stakeholders: (form?.values?.stakeholders as StakeholderFormValue[] | undefined) ?? [],
-		cycleLabel: form?.values?.cycleLabel ?? '',
+		cycleLabel: form?.values?.cycleLabel ?? (form?.values?.objectiveTitle ?? ''),
 		cycleStartDate: form?.values?.cycleStartDate ?? data.defaults.startDate,
-		cycleDurationWeeks: String(form?.values?.cycleDurationWeeks ?? data.defaults.durationWeeks)
+		cycleDurationWeeks: String(form?.values?.cycleDurationWeeks ?? 12)
 	};
 
-	const cycleOptions = [6, 8, 10, 12, 14, 16];
+	const cycleOptions = [8, 12, 16];
 	const minSubgoalFields = 3;
 	const minStakeholderFields = 3;
 	const maxStakeholderFields = 5;
@@ -38,9 +38,10 @@
 
 	let objectiveTitle = values.objectiveTitle;
 	let objectiveDescription = values.objectiveDescription;
-	let cycleLabel = values.cycleLabel;
+	let cycleLabel = values.cycleLabel || (values.objectiveTitle || '');
 	let cycleStartDate = values.cycleStartDate;
-	let cycleDurationWeeks = values.cycleDurationWeeks;
+	let cycleDurationWeeks = values.cycleDurationWeeks || '12';
+	let reminderDays: 'wednesday_friday' | 'tuesday_thursday' = 'wednesday_friday';
 
 	let subgoalForms: SubgoalFormValue[] = Array.from({ length: initialSubgoalCount }, (_, index) => ({
 		label: values.subgoals[index]?.label ?? '',
@@ -117,7 +118,7 @@
 		objectiveDescription = '';
 		cycleLabel = '';
 		cycleStartDate = data.defaults.startDate;
-		cycleDurationWeeks = String(data.defaults.durationWeeks);
+		cycleDurationWeeks = '12';
 		resetSubgoals();
 		resetStakeholders();
 		goToStep('objective');
@@ -137,6 +138,7 @@
 		const composedDescription = `${template.description}\n\n${template.contextSummary}`.trim();
 		objectiveTitle = template.title;
 		objectiveDescription = composedDescription;
+		cycleLabel = template.title; // Pre-fill cycle name with objective title
 		const prefilled = template.subgoals.slice(0, minSubgoalFields);
 		subgoalForms = Array.from({ length: minSubgoalFields }, (_, index) => ({
 			label: prefilled[index]?.label ?? '',
@@ -152,8 +154,14 @@
 			updateSubgoalField(emptyIndex, 'description', subgoal.description ?? '');
 			return;
 		}
-		updateSubgoalField(subgoalForms.length - 1, 'label', subgoal.label);
-		updateSubgoalField(subgoalForms.length - 1, 'description', subgoal.description ?? '');
+		// If all fields are filled and we haven't reached the max, add a new field
+		if (subgoalForms.length < 5) {
+			subgoalForms = [...subgoalForms, { label: subgoal.label, description: subgoal.description ?? '' }];
+		} else {
+			// If we're at max, replace the last one (user can manually adjust)
+			updateSubgoalField(subgoalForms.length - 1, 'label', subgoal.label);
+			updateSubgoalField(subgoalForms.length - 1, 'description', subgoal.description ?? '');
+		}
 	}
 
 	function goToStep(step: Step) {
@@ -167,9 +175,9 @@
 	function canProceedFromStep(step: Step): boolean {
 		switch (step) {
 			case 'objective':
-				return objectiveTitle.trim().length > 0 && objectiveDescription.trim().length > 0;
+				return objectiveTitle.trim().length >= 3 && objectiveDescription.trim().length > 0;
 			case 'subgoals':
-				return subgoalForms.filter((s) => s.label.trim().length > 0).length >= minSubgoalFields;
+				return subgoalForms.filter((s) => s.label.trim().length >= 3).length >= minSubgoalFields;
 			case 'cycle':
 				return cycleLabel.trim().length > 0 && cycleStartDate.length > 0;
 			case 'stakeholders':
@@ -195,10 +203,13 @@
 		}
 	}
 
-	function getStepProgress(): number {
+	$: stepProgress = (() => {
 		const steps: Step[] = ['welcome', 'objective', 'subgoals', 'cycle', 'stakeholders'];
-		return ((steps.indexOf(currentStep) + 1) / steps.length) * 100;
-	}
+		const stepIndex = steps.indexOf(currentStep);
+		// Welcome step is 0%, then each subsequent step is 25% more (4 steps after welcome)
+		if (stepIndex === 0) return 0;
+		return (stepIndex / (steps.length - 1)) * 100;
+	})();
 
 	const getError = (path: string) => errors[path]?.[0];
 
@@ -208,6 +219,10 @@
 			: null;
 	$: cycleDurationNumber = Number(cycleDurationWeeks) || data.defaults.durationWeeks;
 	$: canAdvance = canProceedFromStep(currentStep);
+	// Auto-fill cycle name with objective title if cycle name is empty
+	$: if (objectiveTitle.trim().length > 0 && (!cycleLabel || cycleLabel.trim().length === 0)) {
+		cycleLabel = objectiveTitle;
+	}
 </script>
 
 <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50">
@@ -216,13 +231,13 @@
 		{#if currentStep !== 'welcome'}
 			<div class="mb-8">
 				<div class="mb-3 flex items-center justify-between text-sm text-slate-600">
-					<span class="font-medium">Step {['welcome', 'objective', 'subgoals', 'cycle', 'stakeholders'].indexOf(currentStep)} of 4</span>
-					<span class="text-slate-400">{Math.round(getStepProgress())}% complete</span>
+					<span class="font-medium">Step {['welcome', 'objective', 'subgoals', 'cycle', 'stakeholders'].indexOf(currentStep) + 1} of 5</span>
+					<span class="text-slate-400">{Math.round(stepProgress)}% complete</span>
 				</div>
 				<div class="h-2 overflow-hidden rounded-full bg-slate-200">
 					<div
 						class="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-500 ease-out"
-						style="width: {getStepProgress()}%"
+						style="width: {stepProgress}%"
 					></div>
 				</div>
 			</div>
@@ -318,6 +333,8 @@
 		{#if currentStep !== 'welcome'}
 			<div class="grid gap-6 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
 			<form method="post" class="space-y-8">
+				<!-- Hidden input for reminder days -->
+				<input type="hidden" name="reminderDays" value={reminderDays} />
 				<!-- Objective Step -->
 				{#if currentStep === 'objective'}
 					<div class="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
@@ -594,6 +611,75 @@
 									{#if getError('cycleDurationWeeks')}
 										<p class="text-sm text-red-600">{getError('cycleDurationWeeks')}</p>
 									{/if}
+								</div>
+
+								<div class="space-y-2 md:col-span-2">
+									<label class="block text-sm font-semibold text-slate-700" for="reminderDays">
+										Feedback Reminder Days
+									</label>
+									<p class="mb-3 text-sm text-slate-600">
+										Choose when you'd like to receive reminders to submit your reflections and when stakeholders will be prompted for feedback.
+									</p>
+									<div class="grid gap-4 md:grid-cols-2">
+										<label
+											class="group relative flex cursor-pointer rounded-xl border-2 p-4 transition-all {reminderDays === 'wednesday_friday'
+												? 'border-blue-500 bg-blue-50'
+												: 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50'}"
+										>
+											<input
+												type="radio"
+												name="reminderDays"
+												value="wednesday_friday"
+												checked={reminderDays === 'wednesday_friday'}
+												onchange={() => (reminderDays = 'wednesday_friday')}
+												class="sr-only"
+											/>
+											<div class="flex w-full items-center gap-3">
+												<div
+													class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 {reminderDays === 'wednesday_friday'
+														? 'border-blue-500 bg-blue-500'
+														: 'border-slate-300 bg-white'}"
+												>
+													{#if reminderDays === 'wednesday_friday'}
+														<div class="h-2 w-2 rounded-full bg-white"></div>
+													{/if}
+												</div>
+												<div class="flex-1">
+													<div class="font-semibold text-slate-900">Wednesday & Friday</div>
+													<div class="text-xs text-slate-600">Default option</div>
+												</div>
+											</div>
+										</label>
+										<label
+											class="group relative flex cursor-pointer rounded-xl border-2 p-4 transition-all {reminderDays === 'tuesday_thursday'
+												? 'border-blue-500 bg-blue-50'
+												: 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50'}"
+										>
+											<input
+												type="radio"
+												name="reminderDays"
+												value="tuesday_thursday"
+												checked={reminderDays === 'tuesday_thursday'}
+												onchange={() => (reminderDays = 'tuesday_thursday')}
+												class="sr-only"
+											/>
+											<div class="flex w-full items-center gap-3">
+												<div
+													class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 {reminderDays === 'tuesday_thursday'
+														? 'border-blue-500 bg-blue-500'
+														: 'border-slate-300 bg-white'}"
+												>
+													{#if reminderDays === 'tuesday_thursday'}
+														<div class="h-2 w-2 rounded-full bg-white"></div>
+													{/if}
+												</div>
+												<div class="flex-1">
+													<div class="font-semibold text-slate-900">Tuesday & Thursday</div>
+													<div class="text-xs text-slate-600">Alternative option</div>
+												</div>
+											</div>
+										</label>
+									</div>
 								</div>
 							</div>
 						</div>

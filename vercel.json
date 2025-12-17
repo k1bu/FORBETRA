@@ -1,6 +1,10 @@
 {
 	"crons": [
 		{
+			"path": "/api/jobs/remind-base",
+			"schedule": "0 9 * * 1-5"
+		},
+		{
 			"path": "/api/jobs/remind-prompts",
 			"schedule": "0 14 * * 1-5"
 		},

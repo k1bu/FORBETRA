@@ -4,7 +4,7 @@ import { requireRole } from '$lib/server/auth';
 import type { Actions, PageServerLoad } from './$types';
 import { randomBytes } from 'node:crypto';
 import { sendEmail } from '$lib/notifications/email';
-import { sendSms } from '$lib/notifications/sms';
+import { emailTemplates } from '$lib/notifications/emailTemplates';
 import { Prisma } from '@prisma/client';
 
 export const load: PageServerLoad = async (event) => {
@@ -57,7 +57,9 @@ export const load: PageServerLoad = async (event) => {
 		: null;
 
 	const stakeholders = objective.stakeholders.map((stakeholder) => {
-		const pendingToken = stakeholder.tokens.find((token) => !token.usedAt && token.expiresAt > currentTime);
+		const pendingToken = stakeholder.tokens.find(
+			(token) => !token.usedAt && token.expiresAt > currentTime
+		);
 		const latestFeedback = stakeholder.feedbacks[0] ?? null;
 		const latestReflectionWeek = latestFeedback?.reflection?.weekNumber ?? null;
 		const isCurrentWeekResponse =
@@ -76,7 +78,7 @@ export const load: PageServerLoad = async (event) => {
 				? {
 						submittedAt: latestFeedback.submittedAt?.toISOString() ?? null,
 						effortScore: latestFeedback.effortScore,
-						progressScore: latestFeedback.progressScore,
+						performanceScore: latestFeedback.performanceScore,
 						weekNumber: latestReflectionWeek,
 						isCurrentWeek: isCurrentWeekResponse
 					}
@@ -150,7 +152,7 @@ export const actions: Actions = {
 				cycleId_weekNumber_reflectionType_subgoalId: {
 					cycleId: cycle.id,
 					weekNumber,
-					reflectionType: 'PROGRESS',
+					reflectionType: 'RATING_B',
 					subgoalId: primarySubgoal.id
 				}
 			},
@@ -159,7 +161,7 @@ export const actions: Actions = {
 				cycleId: cycle.id,
 				userId: dbUser.id,
 				subgoalId: primarySubgoal.id,
-				reflectionType: 'PROGRESS',
+				reflectionType: 'RATING_B',
 				weekNumber,
 				checkInDate: new Date()
 			}
@@ -185,20 +187,26 @@ export const actions: Actions = {
 
 		const feedbackLink = `${event.url.origin}/stakeholder/feedback/${tokenValue}`;
 
-		if (process.env.NODE_ENV === 'development') {
-			await sendEmail({
-				to: stakeholder.email ?? 'unknown@example.com',
-				subject: 'FORBETRA feedback link',
-				html: `<p>Hi ${stakeholder.name},</p><p>Please share feedback: <a href="${feedbackLink}">${feedbackLink}</a>.</p>`,
-				text: `Hi ${stakeholder.name}, please share feedback: ${feedbackLink}`
+		// Send feedback invite email
+		try {
+			const objective = await prisma.objective.findFirst({
+				where: { userId: dbUser.id, active: true },
+				select: { title: true }
 			});
 
-			if (stakeholder.phone) {
-				await sendSms({
-					to: stakeholder.phone,
-					body: `Share feedback for ${dbUser.name ?? 'your client'}: ${feedbackLink}`
-				});
-			}
+			const template = emailTemplates.feedbackInvite({
+				individualName: dbUser.name || undefined,
+				stakeholderName: stakeholder.name || undefined,
+				objectiveTitle: objective?.title || undefined,
+				feedbackLink
+			});
+			await sendEmail({
+				to: stakeholder.email,
+				...template
+			});
+		} catch (error) {
+			console.error('[email:error] Failed to send feedback invite', error);
+			// Don't fail the request if email fails
 		}
 
 		return {
@@ -242,8 +250,9 @@ export const actions: Actions = {
 			});
 		}
 
+		let stakeholder;
 		try {
-			await prisma.stakeholder.create({
+			stakeholder = await prisma.stakeholder.create({
 				data: {
 					individualId: dbUser.id,
 					objectiveId: objective.id,
@@ -263,10 +272,30 @@ export const actions: Actions = {
 			throw error;
 		}
 
+		// Send welcome email to new stakeholder
+		try {
+			const objectiveData = await prisma.objective.findUnique({
+				where: { id: objective.id },
+				select: { title: true }
+			});
+
+			const template = emailTemplates.welcomeStakeholder({
+				individualName: dbUser.name || undefined,
+				stakeholderName: name || undefined,
+				appUrl: event.url.origin
+			});
+			await sendEmail({
+				to: email,
+				...template
+			});
+		} catch (error) {
+			console.error('[email:error] Failed to send stakeholder welcome email', error);
+			// Don't fail the request if email fails
+		}
+
 		return {
 			action: 'stakeholder',
 			success: true
 		};
 	}
 };
-

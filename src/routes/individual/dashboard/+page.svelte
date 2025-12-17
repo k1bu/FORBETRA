@@ -52,12 +52,12 @@
 
 	const formatPromptLabel = (type: string) => {
 		switch (type) {
-			case 'INTENTION':
-				return 'Monday intention prompt';
-			case 'EFFORT':
-				return 'Wednesday check-in';
-			case 'PROGRESS':
-				return 'Friday check-in';
+		case 'INTENTION':
+			return 'Monday Check-In';
+		case 'RATING_A':
+			return 'Wednesday Check-In';
+		case 'RATING_B':
+			return 'Friday Check-In';
 			default:
 				return 'Upcoming prompt';
 		}
@@ -65,11 +65,11 @@
 
 	const promptTarget = (type: string) => {
 		switch (type) {
-			case 'INTENTION':
-				return '/prompts/monday';
-			case 'EFFORT':
-			case 'PROGRESS':
-				return '/reflections/checkin';
+		case 'INTENTION':
+			return '/prompts/monday';
+		case 'RATING_A':
+		case 'RATING_B':
+			return '/reflections/checkin';
 			default:
 				return '/individual';
 		}
@@ -185,6 +185,7 @@
 			</div>
 		{/if}
 	{/if}
+
 
 	{#if data.cycle}
 		<!-- Quick Stats Grid -->
@@ -366,7 +367,7 @@
 									{:else if experience.state === 'missed'}
 										<p class="text-xs font-medium text-neutral-600">Window closed — keep going this week!</p>
 									{:else if experience.state === 'upcoming'}
-										<p class="text-xs font-medium text-neutral-500">Coming soon</p>
+										<p class="text-xs font-medium text-neutral-500">Closed/Not Yet Available</p>
 									{/if}
 								</div>
 							{/each}

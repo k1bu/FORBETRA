@@ -24,14 +24,14 @@ export const checkInEntrySchema = z.object({
 		.int()
 		.min(0, 'Minimum effort score is 0')
 		.max(10, 'Maximum effort score is 10'),
-	progressScore: z.coerce
+	performanceScore: z.coerce
 		.number({
-			required_error: 'Progress score is required',
-			invalid_type_error: 'Progress score must be a number'
+			required_error: 'Performance score is required',
+			invalid_type_error: 'Performance score must be a number'
 		})
 		.int()
-		.min(0, 'Minimum progress score is 0')
-		.max(10, 'Maximum progress score is 10'),
+		.min(0, 'Minimum performance score is 0')
+		.max(10, 'Maximum performance score is 10'),
 	notes: z.string().trim().max(1000, 'Keep notes under 1000 characters').optional()
 });
 

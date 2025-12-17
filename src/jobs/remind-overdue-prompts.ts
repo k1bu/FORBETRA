@@ -1,4 +1,6 @@
 import prisma from '$lib/server/prisma';
+import { sendEmail } from '$lib/notifications/email';
+import { emailTemplates } from '$lib/notifications/emailTemplates';
 
 const computeWeekNumber = (startDate: Date) => {
 	const diff = Date.now() - startDate.getTime();
@@ -21,8 +23,6 @@ export const remindOverduePrompts = async () => {
 		}
 	});
 
-	const messages: Array<{ email: string; objective: string; overdue: string[] }> = [];
-
 	for (const objective of objectives) {
 		const cycle = objective.cycles[0];
 		if (!cycle) continue;
@@ -35,20 +35,34 @@ export const remindOverduePrompts = async () => {
 		);
 
 		const overdue: string[] = [];
-		(['INTENTION', 'EFFORT', 'PROGRESS'] as const).forEach((type) => {
+		(['INTENTION', 'RATING_A', 'RATING_B'] as const).forEach((type) => {
 			if (!submittedTypes.has(type)) {
 				overdue.push(type.toLowerCase());
 			}
 		});
 
 		if (overdue.length > 0) {
-			messages.push({
-				email: objective.user.email,
-				objective: objective.title,
-				overdue
-			});
+			try {
+				const template = emailTemplates.reminderOverdue({
+					individualName: objective.user.name || undefined,
+					objectiveTitle: objective.title,
+					appUrl:
+						process.env.PUBLIC_APP_URL || process.env.VERCEL_URL
+							? `https://${process.env.PUBLIC_APP_URL || process.env.VERCEL_URL}`
+							: 'https://app.forbetra.com'
+				});
+				await sendEmail({
+					to: objective.user.email,
+					...template
+				});
+				console.info('[job:remind-overdue-prompts] Sent reminder to', objective.user.email);
+			} catch (error) {
+				console.error(
+					'[job:remind-overdue-prompts] Failed to send reminder to',
+					objective.user.email,
+					error
+				);
+			}
 		}
 	}
-
-	console.info('[job:remind-overdue-prompts]', messages);
 };

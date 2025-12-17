@@ -52,12 +52,12 @@
 
 	const formatPromptLabel = (type: string) => {
 		switch (type) {
-			case 'INTENTION':
-				return 'Monday intention prompt';
-			case 'EFFORT':
-				return 'Wednesday check-in';
-			case 'PROGRESS':
-				return 'Friday check-in';
+		case 'INTENTION':
+			return 'Monday intention prompt';
+		case 'RATING_A':
+			return 'Wednesday check-in';
+		case 'RATING_B':
+			return 'Friday check-in';
 			default:
 				return 'Upcoming prompt';
 		}
@@ -65,11 +65,11 @@
 
 	const promptTarget = (type: string) => {
 		switch (type) {
-			case 'INTENTION':
-				return '/prompts/monday';
-			case 'EFFORT':
-			case 'PROGRESS':
-				return '/reflections/checkin';
+		case 'INTENTION':
+			return '/prompts/monday';
+		case 'RATING_A':
+		case 'RATING_B':
+			return '/reflections/checkin';
 			default:
 				return '/dashboard';
 		}

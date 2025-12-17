@@ -13,7 +13,8 @@
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
 		"sync:clerk": "npx tsx scripts/sync-clerk-db.ts",
-		"delete:test-users": "npx tsx scripts/delete-test-users.ts"
+		"delete:test-users": "npx tsx scripts/delete-test-users.ts",
+		"seed:test-data": "npx tsx scripts/seed-test-data.ts"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.4.0",
@@ -43,6 +44,8 @@
 	},
 	"dependencies": {
 		"@prisma/client": "^6.19.0",
+		"@sendgrid/mail": "^8.1.6",
+		"chart.js": "^4.4.0",
 		"svelte-clerk": "^0.17.8",
 		"svix": "^1.81.0",
 		"twilio": "^5.10.4",

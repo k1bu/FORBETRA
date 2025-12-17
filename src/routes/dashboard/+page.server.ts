@@ -4,7 +4,7 @@ import { requireRole } from '$lib/server/auth';
 import type { Actions, PageServerLoad } from './$types';
 import { randomBytes } from 'node:crypto';
 import { sendEmail } from '$lib/notifications/email';
-import { sendSms } from '$lib/notifications/sms';
+import { emailTemplates } from '$lib/notifications/emailTemplates';
 import { Prisma } from '@prisma/client';
 
 const stdDev = (values: number[]) => {
@@ -15,12 +15,12 @@ const stdDev = (values: number[]) => {
 	return Math.sqrt(variance);
 };
 
-type PromptType = 'INTENTION' | 'EFFORT' | 'PROGRESS';
+type PromptType = 'INTENTION' | 'RATING_A' | 'RATING_B';
 
 const promptWeekdays: Record<PromptType, number> = {
 	INTENTION: 1,
-	EFFORT: 3,
-	PROGRESS: 5
+	RATING_A: 3,
+	RATING_B: 5
 };
 
 const getNextPrompt = (startDate: Date): { type: PromptType; date: Date } => {
@@ -90,7 +90,7 @@ const getDateForWeekday = (weekday: number, startDate: Date, weekNumber: number)
 type ExperienceState = 'open' | 'completed' | 'missed' | 'upcoming';
 
 type WeeklyExperience = {
-	type: 'INTENTION' | 'EFFORT' | 'PROGRESS';
+	type: 'INTENTION' | 'RATING_A' | 'RATING_B';
 	label: string;
 	state: ExperienceState;
 	availableDate: Date | null;
@@ -136,12 +136,12 @@ const getWeeklyExperiences = async (
 	// Get submitted reflections for current week
 	const submittedReflections = cycle.reflections.filter((r) => r.weekNumber === currentWeek);
 	const hasIntention = submittedReflections.some((r) => r.reflectionType === 'INTENTION');
-	const hasEffort = submittedReflections.some((r) => r.reflectionType === 'EFFORT');
-	const hasProgress = submittedReflections.some((r) => r.reflectionType === 'PROGRESS');
+	const hasRatingA = submittedReflections.some((r) => r.reflectionType === 'RATING_A');
+	const hasRatingB = submittedReflections.some((r) => r.reflectionType === 'RATING_B');
 
 	const intentionReflection = submittedReflections.find((r) => r.reflectionType === 'INTENTION');
-	const effortReflection = submittedReflections.find((r) => r.reflectionType === 'EFFORT');
-	const progressReflection = submittedReflections.find((r) => r.reflectionType === 'PROGRESS');
+	const ratingAReflection = submittedReflections.find((r) => r.reflectionType === 'RATING_A');
+	const ratingBReflection = submittedReflections.find((r) => r.reflectionType === 'RATING_B');
 
 	const experiences: WeeklyExperience[] = [];
 
@@ -168,55 +168,55 @@ const getWeeklyExperiences = async (
 		url: intentionState === 'open' || intentionState === 'completed' ? '/prompts/monday' : null
 	});
 
-	// 2. First Check-in (EFFORT) - Available Tuesday/Wednesday until Friday
-	let effortState: ExperienceState;
-	if (hasEffort) {
-		effortState = 'completed';
+	// 2. Wednesday Check-in - Available Tuesday/Wednesday until Friday
+	let ratingAState: ExperienceState;
+	if (hasRatingA) {
+		ratingAState = 'completed';
 	} else if (today < tuesdayDate) {
-		effortState = 'upcoming';
+		ratingAState = 'upcoming';
 	} else if (today > fridayDate || isLocked) {
 		// Missed if past Friday or next Monday intention submitted
-		effortState = 'missed';
+		ratingAState = 'missed';
 	} else {
-		effortState = 'open';
+		ratingAState = 'open';
 	}
 
 	experiences.push({
-		type: 'EFFORT',
-		label: 'First check-in',
-		state: effortState,
+		type: 'RATING_A',
+		label: 'Wednesday check-in',
+		state: ratingAState,
 		availableDate: tuesdayDate,
 		deadlineDate: fridayDate,
-		reflectionId: effortReflection?.id ?? null,
+		reflectionId: ratingAReflection?.id ?? null,
 		url:
-			effortState === 'open' || effortState === 'completed'
-				? '/reflections/checkin?type=EFFORT'
+			ratingAState === 'open' || ratingAState === 'completed'
+				? '/reflections/checkin?type=RATING_A'
 				: null
 	});
 
-	// 3. Second Check-in (PROGRESS) - Available Thursday/Friday until next Monday intention
-	let progressState: ExperienceState;
-	if (hasProgress) {
-		progressState = 'completed';
+	// 3. Friday Check-in - Available Thursday/Friday until next Monday intention
+	let ratingBState: ExperienceState;
+	if (hasRatingB) {
+		ratingBState = 'completed';
 	} else if (today < thursdayDate) {
-		progressState = 'upcoming';
+		ratingBState = 'upcoming';
 	} else if (isLocked) {
 		// Missed if next Monday intention submitted
-		progressState = 'missed';
+		ratingBState = 'missed';
 	} else {
-		progressState = 'open';
+		ratingBState = 'open';
 	}
 
 	experiences.push({
-		type: 'PROGRESS',
-		label: 'Second check-in',
-		state: progressState,
+		type: 'RATING_B',
+		label: 'Friday check-in',
+		state: ratingBState,
 		availableDate: thursdayDate,
 		deadlineDate: isLocked ? nextMondayDate : null,
-		reflectionId: progressReflection?.id ?? null,
+		reflectionId: ratingBReflection?.id ?? null,
 		url:
-			progressState === 'open' || progressState === 'completed'
-				? '/reflections/checkin?type=PROGRESS'
+			ratingBState === 'open' || ratingBState === 'completed'
+				? '/reflections/checkin?type=RATING_B'
 				: null
 	});
 
@@ -264,7 +264,7 @@ export const load: PageServerLoad = async (event) => {
 							weekNumber: true,
 							submittedAt: true,
 							effortScore: true,
-							progressScore: true,
+							performanceScore: true,
 							notes: true
 						}
 					}
@@ -299,7 +299,7 @@ export const load: PageServerLoad = async (event) => {
 			weekNumber: number;
 			intention: boolean;
 			effortScores: number[];
-			progressScores: number[];
+			performanceScores: number[];
 		}
 	>();
 
@@ -309,18 +309,18 @@ export const load: PageServerLoad = async (event) => {
 				weekNumber: reflection.weekNumber,
 				intention: false,
 				effortScores: [],
-				progressScores: []
+				performanceScores: []
 			};
 			if (reflection.reflectionType === 'INTENTION') {
 				weekEntry.intention = true;
 			}
-			// Both EFFORT and PROGRESS check-ins now capture both scores
-			if (reflection.reflectionType === 'EFFORT' || reflection.reflectionType === 'PROGRESS') {
+			// Both RATING_A and RATING_B check-ins capture both scores
+			if (reflection.reflectionType === 'RATING_A' || reflection.reflectionType === 'RATING_B') {
 				if (reflection.effortScore !== null) {
 					weekEntry.effortScores.push(reflection.effortScore);
 				}
-				if (reflection.progressScore !== null) {
-					weekEntry.progressScores.push(reflection.progressScore);
+				if (reflection.performanceScore !== null) {
+					weekEntry.performanceScores.push(reflection.performanceScore);
 				}
 			}
 			reflectionTrendMap.set(reflection.weekNumber, weekEntry);
@@ -329,7 +329,7 @@ export const load: PageServerLoad = async (event) => {
 
 	// Initialize weeklyExperiences if cycle doesn't exist
 	const weeklyExperiences: Array<{
-		type: 'INTENTION' | 'EFFORT' | 'PROGRESS';
+		type: 'INTENTION' | 'RATING_A' | 'RATING_B';
 		label: string;
 		state: 'open' | 'completed' | 'missed' | 'upcoming';
 		availableDate: string | null;
@@ -363,8 +363,11 @@ export const load: PageServerLoad = async (event) => {
 				effortSum += latestFeedback.effortScore;
 				effortCount += 1;
 			}
-			if (latestFeedback?.progressScore !== null && latestFeedback?.progressScore !== undefined) {
-				progressSum += latestFeedback.progressScore;
+			if (
+				latestFeedback?.performanceScore !== null &&
+				latestFeedback?.performanceScore !== undefined
+			) {
+				progressSum += latestFeedback.performanceScore;
 				progressCount += 1;
 			}
 		}
@@ -382,7 +385,7 @@ export const load: PageServerLoad = async (event) => {
 				? {
 						submittedAt: latestFeedback.submittedAt?.toISOString() ?? null,
 						effortScore: latestFeedback.effortScore,
-						progressScore: latestFeedback.progressScore,
+						performanceScore: latestFeedback.performanceScore,
 						weekNumber: latestReflectionWeek,
 						isCurrentWeek: isCurrentWeekResponse
 					}
@@ -424,11 +427,11 @@ export const load: PageServerLoad = async (event) => {
 		}
 
 		const progressAverage =
-			week.progressScores.length > 0
+			week.performanceScores.length > 0
 				? Number(
 						(
-							week.progressScores.reduce((sum, score) => sum + score, 0) /
-							week.progressScores.length
+							week.performanceScores.reduce((sum, score) => sum + score, 0) /
+							week.performanceScores.length
 						).toFixed(1)
 					)
 				: null;
@@ -441,7 +444,7 @@ export const load: PageServerLoad = async (event) => {
 			weekNumber: week.weekNumber,
 			intentionSubmitted: week.intention,
 			effortScore: effortAverage,
-			progressScore: progressAverage
+			performanceScore: progressAverage
 		};
 	});
 
@@ -460,7 +463,7 @@ export const load: PageServerLoad = async (event) => {
 		.map((week) => week.effortScore)
 		.filter((value): value is number => value !== null);
 	const progressSeries = reflectionTrend
-		.map((week) => week.progressScore)
+		.map((week) => week.performanceScore)
 		.filter((value): value is number => value !== null);
 
 	const effortStd = stdDev(effortSeries);
@@ -491,8 +494,8 @@ export const load: PageServerLoad = async (event) => {
 		completionRate = totalExpected > 0 ? Math.round((totalCompleted / totalExpected) * 100) : 0;
 
 		// Calculate streaks (consecutive individual check-ins/prompts)
-		// Sort reflections chronologically by week and type order (INTENTION, EFFORT, PROGRESS)
-		const typeOrder: Record<string, number> = { INTENTION: 0, EFFORT: 1, PROGRESS: 2 };
+		// Sort reflections chronologically by week and type order (INTENTION, RATING_A, RATING_B)
+		const typeOrder: Record<string, number> = { INTENTION: 0, RATING_A: 1, RATING_B: 2 };
 		const sortedReflections = [...cycle.reflections].sort((a, b) => {
 			if (a.weekNumber !== b.weekNumber) {
 				return a.weekNumber - b.weekNumber;
@@ -507,12 +510,12 @@ export const load: PageServerLoad = async (event) => {
 		});
 
 		// Calculate current streak (from most recent backwards, checking for consecutive sequence)
-		// Build expected sequence: Week 1: INTENTION, EFFORT, PROGRESS; Week 2: INTENTION, EFFORT, PROGRESS; etc.
+		// Build expected sequence: Week 1: INTENTION, RATING_A, RATING_B; Week 2: INTENTION, RATING_A, RATING_B; etc.
 		const expectedSequence: Array<{ week: number; type: string }> = [];
 		for (let week = 1; week <= currentWeek; week++) {
 			expectedSequence.push({ week, type: 'INTENTION' });
-			expectedSequence.push({ week, type: 'EFFORT' });
-			expectedSequence.push({ week, type: 'PROGRESS' });
+			expectedSequence.push({ week, type: 'RATING_A' });
+			expectedSequence.push({ week, type: 'RATING_B' });
 		}
 
 		// Count consecutive completed reflections from the end
@@ -534,7 +537,11 @@ export const load: PageServerLoad = async (event) => {
 
 		// Check all expected reflections in chronological order
 		for (let week = 1; week <= currentWeek; week++) {
-			const types: Array<'INTENTION' | 'EFFORT' | 'PROGRESS'> = ['INTENTION', 'EFFORT', 'PROGRESS'];
+			const types: Array<'INTENTION' | 'RATING_A' | 'RATING_B'> = [
+				'INTENTION',
+				'RATING_A',
+				'RATING_B'
+			];
 			for (const type of types) {
 				const key = `${week}-${type}`;
 				if (completedReflections.has(key)) {
@@ -652,7 +659,7 @@ export const actions: Actions = {
 				cycleId_weekNumber_reflectionType_subgoalId: {
 					cycleId: cycle.id,
 					weekNumber,
-					reflectionType: 'PROGRESS',
+					reflectionType: 'RATING_B',
 					subgoalId: primarySubgoal.id
 				}
 			},
@@ -661,7 +668,7 @@ export const actions: Actions = {
 				cycleId: cycle.id,
 				userId: dbUser.id,
 				subgoalId: primarySubgoal.id,
-				reflectionType: 'PROGRESS',
+				reflectionType: 'RATING_B',
 				weekNumber,
 				checkInDate: new Date()
 			}
@@ -687,20 +694,26 @@ export const actions: Actions = {
 
 		const feedbackLink = `${event.url.origin}/stakeholder/feedback/${tokenValue}`;
 
-		if (process.env.NODE_ENV === 'development') {
-			await sendEmail({
-				to: stakeholder.email ?? 'unknown@example.com',
-				subject: 'FORBETRA feedback link',
-				html: `<p>Hi ${stakeholder.name},</p><p>Please share feedback: <a href="${feedbackLink}">${feedbackLink}</a>.</p>`,
-				text: `Hi ${stakeholder.name}, please share feedback: ${feedbackLink}`
+		// Send feedback invite email
+		try {
+			const objective = await prisma.objective.findFirst({
+				where: { userId: dbUser.id, active: true },
+				select: { title: true }
 			});
 
-			if (stakeholder.phone) {
-				await sendSms({
-					to: stakeholder.phone,
-					body: `Share feedback for ${dbUser.name ?? 'your client'}: ${feedbackLink}`
-				});
-			}
+			const template = emailTemplates.feedbackInvite({
+				individualName: dbUser.name || undefined,
+				stakeholderName: stakeholder.name || undefined,
+				objectiveTitle: objective?.title || undefined,
+				feedbackLink
+			});
+			await sendEmail({
+				to: stakeholder.email,
+				...template
+			});
+		} catch (error) {
+			console.error('[email:error] Failed to send feedback invite', error);
+			// Don't fail the request if email fails
 		}
 
 		return {
@@ -744,8 +757,9 @@ export const actions: Actions = {
 			});
 		}
 
+		let stakeholder;
 		try {
-			await prisma.stakeholder.create({
+			stakeholder = await prisma.stakeholder.create({
 				data: {
 					individualId: dbUser.id,
 					objectiveId: objective.id,
@@ -763,6 +777,22 @@ export const actions: Actions = {
 				});
 			}
 			throw error;
+		}
+
+		// Send welcome email to new stakeholder
+		try {
+			const template = emailTemplates.welcomeStakeholder({
+				individualName: dbUser.name || undefined,
+				stakeholderName: name || undefined,
+				appUrl: event.url.origin
+			});
+			await sendEmail({
+				to: email,
+				...template
+			});
+		} catch (error) {
+			console.error('[email:error] Failed to send stakeholder welcome email', error);
+			// Don't fail the request if email fails
 		}
 
 		return {

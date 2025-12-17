@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { ClientSummary } from '$lib/server/buildClientSummary';
+	import PerformanceEffortChart from '$lib/components/PerformanceEffortChart.svelte';
 
 	export let data: {
 		coach: { name: string };
@@ -273,6 +274,21 @@
 								</div>
 							</section>
 						{/if}
+						{/if}
+
+					<!-- Performance/Effort Visualization - Front and Center -->
+					{#if !client.archived && client.objective?.cycle && client.visualizationData}
+						<section class="rounded-xl border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 p-6 shadow-lg">
+							<div class="mb-4">
+								<h3 class="text-lg font-bold text-neutral-900">Effort and Performance Over Time</h3>
+								<p class="text-sm text-neutral-600">Client self-assessments vs. stakeholder observations</p>
+							</div>
+							<PerformanceEffortChart
+								individualData={client.visualizationData.individual}
+								stakeholderData={client.visualizationData.stakeholders}
+								stakeholders={client.visualizationData.stakeholderList}
+							/>
+						</section>
 					{/if}
 
 					{#if !client.archived && client.objective?.cycle}

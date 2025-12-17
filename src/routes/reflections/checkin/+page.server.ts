@@ -53,7 +53,7 @@ const getCheckInType = (
 	// If it's Friday or later, show Friday check-in
 	if (today >= fridayDate) {
 		return {
-			type: 'PROGRESS',
+			type: 'RATING_B',
 			label: 'Friday check-in',
 			availableDate: fridayDate,
 			isAvailable: true
@@ -63,7 +63,7 @@ const getCheckInType = (
 	// If it's Wednesday or later (but before Friday), show Wednesday check-in
 	if (today >= wednesdayDate) {
 		return {
-			type: 'EFFORT',
+			type: 'RATING_A',
 			label: 'Wednesday check-in',
 			availableDate: wednesdayDate,
 			isAvailable: true
@@ -72,7 +72,7 @@ const getCheckInType = (
 
 	// Before Wednesday, show Wednesday check-in but mark as not available yet
 	return {
-		type: 'EFFORT',
+		type: 'RATING_A',
 		label: 'Wednesday check-in',
 		availableDate: wednesdayDate,
 		isAvailable: false
@@ -128,6 +128,7 @@ export const load: PageServerLoad = async (event) => {
 
 	// Check if type is specified in query params
 	const typeParam = event.url.searchParams.get('type');
+	const isPreview = event.url.searchParams.get('preview') === 'true';
 
 	let checkInInfo: {
 		type: ReflectionType;
@@ -136,7 +137,7 @@ export const load: PageServerLoad = async (event) => {
 		isAvailable: boolean;
 	};
 
-	if (typeParam === 'EFFORT' || typeParam === 'PROGRESS') {
+	if (typeParam === 'RATING_A' || typeParam === 'RATING_B') {
 		// Use the specified type
 		const tuesdayDate = getDateForWeekday(2, cycle.startDate, currentWeek);
 		const thursdayDate = getDateForWeekday(4, cycle.startDate, currentWeek);
@@ -144,24 +145,28 @@ export const load: PageServerLoad = async (event) => {
 		const today = new Date();
 		today.setHours(0, 0, 0, 0);
 
-		if (typeParam === 'EFFORT') {
+		if (typeParam === 'RATING_A') {
 			checkInInfo = {
-				type: 'EFFORT',
-				label: 'First check-in',
+				type: 'RATING_A',
+				label: 'Wednesday check-in',
 				availableDate: tuesdayDate,
-				isAvailable: today >= tuesdayDate
+				isAvailable: isPreview || today >= tuesdayDate
 			};
 		} else {
 			checkInInfo = {
-				type: 'PROGRESS',
-				label: 'Second check-in',
+				type: 'RATING_B',
+				label: 'Friday check-in',
 				availableDate: thursdayDate,
-				isAvailable: today >= thursdayDate
+				isAvailable: isPreview || today >= thursdayDate
 			};
 		}
 	} else {
 		// Fall back to auto-detection
 		checkInInfo = getCheckInType(cycle.startDate, currentWeek);
+		// Override availability if preview mode
+		if (isPreview) {
+			checkInInfo.isAvailable = true;
+		}
 	}
 
 	const isLocked = await isNextMondayIntentionSubmitted(cycle.id, dbUser.id, currentWeek);
@@ -180,12 +185,86 @@ export const load: PageServerLoad = async (event) => {
 			})
 		: null;
 
+	// Fetch previous ratings (only if not Week 1)
+	let previousRatings: {
+		weekNumber: number;
+		effortScore: number | null;
+		performanceScore: number | null;
+	} | null = null;
+	let historicRatings: Array<{
+		weekNumber: number;
+		effortScore: number | null;
+		performanceScore: number | null;
+	}> = [];
+
+	if (currentWeek > 1) {
+		if (firstSubgoal) {
+			// Get all reflections for this subgoal (both RATING_A and RATING_B capture both scores)
+			const allReflections = await prisma.reflection.findMany({
+				where: {
+					userId: dbUser.id,
+					cycleId: cycle.id,
+					subgoalId: firstSubgoal.id,
+					weekNumber: { lt: currentWeek }
+				},
+				orderBy: { weekNumber: 'desc' },
+				select: { weekNumber: true, effortScore: true, performanceScore: true }
+			});
+
+			// Get last ratings (most recent reflection with either score)
+			const lastReflection = allReflections[0];
+			if (lastReflection) {
+				previousRatings = {
+					weekNumber: lastReflection.weekNumber,
+					effortScore: lastReflection.effortScore ?? null,
+					performanceScore: lastReflection.performanceScore ?? null
+				};
+			} else {
+				// Initialize with null values if no previous reflections exist (but we're past Week 1)
+				previousRatings = {
+					weekNumber: currentWeek - 1,
+					effortScore: null,
+					performanceScore: null
+				};
+			}
+
+			// Build historic ratings map by week (combining scores from all reflections)
+			const historicMap = new Map<
+				number,
+				{ effortScore: number | null; performanceScore: number | null }
+			>();
+
+			allReflections.forEach((r) => {
+				if (!historicMap.has(r.weekNumber)) {
+					historicMap.set(r.weekNumber, { effortScore: null, performanceScore: null });
+				}
+				const weekData = historicMap.get(r.weekNumber)!;
+				// Use the most recent score if multiple reflections exist for the same week
+				if (r.effortScore !== null) weekData.effortScore = r.effortScore;
+				if (r.performanceScore !== null) weekData.performanceScore = r.performanceScore;
+			});
+
+			// Convert to array sorted by week number (descending)
+			historicRatings = Array.from(historicMap.entries())
+				.map(([weekNumber, scores]) => ({ weekNumber, ...scores }))
+				.sort((a, b) => b.weekNumber - a.weekNumber);
+		} else {
+			// If no subgoal but we're past Week 1, initialize with null values
+			previousRatings = {
+				weekNumber: currentWeek - 1,
+				effortScore: null,
+				performanceScore: null
+			};
+		}
+	}
+
 	return {
 		checkInType: checkInInfo.type,
 		checkInLabel: checkInInfo.label,
 		isAvailable: checkInInfo.isAvailable,
 		availableDate: checkInInfo.availableDate.toISOString(),
-		isLocked,
+		isLocked: isPreview ? false : isLocked, // Allow editing in preview mode
+		isPreview,
 		objective: {
 			id: objective.id,
 			title: objective.title,
@@ -206,10 +285,12 @@ export const load: PageServerLoad = async (event) => {
 			? {
 					id: existingReflection.id,
 					effortScore: existingReflection.effortScore ?? null,
-					progressScore: existingReflection.progressScore ?? null,
+					performanceScore: existingReflection.performanceScore ?? null,
 					notes: existingReflection.notes ?? ''
 				}
-			: null
+			: null,
+		previousRatings,
+		historicRatings
 	};
 };
 
@@ -235,22 +316,61 @@ export const actions: Actions = {
 		}
 
 		const weekNumber = computeWeekNumber(cycle.startDate);
-		const checkInInfo = getCheckInType(cycle.startDate, weekNumber);
+		const isPreview = event.url.searchParams.get('preview') === 'true';
+		const typeParam = event.url.searchParams.get('type');
 
-		// Check if check-in is available
-		if (!checkInInfo.isAvailable) {
+		let checkInInfo: {
+			type: ReflectionType;
+			label: string;
+			availableDate: Date;
+			isAvailable: boolean;
+		};
+
+		// Respect type parameter if provided, otherwise auto-detect
+		if (typeParam === 'RATING_A' || typeParam === 'RATING_B') {
+			const tuesdayDate = getDateForWeekday(2, cycle.startDate, weekNumber);
+			const thursdayDate = getDateForWeekday(4, cycle.startDate, weekNumber);
+			const today = new Date();
+			today.setHours(0, 0, 0, 0);
+
+			if (typeParam === 'RATING_A') {
+				checkInInfo = {
+					type: 'RATING_A',
+					label: 'Wednesday check-in',
+					availableDate: tuesdayDate,
+					isAvailable: isPreview || today >= tuesdayDate
+				};
+			} else {
+				checkInInfo = {
+					type: 'RATING_B',
+					label: 'Friday check-in',
+					availableDate: thursdayDate,
+					isAvailable: isPreview || today >= thursdayDate
+				};
+			}
+		} else {
+			checkInInfo = getCheckInType(cycle.startDate, weekNumber);
+			if (isPreview) {
+				checkInInfo.isAvailable = true;
+			}
+		}
+
+		// Check if check-in is available (skip in preview mode)
+		if (!isPreview && !checkInInfo.isAvailable) {
 			return fail(400, {
 				error: `This check-in is not available yet. It will be available on ${checkInInfo.availableDate.toLocaleDateString()}.`
 			});
 		}
 
-		// Check if locked (next Monday intention submitted)
-		const isLocked = await isNextMondayIntentionSubmitted(cycle.id, dbUser.id, weekNumber);
-		if (isLocked) {
-			return fail(400, {
-				error:
-					'This check-in can no longer be edited because the next Monday intention has been submitted.'
-			});
+		// Check if locked (next Monday intention submitted) - skip in preview mode
+		if (!isPreview) {
+			const isLocked = await isNextMondayIntentionSubmitted(cycle.id, dbUser.id, weekNumber);
+			if (isLocked) {
+				return fail(400, {
+					error:
+						'This check-in can no longer be edited because the next Monday intention has been submitted.'
+				});
+			}
 		}
 
 		// Get first subgoal to use as placeholder for objective-level reflection
@@ -280,7 +400,7 @@ export const actions: Actions = {
 			return fail(400, {
 				error:
 					errors.fieldErrors.effortScore?.[0] ??
-					errors.fieldErrors.progressScore?.[0] ??
+					errors.fieldErrors.performanceScore?.[0] ??
 					'Invalid input',
 				values: submission
 			});
@@ -302,7 +422,7 @@ export const actions: Actions = {
 				update: {
 					notes,
 					effortScore: data.effortScore,
-					progressScore: data.progressScore,
+					performanceScore: data.performanceScore,
 					submittedAt: new Date(),
 					checkInDate: new Date()
 				},
@@ -313,7 +433,7 @@ export const actions: Actions = {
 					reflectionType: checkInInfo.type,
 					weekNumber,
 					effortScore: data.effortScore,
-					progressScore: data.progressScore,
+					performanceScore: data.performanceScore,
 					notes,
 					checkInDate: new Date()
 				}

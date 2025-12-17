@@ -6,8 +6,10 @@ import type { Actions, PageServerLoad } from './$types';
 import type { ReflectionType } from '@prisma/client';
 
 const typeMap: Record<string, ReflectionType> = {
-	effort: 'EFFORT',
-	progress: 'PROGRESS'
+	'rating-a': 'RATING_A',
+	'rating-b': 'RATING_B',
+	ratinga: 'RATING_A',
+	ratingb: 'RATING_B'
 };
 
 const ensureType = (param: string | undefined) => {
@@ -68,6 +70,85 @@ export const load: PageServerLoad = async (event) => {
 		}
 	});
 
+	// Fetch all historic ratings for each subgoal (only if not Week 1)
+	// Get all Effort (RATING_A) and Performance (RATING_B) scores for each subgoal
+	const previousRatingsBySubgoal = new Map<
+		string,
+		{ effortScore: number | null; performanceScore: number | null }
+	>();
+	const historicRatingsBySubgoal = new Map<
+		string,
+		Array<{ weekNumber: number; effortScore: number | null; performanceScore: number | null }>
+	>();
+
+	if (currentWeek > 1) {
+		for (const subgoal of objective.subgoals) {
+			// Get all RATING_A (Effort) reflections for this subgoal
+			const effortReflections = await prisma.reflection.findMany({
+				where: {
+					userId: dbUser.id,
+					cycleId: cycle.id,
+					subgoalId: subgoal.id,
+					reflectionType: 'RATING_A',
+					weekNumber: { lt: currentWeek }
+				},
+				orderBy: { weekNumber: 'desc' },
+				select: { weekNumber: true, effortScore: true }
+			});
+
+			// Get all RATING_B (Performance) reflections for this subgoal
+			const performanceReflections = await prisma.reflection.findMany({
+				where: {
+					userId: dbUser.id,
+					cycleId: cycle.id,
+					subgoalId: subgoal.id,
+					reflectionType: 'RATING_B',
+					weekNumber: { lt: currentWeek }
+				},
+				orderBy: { weekNumber: 'desc' },
+				select: { weekNumber: true, performanceScore: true }
+			});
+
+			// Get last ratings (most recent)
+			const lastEffort = effortReflections[0];
+			const lastPerformance = performanceReflections[0];
+			const lastWeek = Math.max(lastEffort?.weekNumber ?? 0, lastPerformance?.weekNumber ?? 0);
+
+			previousRatingsBySubgoal.set(subgoal.id, {
+				weekNumber: lastWeek,
+				effortScore: lastEffort?.effortScore ?? null,
+				performanceScore: lastPerformance?.performanceScore ?? null
+			});
+
+			// Build historic ratings map by week
+			const historicMap = new Map<
+				number,
+				{ effortScore: number | null; performanceScore: number | null }
+			>();
+
+			effortReflections.forEach((r) => {
+				if (!historicMap.has(r.weekNumber)) {
+					historicMap.set(r.weekNumber, { effortScore: null, performanceScore: null });
+				}
+				historicMap.get(r.weekNumber)!.effortScore = r.effortScore;
+			});
+
+			performanceReflections.forEach((r) => {
+				if (!historicMap.has(r.weekNumber)) {
+					historicMap.set(r.weekNumber, { effortScore: null, performanceScore: null });
+				}
+				historicMap.get(r.weekNumber)!.performanceScore = r.performanceScore;
+			});
+
+			// Convert to array sorted by week number (descending)
+			const historicArray = Array.from(historicMap.entries())
+				.map(([weekNumber, scores]) => ({ weekNumber, ...scores }))
+				.sort((a, b) => b.weekNumber - a.weekNumber);
+
+			historicRatingsBySubgoal.set(subgoal.id, historicArray);
+		}
+	}
+
 	return {
 		reflectionType,
 		cycle: {
@@ -85,9 +166,15 @@ export const load: PageServerLoad = async (event) => {
 			id: entry.id,
 			subgoalId: entry.subgoalId,
 			score:
-				reflectionType === 'EFFORT' ? (entry.effortScore ?? null) : (entry.progressScore ?? null),
+				reflectionType === 'RATING_A'
+					? (entry.effortScore ?? null)
+					: (entry.performanceScore ?? null),
 			notes: entry.notes ?? ''
-		}))
+		})),
+		previousRatingsBySubgoal: Object.fromEntries(previousRatingsBySubgoal),
+		historicRatingsBySubgoal: Object.fromEntries(
+			Array.from(historicRatingsBySubgoal.entries()).map(([key, value]) => [key, value])
+		)
 	};
 };
 
@@ -147,8 +234,8 @@ export const actions: Actions = {
 				},
 				update: {
 					notes,
-					effortScore: reflectionType === 'EFFORT' ? score : undefined,
-					progressScore: reflectionType === 'PROGRESS' ? score : undefined,
+					effortScore: reflectionType === 'RATING_A' ? score : undefined,
+					performanceScore: reflectionType === 'RATING_B' ? score : undefined,
 					submittedAt: new Date(),
 					checkInDate: new Date()
 				},
@@ -158,8 +245,8 @@ export const actions: Actions = {
 					subgoalId: data.subgoalId,
 					reflectionType,
 					weekNumber,
-					effortScore: reflectionType === 'EFFORT' ? score : null,
-					progressScore: reflectionType === 'PROGRESS' ? score : null,
+					effortScore: reflectionType === 'RATING_A' ? score : null,
+					performanceScore: reflectionType === 'RATING_B' ? score : null,
 					notes,
 					checkInDate: new Date()
 				}

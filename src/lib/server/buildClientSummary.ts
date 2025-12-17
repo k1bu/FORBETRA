@@ -28,7 +28,7 @@ type IndividualWithRelations = {
 				reflectionType: string;
 				submittedAt: Date | null;
 				effortScore: number | null;
-				progressScore: number | null;
+				performanceScore: number | null;
 				notes: string;
 			}>;
 			coachNotes: Array<{
@@ -45,11 +45,11 @@ type IndividualWithRelations = {
 			feedbacks: Array<{
 				submittedAt: Date | null;
 				effortScore: number | null;
-				progressScore: number | null;
+				performanceScore: number | null;
 				reflection: {
 					weekNumber: number;
 					effortScore: number | null;
-					progressScore: number | null;
+					performanceScore: number | null;
 				} | null;
 			}>;
 		}>;
@@ -86,7 +86,7 @@ export type ClientSummary = {
 			recentReflections: Array<{
 				weekNumber: number;
 				effortScore: number | null;
-				progressScore: number | null;
+				performanceScore: number | null;
 			}>;
 		} | null;
 		subgoalCount: number;
@@ -106,7 +106,7 @@ export type ClientSummary = {
 		lastFeedback: {
 			submittedAt: string | null;
 			effortScore: number | null;
-			progressScore: number | null;
+			performanceScore: number | null;
 			weekNumber: number | null;
 		} | null;
 	}>;
@@ -117,6 +117,21 @@ export type ClientSummary = {
 		weekNumber: number | null;
 		createdAt: string;
 	}>;
+	visualizationData?: {
+		individual: Array<{
+			weekNumber: number;
+			effortScore: number | null;
+			performanceScore: number | null;
+		}>;
+		stakeholders: Array<{
+			weekNumber: number;
+			stakeholderId: string;
+			stakeholderName: string;
+			effortScore: number | null;
+			performanceScore: number | null;
+		}>;
+		stakeholderList: Array<{ id: string; name: string }>;
+	};
 };
 
 export function buildClientSummary(
@@ -147,7 +162,7 @@ export function buildClientSummary(
 		{
 			weekNumber: number;
 			effortScores: number[];
-			progressScores: number[];
+			performanceScores: number[];
 		}
 	>();
 
@@ -155,14 +170,14 @@ export function buildClientSummary(
 		const weekEntry = reflectionTrendMap.get(reflection.weekNumber) ?? {
 			weekNumber: reflection.weekNumber,
 			effortScores: [],
-			progressScores: []
+			performanceScores: []
 		};
 
 		if (reflection.effortScore !== null && reflection.effortScore !== undefined) {
 			weekEntry.effortScores.push(reflection.effortScore);
 		}
-		if (reflection.progressScore !== null && reflection.progressScore !== undefined) {
-			weekEntry.progressScores.push(reflection.progressScore);
+		if (reflection.performanceScore !== null && reflection.performanceScore !== undefined) {
+			weekEntry.performanceScores.push(reflection.performanceScore);
 		}
 
 		reflectionTrendMap.set(reflection.weekNumber, weekEntry);
@@ -187,11 +202,11 @@ export function buildClientSummary(
 		if (effortAverage !== null) effortSeries.push(effortAverage);
 
 		const progressAverage =
-			week.progressScores.length > 0
+			week.performanceScores.length > 0
 				? Number(
 						(
-							week.progressScores.reduce((sum, score) => sum + score, 0) /
-							week.progressScores.length
+							week.performanceScores.reduce((sum, score) => sum + score, 0) /
+							week.performanceScores.length
 						).toFixed(1)
 					)
 				: null;
@@ -200,7 +215,7 @@ export function buildClientSummary(
 		return {
 			weekNumber: week.weekNumber,
 			effortScore: effortAverage,
-			progressScore: progressAverage
+			performanceScore: progressAverage
 		};
 	});
 
@@ -233,7 +248,7 @@ export function buildClientSummary(
 					? {
 							submittedAt: lastFeedback.submittedAt?.toISOString() ?? null,
 							effortScore: lastFeedback.effortScore,
-							progressScore: lastFeedback.progressScore,
+							performanceScore: lastFeedback.performanceScore,
 							weekNumber: feedbackWeek
 						}
 					: null
@@ -269,8 +284,8 @@ export function buildClientSummary(
 		);
 		const overdueTypes: string[] = [];
 		if (!submittedTypes.has('INTENTION')) overdueTypes.push('Monday intention');
-		if (!submittedTypes.has('EFFORT')) overdueTypes.push('Wednesday check-in');
-		if (!submittedTypes.has('PROGRESS')) overdueTypes.push('Friday check-in');
+		if (!submittedTypes.has('RATING_A')) overdueTypes.push('Wednesday check-in');
+		if (!submittedTypes.has('RATING_B')) overdueTypes.push('Friday check-in');
 
 		if (overdueTypes.length > 0) {
 			alerts.push({
@@ -297,7 +312,7 @@ export function buildClientSummary(
 		if (objective?.stakeholders.length && cycle.reflections.length > 0) {
 			const recentReflections = cycle.reflections
 				.filter((r) => r.weekNumber >= currentWeek - 3 && r.weekNumber <= currentWeek)
-				.filter((r) => r.effortScore !== null || r.progressScore !== null);
+				.filter((r) => r.effortScore !== null || r.performanceScore !== null);
 
 			if (recentReflections.length > 0) {
 				const alignmentIssues: number[] = [];
@@ -315,7 +330,7 @@ export function buildClientSummary(
 
 						const avgStakeholderProgress =
 							reflectionFeedbacks
-								.map((f) => f.progressScore)
+								.map((f) => f.performanceScore)
 								.filter((s): s is number => s !== null)
 								.reduce((sum, s) => sum + s, 0) / reflectionFeedbacks.length;
 
@@ -323,8 +338,8 @@ export function buildClientSummary(
 							const effortGap = Math.abs(reflection.effortScore - avgStakeholderEffort);
 							if (effortGap > 1.5) alignmentIssues.push(reflection.weekNumber);
 						}
-						if (reflection.progressScore !== null) {
-							const progressGap = Math.abs(reflection.progressScore - avgStakeholderProgress);
+						if (reflection.performanceScore !== null) {
+							const progressGap = Math.abs(reflection.performanceScore - avgStakeholderProgress);
 							if (progressGap > 1.5) alignmentIssues.push(reflection.weekNumber);
 						}
 					}
@@ -344,6 +359,51 @@ export function buildClientSummary(
 
 	// Get coach notes for this client
 	const coachNotes = cycle?.coachNotes ?? [];
+
+	// Prepare visualization data (all weeks, not just last 4)
+	const allReflectionWeeks = Array.from(reflectionTrendMap.values()).sort(
+		(a, b) => a.weekNumber - b.weekNumber
+	);
+
+	const individualWeeklyData = allReflectionWeeks.map((week) => {
+		const effortAverage =
+			week.effortScores.length > 0
+				? Number((week.effortScores.reduce((sum, score) => sum + score, 0) / week.effortScores.length).toFixed(1))
+				: null;
+		const progressAverage =
+			week.performanceScores.length > 0
+				? Number((week.performanceScores.reduce((sum, score) => sum + score, 0) / week.performanceScores.length).toFixed(1))
+				: null;
+
+		return {
+			weekNumber: week.weekNumber,
+			effortScore: effortAverage,
+			performanceScore: progressAverage
+		};
+	});
+
+	// Prepare stakeholder feedback data by week for visualization
+	const stakeholderWeeklyData: Array<{
+		weekNumber: number;
+		stakeholderId: string;
+		stakeholderName: string;
+		effortScore: number | null;
+		performanceScore: number | null;
+	}> = [];
+
+	objective?.stakeholders.forEach((stakeholder) => {
+		stakeholder.feedbacks.forEach((feedback) => {
+			if (feedback.reflection) {
+				stakeholderWeeklyData.push({
+					weekNumber: feedback.reflection.weekNumber,
+					stakeholderId: stakeholder.id,
+					stakeholderName: stakeholder.name,
+					effortScore: feedback.effortScore,
+					performanceScore: feedback.performanceScore
+				});
+			}
+		});
+	});
 
 	return {
 		id: individual.id,
@@ -390,7 +450,14 @@ export function buildClientSummary(
 		})),
 		archived: relationship.archivedAt !== null,
 		joinedAt: relationship.createdAt.toISOString(),
-		archivedAt: relationship.archivedAt?.toISOString() ?? null
+		archivedAt: relationship.archivedAt?.toISOString() ?? null,
+		visualizationData: cycle
+			? {
+					individual: individualWeeklyData,
+					stakeholders: stakeholderWeeklyData,
+					stakeholderList: stakeholders.map((s) => ({ id: s.id, name: s.name }))
+				}
+			: undefined
 	};
 }
 

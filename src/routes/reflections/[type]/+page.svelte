@@ -1,13 +1,14 @@
 <script lang="ts">
 	import type { ActionData, PageData } from './$types';
+	import HistoricRatingsChart from '$lib/components/HistoricRatingsChart.svelte';
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
 
 	const reflectionLabel =
-		data.reflectionType === 'EFFORT' ? 'Effort check-in' : 'Progress reflection';
-	const sliderLabel = data.reflectionType === 'EFFORT' ? 'Effort score' : 'Progress score';
+		data.reflectionType === 'RATING_A' ? 'Wednesday check-in' : 'Friday check-in';
+	const sliderLabel = data.reflectionType === 'RATING_A' ? 'Effort score' : 'Performance score';
 	const helperText =
-		data.reflectionType === 'EFFORT'
+		data.reflectionType === 'RATING_A'
 			? 'How much effort did you invest this week?'
 			: 'How satisfied are you with your progress this week?';
 
@@ -15,6 +16,14 @@
 
 	const formatDate = (value: string) =>
 		new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(new Date(value));
+
+	const getPreviousRatings = (subgoalId: string) => {
+		return data.previousRatingsBySubgoal?.[subgoalId] ?? null;
+	};
+
+	const getHistoricRatings = (subgoalId: string) => {
+		return data.historicRatingsBySubgoal?.[subgoalId] ?? [];
+	};
 </script>
 
 <section class="mx-auto flex max-w-4xl flex-col gap-6 p-4">
@@ -34,6 +43,7 @@
 	<div class="space-y-4">
 		{#each data.subgoals as subgoal (subgoal.id)}
 			{@const previous = previousBySubgoal.get(subgoal.id)}
+			{@const previousRatings = getPreviousRatings(subgoal.id)}
 			<form
 				method="post"
 				class="space-y-3 rounded-lg border border-neutral-200 bg-white p-4 shadow-sm"
@@ -54,6 +64,34 @@
 						</span>
 					{/if}
 				</div>
+				{#if previousRatings && (previousRatings.effortScore !== null || previousRatings.performanceScore !== null)}
+					{@const historicRatings = getHistoricRatings(subgoal.id)}
+					<div class="rounded-lg border border-blue-100/50 bg-blue-50/30 p-3">
+						<div class="mb-2">
+							<p class="text-xs font-semibold text-blue-800">Your last ratings:</p>
+						</div>
+						<div class="flex gap-4 text-sm">
+							{#if previousRatings.effortScore !== null}
+								<div class="flex items-center gap-2">
+									<span class="text-blue-600">Effort:</span>
+									<span class="font-semibold text-blue-800">{previousRatings.effortScore}</span>
+								</div>
+							{/if}
+							{#if previousRatings.performanceScore !== null}
+								<div class="flex items-center gap-2">
+									<span class="text-blue-600">Performance:</span>
+									<span class="font-semibold text-blue-800">{previousRatings.performanceScore}</span>
+								</div>
+							{/if}
+						</div>
+						<p class="mt-2 text-xs text-blue-600">Use this as context - adjust freely based on this week.</p>
+						{#if historicRatings.length > 1}
+							<div class="mt-3">
+								<HistoricRatingsChart historicRatings={historicRatings} />
+							</div>
+						{/if}
+					</div>
+				{/if}
 				<label class="text-sm font-medium text-neutral-700" for={`score-${subgoal.id}`}>
 					{sliderLabel}
 				</label>

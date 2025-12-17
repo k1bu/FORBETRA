@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import PerformanceEffortChart from '$lib/components/PerformanceEffortChart.svelte';
 
 	const { data }: { data: PageData } = $props();
 </script>
@@ -54,92 +55,158 @@
 				</div>
 			</div>
 		</div>
-	{:else}
-		<div class="rounded-2xl border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 p-4 shadow-sm">
-			<div class="flex items-center gap-3">
-				<span class="text-2xl">✅</span>
-				<div>
-					<p class="font-semibold text-emerald-900">Onboarding Complete</p>
-					<p class="text-xs text-emerald-700">Your improvement cycle is set up and ready to go!</p>
+	{/if}
+
+	<!-- Action Cards Row -->
+	{#if data.isOnboardingComplete && data.nextAction}
+		<div class="grid gap-6 md:grid-cols-3">
+			<!-- What to do next - Most prominent (left, larger, highlighted) -->
+			{#if data.nextAction.url}
+				<a
+					href={data.nextAction.url}
+					class="group relative overflow-hidden rounded-2xl border-2 border-blue-500 bg-gradient-to-br from-blue-50 to-purple-50 p-6 shadow-lg transition-all hover:border-blue-600 hover:shadow-xl md:col-span-1"
+				>
+					<div class="mb-3 flex items-center gap-2">
+						<div class="rounded-lg bg-blue-500 p-2">
+							<span class="text-xl text-white">
+								{#if data.nextAction.state === 'missed'}
+									⚠
+								{:else if data.nextAction.state === 'upcoming'}
+									📅
+								{:else}
+									✓
+								{/if}
+							</span>
+						</div>
+						<p class="text-xs font-semibold uppercase tracking-wide text-blue-700">What to do next</p>
+					</div>
+					<h3 class="mb-2 text-lg font-bold text-neutral-900">{data.nextAction.label}</h3>
+					<div class="mt-4 flex items-center gap-2 text-sm font-semibold text-blue-700 transition-transform group-hover:translate-x-1">
+						{#if data.nextAction.state === 'missed'}
+							Complete now
+						{:else if data.nextAction.state === 'upcoming'}
+							View details
+						{:else}
+							Get started
+						{/if}
+						<span>→</span>
+					</div>
+				</a>
+			{:else}
+				<div class="rounded-2xl border-2 border-neutral-200 bg-gradient-to-br from-neutral-50 to-neutral-100 p-6 shadow-sm md:col-span-1">
+					<div class="mb-3 flex items-center gap-2">
+						<div class="rounded-lg bg-neutral-400 p-2">
+							<span class="text-xl text-white">✓</span>
+						</div>
+						<p class="text-xs font-semibold uppercase tracking-wide text-neutral-500">What to do next</p>
+					</div>
+					<h3 class="mb-2 text-lg font-bold text-neutral-900">{data.nextAction.label}</h3>
+					<p class="mt-4 text-sm text-neutral-500">Coming soon</p>
 				</div>
+			{/if}
+
+			<!-- My Last Ratings -->
+			<div class="rounded-2xl border-2 border-neutral-200 bg-white p-6 shadow-sm">
+				<div class="mb-3 flex items-center gap-2">
+					<span class="text-2xl">📊</span>
+					<p class="text-xs font-semibold uppercase tracking-wide text-neutral-500">My Last Ratings</p>
+				</div>
+				{#if data.myLastRatings && (data.myLastRatings.effort !== null || data.myLastRatings.performance !== null)}
+					<div class="space-y-4">
+						{#if data.myLastRatings.effort !== null}
+							<div>
+								<div class="mb-1 flex items-baseline gap-2">
+									<span class="text-base font-medium text-neutral-700">Effort</span>
+									<span class="text-xl font-bold text-blue-600">{data.myLastRatings.effort}</span>
+								</div>
+								{#if data.myLastRatings.effortChange !== null && data.myLastRatings.weekNumber && data.myLastRatings.weekNumber > 1}
+									<div class="flex items-center gap-2">
+										<span class="text-xs font-semibold {data.myLastRatings.effortChange >= 0 ? 'text-green-600' : 'text-red-600'}">
+											{data.myLastRatings.effortChange > 0 ? '+' : ''}{data.myLastRatings.effortChange.toFixed(1)}
+										</span>
+										<span class="text-xs text-neutral-500">vs. Week {data.myLastRatings.weekNumber - 1}</span>
+									</div>
+								{/if}
+							</div>
+						{/if}
+						{#if data.myLastRatings.performance !== null}
+							<div>
+								<div class="mb-1 flex items-baseline gap-2">
+									<span class="text-base font-medium text-neutral-700">Performance</span>
+									<span class="text-xl font-bold text-purple-600">{data.myLastRatings.performance}</span>
+								</div>
+								{#if data.myLastRatings.performanceChange !== null && data.myLastRatings.weekNumber && data.myLastRatings.weekNumber > 1}
+									<div class="flex items-center gap-2">
+										<span class="text-xs font-semibold {data.myLastRatings.performanceChange >= 0 ? 'text-green-600' : 'text-red-600'}">
+											{data.myLastRatings.performanceChange > 0 ? '+' : ''}{data.myLastRatings.performanceChange.toFixed(1)}
+										</span>
+										<span class="text-xs text-neutral-500">vs. Week {data.myLastRatings.weekNumber - 1}</span>
+									</div>
+								{/if}
+							</div>
+						{/if}
+					</div>
+				{:else}
+					<p class="text-sm text-neutral-500">No ratings yet</p>
+				{/if}
+			</div>
+
+			<!-- Stakeholders' Last Ratings -->
+			<div class="rounded-2xl border-2 border-neutral-200 bg-white p-6 shadow-sm">
+				<div class="mb-3 flex items-center gap-2">
+					<span class="text-2xl">👥</span>
+					<p class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Stakeholders' Last Ratings</p>
+				</div>
+				{#if data.stakeholdersLastRatings && (data.stakeholdersLastRatings.effort !== null || data.stakeholdersLastRatings.performance !== null)}
+					<div class="space-y-4">
+						{#if data.stakeholdersLastRatings.effort !== null}
+							<div>
+								<div class="mb-1 flex items-baseline gap-2">
+									<span class="text-base font-medium text-neutral-700">Effort (Avg)</span>
+									<span class="text-xl font-bold text-green-600">{data.stakeholdersLastRatings.effort}</span>
+								</div>
+								{#if data.stakeholdersLastRatings.effortChange !== null && data.stakeholdersLastRatings.weekNumber && data.stakeholdersLastRatings.weekNumber > 1}
+									<div class="flex items-center gap-2">
+										<span class="text-xs font-semibold {data.stakeholdersLastRatings.effortChange >= 0 ? 'text-green-600' : 'text-red-600'}">
+											{data.stakeholdersLastRatings.effortChange > 0 ? '+' : ''}{data.stakeholdersLastRatings.effortChange.toFixed(1)}
+										</span>
+										<span class="text-xs text-neutral-500">vs. Week {data.stakeholdersLastRatings.weekNumber - 1}</span>
+									</div>
+								{/if}
+							</div>
+						{/if}
+						{#if data.stakeholdersLastRatings.performance !== null}
+							<div>
+								<div class="mb-1 flex items-baseline gap-2">
+									<span class="text-base font-medium text-neutral-700">Performance (Avg)</span>
+									<span class="text-xl font-bold text-red-600">{data.stakeholdersLastRatings.performance}</span>
+								</div>
+								{#if data.stakeholdersLastRatings.performanceChange !== null && data.stakeholdersLastRatings.weekNumber && data.stakeholdersLastRatings.weekNumber > 1}
+									<div class="flex items-center gap-2">
+										<span class="text-xs font-semibold {data.stakeholdersLastRatings.performanceChange >= 0 ? 'text-green-600' : 'text-red-600'}">
+											{data.stakeholdersLastRatings.performanceChange > 0 ? '+' : ''}{data.stakeholdersLastRatings.performanceChange.toFixed(1)}
+										</span>
+										<span class="text-xs text-neutral-500">vs. Week {data.stakeholdersLastRatings.weekNumber - 1}</span>
+									</div>
+								{/if}
+							</div>
+						{/if}
+					</div>
+				{:else}
+					<p class="text-sm text-neutral-500">No stakeholder ratings yet</p>
+				{/if}
 			</div>
 		</div>
 	{/if}
 
-	<!-- Summary Metrics Cards -->
-	{#if data.isOnboardingComplete && data.summary}
-		<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-			<a
-				href="/individual/dashboard"
-				class="group relative overflow-hidden rounded-2xl border-2 border-neutral-200 bg-gradient-to-br from-blue-50 to-purple-50 p-6 shadow-sm transition-all hover:border-blue-300 hover:shadow-md"
-			>
-				<div class="mb-3 flex items-center gap-2">
-					<span class="text-2xl">📊</span>
-					<p class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Completion</p>
-				</div>
-				<p class="text-4xl font-bold text-neutral-900">
-					{data.summary.completionRate !== null ? `${data.summary.completionRate}%` : '—'}
-				</p>
-				{#if data.summary.completionRate !== null}
-					<p class="mt-2 text-xs text-neutral-600">
-						{data.summary.totalCompleted} of {data.summary.totalExpected} check-ins
-					</p>
-				{/if}
-				<div class="mt-3 text-xs font-semibold text-blue-700 opacity-0 transition-opacity group-hover:opacity-100">
-					View dashboard →
-				</div>
-			</a>
-
-			<a
-				href="/individual/dashboard"
-				class="group relative overflow-hidden rounded-2xl border-2 border-neutral-200 bg-gradient-to-br from-emerald-50 to-teal-50 p-6 shadow-sm transition-all hover:border-emerald-300 hover:shadow-md"
-			>
-				<div class="mb-3 flex items-center gap-2">
-					<span class="text-2xl">🔥</span>
-					<p class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Current Streak</p>
-				</div>
-				<p class="text-4xl font-bold text-neutral-900">{data.summary.currentStreak}</p>
-				<p class="mt-2 text-xs text-neutral-600">check-ins</p>
-				<div class="mt-3 text-xs font-semibold text-emerald-700 opacity-0 transition-opacity group-hover:opacity-100">
-					View dashboard →
-				</div>
-			</a>
-
-			<a
-				href="/individual/dashboard"
-				class="group relative overflow-hidden rounded-2xl border-2 border-neutral-200 bg-gradient-to-br from-amber-50 to-orange-50 p-6 shadow-sm transition-all hover:border-amber-300 hover:shadow-md"
-			>
-				<div class="mb-3 flex items-center gap-2">
-					<span class="text-2xl">⏰</span>
-					<p class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Open Tasks</p>
-				</div>
-				<p class="text-4xl font-bold text-neutral-900">{data.summary.openExperiences}</p>
-				{#if data.summary.missedExperiences > 0}
-					<p class="mt-2 text-xs font-semibold text-amber-700">
-						{data.summary.missedExperiences} missed
-					</p>
-				{:else if data.summary.openExperiences === 0}
-					<p class="mt-2 text-xs text-emerald-600">All caught up! 🎉</p>
-				{/if}
-				<div class="mt-3 text-xs font-semibold text-amber-700 opacity-0 transition-opacity group-hover:opacity-100">
-					View dashboard →
-				</div>
-			</a>
-
-			<a
-				href="/individual/stakeholders"
-				class="group relative overflow-hidden rounded-2xl border-2 border-neutral-200 bg-gradient-to-br from-purple-50 to-pink-50 p-6 shadow-sm transition-all hover:border-purple-300 hover:shadow-md"
-			>
-				<div class="mb-3 flex items-center gap-2">
-					<span class="text-2xl">👥</span>
-					<p class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Stakeholders</p>
-				</div>
-				<p class="text-4xl font-bold text-neutral-900">{data.summary.totalStakeholders}</p>
-				<p class="mt-2 text-xs text-neutral-600">invited</p>
-				<div class="mt-3 text-xs font-semibold text-purple-700 opacity-0 transition-opacity group-hover:opacity-100">
-					Manage stakeholders →
-				</div>
-			</a>
+	<!-- Performance/Effort Visualization -->
+	{#if data.isOnboardingComplete && data.cycle && data.visualizationData}
+		<div class="rounded-2xl border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 p-6 shadow-lg">
+			<PerformanceEffortChart
+				individualData={data.visualizationData.individual}
+				stakeholderData={data.visualizationData.stakeholders}
+				stakeholders={data.visualizationData.stakeholderList}
+			/>
 		</div>
 	{/if}
 

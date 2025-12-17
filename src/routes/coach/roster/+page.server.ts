@@ -56,7 +56,7 @@ export const load: PageServerLoad = async (event) => {
 											reflectionType: true,
 											submittedAt: true,
 											effortScore: true,
-											progressScore: true,
+											performanceScore: true,
 											notes: true
 										}
 									},
@@ -78,16 +78,15 @@ export const load: PageServerLoad = async (event) => {
 								include: {
 									feedbacks: {
 										orderBy: { submittedAt: 'desc' },
-										take: 10,
 										select: {
 											submittedAt: true,
 											effortScore: true,
-											progressScore: true,
+											performanceScore: true,
 											reflection: {
 												select: {
 													weekNumber: true,
 													effortScore: true,
-													progressScore: true
+													performanceScore: true
 												}
 											}
 										}
