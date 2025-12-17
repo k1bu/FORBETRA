@@ -1,5 +1,6 @@
 import type { RequestHandler } from '@sveltejs/kit';
 import { remindOverduePrompts } from '$jobs/remind-overdue-prompts';
+import { remindStakeholderFeedback } from '$jobs/remind-stakeholder-feedback';
 
 const isAuthorized = (request: Request) => {
 	const secret = process.env.JOB_SECRET_TOKEN;
@@ -19,7 +20,8 @@ export const GET: RequestHandler = async ({ request }) => {
 		return new Response('Unauthorized', { status: 401 });
 	}
 
-	await remindOverduePrompts();
+	// Run both reminder jobs
+	await Promise.all([remindOverduePrompts(), remindStakeholderFeedback()]);
 
 	return new Response(null, { status: 204 });
 };
