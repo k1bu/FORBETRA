@@ -31,7 +31,7 @@ export const load: PageServerLoad = async (event) => {
 	}
 
 	// Check if initial ratings are missing - redirect to initial-ratings if so
-	const cycle = objective.cycles[0];
+	const cycle = objective.cycles[0] ?? null;
 	const firstSubgoal = objective.subgoals[0];
 	if (cycle && firstSubgoal) {
 		const hasInitialRating = cycle.reflections.some((r) => r.weekNumber === 0);
@@ -40,7 +40,6 @@ export const load: PageServerLoad = async (event) => {
 		}
 	}
 
-	const cycle = objective.cycles[0] ?? null;
 	const subgoal = objective.subgoals[0] ?? null;
 	const stakeholder = objective.stakeholders[0] ?? null;
 
