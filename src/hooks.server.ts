@@ -76,106 +76,198 @@ export const handle = sequence(clerkHandle, async ({ event, resolve }) => {
 		return resolve(event);
 	}
 
-	const existingUser = await prisma.user.findUnique({
-		where: { clerkUserId: auth.userId }
-	});
-
-	const clerkUser = await clerkClient.users.getUser(auth.userId);
-	const primaryEmail =
-		clerkUser.emailAddresses.find((email) => email.id === clerkUser.primaryEmailAddressId)
-			?.emailAddress ??
-		clerkUser.emailAddresses[0]?.emailAddress ??
-		'';
-
-	const fullName = [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(' ') || null;
-	const metadataRoleRaw = clerkUser.publicMetadata?.role;
-	const metadataRole =
-		typeof metadataRoleRaw === 'string' ? (metadataRoleRaw.toUpperCase() as UserRole) : null;
-	const resolvedRole =
-		(metadataRole && ALLOWED_ROLES.has(metadataRole) ? metadataRole : undefined) ??
-		existingUser?.role ??
-		DEFAULT_ROLE;
-
-	if (!primaryEmail) {
-		console.error('Clerk user is missing an email address', { clerkUserId: auth.userId });
-		event.locals.dbUser = existingUser ?? null;
-		return resolve(event);
-	}
-
-	if (!existingUser) {
-		// Check if user exists by email (e.g., from seed script) but without clerkUserId
-		const userByEmail = await prisma.user.findUnique({
-			where: { email: primaryEmail.toLowerCase() }
+	try {
+		const existingUser = await prisma.user.findUnique({
+			where: { clerkUserId: auth.userId }
 		});
 
-		if (userByEmail) {
-			// User exists but not linked to Clerk - link them now
-			// Preserve existing role (database is source of truth) unless Clerk metadata has a valid role
-			const finalRole =
-				metadataRole && ALLOWED_ROLES.has(metadataRole)
-					? metadataRole
-					: userByEmail.role;
+		const clerkUser = await clerkClient.users.getUser(auth.userId);
+		const primaryEmail =
+			clerkUser.emailAddresses.find((email) => email.id === clerkUser.primaryEmailAddressId)
+				?.emailAddress ??
+			clerkUser.emailAddresses[0]?.emailAddress ??
+			'';
 
-			const dbUser = await prisma.user.update({
-				where: { id: userByEmail.id },
-				data: {
-					clerkUserId: auth.userId,
-					name: fullName ?? userByEmail.name,
-					role: finalRole
-				}
-			});
+		const fullName = [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(' ') || null;
+		const metadataRoleRaw = clerkUser.publicMetadata?.role;
+		const metadataRole =
+			typeof metadataRoleRaw === 'string' ? (metadataRoleRaw.toUpperCase() as UserRole) : null;
+		const resolvedRole =
+			(metadataRole && ALLOWED_ROLES.has(metadataRole) ? metadataRole : undefined) ??
+			existingUser?.role ??
+			DEFAULT_ROLE;
 
-			await linkPendingCoachInvites(dbUser);
-
-			event.locals.dbUser = dbUser;
+		if (!primaryEmail) {
+			console.error('Clerk user is missing an email address', { clerkUserId: auth.userId });
+			event.locals.dbUser = existingUser ?? null;
 			return resolve(event);
 		}
 
-		// No user exists - create new one
-		const dbUser = await prisma.user.create({
-			data: {
-				clerkUserId: auth.userId,
-				email: primaryEmail.toLowerCase(),
-				name: fullName,
-				role: resolvedRole
+		if (!existingUser) {
+			// Check if user exists by email (e.g., from seed script) but without clerkUserId
+			const userByEmail = await prisma.user.findUnique({
+				where: { email: primaryEmail.toLowerCase() }
+			});
+
+			if (userByEmail) {
+				// User exists but not linked to Clerk - link them now
+				// Preserve existing role (database is source of truth) unless Clerk metadata has a valid role
+				const finalRole =
+					metadataRole && ALLOWED_ROLES.has(metadataRole) ? metadataRole : userByEmail.role;
+
+				try {
+					const dbUser = await prisma.user.update({
+						where: { id: userByEmail.id },
+						data: {
+							clerkUserId: auth.userId,
+							name: fullName ?? userByEmail.name,
+							role: finalRole
+						}
+					});
+
+					try {
+						await linkPendingCoachInvites(dbUser);
+					} catch (linkError) {
+						console.error(
+							'[auth:error] Failed to link pending coach invites',
+							{ userId: dbUser.id, email: dbUser.email },
+							linkError
+						);
+						// Don't fail the request if linking invites fails
+					}
+
+					event.locals.dbUser = dbUser;
+					return resolve(event);
+				} catch (updateError: any) {
+					console.error('[auth:error] Failed to update user with Clerk ID', {
+						userId: userByEmail.id,
+						email: userByEmail.email,
+						clerkUserId: auth.userId,
+						error: updateError.message,
+						code: updateError.code
+					});
+					// If update fails (e.g., constraint violation), return existing user
+					event.locals.dbUser = userByEmail;
+					return resolve(event);
+				}
 			}
+
+			// No user exists - create new one
+			try {
+				const dbUser = await prisma.user.create({
+					data: {
+						clerkUserId: auth.userId,
+						email: primaryEmail.toLowerCase(),
+						name: fullName,
+						role: resolvedRole
+					}
+				});
+
+				try {
+					await linkPendingCoachInvites(dbUser);
+				} catch (linkError) {
+					console.error(
+						'[auth:error] Failed to link pending coach invites',
+						{ userId: dbUser.id, email: dbUser.email },
+						linkError
+					);
+					// Don't fail the request if linking invites fails
+				}
+
+				event.locals.dbUser = dbUser;
+				return resolve(event);
+			} catch (createError: any) {
+				console.error('[auth:error] Failed to create user', {
+					email: primaryEmail.toLowerCase(),
+					clerkUserId: auth.userId,
+					error: createError.message,
+					code: createError.code
+				});
+				// If create fails, try to return existing user by email as fallback
+				const fallbackUser = await prisma.user.findUnique({
+					where: { email: primaryEmail.toLowerCase() }
+				});
+				event.locals.dbUser = fallbackUser ?? null;
+				return resolve(event);
+			}
+		}
+
+		const updates: Prisma.UserUpdateInput = {};
+
+		if (existingUser.email.toLowerCase() !== primaryEmail.toLowerCase()) {
+			updates.email = primaryEmail.toLowerCase();
+		}
+
+		if (existingUser.name !== fullName) {
+			updates.name = fullName;
+		}
+
+		if (existingUser.role !== resolvedRole) {
+			updates.role = resolvedRole;
+		}
+
+		if (Object.keys(updates).length === 0) {
+			try {
+				await linkPendingCoachInvites(existingUser);
+			} catch (linkError) {
+				console.error(
+					'[auth:error] Failed to link pending coach invites',
+					{ userId: existingUser.id, email: existingUser.email },
+					linkError
+				);
+				// Don't fail the request if linking invites fails
+			}
+
+			event.locals.dbUser = existingUser;
+			return resolve(event);
+		}
+
+		try {
+			const dbUser = await prisma.user.update({
+				where: { id: existingUser.id },
+				data: updates
+			});
+
+			try {
+				await linkPendingCoachInvites(dbUser);
+			} catch (linkError) {
+				console.error(
+					'[auth:error] Failed to link pending coach invites',
+					{ userId: dbUser.id, email: dbUser.email },
+					linkError
+				);
+				// Don't fail the request if linking invites fails
+			}
+
+			event.locals.dbUser = dbUser;
+			return resolve(event);
+		} catch (updateError: any) {
+			console.error('[auth:error] Failed to update user', {
+				userId: existingUser.id,
+				email: existingUser.email,
+				updates,
+				error: updateError.message,
+				code: updateError.code
+			});
+			// If update fails, return existing user as fallback
+			event.locals.dbUser = existingUser;
+			return resolve(event);
+		}
+	} catch (error: any) {
+		console.error('[auth:error] Unexpected error in authentication hook', {
+			clerkUserId: auth.userId,
+			error: error.message,
+			stack: error.stack
 		});
-
-		await linkPendingCoachInvites(dbUser);
-
-		event.locals.dbUser = dbUser;
+		// Try to get existing user as fallback
+		try {
+			const fallbackUser = await prisma.user.findUnique({
+				where: { clerkUserId: auth.userId }
+			});
+			event.locals.dbUser = fallbackUser ?? null;
+		} catch {
+			event.locals.dbUser = null;
+		}
 		return resolve(event);
 	}
-
-	const updates: Prisma.UserUpdateInput = {};
-
-	if (existingUser.email.toLowerCase() !== primaryEmail.toLowerCase()) {
-		updates.email = primaryEmail.toLowerCase();
-	}
-
-	if (existingUser.name !== fullName) {
-		updates.name = fullName;
-	}
-
-	if (existingUser.role !== resolvedRole) {
-		updates.role = resolvedRole;
-	}
-
-	if (Object.keys(updates).length === 0) {
-		await linkPendingCoachInvites(existingUser);
-
-		event.locals.dbUser = existingUser;
-		return resolve(event);
-	}
-
-	const dbUser = await prisma.user.update({
-		where: { id: existingUser.id },
-		data: updates
-	});
-
-	await linkPendingCoachInvites(dbUser);
-
-	event.locals.dbUser = dbUser;
-
-	return resolve(event);
 });
