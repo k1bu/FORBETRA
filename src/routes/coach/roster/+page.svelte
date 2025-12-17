@@ -364,8 +364,15 @@
 				noteClientId = null;
 			}
 		}}
+		onkeydown={(e) => {
+			if (e.key === 'Escape') {
+				noteFormOpen = false;
+				noteClientId = null;
+			}
+		}}
 		role="dialog"
 		aria-modal="true"
+		tabindex="-1"
 	>
 		<div class="w-full max-w-lg rounded-2xl border-2 border-neutral-200 bg-white p-6 shadow-2xl">
 			<div class="mb-4 flex items-center gap-2">
