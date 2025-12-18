@@ -279,7 +279,7 @@
 		uniqueStakeholders.forEach((name, id) => {
 			const stakeholderWeekData = stakeholderData.filter((d) => d.stakeholderId === id);
 			
-			const week1Data = stakeholderWeekData.find((d) => d.weekNumber === week1);
+			const week1Data = stakeholderWeekData.find((d) => d.weekNumber === baselineWeek);
 			
 			// Find latest week with effort data for this stakeholder
 			const effortWeeks = stakeholderWeekData
