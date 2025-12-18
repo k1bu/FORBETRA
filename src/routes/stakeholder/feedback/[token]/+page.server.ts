@@ -103,13 +103,6 @@ export const load: PageServerLoad = async ({ params, url }) => {
 					weekNumber: { lt: token.reflection.weekNumber }
 				}
 			},
-			include: {
-				reflection: {
-					select: {
-						weekNumber: true
-					}
-				}
-			},
 			orderBy: {
 				submittedAt: 'desc'
 			},
