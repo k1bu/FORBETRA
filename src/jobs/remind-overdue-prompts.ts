@@ -65,4 +65,7 @@ export const remindOverduePrompts = async () => {
 			}
 		}
 	}
+
+	// Also send stakeholder feedback reminders in the same job
+	await remindStakeholderFeedback();
 };

@@ -64,8 +64,10 @@
 
 	// Step wizard state
 	type Step = 'welcome' | 'objective' | 'subgoals' | 'cycle' | 'stakeholders';
-	let currentStep: Step = 'welcome';
-	let stepHistory: Step[] = ['welcome'];
+	// If form has errors, we're likely on the stakeholders step (since that's where "Complete Setup" is)
+	// Otherwise, start at welcome
+	let currentStep: Step = Object.keys(errors).length > 0 ? 'stakeholders' : 'welcome';
+	let stepHistory: Step[] = currentStep === 'stakeholders' ? ['welcome', 'objective', 'subgoals', 'cycle', 'stakeholders'] : ['welcome'];
 
 	function selectContext(contextId: string) {
 		selectedContextId = contextId;
