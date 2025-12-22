@@ -109,6 +109,17 @@ export const actions: Actions = {
 		});
 
 		if (!parsed.success) {
+			console.error(
+				'[onboarding:validation] Validation failed:',
+				JSON.stringify(parsed.error.issues, null, 2)
+			);
+			console.error('[onboarding:validation] Submission data:', {
+				objectiveTitle: submission.objectiveTitle,
+				subgoalsCount: submission.subgoals.length,
+				stakeholdersCount: submission.stakeholders.length,
+				cycleStartDate: submission.cycleStartDate,
+				cycleDurationWeeks: cycleDurationWeeksValue
+			});
 			return fail(400, {
 				errors: formatErrors(parsed.error.issues),
 				values: submission

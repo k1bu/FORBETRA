@@ -337,6 +337,21 @@
 			<form method="post" class="space-y-8">
 				<!-- Hidden input for reminder days -->
 				<input type="hidden" name="reminderDays" value={reminderDays} />
+				
+				<!-- Hidden inputs for all form data when on stakeholders step -->
+				{#if currentStep === 'stakeholders'}
+					<input type="hidden" name="objectiveTitle" value={objectiveTitle} />
+					<input type="hidden" name="objectiveDescription" value={objectiveDescription} />
+					<input type="hidden" name="cycleLabel" value={cycleLabel} />
+					<input type="hidden" name="cycleStartDate" value={cycleStartDate} />
+					<input type="hidden" name="cycleDurationWeeks" value={cycleDurationWeeks} />
+					{#each Array.from({ length: 5 }, (_, i) => i) as _, index}
+						{@const subgoal = subgoalForms[index] ?? { label: '', description: '' }}
+						<input type="hidden" name={`subgoalLabel${index + 1}`} value={subgoal.label} />
+						<input type="hidden" name={`subgoalDescription${index + 1}`} value={subgoal.description} />
+					{/each}
+				{/if}
+				
 				<!-- Objective Step -->
 				{#if currentStep === 'objective'}
 					<div class="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
