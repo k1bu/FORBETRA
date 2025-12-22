@@ -38,17 +38,32 @@
 			{/if}
 		</article>
 
-		<article class="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm md:col-span-2">
-			<h2 class="text-sm font-semibold text-neutral-500 uppercase">First subgoal</h2>
-			{#if data.subgoal}
-				<p class="text-lg font-semibold">{data.subgoal.label}</p>
-				{#if data.subgoal.description}
-					<p class="mt-1 text-sm text-neutral-600">{data.subgoal.description}</p>
-				{/if}
-			{:else}
-				<p class="text-sm text-neutral-600">No subgoal captured yet.</p>
-			{/if}
-		</article>
+		{#if data.subgoals.length > 0}
+			<article class="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm md:col-span-2">
+				<h2 class="text-sm font-semibold text-neutral-500 uppercase">
+					{#if data.subgoals.length === 1}
+						Subgoal
+					{:else}
+						Subgoals ({data.subgoals.length})
+					{/if}
+				</h2>
+				<div class="mt-2 space-y-4">
+					{#each data.subgoals as subgoal}
+						<div class="border-t border-neutral-100 pt-3 first:border-t-0 first:pt-0">
+							<p class="text-lg font-semibold">{subgoal.label}</p>
+							{#if subgoal.description}
+								<p class="mt-1 text-sm text-neutral-600">{subgoal.description}</p>
+							{/if}
+						</div>
+					{/each}
+				</div>
+			</article>
+		{:else}
+			<article class="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm md:col-span-2">
+				<h2 class="text-sm font-semibold text-neutral-500 uppercase">Subgoals</h2>
+				<p class="text-sm text-neutral-600">No subgoals captured yet.</p>
+			</article>
+		{/if}
 
 		<article class="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm md:col-span-2">
 			<h2 class="text-sm font-semibold text-neutral-500 uppercase">Stakeholder</h2>

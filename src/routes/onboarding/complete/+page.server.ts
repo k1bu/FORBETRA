@@ -11,7 +11,7 @@ export const load: PageServerLoad = async (event) => {
 	const objective = await prisma.objective.findFirst({
 		where: { userId: dbUser.id },
 		include: {
-			subgoals: { take: 1 },
+			subgoals: { orderBy: { createdAt: 'asc' } }, // Get all subgoals, ordered by creation
 			stakeholders: { take: 1 },
 			cycles: {
 				orderBy: { startDate: 'desc' },
@@ -40,7 +40,7 @@ export const load: PageServerLoad = async (event) => {
 		}
 	}
 
-	const subgoal = objective.subgoals[0] ?? null;
+	const subgoals = objective.subgoals;
 	const stakeholder = objective.stakeholders[0] ?? null;
 
 	// Send welcome email to individual (only once, check if we've sent it before)
@@ -72,13 +72,11 @@ export const load: PageServerLoad = async (event) => {
 			title: objective.title,
 			description: objective.description
 		},
-		subgoal: subgoal
-			? {
-					id: subgoal.id,
-					label: subgoal.label,
-					description: subgoal.description
-				}
-			: null,
+		subgoals: subgoals.map((subgoal) => ({
+			id: subgoal.id,
+			label: subgoal.label,
+			description: subgoal.description
+		})),
 		cycle: cycle
 			? {
 					id: cycle.id,
