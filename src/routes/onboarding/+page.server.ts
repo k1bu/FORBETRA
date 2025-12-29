@@ -98,11 +98,13 @@ export const actions: Actions = {
 				label: subgoal.label,
 				description: subgoal.description.length > 0 ? subgoal.description : undefined
 			})),
-			stakeholders: submission.stakeholders.map((stakeholder) => ({
-				name: stakeholder.name,
-				email: stakeholder.email,
-				relationship: stakeholder.relationship.length > 0 ? stakeholder.relationship : undefined
-			})),
+			stakeholders: submission.stakeholders.length > 0
+				? submission.stakeholders.map((stakeholder) => ({
+						name: stakeholder.name,
+						email: stakeholder.email,
+						relationship: stakeholder.relationship.length > 0 ? stakeholder.relationship : undefined
+					}))
+				: [],
 			cycleLabel: submission.cycleLabel.length > 0 ? submission.cycleLabel : undefined,
 			cycleStartDate: submission.cycleStartDate,
 			cycleDurationWeeks: cycleDurationWeeksValue
@@ -184,14 +186,20 @@ export const actions: Actions = {
 				}
 
 				const startDate = new Date(data.cycleStartDate);
+				if (isNaN(startDate.getTime())) {
+					throw new Error(`Invalid start date: ${data.cycleStartDate}`);
+				}
 				const endDate = new Date(startDate);
 				endDate.setDate(endDate.getDate() + data.cycleDurationWeeks * 7);
+				if (isNaN(endDate.getTime())) {
+					throw new Error(`Invalid end date calculation for start date: ${data.cycleStartDate}`);
+				}
 
 				await tx.cycle.create({
 					data: {
 						userId: dbUser.id,
 						objectiveId: objective.id,
-						label: data.cycleLabel && data.cycleLabel.length > 0 ? data.cycleLabel : 'Cycle 1',
+						label: data.cycleLabel && data.cycleLabel.trim().length > 0 ? data.cycleLabel.trim() : 'Cycle 1',
 						startDate,
 						endDate,
 						status: 'ACTIVE'
@@ -258,8 +266,18 @@ export const actions: Actions = {
 			});
 		} catch (error) {
 			console.error('[onboarding:error] Failed to create objective:', error);
+			// Log more details about the error
+			if (error instanceof Error) {
+				console.error('[onboarding:error] Error message:', error.message);
+				console.error('[onboarding:error] Error stack:', error.stack);
+			}
+			// Return a more helpful error message in development
+			const errorMessage =
+				process.env.NODE_ENV === 'development' && error instanceof Error
+					? `Failed to save: ${error.message}`
+					: 'Failed to save your onboarding data. Please try again.';
 			return fail(500, {
-				errors: { _general: ['Failed to save your onboarding data. Please try again.'] },
+				errors: { _general: [errorMessage] },
 				values: submission
 			});
 		}

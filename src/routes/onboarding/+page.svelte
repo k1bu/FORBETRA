@@ -220,7 +220,17 @@
 			? contexts.find((context) => context.id === selectedContextId) ?? null
 			: null;
 	$: cycleDurationNumber = Number(cycleDurationWeeks) || data.defaults.durationWeeks;
-	$: canAdvance = canProceedFromStep(currentStep);
+	// Explicitly track all dependencies for reactive updates - reference all variables directly
+	$: canAdvance = 
+		currentStep === 'objective' 
+			? objectiveTitle.trim().length >= 3 && objectiveDescription.trim().length > 0
+			: currentStep === 'subgoals'
+				? subgoalForms.filter((s) => s.label.trim().length >= 3).length >= minSubgoalFields
+				: currentStep === 'cycle'
+					? cycleLabel.trim().length > 0 && cycleStartDate.length > 0
+					: currentStep === 'stakeholders'
+						? true // Optional
+						: false;
 	// Auto-fill cycle name with objective title if cycle name is empty
 	$: if (objectiveTitle.trim().length > 0 && (!cycleLabel || cycleLabel.trim().length === 0)) {
 		cycleLabel = objectiveTitle;
@@ -335,6 +345,12 @@
 		{#if currentStep !== 'welcome'}
 			<div class="grid gap-6 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
 			<form method="post" class="space-y-8">
+				<!-- General form errors -->
+				{#if getError('_general')}
+					<div class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+						<p class="font-medium">{getError('_general')}</p>
+					</div>
+				{/if}
 				<!-- Hidden input for reminder days -->
 				<input type="hidden" name="reminderDays" value={reminderDays} />
 				
@@ -418,8 +434,8 @@
 										rows="5"
 										placeholder="Describe what this objective means to you and why it matters right now..."
 										class="w-full rounded-xl border-2 border-slate-300 px-4 py-3 text-slate-900 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10"
-										oninput={(event) => (objectiveDescription = event.currentTarget.value)}
-									>{objectiveDescription}</textarea>
+										bind:value={objectiveDescription}
+									></textarea>
 									{#if getError('objectiveDescription')}
 										<p class="text-sm text-red-600">{getError('objectiveDescription')}</p>
 									{:else if objectiveDescription.trim().length > 20}
@@ -720,6 +736,13 @@
 									class="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"
 								>
 									<p class="font-medium">{getError('stakeholders')}</p>
+								</div>
+							{/if}
+							{#if getError('_general')}
+								<div
+									class="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+								>
+									<p class="font-medium">{getError('_general')}</p>
 								</div>
 							{/if}
 
