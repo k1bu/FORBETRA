@@ -47,6 +47,7 @@
 		"@prisma/client": "^6.19.0",
 		"@sendgrid/mail": "^8.1.6",
 		"chart.js": "^4.4.0",
+		"postmark": "^4.0.5",
 		"svelte-clerk": "^0.17.8",
 		"svix": "^1.81.0",
 		"twilio": "^5.10.4",
