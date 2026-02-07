@@ -53,11 +53,11 @@
 	const formatPromptLabel = (type: string) => {
 		switch (type) {
 		case 'INTENTION':
-			return 'Monday Check-In';
+			return 'Monday intention';
 		case 'RATING_A':
-			return 'Wednesday Check-In';
+			return 'Wednesday check-in';
 		case 'RATING_B':
-			return 'Friday Check-In';
+			return 'Friday check-in';
 			default:
 				return 'Upcoming prompt';
 		}
@@ -320,7 +320,7 @@
 				</div>
 				{#if data.weeklyExperiences.length}
 					<div class="space-y-3">
-						<h3 class="text-sm font-semibold uppercase tracking-wide text-neutral-500">This Week's Experiences</h3>
+						<h3 class="text-sm font-semibold uppercase tracking-wide text-neutral-500">This Week's Check-ins</h3>
 						<div class="grid gap-3 md:grid-cols-3">
 							{#each data.weeklyExperiences as experience (experience.type)}
 								{@const stateColors = {

@@ -66,15 +66,29 @@
 		{/if}
 
 		<article class="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm md:col-span-2">
-			<h2 class="text-sm font-semibold text-neutral-500 uppercase">Stakeholder</h2>
-			{#if data.stakeholder}
-				<p class="text-lg font-semibold">{data.stakeholder.name}</p>
-				<p class="text-sm text-neutral-600">{data.stakeholder.email}</p>
-				{#if data.stakeholder.relationship}
-					<p class="mt-1 text-xs tracking-wide text-neutral-500 uppercase">
-						{data.stakeholder.relationship}
-					</p>
+			<h2 class="text-sm font-semibold text-neutral-500 uppercase">
+				{#if data.stakeholders.length === 1}
+					Stakeholder
+				{:else if data.stakeholders.length > 1}
+					Stakeholders ({data.stakeholders.length})
+				{:else}
+					Stakeholders
 				{/if}
+			</h2>
+			{#if data.stakeholders.length > 0}
+				<div class="mt-2 space-y-4">
+					{#each data.stakeholders as stakeholder}
+						<div class="border-t border-neutral-100 pt-3 first:border-t-0 first:pt-0">
+							<p class="text-lg font-semibold">{stakeholder.name}</p>
+							<p class="text-sm text-neutral-600">{stakeholder.email}</p>
+							{#if stakeholder.relationship}
+								<p class="mt-1 text-xs tracking-wide text-neutral-500 uppercase">
+									{stakeholder.relationship}
+								</p>
+							{/if}
+						</div>
+					{/each}
+				</div>
 			{:else}
 				<p class="text-sm text-neutral-600">
 					You can invite stakeholders later from your dashboard.

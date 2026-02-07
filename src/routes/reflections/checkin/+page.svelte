@@ -402,7 +402,7 @@
 						href="/individual"
 						class="rounded-xl border-2 border-neutral-300 bg-white px-6 py-3.5 text-sm font-semibold text-neutral-700 transition-all hover:border-neutral-400 hover:bg-neutral-50"
 					>
-						Save for Later
+						Back to Dashboard
 					</a>
 					<button
 						type="submit"

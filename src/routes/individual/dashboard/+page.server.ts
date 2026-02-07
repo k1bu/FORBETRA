@@ -225,7 +225,7 @@ const getWeeklyExperiences = async (
 
 	experiences.push({
 		type: 'INTENTION',
-		label: 'Monday intention prompt',
+		label: 'Monday intention',
 		state: intentionState,
 		availableDate: mondayDisplayDate,
 		deadlineDate: isLocked ? nextMondayDate : null,

@@ -150,7 +150,7 @@ export const emailTemplates = {
 					? 'Wednesday'
 					: 'Friday';
 		return {
-			subject: `Reminder: Time for your ${dayLabel} reflection`,
+			subject: `Reminder: Time for your ${dayLabel} check-in`,
 			html: `
 				<!DOCTYPE html>
 				<html>
@@ -160,22 +160,22 @@ export const emailTemplates = {
 				</head>
 				<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #334155; max-width: 600px; margin: 0 auto; padding: 20px;">
 					<div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
-						<h1 style="color: white; margin: 0; font-size: 24px; font-weight: 600;">Time for Your Reflection</h1>
+						<h1 style="color: white; margin: 0; font-size: 24px; font-weight: 600;">Time for Your Check-in</h1>
 					</div>
 					<div style="background: white; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
 						<p style="font-size: 16px; margin-top: 0;">Hi ${data.individualName || 'there'},</p>
-						<p style="font-size: 16px;">It's ${dayLabel} — time for your weekly reflection!</p>
+						<p style="font-size: 16px;">It's ${dayLabel} — time for your weekly check-in!</p>
 						${data.objectiveTitle ? `<p style="font-size: 14px; color: #64748b; background: #f1f5f9; padding: 12px; border-radius: 6px; margin: 20px 0;"><strong>Objective:</strong> ${data.objectiveTitle}</p>` : ''}
-						<p style="font-size: 16px;">Take a moment to reflect on your effort and progress this week.</p>
+						<p style="font-size: 16px;">Take a moment to check in on your effort and progress this week.</p>
 						<div style="text-align: center; margin: 30px 0;">
-							<a href="${data.appUrl || baseUrl}/reflections/${data.reflectionType?.toLowerCase() || 'checkin'}" style="display: inline-block; background: #f59e0b; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Complete Reflection</a>
+							<a href="${data.appUrl || baseUrl}/reflections/${data.reflectionType?.toLowerCase() || 'checkin'}" style="display: inline-block; background: #f59e0b; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Complete Check-in</a>
 						</div>
-						<p style="font-size: 14px; color: #64748b; margin-top: 30px;">This helps you stay consistent and track your growth.</p>
+						<p style="font-size: 14px; color: #64748b; margin-top: 30px;">Staying consistent helps you track your growth.</p>
 					</div>
 				</body>
 				</html>
 			`,
-			text: `Reminder: Time for your ${dayLabel} reflection\n\nHi ${data.individualName || 'there'},\n\nIt's ${dayLabel} — time for your weekly reflection!\n\n${data.objectiveTitle ? `Objective: ${data.objectiveTitle}\n\n` : ''}Take a moment to reflect on your effort and progress this week.\n\nComplete reflection: ${data.appUrl || baseUrl}/reflections/${data.reflectionType?.toLowerCase() || 'checkin'}\n\nThis helps you stay consistent and track your growth.`
+			text: `Reminder: Time for your ${dayLabel} check-in\n\nHi ${data.individualName || 'there'},\n\nIt's ${dayLabel} — time for your weekly check-in!\n\n${data.objectiveTitle ? `Objective: ${data.objectiveTitle}\n\n` : ''}Take a moment to check in on your effort and progress this week.\n\nComplete check-in: ${data.appUrl || baseUrl}/reflections/${data.reflectionType?.toLowerCase() || 'checkin'}\n\nThis helps you stay consistent and track your growth.`
 		};
 	},
 

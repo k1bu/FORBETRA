@@ -12,7 +12,7 @@ export const load: PageServerLoad = async (event) => {
 		where: { userId: dbUser.id },
 		include: {
 			subgoals: { orderBy: { createdAt: 'asc' } }, // Get all subgoals, ordered by creation
-			stakeholders: { take: 1 },
+			stakeholders: { orderBy: { createdAt: 'asc' } },
 			cycles: {
 				orderBy: { startDate: 'desc' },
 				take: 1,
@@ -41,7 +41,7 @@ export const load: PageServerLoad = async (event) => {
 	}
 
 	const subgoals = objective.subgoals;
-	const stakeholder = objective.stakeholders[0] ?? null;
+	const stakeholders = objective.stakeholders;
 
 	// Send welcome email to individual (only once, check if we've sent it before)
 	// We can check if this is the first time they're seeing this page by checking if they have any reflections
@@ -85,13 +85,11 @@ export const load: PageServerLoad = async (event) => {
 					endDate: cycle.endDate?.toISOString() ?? null
 				}
 			: null,
-		stakeholder: stakeholder
-			? {
-					id: stakeholder.id,
-					name: stakeholder.name,
-					email: stakeholder.email,
-					relationship: stakeholder.relationship
-				}
-			: null
+		stakeholders: stakeholders.map((s) => ({
+			id: s.id,
+			name: s.name,
+			email: s.email,
+			relationship: s.relationship
+		}))
 	};
 };

@@ -3,11 +3,17 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import type { Snippet } from 'svelte';
 	import { ClerkProvider, SignedIn, UserButton } from 'svelte-clerk';
+	import { page } from '$app/stores';
 	import type { LayoutData } from './$types';
 
 	const { children, data }: { children: Snippet; data: LayoutData } = $props();
 
 	const displayRole = data.dbUser?.role ?? null;
+
+	const isActive = (href: string) => {
+		const pathname = $page.url.pathname;
+		return pathname === href || pathname.startsWith(href + '/');
+	};
 </script>
 
 <svelte:head>
@@ -16,22 +22,29 @@
 
 <ClerkProvider>
 	<SignedIn>
-		<header class="flex flex-wrap items-center justify-between gap-3 p-4">
+		<a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:shadow-lg">Skip to main content</a>
+		<header class="flex flex-wrap items-center justify-between gap-3 p-4" aria-label="Site header">
 			<h1 class="text-lg font-semibold">FORBETRA</h1>
-			<nav class="flex items-center gap-3">
+			<nav class="flex items-center gap-3" aria-label="Main navigation">
 				{#if data.dbUser}
 					<div class="flex items-center gap-3">
 						{#if data.dbUser.role === 'INDIVIDUAL'}
-							<a href="/individual" class="text-sm text-neutral-600 hover:text-black">
+							<a
+								href="/individual"
+								class="text-sm transition-colors hover:text-black {isActive('/individual') ? 'font-semibold text-black' : 'text-neutral-600'}"
+								aria-current={isActive('/individual') ? 'page' : undefined}
+							>
 								Individual Hub
 							</a>
 						{/if}
 						{#if data.dbUser.role === 'ADMIN'}
-							<form method="get" action="/admin/users">
-								<button type="submit" class="text-sm text-neutral-600 hover:text-black">
-									Admin Console
-								</button>
-							</form>
+							<a
+								href="/admin/users"
+								class="text-sm transition-colors hover:text-black {isActive('/admin') ? 'font-semibold text-black' : 'text-neutral-600'}"
+								aria-current={isActive('/admin') ? 'page' : undefined}
+							>
+								Admin Console
+							</a>
 						{/if}
 						{#if displayRole}
 							<span class="text-sm text-neutral-500">Role: {displayRole}</span>
@@ -43,7 +56,7 @@
 		</header>
 	</SignedIn>
 
-	<main class={`min-h-screen ${data.dbUser ? 'p-4' : ''}`}>
+	<main id="main-content" class={`min-h-screen ${data.dbUser ? 'p-4' : ''}`}>
 		{@render children()}
 	</main>
 </ClerkProvider>
