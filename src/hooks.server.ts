@@ -1,6 +1,7 @@
 import { sequence } from '@sveltejs/kit/hooks';
 import prisma from '$lib/server/prisma';
 import { clerkClient, withClerkHandler } from 'svelte-clerk/server';
+import type { Handle } from '@sveltejs/kit';
 import type { Prisma, UserRole } from '@prisma/client';
 
 const DEFAULT_ROLE: UserRole = 'INDIVIDUAL';
@@ -66,6 +67,26 @@ const linkPendingCoachInvites = async (user: { id: string; email: string; role: 
 			});
 		}
 	});
+};
+
+const IMPERSONATE_COOKIE = 'forbetra_impersonate';
+
+const impersonateHandle: Handle = async ({ event, resolve }) => {
+	event.locals.realUser = null;
+
+	const targetUserId = event.cookies.get(IMPERSONATE_COOKIE);
+	if (targetUserId && event.locals.dbUser?.role === 'ADMIN') {
+		const targetUser = await prisma.user.findUnique({ where: { id: targetUserId } });
+		if (targetUser) {
+			event.locals.realUser = event.locals.dbUser;
+			event.locals.dbUser = targetUser;
+		} else {
+			// Target user no longer exists — clear stale cookie
+			event.cookies.delete(IMPERSONATE_COOKIE, { path: '/' });
+		}
+	}
+
+	return resolve(event);
 };
 
 export const handle = sequence(clerkHandle, async ({ event, resolve }) => {
@@ -270,4 +291,4 @@ export const handle = sequence(clerkHandle, async ({ event, resolve }) => {
 		}
 		return resolve(event);
 	}
-});
+}, impersonateHandle);

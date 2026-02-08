@@ -6,6 +6,7 @@ export const load: LayoutServerLoad = ({ locals }) => {
 
 	return {
 		...buildClerkProps(auth),
-		dbUser: locals.dbUser
+		dbUser: locals.dbUser,
+		realUser: locals.realUser
 	};
 };

@@ -1,13 +1,38 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import type { ActionData, PageData } from './$types';
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
+
+	let searchTerm = $state('');
+	let roleFilter = $state('ALL');
+
+	const viewAsUser = async (userId: string) => {
+		await fetch('/api/admin/impersonate', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ userId })
+		});
+		await goto('/', { invalidateAll: true });
+	};
+
+	const filteredUsers = $derived(
+		data.users.filter((user) => {
+			if (roleFilter !== 'ALL' && user.role !== roleFilter) return false;
+			if (!searchTerm) return true;
+			const q = searchTerm.toLowerCase();
+			return (
+				(user.name ?? '').toLowerCase().includes(q) ||
+				user.email.toLowerCase().includes(q)
+			);
+		})
+	);
 </script>
 
-<section class="mx-auto flex max-w-5xl flex-col gap-6 p-4">
+<section class="mx-auto flex max-w-5xl flex-col gap-6 p-6">
 	<header class="space-y-2">
-		<h1 class="text-2xl font-semibold">Role management</h1>
-		<p class="text-neutral-600">Update application roles and keep Clerk public metadata in sync.</p>
+		<h1 class="text-2xl font-semibold">Users ({data.users.length})</h1>
+		<p class="text-neutral-600">Manage roles, view details, and administer user accounts.</p>
 	</header>
 
 	{#if form?.error}
@@ -17,6 +42,26 @@
 			{form.message ?? 'Action completed successfully.'}
 		</div>
 	{/if}
+
+	<!-- Search & Filter -->
+	<div class="flex flex-wrap items-center gap-3">
+		<input
+			type="search"
+			placeholder="Search by name or email..."
+			class="rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200"
+			bind:value={searchTerm}
+		/>
+		<select
+			class="rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+			bind:value={roleFilter}
+		>
+			<option value="ALL">All Roles</option>
+			{#each data.roles as role (role)}
+				<option value={role}>{role}</option>
+			{/each}
+		</select>
+		<span class="text-xs text-neutral-500">{filteredUsers.length} shown</span>
+	</div>
 
 	<div class="overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm">
 		<table class="min-w-full divide-y divide-neutral-200 text-sm">
@@ -31,10 +76,12 @@
 				</tr>
 			</thead>
 			<tbody class="divide-y divide-neutral-200">
-				{#each data.users as user (user.id)}
+				{#each filteredUsers as user (user.id)}
 					<tr class="align-top">
 						<td class="px-4 py-3">
-							<p class="font-medium text-neutral-900">{user.name ?? 'Unnamed user'}</p>
+							<a href="/admin/users/{user.id}" class="font-medium text-neutral-900 hover:text-blue-700 hover:underline">
+								{user.name ?? 'Unnamed user'}
+							</a>
 							<p class="text-xs text-neutral-500">
 								Created {new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(
 									new Date(user.createdAt)
@@ -53,14 +100,7 @@
 							<form method="post" class="flex flex-wrap items-center gap-2">
 								<input type="hidden" name="intent" value="update" />
 								<input type="hidden" name="userId" value={user.id} />
-								<label
-									class="text-xs font-semibold text-neutral-500 uppercase"
-									for={`role-${user.id}`}
-								>
-									Role
-								</label>
 								<select
-									id={`role-${user.id}`}
 									name="role"
 									class="rounded border border-neutral-300 px-2 py-1 text-sm"
 								>
@@ -75,25 +115,36 @@
 									Update
 								</button>
 							</form>
-							<form method="post" class="mt-2">
-								<input type="hidden" name="intent" value="delete" />
-								<input type="hidden" name="userId" value={user.id} />
+							<div class="mt-2 flex gap-2">
+								<a href="/admin/users/{user.id}" class="rounded border border-blue-200 px-3 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50">
+									Details
+								</a>
 								<button
-									type="submit"
-									class="rounded border border-red-200 px-3 py-1 text-xs font-medium uppercase text-red-600 hover:bg-red-50"
-									onclick={(event) => {
-										if (
-											!confirm(
-												`Delete ${user.email}? This will remove their account and related access.`
-											)
-										) {
-											event.preventDefault();
-										}
-									}}
+									onclick={() => viewAsUser(user.id)}
+									class="rounded border border-amber-200 px-3 py-1 text-xs font-medium text-amber-700 hover:bg-amber-50"
 								>
-									Delete user
+									View as
 								</button>
-							</form>
+								<form method="post">
+									<input type="hidden" name="intent" value="delete" />
+									<input type="hidden" name="userId" value={user.id} />
+									<button
+										type="submit"
+										class="rounded border border-red-200 px-3 py-1 text-xs font-medium uppercase text-red-600 hover:bg-red-50"
+										onclick={(event) => {
+											if (
+												!confirm(
+													`Delete ${user.email}? This will remove their account and related data.`
+												)
+											) {
+												event.preventDefault();
+											}
+										}}
+									>
+										Delete
+									</button>
+								</form>
+							</div>
 						</td>
 					</tr>
 				{/each}

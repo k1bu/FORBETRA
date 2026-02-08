@@ -8,6 +8,7 @@ declare global {
 	namespace App {
 		interface Locals {
 			dbUser: User | null;
+			realUser: User | null;
 		}
 		// interface Error {}
 		// interface PageData {}
