@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { Chart, registerables, type ChartConfiguration } from 'chart.js';
+	import { CHART_COLORS } from '$lib/utils/scoreColors';
 
 	Chart.register(...registerables);
 
@@ -128,13 +129,29 @@
 	})());
 
 	// Get all unique week numbers and sort them, excluding Week 13
+	// Pad to minimum 4 weeks so early-cycle charts look intentional
 	const allWeeks = $derived((() => {
 		const weeks = new Set<number>();
 		individualData.forEach((d) => weeks.add(d.weekNumber));
 		stakeholderData.forEach((d) => weeks.add(d.weekNumber));
-		return Array.from(weeks)
+		const sorted = Array.from(weeks)
 			.filter((week) => week !== 13) // Exclude Week 13
 			.sort((a, b) => a - b);
+		// Pad to at least 4 weeks
+		if (sorted.length > 0 && sorted.length < 4) {
+			const maxWeek = sorted[sorted.length - 1];
+			for (let w = maxWeek + 1; sorted.length < 4; w++) {
+				if (w !== 13) sorted.push(w);
+			}
+		}
+		return sorted;
+	})());
+
+	const hasLimitedData = $derived((() => {
+		const dataWeeks = new Set<number>();
+		individualData.forEach((d) => dataWeeks.add(d.weekNumber));
+		stakeholderData.forEach((d) => dataWeeks.add(d.weekNumber));
+		return dataWeeks.size > 0 && dataWeeks.size < 4;
 	})());
 
 	// Calculate baseline values - prefer Week 0 (initial rating) if available, otherwise use first week
@@ -339,8 +356,8 @@
 				const weekData = individualData.find((d) => d.weekNumber === week);
 				return weekData?.effortScore ?? null;
 			}),
-			borderColor: 'rgb(59, 130, 246)',
-			backgroundColor: 'rgba(59, 130, 246, 0.1)',
+			borderColor: CHART_COLORS.effort.individual.border,
+			backgroundColor: CHART_COLORS.effort.individual.bg,
 			borderWidth: 3,
 			tension: 0.3,
 			pointRadius: 5,
@@ -356,8 +373,8 @@
 					const weekData = stakeholderAveragesByWeek.find((d) => d.weekNumber === week);
 					return weekData?.avgEffort ?? null;
 				}),
-				borderColor: 'rgb(16, 185, 129)',
-				backgroundColor: 'rgba(16, 185, 129, 0.1)',
+				borderColor: CHART_COLORS.effort.stakeholder.border,
+				backgroundColor: CHART_COLORS.effort.stakeholder.bg,
 				borderWidth: 2,
 				tension: 0.3,
 				pointRadius: 5,
@@ -499,8 +516,8 @@
 				const weekData = individualData.find((d) => d.weekNumber === week);
 				return weekData?.performanceScore ?? null;
 			}),
-			borderColor: 'rgb(168, 85, 247)',
-			backgroundColor: 'rgba(168, 85, 247, 0.1)',
+			borderColor: CHART_COLORS.performance.individual.border,
+			backgroundColor: CHART_COLORS.performance.individual.bg,
 			borderWidth: 3,
 			tension: 0.3,
 			pointRadius: 5,
@@ -516,8 +533,8 @@
 					const weekData = stakeholderAveragesByWeek.find((d) => d.weekNumber === week);
 					return weekData?.avgProgress ?? null;
 				}),
-				borderColor: 'rgb(245, 101, 101)',
-				backgroundColor: 'rgba(245, 101, 101, 0.1)',
+				borderColor: CHART_COLORS.performance.stakeholder.border,
+				backgroundColor: CHART_COLORS.performance.stakeholder.bg,
 				borderWidth: 2,
 				tension: 0.3,
 				pointRadius: 5,
@@ -872,6 +889,11 @@
 				<p class="text-sm">Select at least one metric (Effort or Performance) to view</p>
 			</div>
 		{/if}
+		{#if hasLimitedData}
+			<p class="mt-3 text-center text-sm text-neutral-500">
+				Trends become clearer after week 4. Keep going!
+			</p>
+		{/if}
 	</div>
 
 	<!-- Summary Table -->
@@ -908,7 +930,7 @@
 						<tbody class="divide-y divide-neutral-200">
 						{#if showEffort}
 							<!-- My Effort -->
-							<tr class="bg-blue-50/30">
+							<tr class="bg-amber-50/30">
 								<td class="px-5 py-3 font-semibold text-neutral-900">My Effort Rating</td>
 								<td class="px-5 py-3 text-center font-medium text-neutral-700">
 									{baseline.individualEffort?.toFixed(1) ?? '—'}
@@ -981,7 +1003,7 @@
 						{/if}
 						{#if showPerformance}
 							<!-- My Performance -->
-							<tr class="bg-purple-50/30">
+							<tr class="bg-indigo-50/30">
 								<td class="px-5 py-3 font-semibold text-neutral-900">My Performance Rating</td>
 								<td class="px-5 py-3 text-center font-medium text-neutral-700">
 									{baseline.individualProgress?.toFixed(1) ?? '—'}

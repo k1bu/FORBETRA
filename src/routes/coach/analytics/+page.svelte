@@ -9,7 +9,7 @@
 			highPriorityAlerts: number;
 			mediumPriorityAlerts: number;
 			lowPriorityAlerts: number;
-			avgConsistency: number | null;
+			avgStability: number | null;
 			avgAlignment: number | null;
 			overallAvgEffort: number | null;
 			overallAvgProgress: number | null;
@@ -51,7 +51,7 @@
 	<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 		<div class="group relative overflow-hidden rounded-2xl border-2 border-neutral-200 bg-gradient-to-br from-red-50 to-orange-50 p-6 shadow-sm">
 			<div class="mb-3 flex items-center gap-2">
-				<span class="text-2xl">⚠️</span>
+				<span class="text-2xl" role="img" aria-label="warning">⚠️</span>
 				<p class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Total Alerts</p>
 			</div>
 			<p class="text-4xl font-bold text-neutral-900">{data.analytics.totalAlerts}</p>
@@ -63,19 +63,19 @@
 		</div>
 		<div class="group relative overflow-hidden rounded-2xl border-2 border-neutral-200 bg-gradient-to-br from-blue-50 to-cyan-50 p-6 shadow-sm">
 			<div class="mb-3 flex items-center gap-2">
-				<span class="text-2xl">📊</span>
-				<p class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Avg. Consistency</p>
+				<span class="text-2xl" role="img" aria-label="bar chart">📊</span>
+				<p class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Avg. Stability</p>
 			</div>
 			<p class="text-4xl font-bold text-neutral-900">
-				{formatScore(data.analytics.avgConsistency)}
+				{formatScore(data.analytics.avgStability)}
 			</p>
-			{#if data.analytics.avgConsistency !== null && data.analytics.avgConsistency >= 75}
+			{#if data.analytics.avgStability !== null && data.analytics.avgStability >= 75}
 				<p class="mt-2 text-xs text-emerald-600">Excellent! ✨</p>
 			{/if}
 		</div>
 		<div class="group relative overflow-hidden rounded-2xl border-2 border-neutral-200 bg-gradient-to-br from-purple-50 to-pink-50 p-6 shadow-sm">
 			<div class="mb-3 flex items-center gap-2">
-				<span class="text-2xl">🎯</span>
+				<span class="text-2xl" role="img" aria-label="target">🎯</span>
 				<p class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Avg. Alignment</p>
 			</div>
 			<p class="text-4xl font-bold text-neutral-900">
@@ -87,7 +87,7 @@
 		</div>
 		<div class="group relative overflow-hidden rounded-2xl border-2 border-neutral-200 bg-gradient-to-br from-emerald-50 to-teal-50 p-6 shadow-sm">
 			<div class="mb-3 flex items-center gap-2">
-				<span class="text-2xl">📈</span>
+				<span class="text-2xl" role="img" aria-label="chart trending up">📈</span>
 				<p class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Avg. Progress</p>
 			</div>
 			<p class="text-4xl font-bold text-neutral-900">
@@ -136,9 +136,9 @@
 						{#if client.objective?.insights}
 							<div class="grid gap-4 md:grid-cols-4">
 								<div class="rounded-lg border border-neutral-200 bg-white p-4">
-									<p class="mb-1 text-xs text-neutral-500">Consistency</p>
+									<p class="mb-1 text-xs text-neutral-500">Stability</p>
 									<p class="text-2xl font-bold text-blue-600">
-										{formatScore(client.objective.insights.consistencyScore)}
+										{formatScore(client.objective.insights.stabilityScore)}
 									</p>
 								</div>
 								<div class="rounded-lg border border-neutral-200 bg-white p-4">

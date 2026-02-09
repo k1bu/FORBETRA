@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { Chart, registerables } from 'chart.js';
+	import { CHART_COLORS } from '$lib/utils/scoreColors';
 
 	Chart.register(...registerables);
 
@@ -77,8 +78,8 @@
 								? 'Effort Gap (Self - Stakeholders)'
 								: `Effort Gap (Self - ${selectedStakeholderName})`,
 						data,
-						borderColor: 'rgb(59, 130, 246)',
-						backgroundColor: 'rgba(59, 130, 246, 0.1)',
+						borderColor: CHART_COLORS.effort.individual.border,
+						backgroundColor: CHART_COLORS.effort.individual.bg,
 						borderWidth: 3,
 						borderDash: [],
 						tension: 0.3,
@@ -198,8 +199,8 @@
 								? 'Performance Gap (Self - Stakeholders)'
 								: `Performance Gap (Self - ${selectedStakeholderName})`,
 						data,
-						borderColor: 'rgb(168, 85, 247)',
-						backgroundColor: 'rgba(168, 85, 247, 0.1)',
+						borderColor: CHART_COLORS.performance.individual.border,
+						backgroundColor: CHART_COLORS.performance.individual.bg,
 						borderWidth: 3,
 						borderDash: [],
 						tension: 0.3,
@@ -526,7 +527,7 @@
 		<div class="flex flex-wrap gap-6">
 			{#if showEffort}
 				<div class="flex items-center gap-2">
-					<div class="h-1 w-8 rounded-full bg-blue-600"></div>
+					<div class="h-1 w-8 rounded-full bg-amber-600"></div>
 					<span class="text-sm font-medium text-neutral-700">
 						Effort Gap {selectedStakeholderId === null ? '(Self - Stakeholders)' : `(Self - ${selectedStakeholderName})`}
 					</span>
@@ -534,7 +535,7 @@
 			{/if}
 			{#if showPerformance}
 				<div class="flex items-center gap-2">
-					<div class="h-1 w-8 rounded-full bg-purple-600"></div>
+					<div class="h-1 w-8 rounded-full bg-indigo-600"></div>
 					<span class="text-sm font-medium text-neutral-700">
 						Performance Gap {selectedStakeholderId === null ? '(Self - Stakeholders)' : `(Self - ${selectedStakeholderName})`}
 					</span>
@@ -549,8 +550,13 @@
 			<div class="rounded-xl border-2 border-neutral-200 bg-white p-6">
 				<h3 class="mb-4 text-lg font-semibold text-neutral-900">Effort Gap</h3>
 				<div class="h-[350px] w-full">
-					{#if activeEffortGaps.length > 0}
+					{#if activeEffortGaps.length >= 2}
 						<canvas bind:this={effortChartCanvas}></canvas>
+					{:else if activeEffortGaps.length === 1}
+						<div class="flex h-full flex-col items-center justify-center gap-2 text-neutral-500">
+							<p class="text-sm font-medium">Gap analysis requires stakeholder feedback from at least 2 weeks.</p>
+							<p class="text-xs">You have 1 week so far. Keep going!</p>
+						</div>
 					{:else}
 						<div class="flex h-full items-center justify-center text-neutral-500">
 							<p class="text-sm">Not enough data to display effort gap.</p>
@@ -564,8 +570,13 @@
 			<div class="rounded-xl border-2 border-neutral-200 bg-white p-6">
 				<h3 class="mb-4 text-lg font-semibold text-neutral-900">Performance Gap</h3>
 				<div class="h-[350px] w-full">
-					{#if activePerformanceGaps.length > 0}
+					{#if activePerformanceGaps.length >= 2}
 						<canvas bind:this={performanceChartCanvas}></canvas>
+					{:else if activePerformanceGaps.length === 1}
+						<div class="flex h-full flex-col items-center justify-center gap-2 text-neutral-500">
+							<p class="text-sm font-medium">Gap analysis requires stakeholder feedback from at least 2 weeks.</p>
+							<p class="text-xs">You have 1 week so far. Keep going!</p>
+						</div>
 					{:else}
 						<div class="flex h-full items-center justify-center text-neutral-500">
 							<p class="text-sm">Not enough data to display performance gap.</p>

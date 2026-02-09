@@ -74,8 +74,10 @@ const IMPERSONATE_COOKIE = 'forbetra_impersonate';
 const impersonateHandle: Handle = async ({ event, resolve }) => {
 	event.locals.realUser = null;
 
+	// Never impersonate on admin routes — admin always sees real data
+	const isAdminRoute = event.url.pathname.startsWith('/admin') || event.url.pathname.startsWith('/api/admin');
 	const targetUserId = event.cookies.get(IMPERSONATE_COOKIE);
-	if (targetUserId && event.locals.dbUser?.role === 'ADMIN') {
+	if (targetUserId && event.locals.dbUser?.role === 'ADMIN' && !isAdminRoute) {
 		const targetUser = await prisma.user.findUnique({ where: { id: targetUserId } });
 		if (targetUser) {
 			event.locals.realUser = event.locals.dbUser;

@@ -1,6 +1,14 @@
 <script lang="ts">
 	import type { ActionData, PageData } from './$types';
 	import HistoricRatingsChart from '$lib/components/HistoricRatingsChart.svelte';
+	import {
+		getScoreColor,
+		getScoreBgColor,
+		getButtonSelectedColors,
+		getButtonHoverColors,
+		getFocusRing,
+		getScoreLabel
+	} from '$lib/utils/scoreColors';
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
 
@@ -19,62 +27,6 @@
 
 	const formatDate = (value: string) =>
 		new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(new Date(value));
-
-	const getScoreLabel = (score: number, type: 'effort' | 'progress') => {
-		if (type === 'effort') {
-			if (score <= 2) return 'Minimal focus';
-			if (score <= 4) return 'Inconsistent focus';
-			if (score <= 6) return 'Consistent focus';
-			if (score <= 8) return 'Strong focus';
-			return 'Exceptional focus';
-		} else {
-			if (score <= 2) return 'Limited impact';
-			if (score <= 4) return 'Emerging impact';
-			if (score <= 6) return 'Clear impact';
-			if (score <= 8) return 'Strong impact';
-			return 'Exceptional impact';
-		}
-	};
-
-	const getScoreColor = (score: number) => {
-		if (score <= 2) return 'text-yellow-600';
-		if (score <= 4) return 'text-orange-600';
-		if (score <= 6) return 'text-blue-600';
-		if (score <= 8) return 'text-emerald-600';
-		return 'text-purple-600';
-	};
-
-	const getScoreBgColor = (score: number) => {
-		if (score <= 2) return 'bg-yellow-50 border-yellow-200';
-		if (score <= 4) return 'bg-orange-50 border-orange-200';
-		if (score <= 6) return 'bg-blue-50 border-blue-200';
-		if (score <= 8) return 'bg-emerald-50 border-emerald-200';
-		return 'bg-purple-50 border-purple-200';
-	};
-
-	const getButtonSelectedColors = (score: number) => {
-		if (score <= 2) return 'border-yellow-500 bg-yellow-500 text-white';
-		if (score <= 4) return 'border-orange-500 bg-orange-500 text-white';
-		if (score <= 6) return 'border-blue-500 bg-blue-500 text-white';
-		if (score <= 8) return 'border-emerald-500 bg-emerald-500 text-white';
-		return 'border-purple-500 bg-purple-500 text-white';
-	};
-
-	const getButtonHoverColors = (score: number) => {
-		if (score <= 2) return 'hover:border-yellow-300 hover:bg-yellow-50';
-		if (score <= 4) return 'hover:border-orange-300 hover:bg-orange-50';
-		if (score <= 6) return 'hover:border-blue-300 hover:bg-blue-50';
-		if (score <= 8) return 'hover:border-emerald-300 hover:bg-emerald-50';
-		return 'hover:border-purple-300 hover:bg-purple-50';
-	};
-
-	const getFocusRing = (score: number) => {
-		if (score <= 2) return 'focus:ring-yellow-500';
-		if (score <= 4) return 'focus:ring-orange-500';
-		if (score <= 6) return 'focus:ring-blue-500';
-		if (score <= 8) return 'focus:ring-emerald-500';
-		return 'focus:ring-purple-500';
-	};
 
 	const handleSubmit = () => {
 		isSubmitting = true;
@@ -129,28 +81,30 @@
 		{/if}
 	</header>
 
-	{#if form?.error}
-		<div class="mx-auto max-w-2xl rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-			<p class="font-medium">⚠️ {form.error}</p>
-		</div>
-	{/if}
+	<div aria-live="polite">
+		{#if form?.error}
+			<div class="mx-auto max-w-2xl rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+				<p class="font-medium">⚠️ {form.error}</p>
+			</div>
+		{/if}
 
-	{#if form?.success}
-		<div class="mx-auto max-w-2xl animate-in fade-in slide-in-from-top-2 rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 text-center">
-			<div class="mb-2 text-4xl">🎉</div>
-			<p class="text-lg font-semibold text-emerald-900">Check-in saved!</p>
-			<p class="mt-1 text-sm text-emerald-700">Your reflection has been recorded. Keep up the great work!</p>
-			<a
-				href="/individual"
-				class="mt-4 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-emerald-700 hover:shadow-lg"
-			>
-				Return to Dashboard
-				<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-				</svg>
-			</a>
-		</div>
-	{/if}
+		{#if form?.success}
+			<div class="mx-auto max-w-2xl animate-in fade-in slide-in-from-top-2 rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 text-center">
+				<div class="mb-2 text-4xl">🎉</div>
+				<p class="text-lg font-semibold text-emerald-900">Check-in saved!</p>
+				<p class="mt-1 text-sm text-emerald-700">Your reflection has been recorded. Keep up the great work!</p>
+				<a
+					href="/individual"
+					class="mt-4 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-emerald-700 hover:shadow-lg"
+				>
+					Return to Dashboard
+					<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+					</svg>
+				</a>
+			</div>
+		{/if}
+	</div>
 
 	<div class="mx-auto w-full max-w-2xl space-y-6">
 		<!-- Interactive Check-in Form -->
@@ -162,7 +116,7 @@
 			<!-- Simple Objective Display -->
 			<div class="rounded-xl border border-neutral-200 bg-neutral-50/50 px-5 py-4">
 				<div class="flex items-center gap-3 text-base text-neutral-600">
-					<span class="text-xl">🎯</span>
+					<span class="text-xl" role="img" aria-label="target">🎯</span>
 					<span class="font-medium">Objective:</span>
 					<span class="font-semibold text-lg text-neutral-900">{data.objective.title}</span>
 				</div>
@@ -176,7 +130,7 @@
 					class="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-neutral-50"
 				>
 					<div class="flex items-center gap-2">
-						<span class="text-lg">📋</span>
+						<span class="text-lg" role="img" aria-label="clipboard">📋</span>
 						<span class="text-sm font-medium text-neutral-700">View behavioral indicators</span>
 					</div>
 					<svg
@@ -246,7 +200,7 @@
 			<div class="group rounded-2xl border-2 border-neutral-200 bg-white p-6 shadow-sm transition-all hover:border-neutral-400 hover:shadow-md">
 				<div class="mb-4 flex items-center justify-between">
 					<div class="flex items-center gap-3">
-						<span class="text-2xl">💪</span>
+						<span class="text-2xl" role="img" aria-label="flexed biceps">💪</span>
 						<div>
 							<label for="effort-score" class="text-lg font-bold text-neutral-900">
 								Focused Effort
@@ -258,10 +212,10 @@
 					</div>
 					<div
 						class="flex h-16 w-16 items-center justify-center rounded-full border-2 transition-all {getScoreBgColor(
-							effortScore
+							effortScore, 'effort'
 						)}"
 					>
-						<span class="text-2xl font-bold {getScoreColor(effortScore)}">{effortScore}</span>
+						<span class="text-2xl font-bold {getScoreColor(effortScore, 'effort')}">{effortScore}</span>
 					</div>
 				</div>
 
@@ -269,14 +223,14 @@
 				<div class="mb-4 grid grid-cols-6 gap-2 sm:grid-cols-11">
 					{#each Array(11) as _, i}
 						{@const isSelected = effortScore === i}
-						{@const buttonColors = getButtonSelectedColors(i)}
-						{@const hoverColors = getButtonHoverColors(i)}
-						{@const focusRing = getFocusRing(i)}
+						{@const buttonColors = getButtonSelectedColors(i, 'effort')}
+						{@const hoverColors = getButtonHoverColors(i, 'effort')}
+						{@const focusRing = getFocusRing(i, 'effort')}
 						<button
 							type="button"
 							onclick={() => (effortScore = i)}
 							disabled={!data.isAvailable || data.isLocked}
-							class="flex h-10 w-full items-center justify-center rounded-lg border-2 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-50 {isSelected
+							class="flex h-10 w-full items-center justify-center rounded-lg border-2 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-60 {isSelected
 								? buttonColors + ' shadow-md'
 								: 'border-neutral-300 bg-white text-neutral-700 ' + hoverColors} focus:outline-none focus:ring-2 {focusRing} focus:ring-offset-2"
 						>
@@ -286,15 +240,15 @@
 				</div>
 
 				<div class="mb-2 flex items-center justify-between">
-					<span class="text-xs font-medium text-neutral-500">Minimal</span>
+					<span class="text-xs font-medium text-neutral-500">Rarely intentional</span>
 					<div
 						class="rounded-full px-3 py-1 text-xs font-semibold {getScoreBgColor(
-							effortScore
-						)} {getScoreColor(effortScore)}"
+							effortScore, 'effort'
+						)} {getScoreColor(effortScore, 'effort')}"
 					>
 						{getScoreLabel(effortScore, 'effort')}
 					</div>
-					<span class="text-xs font-medium text-neutral-500">Exceptional</span>
+					<span class="text-xs font-medium text-neutral-500">Relentless commitment</span>
 				</div>
 				<p class="text-xs text-neutral-400 italic">
 					Consider attention, preparation, and prioritization toward the objective.
@@ -305,7 +259,7 @@
 			<div class="group rounded-2xl border-2 border-neutral-200 bg-white p-6 shadow-sm transition-all hover:border-neutral-400 hover:shadow-md">
 				<div class="mb-4 flex items-center justify-between">
 					<div class="flex items-center gap-3">
-						<span class="text-2xl">📈</span>
+						<span class="text-2xl" role="img" aria-label="chart trending up">📈</span>
 						<div>
 							<label for="progress-score" class="text-lg font-bold text-neutral-900">
 								Performance
@@ -317,10 +271,10 @@
 					</div>
 					<div
 						class="flex h-16 w-16 items-center justify-center rounded-full border-2 transition-all {getScoreBgColor(
-							performanceScore
+							performanceScore, 'performance'
 						)}"
 					>
-						<span class="text-2xl font-bold {getScoreColor(performanceScore)}">{performanceScore}</span>
+						<span class="text-2xl font-bold {getScoreColor(performanceScore, 'performance')}">{performanceScore}</span>
 					</div>
 				</div>
 
@@ -328,14 +282,14 @@
 				<div class="mb-4 grid grid-cols-6 gap-2 sm:grid-cols-11">
 					{#each Array(11) as _, i}
 						{@const isSelected = performanceScore === i}
-						{@const buttonColors = getButtonSelectedColors(i)}
-						{@const hoverColors = getButtonHoverColors(i)}
-						{@const focusRing = getFocusRing(i)}
+						{@const buttonColors = getButtonSelectedColors(i, 'performance')}
+						{@const hoverColors = getButtonHoverColors(i, 'performance')}
+						{@const focusRing = getFocusRing(i, 'performance')}
 						<button
 							type="button"
 							onclick={() => (performanceScore = i)}
 							disabled={!data.isAvailable || data.isLocked}
-							class="flex h-10 w-full items-center justify-center rounded-lg border-2 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-50 {isSelected
+							class="flex h-10 w-full items-center justify-center rounded-lg border-2 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-60 {isSelected
 								? buttonColors + ' shadow-md'
 								: 'border-neutral-300 bg-white text-neutral-700 ' + hoverColors} focus:outline-none focus:ring-2 {focusRing} focus:ring-offset-2"
 						>
@@ -345,15 +299,15 @@
 				</div>
 
 				<div class="mb-2 flex items-center justify-between">
-					<span class="text-xs font-medium text-neutral-500">Limited</span>
+					<span class="text-xs font-medium text-neutral-500">Not yet visible</span>
 					<div
 						class="rounded-full px-3 py-1 text-xs font-semibold {getScoreBgColor(
-							performanceScore
-						)} {getScoreColor(performanceScore)}"
+							performanceScore, 'performance'
+						)} {getScoreColor(performanceScore, 'performance')}"
 					>
 						{getScoreLabel(performanceScore, 'progress')}
 					</div>
-					<span class="text-xs font-medium text-neutral-500">Exceptional</span>
+					<span class="text-xs font-medium text-neutral-500">Transformative impact</span>
 				</div>
 				<p class="text-xs text-neutral-400 italic">
 					Consider outcomes, behavior change, and visible impact related to the objective.
@@ -363,7 +317,7 @@
 			<!-- Notes with Better UX -->
 			<div class="rounded-2xl border-2 border-neutral-200 bg-white p-6 shadow-sm transition-all hover:border-purple-300 hover:shadow-md">
 				<div class="mb-3 flex items-center gap-2">
-					<span class="text-xl">✍️</span>
+					<span class="text-xl" role="img" aria-label="writing hand">✍️</span>
 					<label for="notes" class="text-base font-semibold text-neutral-900">
 						Reflection Notes
 						<span class="ml-2 text-xs font-normal text-neutral-500">(optional)</span>
@@ -374,7 +328,7 @@
 					id="notes"
 					rows="4"
 					disabled={!data.isAvailable || data.isLocked}
-					class="w-full rounded-xl border-2 border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700 placeholder:text-neutral-400 focus:border-purple-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-200 disabled:cursor-not-allowed disabled:opacity-50"
+					class="w-full rounded-xl border-2 border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700 placeholder:text-neutral-400 focus:border-purple-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-200 disabled:cursor-not-allowed disabled:opacity-60"
 					placeholder="Share a win, an obstacle you overcame, or something you learned this week..."
 				>{data.previousEntry?.notes ?? ''}</textarea>
 				<p class="mt-2 text-xs text-neutral-500">
@@ -407,14 +361,14 @@
 					<button
 						type="submit"
 						disabled={!data.isAvailable || data.isLocked || isSubmitting}
-						class="group relative overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-3.5 font-semibold text-white shadow-lg transition-all hover:from-blue-700 hover:to-purple-700 hover:shadow-xl hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
+						class="group relative overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-3.5 font-semibold text-white shadow-lg transition-all hover:from-blue-700 hover:to-purple-700 hover:shadow-xl hover:scale-105 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100 focus-visible:ring-2 focus-visible:ring-offset-2"
 					>
 						<span class="relative z-10 flex items-center gap-2">
 							{#if isSubmitting}
 								<span class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
 								Saving...
 							{:else}
-								<span>✨</span>
+								<span role="img" aria-label="sparkles">✨</span>
 								Save Check-in
 							{/if}
 						</span>

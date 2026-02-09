@@ -124,12 +124,12 @@ export const load: PageServerLoad = async (event) => {
 		0
 	);
 
-	const consistencyScores = clientSummaries
-		.map((c) => c.objective?.insights?.consistencyScore)
+	const stabilityScores = clientSummaries
+		.map((c) => c.objective?.insights?.stabilityScore)
 		.filter((s): s is number => s !== null);
-	const avgConsistency =
-		consistencyScores.length > 0
-			? Math.round(consistencyScores.reduce((sum, s) => sum + s, 0) / consistencyScores.length)
+	const avgStability =
+		stabilityScores.length > 0
+			? Math.round(stabilityScores.reduce((sum, s) => sum + s, 0) / stabilityScores.length)
 			: null;
 
 	const alignmentRatios = clientSummaries
@@ -168,7 +168,7 @@ export const load: PageServerLoad = async (event) => {
 			highPriorityAlerts,
 			mediumPriorityAlerts,
 			lowPriorityAlerts,
-			avgConsistency,
+			avgStability,
 			avgAlignment,
 			overallAvgEffort,
 			overallAvgProgress

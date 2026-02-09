@@ -25,9 +25,8 @@ const formatErrors = (issues: ZodIssue[]) =>
 	);
 
 export const load: PageServerLoad = async (event) => {
-	const { dbUser } = requireRole(event, 'INDIVIDUAL');
-
 	const isPreview = event.url.searchParams.get('preview') === 'true';
+	const { dbUser } = requireRole(event, isPreview ? ['INDIVIDUAL', 'ADMIN'] : 'INDIVIDUAL');
 
 	const existingObjective = await prisma.objective.findFirst({
 		where: { userId: dbUser.id },

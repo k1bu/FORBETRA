@@ -62,7 +62,7 @@
 		</div>
 		<div class="space-y-2">
 			<div class="flex items-center justify-center gap-3">
-				<span class="text-4xl">{getPromptEmoji(data.prompt.heading)}</span>
+				<span class="text-4xl" role="img" aria-label={data.prompt.heading}>{getPromptEmoji(data.prompt.heading)}</span>
 				<h1 class="text-3xl font-bold text-neutral-900">{data.prompt.heading}</h1>
 			</div>
 			{#if isIdentityAnchor}
@@ -79,7 +79,7 @@
 	{#if data.coachNotes && data.coachNotes.length > 0}
 		<section class="mx-auto w-full max-w-2xl space-y-3 rounded-2xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100 p-6 shadow-sm">
 			<div class="flex items-center gap-2">
-				<span class="text-2xl">💬</span>
+				<span class="text-2xl" role="img" aria-label="speech bubble">💬</span>
 				<h2 class="text-base font-semibold text-blue-900">Message from your coach</h2>
 			</div>
 			{#each data.coachNotes as note (note.id)}
@@ -91,28 +91,30 @@
 		</section>
 	{/if}
 
-	{#if form?.error}
-		<div class="mx-auto w-full max-w-2xl rounded-xl border-2 border-red-200 bg-red-50 p-4 text-sm text-red-700">
-			<p class="font-medium">⚠️ {form.error}</p>
-		</div>
-	{/if}
+	<div aria-live="polite">
+		{#if form?.error}
+			<div class="mx-auto w-full max-w-2xl rounded-xl border-2 border-red-200 bg-red-50 p-4 text-sm text-red-700">
+				<p class="font-medium">⚠️ {form.error}</p>
+			</div>
+		{/if}
 
-	{#if form?.success}
-		<div class="mx-auto w-full max-w-2xl animate-in fade-in slide-in-from-top-2 rounded-xl border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 text-center">
-			<div class="mb-2 text-4xl">🎉</div>
-			<p class="text-lg font-semibold text-emerald-900">Intention saved!</p>
-			<p class="mt-1 text-sm text-emerald-700">Your intention has been recorded. You've got this!</p>
-			<a
-				href="/individual"
-				class="mt-4 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-emerald-700 hover:shadow-lg"
-			>
-				Return to Dashboard
-				<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-				</svg>
-			</a>
-		</div>
-	{/if}
+		{#if form?.success}
+			<div class="mx-auto w-full max-w-2xl animate-in fade-in slide-in-from-top-2 rounded-xl border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 text-center">
+				<div class="mb-2 text-4xl">🎉</div>
+				<p class="text-lg font-semibold text-emerald-900">Intention saved!</p>
+				<p class="mt-1 text-sm text-emerald-700">Your intention has been recorded. You've got this!</p>
+				<a
+					href="/individual"
+					class="mt-4 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-emerald-700 hover:shadow-lg"
+				>
+					Return to Dashboard
+					<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+					</svg>
+				</a>
+			</div>
+		{/if}
+	</div>
 
 	<div class="mx-auto w-full max-w-2xl space-y-6">
 		<!-- Objective Card with Visual Appeal -->
@@ -122,7 +124,7 @@
 				<div class="mb-4 flex items-start justify-between">
 					<div class="flex-1">
 						<div class="mb-2 inline-flex items-center gap-2 rounded-lg bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-700">
-							<span>🎯</span>
+							<span role="img" aria-label="target">🎯</span>
 							Your Objective
 						</div>
 						<h2 class="mt-3 text-2xl font-bold text-neutral-900">{data.objective.title}</h2>
@@ -136,7 +138,7 @@
 				{#if data.subgoals && data.subgoals.length > 0}
 					<div class="mt-6 rounded-xl border border-neutral-200 bg-white/80 p-5 backdrop-blur-sm">
 						<div class="mb-3 flex items-center gap-2">
-							<span class="text-lg">📋</span>
+							<span class="text-lg" role="img" aria-label="clipboard">📋</span>
 							<p class="text-sm font-semibold text-neutral-700">Your behavioral indicators</p>
 						</div>
 						<p class="mb-4 text-xs leading-relaxed text-neutral-600">
@@ -168,7 +170,7 @@
 				<!-- Why This Is Effective -->
 				<div class="rounded-2xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50 p-6 shadow-sm">
 					<div class="mb-3 flex items-center gap-2">
-						<span class="text-2xl">🧠</span>
+						<span class="text-2xl" role="img" aria-label="brain">🧠</span>
 						<h3 class="text-base font-semibold text-blue-900">Why This Is Effective</h3>
 					</div>
 					<div class="space-y-2 text-sm leading-relaxed text-blue-800">
@@ -187,7 +189,7 @@
 				<!-- Example -->
 				<div class="rounded-2xl border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 p-6 shadow-sm">
 					<div class="mb-3 flex items-center gap-2">
-						<span class="text-2xl">💡</span>
+						<span class="text-2xl" role="img" aria-label="light bulb">💡</span>
 						<h3 class="text-base font-semibold text-amber-900">Example Identity Anchor</h3>
 					</div>
 					<p class="mb-3 text-sm leading-relaxed text-amber-800">
@@ -209,7 +211,7 @@
 		<form method="post" onsubmit={handleSubmit} class="space-y-6">
 			<div class="group rounded-2xl border-2 border-neutral-200 bg-white p-6 shadow-sm transition-all hover:border-purple-300 hover:shadow-md">
 				<div class="mb-4 flex items-center gap-3">
-					<span class="text-2xl">✍️</span>
+					<span class="text-2xl" role="img" aria-label="writing hand">✍️</span>
 					<div class="flex-1">
 						<label for="intention" class="text-lg font-bold text-neutral-900">
 							{#if isIdentityAnchor}
@@ -302,14 +304,14 @@
 					<button
 						type="submit"
 						disabled={characterCount < 25 || isSubmitting}
-						class="group relative overflow-hidden rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 px-8 py-3.5 font-semibold text-white shadow-lg transition-all hover:from-purple-700 hover:to-pink-700 hover:shadow-xl hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
+						class="group relative overflow-hidden rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 px-8 py-3.5 font-semibold text-white shadow-lg transition-all hover:from-purple-700 hover:to-pink-700 hover:shadow-xl hover:scale-105 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100 focus-visible:ring-2 focus-visible:ring-offset-2"
 					>
 						<span class="relative z-10 flex items-center gap-2">
 							{#if isSubmitting}
 								<span class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
 								Saving...
 							{:else}
-								<span>✨</span>
+								<span role="img" aria-label="sparkles">✨</span>
 								{#if isIdentityAnchor}
 									{data.existing ? 'Update Identity Anchor' : 'Save Identity Anchor'}
 								{:else}

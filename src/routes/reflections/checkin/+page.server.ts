@@ -98,7 +98,8 @@ const isNextMondayIntentionSubmitted = async (
 };
 
 export const load: PageServerLoad = async (event) => {
-	const { dbUser } = requireRole(event, 'INDIVIDUAL');
+	const isPreview = event.url.searchParams.get('preview') === 'true';
+	const { dbUser } = requireRole(event, isPreview ? ['INDIVIDUAL', 'ADMIN'] : 'INDIVIDUAL');
 
 	const objective = await prisma.objective.findFirst({
 		where: { userId: dbUser.id, active: true },
@@ -129,7 +130,6 @@ export const load: PageServerLoad = async (event) => {
 
 	// Check if type is specified in query params
 	const typeParam = event.url.searchParams.get('type');
-	const isPreview = event.url.searchParams.get('preview') === 'true';
 
 	let checkInInfo: {
 		type: ReflectionType;

@@ -5,6 +5,8 @@
 	export let data: {
 		coach: { name: string };
 		clients: ClientSummary[];
+		coachPrepMap: Record<string, { id: string; content: string | null; createdAt: Date }>;
+		alertMap: Record<string, string[]>;
 	};
 
 	export let form:
@@ -13,6 +15,7 @@
 				success?: boolean;
 				noteError?: string;
 				noteSuccess?: boolean;
+				cadenceSuccess?: boolean;
 				values?: {
 					content?: string;
 					weekNumber?: string;
@@ -66,6 +69,48 @@
 	let filteredClients: ClientSummary[] = data.clients;
 	let noteClientId: string | null = null;
 	let noteFormOpen = false;
+	let noteTextareaEl: HTMLTextAreaElement | undefined;
+
+	function trapFocus(e: KeyboardEvent) {
+		if (e.key !== 'Tab') return;
+		const modal = (e.currentTarget as HTMLElement);
+		const focusable = modal.querySelectorAll<HTMLElement>(
+			'textarea, input:not([type="hidden"]), button, select, [tabindex]:not([tabindex="-1"])'
+		);
+		if (focusable.length === 0) return;
+		const first = focusable[0];
+		const last = focusable[focusable.length - 1];
+		if (e.shiftKey) {
+			if (document.activeElement === first) {
+				e.preventDefault();
+				last.focus();
+			}
+		} else {
+			if (document.activeElement === last) {
+				e.preventDefault();
+				first.focus();
+			}
+		}
+	}
+
+	$: if (noteFormOpen) {
+		setTimeout(() => {
+			noteTextareaEl?.focus();
+		}, 0);
+	}
+
+	// Auto-select first non-archived client on load
+	let selectedClientId: string | null = null;
+	$: {
+		const nonArchived = filteredClients.filter((c) => !c.archived);
+		if (selectedClientId === null && nonArchived.length > 0) {
+			selectedClientId = nonArchived[0].id;
+		}
+	}
+
+	function selectClient(id: string) {
+		selectedClientId = id;
+	}
 
 	$: filteredClients = data.clients.filter((client) => {
 		if (!showArchived && client.archived) return false;
@@ -76,9 +121,11 @@
 			client.email.toLowerCase().includes(query)
 		);
 	});
+
+	$: selectedClient = filteredClients.find((c) => c.id === selectedClientId) ?? null;
 </script>
 
-<section class="mx-auto flex max-w-7xl flex-col gap-8 p-4 pb-12">
+<section class="mx-auto flex max-w-7xl flex-col gap-6 p-4 pb-12">
 	<!-- Header -->
 	<header class="flex items-center justify-between">
 		<div>
@@ -109,7 +156,7 @@
 		</div>
 	</section>
 
-	<!-- Client Cards -->
+	<!-- Split Pane Layout -->
 	{#if data.clients.length === 0}
 		<div class="rounded-xl border-2 border-dashed border-neutral-300 bg-neutral-50 p-8 text-center">
 			<p class="text-sm text-neutral-500">
@@ -121,35 +168,56 @@
 			<p class="text-sm text-neutral-500">No clients match this search.</p>
 		</div>
 	{:else}
-		<div class="grid gap-6 lg:grid-cols-2">
-			{#each filteredClients as client (client.id)}
-				<article
-					class="group relative space-y-4 rounded-2xl border-2 border-neutral-200 bg-gradient-to-br from-white to-neutral-50 px-6 py-5 shadow-sm transition-all hover:border-blue-300 hover:shadow-lg"
-				>
-					<header class="flex flex-wrap items-start justify-between gap-3">
-						<div class="flex-1">
-							<div class="mb-2 flex items-center gap-2">
-								<h2 class="text-xl font-bold text-neutral-900">{client.name}</h2>
-								{#if client.archived}
-									<span class="rounded-full bg-neutral-200 px-3 py-1 text-xs font-semibold uppercase text-neutral-600">
-										Archived
-									</span>
-								{:else}
-									<span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold uppercase text-emerald-700">
-										✓ Active
+		<div class="flex flex-col gap-4 md:flex-row md:gap-6" style="min-height: 600px;">
+			<!-- Left Column: Client List -->
+			<div class="w-full shrink-0 md:w-80 lg:w-96">
+				<div class="sticky top-4 max-h-[calc(100vh-200px)] space-y-1.5 overflow-y-auto rounded-xl border-2 border-neutral-200 bg-white p-2">
+					{#each filteredClients as client (client.id)}
+						<button
+							class="w-full flex items-center gap-3 rounded-lg px-3 py-3 text-left transition-all {selectedClientId === client.id ? 'bg-blue-50 border-2 border-blue-300 shadow-sm' : 'border-2 border-transparent hover:bg-neutral-50 hover:border-neutral-200'}"
+							onclick={() => selectClient(client.id)}
+						>
+							<div class="min-w-0 flex-1">
+								<div class="flex items-center gap-2">
+									<span class="truncate text-sm font-bold text-neutral-900">{client.name}</span>
+									{#if client.archived}
+										<span class="shrink-0 rounded-full bg-neutral-200 px-1.5 py-0.5 text-[10px] font-medium text-neutral-600">Archived</span>
+									{:else}
+										<span class="shrink-0 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-medium text-emerald-700">Active</span>
+									{/if}
+								</div>
+								{#if client.objective?.cycle}
+									<span class="text-xs text-neutral-500">
+										Week {client.objective.cycle.currentWeek ?? '—'}
 									</span>
 								{/if}
 							</div>
-							<p class="text-sm text-neutral-600">{client.email}</p>
-							<p class="mt-1 text-xs text-neutral-500">
-								Joined {formatRelativeDays(client.joinedAt)}
-								{#if client.archived}
-									· Archived {formatDate(client.archivedAt)}
-								{/if}
-							</p>
-						</div>
-						{#if client.alerts.length > 0}
-							<div class="flex flex-col items-end gap-2">
+							{#if client.alerts && client.alerts.length > 0}
+								<span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-100 text-xs font-bold text-red-600">{client.alerts.length}</span>
+							{/if}
+						</button>
+					{/each}
+				</div>
+			</div>
+
+			<!-- Right Column: Detail Panel -->
+			<div class="flex-1 min-w-0">
+				{#if selectedClient}
+					{@const client = selectedClient}
+					<div class="rounded-xl border-2 border-neutral-200 bg-white p-6 space-y-6">
+						<!-- Client header info -->
+						<header class="flex flex-wrap items-start justify-between gap-3">
+							<div class="flex-1">
+								<h2 class="text-xl font-bold text-neutral-900">{client.name}</h2>
+								<p class="text-sm text-neutral-600">{client.email}</p>
+								<p class="mt-1 text-xs text-neutral-500">
+									Joined {formatRelativeDays(client.joinedAt)}
+									{#if client.archived}
+										· Archived {formatDate(client.archivedAt)}
+									{/if}
+								</p>
+							</div>
+							{#if client.alerts.length > 0}
 								<span
 									class="rounded-full px-4 py-1.5 text-xs font-bold uppercase shadow-sm {client.alerts.some(
 										(a) => a.severity === 'high'
@@ -159,196 +227,238 @@
 										? 'bg-amber-100 text-amber-700'
 										: 'bg-blue-100 text-blue-700'}"
 								>
-									⚠️ {client.alerts.length} alert{client.alerts.length === 1 ? '' : 's'}
+									{client.alerts.length} alert{client.alerts.length === 1 ? '' : 's'}
 								</span>
-							</div>
-						{/if}
-					</header>
-
-					{#if client.alerts.length > 0}
-						<section class="rounded-xl border-2 border-red-300 bg-gradient-to-br from-red-50 to-orange-50 p-4 shadow-sm">
-							<div class="mb-3 flex items-center gap-2">
-								<span class="text-lg">⚠️</span>
-								<h3 class="text-sm font-bold text-red-900">Alerts</h3>
-							</div>
-							<ul class="space-y-2 text-xs text-red-800">
-								{#each client.alerts as alert (alert.type)}
-									<li
-										class="flex items-start gap-2 rounded-lg bg-white/80 px-3 py-2 {alert.severity === 'high'
-											? 'font-bold border-2 border-red-300'
-											: ''}"
-									>
-										<span
-											class="mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full {alert.severity === 'high'
-												? 'bg-red-600'
-												: alert.severity === 'medium'
-												? 'bg-amber-500'
-												: 'bg-blue-500'}"
-										></span>
-										<span>{alert.message}</span>
-									</li>
-								{/each}
-							</ul>
-						</section>
-					{/if}
-
-					{#if client.objective}
-						<section class="rounded-xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50 p-4">
-							<div class="mb-2 flex items-center gap-2">
-								<span class="text-lg">🎯</span>
-								<p class="text-sm font-bold text-neutral-900">Objective</p>
-							</div>
-							<p class="mb-1 font-semibold text-neutral-900">{client.objective.title}</p>
-							{#if client.objective.description}
-								<p class="text-xs text-neutral-600">{client.objective.description}</p>
 							{/if}
-						</section>
+						</header>
 
-						{#if client.objective.cycle}
-							<section class="rounded-xl border-2 border-neutral-200 bg-gradient-to-br from-neutral-50 to-white p-4">
+						{#if client.alerts.length > 0}
+							<section class="rounded-xl border-2 border-red-300 bg-gradient-to-br from-red-50 to-orange-50 p-4 shadow-sm">
 								<div class="mb-3 flex items-center gap-2">
-									<span class="text-lg">📅</span>
-									<p class="text-sm font-bold text-neutral-900">Cycle Progress</p>
+									<span class="text-lg" role="img" aria-label="warning">⚠️</span>
+									<h3 class="text-sm font-bold text-red-900">Alerts</h3>
 								</div>
-								<div class="mb-3">
-									<div class="mb-2 flex items-center justify-between text-xs">
-										<span class="font-semibold text-neutral-600">Progress</span>
-										<span class="font-bold text-neutral-900">{client.objective.cycle.completion}%</span>
-									</div>
-									<div class="h-2.5 w-full overflow-hidden rounded-full bg-neutral-200">
-										<div
-											class="h-full rounded-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all"
-											style={`width: ${client.objective.cycle.completion}%`}
-										></div>
-									</div>
-								</div>
-								<div class="grid grid-cols-2 gap-2 text-xs text-neutral-600">
-									<div>
-										<span class="text-neutral-500">Status:</span>
-										<span class="ml-1 font-semibold">{client.objective.cycle.status}</span>
-									</div>
-									<div>
-										<span class="text-neutral-500">Week:</span>
-										<span class="ml-1 font-semibold">{client.objective.cycle.currentWeek ?? '—'}</span>
-									</div>
-									<div>
-										<span class="text-neutral-500">Elapsed:</span>
-										<span class="ml-1 font-semibold">{client.objective.cycle.weeksElapsed} weeks</span>
-									</div>
-									<div>
-										<span class="text-neutral-500">Subgoals:</span>
-										<span class="ml-1 font-semibold">{client.objective.subgoalCount}</span>
-									</div>
-								</div>
-							</section>
-						{/if}
-
-						{#if client.objective.insights}
-							<section class="rounded-xl border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 p-4">
-								<div class="mb-3 flex items-center gap-2">
-									<span class="text-lg">✨</span>
-									<p class="text-sm font-bold text-neutral-900">Performance Insights</p>
-								</div>
-								<div class="grid grid-cols-2 gap-3 text-xs">
-									<div class="rounded-lg border border-purple-200 bg-white/80 p-2">
-										<p class="text-neutral-500">Effort (4-wk)</p>
-										<p class="text-lg font-bold text-blue-600">{formatAverage(client.objective.insights.avgEffort)}</p>
-									</div>
-									<div class="rounded-lg border border-purple-200 bg-white/80 p-2">
-										<p class="text-neutral-500">Progress (4-wk)</p>
-										<p class="text-lg font-bold text-emerald-600">{formatAverage(client.objective.insights.avgProgress)}</p>
-									</div>
-									<div class="rounded-lg border border-purple-200 bg-white/80 p-2">
-										<p class="text-neutral-500">Consistency</p>
-										<p class="text-lg font-bold text-purple-600">{formatScore(client.objective.insights.consistencyScore)}</p>
-									</div>
-									<div class="rounded-lg border border-purple-200 bg-white/80 p-2">
-										<p class="text-neutral-500">Alignment</p>
-										<p class="text-lg font-bold text-emerald-600">{formatPercent(client.objective.insights.alignmentRatio)}</p>
-									</div>
-								</div>
-								<div class="mt-3 rounded-lg border border-purple-200 bg-white/80 p-2 text-xs">
-									<p class="text-neutral-600">
-										Stakeholders: <span class="font-semibold">{client.objective.respondedStakeholders}/{client.objective.stakeholderCount}</span> responded this week
-									</p>
-								</div>
-							</section>
-						{/if}
-						{/if}
-
-					<!-- Performance/Effort Visualization - Front and Center -->
-					{#if !client.archived && client.objective?.cycle && client.visualizationData}
-						<section class="rounded-xl border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 p-6 shadow-lg">
-							<div class="mb-4">
-								<h3 class="text-lg font-bold text-neutral-900">Effort and Performance Over Time</h3>
-								<p class="text-sm text-neutral-600">Client self-assessments vs. stakeholder observations</p>
-							</div>
-							<PerformanceEffortChart
-								individualData={client.visualizationData.individual}
-								stakeholderData={client.visualizationData.stakeholders}
-								stakeholders={client.visualizationData.stakeholderList}
-							/>
-						</section>
-					{/if}
-
-					{#if !client.archived && client.objective?.cycle}
-						<section class="rounded-xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50 p-4">
-							<div class="mb-3 flex items-center justify-between">
-								<div class="flex items-center gap-2">
-									<span class="text-lg">💬</span>
-									<h3 class="text-sm font-bold text-neutral-900">Coach Notes</h3>
-								</div>
-								<button
-									type="button"
-									onclick={() => {
-										noteClientId = client.id;
-										noteFormOpen = true;
-									}}
-									class="rounded-lg border-2 border-blue-300 bg-white px-3 py-1.5 text-xs font-semibold text-blue-700 transition-all hover:border-blue-400 hover:bg-blue-100"
-								>
-									+ Add Note
-								</button>
-							</div>
-							{#if client.coachNotes.length > 0}
-								<ul class="space-y-2 text-xs">
-									{#each client.coachNotes as note (note.id)}
-										<li class="rounded-lg border-2 border-blue-200 bg-white p-3 shadow-sm">
-											<p class="mb-2 text-neutral-700">{note.content}</p>
-											<div class="flex items-center gap-2 text-[11px] text-neutral-500">
-												{#if note.weekNumber}
-													<span class="rounded-full bg-blue-100 px-2 py-0.5 font-semibold text-blue-700">
-														Week {note.weekNumber}
-													</span>
-												{/if}
-												<span>{formatRelativeDays(note.createdAt)}</span>
-											</div>
+								<ul class="space-y-2 text-xs text-red-800">
+									{#each client.alerts as alert (alert.type)}
+										<li
+											class="flex items-start gap-2 rounded-lg bg-white/80 px-3 py-2 {alert.severity === 'high'
+												? 'font-bold border-2 border-red-300'
+												: ''}"
+										>
+											<span
+												class="mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full {alert.severity === 'high'
+													? 'bg-red-600'
+													: alert.severity === 'medium'
+													? 'bg-amber-500'
+													: 'bg-blue-500'}"
+											></span>
+											<span>{alert.message}</span>
 										</li>
 									{/each}
 								</ul>
-							{:else}
-								<div class="rounded-lg border-2 border-dashed border-blue-300 bg-white/50 p-4 text-center">
-									<p class="text-xs text-neutral-500">
-										No notes yet. Add one to appear in their Monday prompt.
-									</p>
-								</div>
-							{/if}
-						</section>
-					{/if}
+							</section>
+						{/if}
 
-					<div class="flex gap-2">
-						<form method="post" action="?/archiveClient" class="flex-1">
-							<input type="hidden" name="individualId" value={client.id} />
-							<input type="hidden" name="archive" value={client.archived ? 'false' : 'true'} />
-							<button
-								type="submit"
-								class="w-full rounded-lg border-2 border-neutral-300 bg-white px-4 py-2 text-xs font-semibold text-neutral-700 transition-all hover:border-neutral-400 hover:bg-neutral-50"
-							>
-								{client.archived ? 'Unarchive' : 'Archive'}
-							</button>
-						</form>
+						{#if client.objective}
+							<section class="rounded-xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50 p-4">
+								<div class="mb-2 flex items-center gap-2">
+									<span class="text-lg" role="img" aria-label="target">🎯</span>
+									<p class="text-sm font-bold text-neutral-900">Objective</p>
+								</div>
+								<p class="mb-1 font-semibold text-neutral-900">{client.objective.title}</p>
+								{#if client.objective.description}
+									<p class="text-xs text-neutral-600">{client.objective.description}</p>
+								{/if}
+							</section>
+
+							{#if client.objective.insights}
+								<section class="rounded-xl border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 p-4">
+									<div class="mb-3 flex items-center gap-2">
+										<span class="text-lg" role="img" aria-label="sparkles">✨</span>
+										<p class="text-sm font-bold text-neutral-900">Performance Insights</p>
+									</div>
+									<div class="grid grid-cols-2 gap-3 text-xs">
+										<div class="rounded-lg border border-purple-200 bg-white/80 p-2">
+											<p class="text-neutral-500">Effort (4-wk)</p>
+											<p class="text-lg font-bold text-amber-600">{formatAverage(client.objective.insights.avgEffort)}</p>
+										</div>
+										<div class="rounded-lg border border-purple-200 bg-white/80 p-2">
+											<p class="text-neutral-500">Progress (4-wk)</p>
+											<p class="text-lg font-bold text-indigo-600">{formatAverage(client.objective.insights.avgProgress)}</p>
+										</div>
+										<div class="rounded-lg border border-purple-200 bg-white/80 p-2">
+											<p class="text-neutral-500">Stability</p>
+											<p class="text-lg font-bold text-purple-600">{formatScore(client.objective.insights.stabilityScore)}</p>
+										</div>
+										<div class="rounded-lg border border-purple-200 bg-white/80 p-2">
+											<p class="text-neutral-500">Alignment</p>
+											<p class="text-lg font-bold text-emerald-600">{formatPercent(client.objective.insights.alignmentRatio)}</p>
+										</div>
+									</div>
+									<div class="mt-3 rounded-lg border border-purple-200 bg-white/80 p-2 text-xs">
+										<p class="text-neutral-600">
+											Stakeholders: <span class="font-semibold">{client.objective.respondedStakeholders}/{client.objective.stakeholderCount}</span> responded this week
+										</p>
+									</div>
+								</section>
+							{/if}
+
+							{#if client.objective?.cycle && client.stakeholders.length > 0}
+								<section class="rounded-xl border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 p-4">
+									<div class="mb-3 flex items-center gap-2">
+										<span class="text-lg" role="img" aria-label="incoming mail">📬</span>
+										<h3 class="text-sm font-bold text-neutral-900">Stakeholder Feedback Cadence</h3>
+									</div>
+									<p class="mb-3 text-xs text-neutral-600">
+										How often should stakeholders be asked to rate {client.name.split(' ')[0]}?
+									</p>
+									<form method="post" action="?/updateCadence" class="space-y-3">
+										<input type="hidden" name="individualId" value={client.id} />
+										<input type="hidden" name="cycleId" value={client.objective.cycle.id} />
+										<div class="flex gap-2">
+											{#each [
+												{ value: 'every_checkin', label: 'Every check-in', desc: '~8/mo' },
+												{ value: 'weekly', label: 'Weekly', desc: '~4/mo' },
+												{ value: 'monthly', label: 'Monthly', desc: '~1/mo' }
+											] as option (option.value)}
+												<label
+													class="flex flex-1 cursor-pointer flex-col items-center gap-1 rounded-xl border-2 px-3 py-2.5 text-center transition-all
+														{client.objective.cycle.stakeholderCadence === option.value
+														? 'border-amber-500 bg-amber-100 shadow-sm'
+														: 'border-neutral-200 bg-white hover:border-amber-300 hover:bg-amber-50'}"
+												>
+													<input
+														type="radio"
+														name="stakeholderCadence"
+														value={option.value}
+														checked={client.objective.cycle.stakeholderCadence === option.value}
+														class="sr-only"
+														onchange={(e) => e.currentTarget.closest('form')?.requestSubmit()}
+													/>
+													<span class="text-xs font-semibold text-neutral-900">{option.label}</span>
+													<span class="text-xs text-neutral-500">{option.desc}</span>
+												</label>
+											{/each}
+										</div>
+										<label class="flex items-center gap-2 text-xs text-neutral-700">
+											<input
+												type="checkbox"
+												name="autoThrottle"
+												checked={client.objective.cycle.autoThrottle}
+												class="rounded border-neutral-300"
+												onchange={(e) => e.currentTarget.closest('form')?.requestSubmit()}
+											/>
+											<span>Auto-reduce for stakeholders rating 3+ people</span>
+										</label>
+									</form>
+									<p class="mt-2 text-xs text-neutral-400">
+										{client.stakeholders.length} stakeholder{client.stakeholders.length === 1 ? '' : 's'} linked
+									</p>
+								</section>
+							{/if}
+						{/if}
+
+						<!-- AI Coach Prep -->
+						{#if !client.archived && data.coachPrepMap[client.id]}
+							{@const prep = data.coachPrepMap[client.id]}
+							<section class="rounded-xl border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 p-4">
+								<div class="mb-3 flex items-center gap-2">
+									<span class="text-lg" role="img" aria-label="sparkles">&#10024;</span>
+									<h3 class="text-sm font-bold text-neutral-900">AI Coach Prep</h3>
+									<span class="text-xs text-neutral-500">{formatRelativeDays(prep.createdAt?.toString())}</span>
+								</div>
+								{#if data.alertMap[client.id]?.length}
+									<div class="mb-3 rounded-lg border border-red-200 bg-red-50 p-2">
+										<p class="text-xs font-bold text-red-700">AI Alerts:</p>
+										{#each data.alertMap[client.id] as alert}
+											<p class="mt-1 text-xs text-red-600">{alert}</p>
+										{/each}
+									</div>
+								{/if}
+								<div class="prose prose-sm max-w-none text-neutral-700">
+									{prep.content ?? 'No prep available.'}
+								</div>
+							</section>
+						{/if}
+
+						<!-- Performance/Effort Visualization -->
+						{#if !client.archived && client.objective?.cycle && client.visualizationData}
+							<section class="rounded-xl border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 p-6 shadow-lg">
+								<div class="mb-4">
+									<h3 class="text-lg font-bold text-neutral-900">Effort and Performance Over Time</h3>
+									<p class="text-sm text-neutral-600">Client self-assessments vs. stakeholder observations</p>
+								</div>
+								<PerformanceEffortChart
+									individualData={client.visualizationData.individual}
+									stakeholderData={client.visualizationData.stakeholders}
+									stakeholders={client.visualizationData.stakeholderList}
+								/>
+							</section>
+						{/if}
+
+						{#if !client.archived && client.objective?.cycle}
+							<section class="rounded-xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50 p-4">
+								<div class="mb-3 flex items-center justify-between">
+									<div class="flex items-center gap-2">
+										<span class="text-lg" role="img" aria-label="speech bubble">💬</span>
+										<h3 class="text-sm font-bold text-neutral-900">Coach Notes</h3>
+									</div>
+									<button
+										type="button"
+										onclick={() => {
+											noteClientId = client.id;
+											noteFormOpen = true;
+										}}
+										class="rounded-lg border-2 border-blue-300 bg-white px-3 py-1.5 text-xs font-semibold text-blue-700 transition-all hover:border-blue-400 hover:bg-blue-100"
+									>
+										+ Add Note
+									</button>
+								</div>
+								{#if client.coachNotes.length > 0}
+									<ul class="space-y-2 text-xs">
+										{#each client.coachNotes as note (note.id)}
+											<li class="rounded-lg border-2 border-blue-200 bg-white p-3 shadow-sm">
+												<p class="mb-2 text-neutral-700">{note.content}</p>
+												<div class="flex items-center gap-2 text-xs text-neutral-500">
+													{#if note.weekNumber}
+														<span class="rounded-full bg-blue-100 px-2 py-0.5 font-semibold text-blue-700">
+															Week {note.weekNumber}
+														</span>
+													{/if}
+													<span>{formatRelativeDays(note.createdAt)}</span>
+												</div>
+											</li>
+										{/each}
+									</ul>
+								{:else}
+									<div class="rounded-lg border-2 border-dashed border-blue-300 bg-white/50 p-4 text-center">
+										<p class="text-xs text-neutral-500">
+											No notes yet. Add one to appear in their Monday prompt.
+										</p>
+									</div>
+								{/if}
+							</section>
+						{/if}
+
+						<div class="flex gap-2">
+							<form method="post" action="?/archiveClient" class="flex-1">
+								<input type="hidden" name="individualId" value={client.id} />
+								<input type="hidden" name="archive" value={client.archived ? 'false' : 'true'} />
+								<button
+									type="submit"
+									class="w-full rounded-lg border-2 border-neutral-300 bg-white px-4 py-2 text-xs font-semibold text-neutral-700 transition-all hover:border-neutral-400 hover:bg-neutral-50"
+								>
+									{client.archived ? 'Unarchive' : 'Archive'}
+								</button>
+							</form>
+						</div>
 					</div>
-				</article>
-			{/each}
+				{:else}
+					<div class="flex h-full items-center justify-center rounded-xl border-2 border-dashed border-neutral-300 bg-neutral-50 p-12">
+						<p class="text-sm text-neutral-500">Select a client to view details</p>
+					</div>
+				{/if}
+			</div>
 		</div>
 	{/if}
 </section>
@@ -369,15 +479,17 @@
 				noteFormOpen = false;
 				noteClientId = null;
 			}
+			trapFocus(e);
 		}}
 		role="dialog"
 		aria-modal="true"
+		aria-labelledby="note-modal-title"
 		tabindex="-1"
 	>
 		<div class="w-full max-w-lg rounded-2xl border-2 border-neutral-200 bg-white p-6 shadow-2xl">
 			<div class="mb-4 flex items-center gap-2">
-				<span class="text-2xl">💬</span>
-				<h2 class="text-xl font-bold text-neutral-900">Add Note for {client?.name}</h2>
+				<span class="text-2xl" role="img" aria-label="speech bubble">💬</span>
+				<h2 id="note-modal-title" class="text-xl font-bold text-neutral-900">Add Note for {client?.name}</h2>
 			</div>
 			{#if form?.noteError}
 				<div class="mb-4 rounded-xl border-2 border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -386,7 +498,7 @@
 			{:else if form?.noteSuccess}
 				<div class="mb-4 rounded-xl border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100 px-4 py-3 text-sm text-emerald-700">
 					<div class="flex items-center gap-2">
-						<span class="text-lg">✅</span>
+						<span class="text-lg" role="img" aria-label="check mark">✅</span>
 						<p class="font-semibold">Note saved successfully! It will appear in their next Monday prompt.</p>
 					</div>
 				</div>
@@ -421,6 +533,7 @@
 				<label class="block space-y-1 text-sm">
 					<span class="font-semibold text-neutral-700">Note content</span>
 					<textarea
+						bind:this={noteTextareaEl}
 						name="content"
 						rows="4"
 						required
@@ -445,7 +558,7 @@
 						type="submit"
 						class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:from-blue-700 hover:to-purple-700 hover:shadow-lg hover:scale-105"
 					>
-						<span>💾</span>
+						<span role="img" aria-label="save">💾</span>
 						Save Note
 					</button>
 				</div>
@@ -453,4 +566,3 @@
 		</div>
 	</div>
 {/if}
-

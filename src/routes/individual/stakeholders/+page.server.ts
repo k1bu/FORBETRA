@@ -147,6 +147,59 @@ export const actions: Actions = {
 			Math.floor((new Date().getTime() - cycle.startDate.getTime()) / (7 * 24 * 60 * 60 * 1000))
 		);
 
+		// Cadence gating: check if feedback request is allowed this period
+		const cadence = cycle.stakeholderCadence ?? 'weekly';
+		if (cadence !== 'every_checkin') {
+			let windowStart: Date;
+			if (cadence === 'monthly') {
+				windowStart = new Date();
+				windowStart.setDate(1);
+				windowStart.setHours(0, 0, 0, 0);
+			} else {
+				// weekly: start of current week (Monday)
+				windowStart = new Date();
+				const dayOfWeek = windowStart.getDay();
+				const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+				windowStart.setDate(windowStart.getDate() + mondayOffset);
+				windowStart.setHours(0, 0, 0, 0);
+			}
+
+			const existingToken = await prisma.token.findFirst({
+				where: {
+					type: 'FEEDBACK_INVITE',
+					stakeholderId: stakeholder.id,
+					createdAt: { gte: windowStart }
+				}
+			});
+
+			if (existingToken) {
+				const period = cadence === 'monthly' ? 'this month' : 'this week';
+				return fail(400, {
+					action: 'feedback',
+					error: `Feedback already requested from ${stakeholder.name} ${period}. Your coach set the cadence to ${cadence === 'monthly' ? 'monthly' : 'weekly'}.`
+				});
+			}
+		}
+
+		// Auto-throttle: skip if stakeholder has too many pending requests
+		if (cycle.autoThrottle) {
+			const activeRequestCount = await prisma.token.count({
+				where: {
+					type: 'FEEDBACK_INVITE',
+					stakeholderId: stakeholder.id,
+					usedAt: null,
+					expiresAt: { gt: new Date() }
+				}
+			});
+
+			if (activeRequestCount >= 3) {
+				return fail(400, {
+					action: 'feedback',
+					error: `${stakeholder.name} already has ${activeRequestCount} pending feedback requests. Auto-throttle is limiting new requests to prevent survey fatigue.`
+				});
+			}
+		}
+
 		const reflection = await prisma.reflection.upsert({
 			where: {
 				cycleId_weekNumber_reflectionType_subgoalId: {

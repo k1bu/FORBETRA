@@ -72,7 +72,7 @@
 		<div class="space-y-4">
 			<header class="space-y-2">
 				<div class="flex items-center gap-2">
-					<span class="text-2xl">✉️</span>
+					<span class="text-2xl" role="img" aria-label="envelope">✉️</span>
 					<h2 class="text-xl font-bold text-neutral-900">Invite an Individual</h2>
 				</div>
 				<p class="text-sm text-neutral-600">
@@ -87,7 +87,7 @@
 			{:else if form?.success}
 				<div class="space-y-3 rounded-xl border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100 px-4 py-3 text-sm text-emerald-700">
 					<div class="flex items-center gap-2">
-						<span class="text-xl">✅</span>
+						<span class="text-xl" role="img" aria-label="check mark">✅</span>
 						<p class="font-semibold">Invitation created successfully!</p>
 					</div>
 					{#if form.inviteUrl}
@@ -139,7 +139,7 @@
 					type="submit"
 					class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-md transition-all hover:from-blue-700 hover:to-purple-700 hover:shadow-lg hover:scale-105"
 				>
-					<span>✉️</span>
+					<span role="img" aria-label="envelope">✉️</span>
 					Send Invitation
 				</button>
 			</form>
@@ -149,7 +149,7 @@
 			<header class="flex items-center justify-between">
 				<div>
 					<div class="mb-1 flex items-center gap-2">
-						<span class="text-xl">📬</span>
+						<span class="text-xl" role="img" aria-label="incoming mail">📬</span>
 						<h3 class="text-sm font-bold text-neutral-900">Active Invites</h3>
 					</div>
 					<p class="text-xs text-neutral-500">Track invitations waiting for acceptance.</p>

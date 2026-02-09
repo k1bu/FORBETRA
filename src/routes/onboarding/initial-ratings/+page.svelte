@@ -42,7 +42,7 @@
 			<h1 class="mb-4 text-3xl font-bold text-slate-900">Set Your Starting Point</h1>
 			<p class="text-lg leading-relaxed text-slate-700">
 				These ratings capture where you feel you are right now as you begin working toward
-				<span class="font-semibold text-blue-900">{data.objective.title}</span>.
+				<span class="font-semibold text-blue-900">{data.isPreview ? "your development objective" : data.objective.title}</span>.
 			</p>
 			<p class="mt-3 text-base text-slate-600">
 				There's no right or wrong answer—this simply gives us a baseline to measure change over time.
@@ -77,7 +77,7 @@
 					</label>
 					<p class="text-base text-neutral-700 leading-relaxed">
 						Over the past few weeks, how consistently have you been putting deliberate effort toward
-						improving your {data.objective.title}?
+						improving your {data.isPreview ? "your development objective" : data.objective.title}?
 					</p>
 				</div>
 
@@ -101,7 +101,7 @@
 				</div>
 
 				<div class="flex items-center justify-between">
-					<span class="text-xs font-medium text-neutral-500">Minimal</span>
+					<span class="text-xs font-medium text-neutral-500">Rarely intentional</span>
 					<div
 						class="rounded-full px-3 py-1 text-xs font-semibold {getScoreBgColor(
 							effortScore, 'effort'
@@ -109,7 +109,7 @@
 					>
 						{getScoreLabel(effortScore, 'effort')}
 					</div>
-					<span class="text-xs font-medium text-neutral-500">Exceptional</span>
+					<span class="text-xs font-medium text-neutral-500">Relentless commitment</span>
 				</div>
 			</div>
 
@@ -129,7 +129,7 @@
 					</label>
 					<p class="text-base text-neutral-700 leading-relaxed">
 						Based on recent situations, how effectively have you been showing up in line with your goal
-						of improving your {data.objective.title}?
+						of improving your {data.isPreview ? "your development objective" : data.objective.title}?
 					</p>
 				</div>
 
@@ -153,7 +153,7 @@
 				</div>
 
 				<div class="flex items-center justify-between">
-					<span class="text-xs font-medium text-neutral-500">Limited</span>
+					<span class="text-xs font-medium text-neutral-500">Not yet visible</span>
 					<div
 						class="rounded-full px-3 py-1 text-xs font-semibold {getScoreBgColor(
 							performanceScore, 'performance'
@@ -161,7 +161,7 @@
 					>
 						{getScoreLabel(performanceScore, 'progress')}
 					</div>
-					<span class="text-xs font-medium text-neutral-500">Exceptional</span>
+					<span class="text-xs font-medium text-neutral-500">Transformative impact</span>
 				</div>
 			</div>
 

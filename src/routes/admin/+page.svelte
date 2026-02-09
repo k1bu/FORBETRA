@@ -10,6 +10,12 @@
 		);
 	};
 
+	const reflectionTypeLabels: Record<string, string> = {
+		INTENTION: 'Intention',
+		RATING_A: 'Effort check-in',
+		RATING_B: 'Performance check-in'
+	};
+
 	const statCards = [
 		{ label: 'Total Users', value: data.stats.totalUsers, color: 'bg-blue-50 border-blue-200 text-blue-700' },
 		{ label: 'Individuals', value: data.stats.roleCounts['INDIVIDUAL'] ?? 0, color: 'bg-emerald-50 border-emerald-200 text-emerald-700' },
@@ -39,33 +45,14 @@
 		{/each}
 	</div>
 
-	<!-- Preview User Flows -->
-	<div class="rounded-xl border border-blue-200 bg-blue-50/50 p-4 shadow-sm">
-		<h2 class="mb-2 text-sm font-bold uppercase tracking-wide text-blue-600">Preview User Flows</h2>
-		<p class="mb-3 text-xs text-neutral-600">Open user-facing pages in a new window. Use the Users page to preview as a specific user.</p>
-		<div class="flex flex-wrap gap-2">
-			<a href="/onboarding?preview=true" target="_blank" rel="noopener"
-				class="rounded-lg border border-blue-200 bg-white px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-50">
-				Onboarding Flow
-			</a>
-			<a href="/onboarding/initial-ratings?preview=true" target="_blank" rel="noopener"
-				class="rounded-lg border border-blue-200 bg-white px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-50">
-				Initial Ratings
-			</a>
-			<a href="/reflections/checkin?preview=true" target="_blank" rel="noopener"
-				class="rounded-lg border border-blue-200 bg-white px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-50">
-				Check-in / Ratings
-			</a>
-			<a href="/prompts/monday?preview=true" target="_blank" rel="noopener"
-				class="rounded-lg border border-blue-200 bg-white px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-50">
-				Monday Intention
-			</a>
-			<a href="/individual" target="_blank" rel="noopener"
-				class="rounded-lg border border-blue-200 bg-white px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-50">
-				Individual Hub
-			</a>
+	<!-- Preview Link -->
+	<a href="/admin/preview" class="flex items-center justify-between rounded-xl border-2 border-blue-200 bg-blue-50/50 p-4 shadow-sm transition-all hover:border-blue-300 hover:shadow-md">
+		<div>
+			<h2 class="text-sm font-bold text-blue-700">Preview Panel</h2>
+			<p class="mt-0.5 text-xs text-neutral-600">Test every user flow through the lens of each role — Individual, Stakeholder, Coach</p>
 		</div>
-	</div>
+		<span class="text-blue-400">&rarr;</span>
+	</a>
 
 	<!-- Recent Activity -->
 	<div class="grid gap-6 lg:grid-cols-3">
@@ -74,14 +61,14 @@
 			<h2 class="mb-3 text-sm font-bold uppercase tracking-wide text-neutral-500">Recent Users</h2>
 			<ul class="space-y-2 text-sm">
 				{#each data.recentActivity.users as user (user.id)}
-					<li class="flex items-center justify-between rounded-lg bg-neutral-50 px-3 py-2">
-						<div>
-							<a href="/admin/users/{user.id}" class="font-medium text-neutral-900 hover:text-blue-700">
+					<li class="flex items-center gap-2 rounded-lg bg-neutral-50 px-3 py-2">
+						<div class="min-w-0 flex-1">
+							<a href="/admin/users/{user.id}" class="block truncate font-medium text-neutral-900 hover:text-blue-700">
 								{user.name ?? 'Unnamed'}
 							</a>
-							<p class="text-xs text-neutral-500">{user.email}</p>
+							<p class="truncate text-xs text-neutral-500">{user.email}</p>
 						</div>
-						<span class="rounded bg-neutral-200 px-2 py-0.5 text-xs font-semibold uppercase">{user.role}</span>
+						<span class="shrink-0 rounded bg-neutral-200 px-2 py-0.5 text-xs font-semibold uppercase">{user.role}</span>
 					</li>
 				{/each}
 			</ul>
@@ -93,9 +80,9 @@
 			<ul class="space-y-2 text-sm">
 				{#each data.recentActivity.reflections as refl (refl.id)}
 					<li class="rounded-lg bg-neutral-50 px-3 py-2">
-						<div class="flex items-center justify-between">
-							<span class="font-medium text-neutral-900">{refl.user?.name ?? 'Unknown'}</span>
-							<span class="rounded bg-neutral-200 px-2 py-0.5 text-xs font-semibold">{refl.reflectionType}</span>
+						<div class="flex items-center gap-2">
+							<span class="min-w-0 flex-1 truncate font-medium text-neutral-900">{refl.user?.name ?? 'Unknown'}</span>
+							<span class="shrink-0 rounded bg-neutral-200 px-2 py-0.5 text-xs font-semibold">{reflectionTypeLabels[refl.reflectionType] ?? refl.reflectionType}</span>
 						</div>
 						<p class="text-xs text-neutral-500">Week {refl.weekNumber} &middot; {formatDate(refl.submittedAt)}</p>
 					</li>

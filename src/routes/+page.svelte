@@ -6,7 +6,7 @@
 </script>
 
 <SignedOut>
-	<section class="landing relative flex min-h-screen w-full flex-col bg-[#F7F8FA] md:flex-row">
+	<section class="landing relative flex min-h-screen w-full flex-col bg-slate-50 md:flex-row">
 		<nav class="absolute inset-x-0 top-0 z-20 flex items-center justify-start px-8 py-6 text-sm text-slate-500" aria-hidden="true"></nav>
 
 		<div class="left-panel relative flex w-full flex-col items-center justify-center px-10 pb-16 pt-32 md:w-1/2 md:px-16">
@@ -24,7 +24,7 @@
 				<div class="space-y-5">
 					<p class="text-xs uppercase tracking-[0.6em] text-slate-400">Human. Data. Better.</p>
 					<h1 class="text-5xl font-semibold tracking-[0.18em] text-slate-900">FORBETRA</h1>
-					<div class="h-[2px] w-24 rounded-full bg-[#F2EDE6]"></div>
+					<div class="h-[2px] w-24 rounded-full bg-neutral-200"></div>
 					<p class="text-lg leading-relaxed text-slate-500">
 						FORBETRA is a tool to help you improve. Structure your development, align with stakeholders
 						invested in your growth, and make true progress.
@@ -63,13 +63,13 @@
 				<div class="space-y-4">
 					<a
 						href="/sign-in"
-						class="cta-primary"
+						class="inline-flex w-full items-center justify-center rounded-[1.25rem] bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-3.5 text-[0.95rem] font-semibold text-white shadow-[0_12px_24px_-18px_rgba(37,99,235,0.8)] transition-all duration-200 hover:-translate-y-0.5 hover:from-blue-600 hover:to-blue-700 hover:shadow-[0_16px_28px_-16px_rgba(37,99,235,0.95)]"
 					>
 						Sign in
 					</a>
 					<a
 						href="/sign-up"
-						class="cta-secondary"
+						class="inline-flex w-full items-center justify-center rounded-[1.25rem] border-[1.5px] border-blue-500/70 bg-white/75 px-4 py-3.5 text-[0.95rem] font-semibold text-blue-700 transition-all duration-200 hover:-translate-y-px hover:bg-blue-100/40"
 					>
 						Create account
 					</a>
@@ -161,42 +161,6 @@
 	.right-panel {
 		position: relative;
 		background: linear-gradient(160deg, rgba(241, 245, 249, 0.95), rgba(226, 232, 240, 0.9));
-	}
-
-	.cta-primary,
-	.cta-secondary {
-		display: inline-flex;
-		width: 100%;
-		align-items: center;
-		justify-content: center;
-		padding: 0.85rem 1rem;
-		border-radius: 1.25rem;
-		font-weight: 600;
-		font-size: 0.95rem;
-		transition: transform 200ms ease, box-shadow 200ms ease, background 200ms ease;
-	}
-
-	.cta-primary {
-		background: linear-gradient(90deg, #3b82f6, #2563eb);
-		color: #fff;
-		box-shadow: 0 12px 24px -18px rgba(37, 99, 235, 0.8);
-	}
-
-	.cta-primary:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 16px 28px -16px rgba(37, 99, 235, 0.95);
-		background: linear-gradient(90deg, #2563eb, #1d4ed8);
-	}
-
-	.cta-secondary {
-		border: 1.5px solid rgba(37, 99, 235, 0.7);
-		color: #1d4ed8;
-		background: rgba(255, 255, 255, 0.75);
-	}
-
-	.cta-secondary:hover {
-		transform: translateY(-1px);
-		background: rgba(219, 234, 254, 0.4);
 	}
 
 	@media (max-width: 768px) {

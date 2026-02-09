@@ -463,36 +463,6 @@ export const load: PageServerLoad = async (event) => {
 		};
 	}
 
-	// Load AI-generated insights for this cycle
-	let aiInsights: Array<{
-		id: string;
-		type: string;
-		content: string | null;
-		weekNumber: number | null;
-		thumbs: number | null;
-		createdAt: Date;
-	}> = [];
-
-	if (cycle) {
-		aiInsights = await prisma.insight.findMany({
-			where: {
-				userId: dbUser.id,
-				cycleId: cycle.id,
-				status: 'COMPLETED',
-				type: 'WEEKLY_SYNTHESIS'
-			},
-			orderBy: { weekNumber: 'desc' },
-			select: {
-				id: true,
-				type: true,
-				content: true,
-				weekNumber: true,
-				thumbs: true,
-				createdAt: true
-			}
-		});
-	}
-
 	let cycleReport: { id: string; content: string | null; createdAt: Date; thumbs: number | null } | null = null;
 	if (cycle) {
 		cycleReport = await prisma.insight.findFirst({
@@ -517,7 +487,6 @@ export const load: PageServerLoad = async (event) => {
 		},
 		correlationData,
 		gapLensData,
-		aiInsights,
 		cycleReport
 	};
 };

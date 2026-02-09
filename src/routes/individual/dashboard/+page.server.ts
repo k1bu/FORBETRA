@@ -650,8 +650,37 @@ export const load: PageServerLoad = async (event) => {
 		stdValues.length > 0
 			? stdValues.reduce((sum, value) => sum + value, 0) / stdValues.length
 			: null;
-	const consistencyScore =
+	const stabilityScore =
 		combinedStd !== null ? Math.max(0, Math.round(100 - combinedStd * 10)) : null;
+
+	// Trajectory: linear regression slope of last 4 weeks combined effort+performance
+	let trajectoryScore: number | null = null;
+	if (trendWeeks.length >= 2) {
+		const points: { x: number; y: number }[] = [];
+		for (const week of trendWeeks) {
+			const effortAvg =
+				week.effortScores.length > 0
+					? week.effortScores.reduce((s, v) => s + v, 0) / week.effortScores.length
+					: null;
+			const perfAvg =
+				week.performanceScores.length > 0
+					? week.performanceScores.reduce((s, v) => s + v, 0) / week.performanceScores.length
+					: null;
+			const vals = [effortAvg, perfAvg].filter((v): v is number => v !== null);
+			if (vals.length > 0) {
+				points.push({ x: week.weekNumber, y: vals.reduce((a, b) => a + b, 0) / vals.length });
+			}
+		}
+		if (points.length >= 2) {
+			const n = points.length;
+			const sumX = points.reduce((s, p) => s + p.x, 0);
+			const sumY = points.reduce((s, p) => s + p.y, 0);
+			const sumXY = points.reduce((s, p) => s + p.x * p.y, 0);
+			const sumX2 = points.reduce((s, p) => s + p.x * p.x, 0);
+			const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+			trajectoryScore = Math.max(-100, Math.min(100, Math.round(slope * 25)));
+		}
+	}
 
 	const alignmentRatio =
 		objective.stakeholders.length > 0 ? respondedThisWeek / objective.stakeholders.length : null;
@@ -749,7 +778,8 @@ export const load: PageServerLoad = async (event) => {
 		insights: {
 			avgEffort: normalizedReflectionTrend.avgEffort,
 			avgProgress: normalizedReflectionTrend.avgProgress,
-			consistencyScore,
+			stabilityScore,
+			trajectoryScore,
 			alignmentRatio
 		},
 		engagement: {
@@ -835,6 +865,59 @@ export const actions: Actions = {
 		}
 
 		const weekNumber = computeWeekNumber(cycle.startDate);
+
+		// Cadence gating: check if feedback request is allowed this period
+		const cadence = cycle.stakeholderCadence ?? 'weekly';
+		if (cadence !== 'every_checkin') {
+			let windowStart: Date;
+			if (cadence === 'monthly') {
+				windowStart = new Date();
+				windowStart.setDate(1);
+				windowStart.setHours(0, 0, 0, 0);
+			} else {
+				// weekly: start of current week (Monday)
+				windowStart = new Date();
+				const dayOfWeek = windowStart.getDay();
+				const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+				windowStart.setDate(windowStart.getDate() + mondayOffset);
+				windowStart.setHours(0, 0, 0, 0);
+			}
+
+			const existingToken = await prisma.token.findFirst({
+				where: {
+					type: 'FEEDBACK_INVITE',
+					stakeholderId: stakeholder.id,
+					createdAt: { gte: windowStart }
+				}
+			});
+
+			if (existingToken) {
+				const period = cadence === 'monthly' ? 'this month' : 'this week';
+				return fail(400, {
+					action: 'feedback',
+					error: `Feedback already requested from ${stakeholder.name} ${period}. Your coach set the cadence to ${cadence === 'monthly' ? 'monthly' : 'weekly'}.`
+				});
+			}
+		}
+
+		// Auto-throttle: skip if stakeholder is rating 3+ people and autoThrottle is on
+		if (cycle.autoThrottle) {
+			const activeRequestCount = await prisma.token.count({
+				where: {
+					type: 'FEEDBACK_INVITE',
+					stakeholderId: stakeholder.id,
+					usedAt: null,
+					expiresAt: { gt: new Date() }
+				}
+			});
+
+			if (activeRequestCount >= 3) {
+				return fail(400, {
+					action: 'feedback',
+					error: `${stakeholder.name} already has ${activeRequestCount} pending feedback requests. Auto-throttle is limiting new requests to prevent survey fatigue.`
+				});
+			}
+		}
 
 		const reflection = await prisma.reflection.upsert({
 			where: {

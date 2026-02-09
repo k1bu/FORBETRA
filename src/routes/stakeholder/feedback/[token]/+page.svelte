@@ -1,8 +1,23 @@
 <script lang="ts">
 	import type { ActionData, PageData } from './$types';
 	import HistoricRatingsChart from '$lib/components/HistoricRatingsChart.svelte';
+	import {
+		getScoreColor,
+		getScoreBgColor,
+		getButtonSelectedColors,
+		getButtonHoverColors,
+		getFocusRing,
+		getScoreLabel
+	} from '$lib/utils/scoreColors';
+
+	import { onMount } from 'svelte';
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
+
+	const DRAFT_KEY = `feedback-draft-${data.token}`;
+	const DRAFT_MAX_AGE_MS = 4 * 60 * 60 * 1000; // 4 hours
+
+	let draftRestored = $state(false);
 
 	const reflectionLabel = (() => {
 		switch (data.reflection.type) {
@@ -22,66 +37,11 @@
 
 	let effortScore = $state(5);
 	let performanceScore = $state(5);
+	let notes = $state('');
 	let isSubmitting = $state(false);
 	let showReveal = $state(false);
 	let stakeholderScores = $state<{ effortScore: number; performanceScore: number } | null>(null);
 	let previewIndividualScores = $state<{ effortScore: number; performanceScore: number; participantName: string } | null>(null);
-
-	const getScoreLabel = (score: number, type: 'effort' | 'progress') => {
-		if (type === 'effort') {
-			if (score <= 2) return 'Minimal focus';
-			if (score <= 4) return 'Inconsistent focus';
-			if (score <= 6) return 'Consistent focus';
-			if (score <= 8) return 'Strong focus';
-			return 'Exceptional focus';
-		} else {
-			if (score <= 2) return 'Limited impact';
-			if (score <= 4) return 'Emerging impact';
-			if (score <= 6) return 'Clear impact';
-			if (score <= 8) return 'Strong impact';
-			return 'Exceptional impact';
-		}
-	};
-
-	const getScoreColor = (score: number) => {
-		if (score <= 2) return 'text-yellow-600';
-		if (score <= 4) return 'text-orange-600';
-		if (score <= 6) return 'text-blue-600';
-		if (score <= 8) return 'text-emerald-600';
-		return 'text-purple-600';
-	};
-
-	const getScoreBgColor = (score: number) => {
-		if (score <= 2) return 'bg-yellow-50 border-yellow-200';
-		if (score <= 4) return 'bg-orange-50 border-orange-200';
-		if (score <= 6) return 'bg-blue-50 border-blue-200';
-		if (score <= 8) return 'bg-emerald-50 border-emerald-200';
-		return 'bg-purple-50 border-purple-200';
-	};
-
-	const getButtonSelectedColors = (score: number) => {
-		if (score <= 2) return 'border-yellow-500 bg-yellow-500 text-white';
-		if (score <= 4) return 'border-orange-500 bg-orange-500 text-white';
-		if (score <= 6) return 'border-blue-500 bg-blue-500 text-white';
-		if (score <= 8) return 'border-emerald-500 bg-emerald-500 text-white';
-		return 'border-purple-500 bg-purple-500 text-white';
-	};
-
-	const getButtonHoverColors = (score: number) => {
-		if (score <= 2) return 'hover:border-yellow-300 hover:bg-yellow-50';
-		if (score <= 4) return 'hover:border-orange-300 hover:bg-orange-50';
-		if (score <= 6) return 'hover:border-blue-300 hover:bg-blue-50';
-		if (score <= 8) return 'hover:border-emerald-300 hover:bg-emerald-50';
-		return 'hover:border-purple-300 hover:bg-purple-50';
-	};
-
-	const getFocusRing = (score: number) => {
-		if (score <= 2) return 'focus:ring-yellow-500';
-		if (score <= 4) return 'focus:ring-orange-500';
-		if (score <= 6) return 'focus:ring-blue-500';
-		if (score <= 8) return 'focus:ring-emerald-500';
-		return 'focus:ring-purple-500';
-	};
 
 	const handleSubmit = () => {
 		isSubmitting = true;
@@ -114,6 +74,57 @@
 			}, 500);
 		}
 	});
+
+	// Clear draft on successful submission
+	$effect(() => {
+		if (form?.success) {
+			try {
+				localStorage.removeItem(DRAFT_KEY);
+			} catch {}
+		}
+	});
+
+	// Restore draft from localStorage on mount
+	onMount(() => {
+		if (data.isPreview) return;
+		try {
+			const raw = localStorage.getItem(DRAFT_KEY);
+			if (raw) {
+				const draft = JSON.parse(raw);
+				if (draft.savedAt && Date.now() - draft.savedAt < DRAFT_MAX_AGE_MS) {
+					if (typeof draft.effortScore === 'number') effortScore = draft.effortScore;
+					if (typeof draft.performanceScore === 'number') performanceScore = draft.performanceScore;
+					if (typeof draft.notes === 'string') notes = draft.notes;
+					draftRestored = true;
+					setTimeout(() => { draftRestored = false; }, 3000);
+				} else {
+					localStorage.removeItem(DRAFT_KEY);
+				}
+			}
+		} catch {}
+	});
+
+	// Auto-save draft to localStorage (debounced)
+	let saveTimeout: ReturnType<typeof setTimeout> | null = null;
+	$effect(() => {
+		// Track reactive dependencies
+		const e = effortScore;
+		const p = performanceScore;
+		const n = notes;
+
+		if (data.isPreview) return;
+		if (saveTimeout) clearTimeout(saveTimeout);
+		saveTimeout = setTimeout(() => {
+			try {
+				localStorage.setItem(DRAFT_KEY, JSON.stringify({
+					effortScore: e,
+					performanceScore: p,
+					notes: n,
+					savedAt: Date.now()
+				}));
+			} catch {}
+		}, 1000);
+	});
 </script>
 
 <section class="mx-auto flex min-h-screen max-w-4xl flex-col gap-6 p-4 pb-12">
@@ -132,6 +143,11 @@
 			{/if}
 		</div>
 	{/if}
+	{#if draftRestored}
+		<div class="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-800 shadow-lg transition-opacity">
+			Draft restored
+		</div>
+	{/if}
 	<header class="space-y-3 text-center">
 		<div class="inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-1.5 text-xs font-medium text-blue-700">
 			<span class="h-2 w-2 rounded-full bg-blue-500"></span>
@@ -143,16 +159,18 @@
 		</p>
 	</header>
 
-	{#if form?.error}
-		<div class="mx-auto max-w-2xl rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-			<p class="font-medium">⚠️ {form.error}</p>
-		</div>
-	{/if}
+	<div aria-live="polite">
+		{#if form?.error}
+			<div class="mx-auto max-w-2xl rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+				<p class="font-medium">⚠️ {form.error}</p>
+			</div>
+		{/if}
+	</div>
 
 	{#if form?.success || (data.isPreview && showReveal)}
 		<div class="mx-auto max-w-2xl space-y-6">
 			<!-- Initial Success Message -->
-			<div class="animate-in fade-in slide-in-from-top-2 rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 text-center">
+			<div aria-live="polite" class="animate-in fade-in slide-in-from-top-2 rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 text-center">
 				<div class="mb-2 text-4xl">🎉</div>
 				<p class="text-lg font-semibold text-emerald-900">Feedback submitted!</p>
 				<p class="mt-1 text-sm text-emerald-700">Thank you for sharing your perspective. Your feedback has been recorded.</p>
@@ -182,10 +200,10 @@
 									<div class="flex items-center gap-2">
 										<div
 											class="flex h-10 w-10 items-center justify-center rounded-full border-2 {getScoreBgColor(
-												stakeholderScores?.effortScore ?? 0
+												stakeholderScores?.effortScore ?? 0, 'effort'
 											)}"
 										>
-											<span class="text-lg font-bold {getScoreColor(stakeholderScores?.effortScore ?? 0)}">
+											<span class="text-lg font-bold {getScoreColor(stakeholderScores?.effortScore ?? 0, 'effort')}">
 												{stakeholderScores?.effortScore ?? 0}
 											</span>
 										</div>
@@ -196,10 +214,10 @@
 									<div class="flex items-center gap-2">
 										<div
 											class="flex h-10 w-10 items-center justify-center rounded-full border-2 {getScoreBgColor(
-												individualScores?.effortScore ?? 0
+												individualScores?.effortScore ?? 0, 'effort'
 											)}"
 										>
-											<span class="text-lg font-bold {getScoreColor(individualScores?.effortScore ?? 0)}">
+											<span class="text-lg font-bold {getScoreColor(individualScores?.effortScore ?? 0, 'effort')}">
 												{individualScores?.effortScore ?? '—'}
 											</span>
 										</div>
@@ -222,10 +240,10 @@
 									<div class="flex items-center gap-2">
 										<div
 											class="flex h-10 w-10 items-center justify-center rounded-full border-2 {getScoreBgColor(
-												stakeholderScores?.performanceScore ?? 0
+												stakeholderScores?.performanceScore ?? 0, 'performance'
 											)}"
 										>
-											<span class="text-lg font-bold {getScoreColor(stakeholderScores?.performanceScore ?? 0)}">
+											<span class="text-lg font-bold {getScoreColor(stakeholderScores?.performanceScore ?? 0, 'performance')}">
 												{stakeholderScores?.performanceScore ?? 0}
 											</span>
 										</div>
@@ -236,10 +254,10 @@
 									<div class="flex items-center gap-2">
 										<div
 											class="flex h-10 w-10 items-center justify-center rounded-full border-2 {getScoreBgColor(
-												individualScores?.performanceScore ?? 0
+												individualScores?.performanceScore ?? 0, 'performance'
 											)}"
 										>
-											<span class="text-lg font-bold {getScoreColor(individualScores?.performanceScore ?? 0)}">
+											<span class="text-lg font-bold {getScoreColor(individualScores?.performanceScore ?? 0, 'performance')}">
 												{individualScores?.performanceScore ?? '—'}
 											</span>
 										</div>
@@ -264,7 +282,7 @@
 			<!-- Objective Display -->
 			<div class="rounded-xl border border-neutral-200 bg-neutral-50/50 px-5 py-4">
 				<div class="flex items-center gap-3 text-base text-neutral-600">
-					<span class="text-xl">🎯</span>
+					<span class="text-xl" role="img" aria-label="target">🎯</span>
 					<span class="font-medium">Objective:</span>
 					<span class="font-semibold text-lg text-neutral-900">{data.reflection.objectiveTitle || 'the objective'}</span>
 				</div>
@@ -303,7 +321,7 @@
 			<div class="group rounded-2xl border-2 border-neutral-200 bg-white p-6 shadow-sm transition-all hover:border-neutral-400 hover:shadow-md">
 				<div class="mb-4 flex items-center justify-between">
 					<div class="flex items-center gap-3">
-						<span class="text-2xl">💪</span>
+						<span class="text-2xl" role="img" aria-label="flexed biceps">💪</span>
 						<div>
 							<label for="effort-score" class="text-lg font-bold text-neutral-900">
 								Focused Effort
@@ -315,10 +333,10 @@
 					</div>
 					<div
 						class="flex h-16 w-16 items-center justify-center rounded-full border-2 transition-all {getScoreBgColor(
-							effortScore
+							effortScore, 'effort'
 						)}"
 					>
-						<span class="text-2xl font-bold {getScoreColor(effortScore)}">{effortScore}</span>
+						<span class="text-2xl font-bold {getScoreColor(effortScore, 'effort')}">{effortScore}</span>
 					</div>
 				</div>
 
@@ -326,9 +344,9 @@
 				<div class="mb-4 grid grid-cols-6 gap-2 sm:grid-cols-11">
 					{#each Array(11) as _, i}
 						{@const isSelected = effortScore === i}
-						{@const buttonColors = getButtonSelectedColors(i)}
-						{@const hoverColors = getButtonHoverColors(i)}
-						{@const focusRing = getFocusRing(i)}
+						{@const buttonColors = getButtonSelectedColors(i, 'effort')}
+						{@const hoverColors = getButtonHoverColors(i, 'effort')}
+						{@const focusRing = getFocusRing(i, 'effort')}
 						<button
 							type="button"
 							onclick={() => (effortScore = i)}
@@ -345,8 +363,8 @@
 					<span class="text-xs font-medium text-neutral-500">Minimal</span>
 					<div
 						class="rounded-full px-3 py-1 text-xs font-semibold {getScoreBgColor(
-							effortScore
-						)} {getScoreColor(effortScore)}"
+							effortScore, 'effort'
+						)} {getScoreColor(effortScore, 'effort')}"
 					>
 						{getScoreLabel(effortScore, 'effort')}
 					</div>
@@ -361,7 +379,7 @@
 			<div class="group rounded-2xl border-2 border-neutral-200 bg-white p-6 shadow-sm transition-all hover:border-neutral-400 hover:shadow-md">
 				<div class="mb-4 flex items-center justify-between">
 					<div class="flex items-center gap-3">
-						<span class="text-2xl">📈</span>
+						<span class="text-2xl" role="img" aria-label="chart trending up">📈</span>
 						<div>
 							<label for="progress-score" class="text-lg font-bold text-neutral-900">
 								Performance
@@ -373,10 +391,10 @@
 					</div>
 					<div
 						class="flex h-16 w-16 items-center justify-center rounded-full border-2 transition-all {getScoreBgColor(
-							performanceScore
+							performanceScore, 'performance'
 						)}"
 					>
-						<span class="text-2xl font-bold {getScoreColor(performanceScore)}">{performanceScore}</span>
+						<span class="text-2xl font-bold {getScoreColor(performanceScore, 'performance')}">{performanceScore}</span>
 					</div>
 				</div>
 
@@ -384,9 +402,9 @@
 				<div class="mb-4 grid grid-cols-6 gap-2 sm:grid-cols-11">
 					{#each Array(11) as _, i}
 						{@const isSelected = performanceScore === i}
-						{@const buttonColors = getButtonSelectedColors(i)}
-						{@const hoverColors = getButtonHoverColors(i)}
-						{@const focusRing = getFocusRing(i)}
+						{@const buttonColors = getButtonSelectedColors(i, 'performance')}
+						{@const hoverColors = getButtonHoverColors(i, 'performance')}
+						{@const focusRing = getFocusRing(i, 'performance')}
 						<button
 							type="button"
 							onclick={() => (performanceScore = i)}
@@ -403,8 +421,8 @@
 					<span class="text-xs font-medium text-neutral-500">Limited</span>
 					<div
 						class="rounded-full px-3 py-1 text-xs font-semibold {getScoreBgColor(
-							performanceScore
-						)} {getScoreColor(performanceScore)}"
+							performanceScore, 'performance'
+						)} {getScoreColor(performanceScore, 'performance')}"
 					>
 						{getScoreLabel(performanceScore, 'progress')}
 					</div>
@@ -418,7 +436,7 @@
 			<!-- Notes with Better UX -->
 			<div class="rounded-2xl border-2 border-neutral-200 bg-white p-6 shadow-sm transition-all hover:border-purple-300 hover:shadow-md">
 				<div class="mb-3 flex items-center gap-2">
-					<span class="text-xl">✍️</span>
+					<span class="text-xl" role="img" aria-label="writing hand">✍️</span>
 					<label for="comment" class="text-base font-semibold text-neutral-900">
 						Reflection Notes
 						<span class="ml-2 text-xs font-normal text-neutral-500">(optional)</span>
@@ -428,6 +446,7 @@
 					name="comment"
 					id="comment"
 					rows="4"
+					bind:value={notes}
 					class="w-full rounded-xl border-2 border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700 placeholder:text-neutral-400 focus:border-purple-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-200"
 					placeholder="Share what you observed about {data.reflection.participantName}'s progress, any wins you noticed, or encouragement..."
 				></textarea>
@@ -448,14 +467,14 @@
 					<button
 						type="submit"
 						disabled={isSubmitting || data.isPreview}
-						class="group relative overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-3.5 font-semibold text-white shadow-lg transition-all hover:from-blue-700 hover:to-purple-700 hover:shadow-xl hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
+						class="group relative overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-3.5 font-semibold text-white shadow-lg transition-all hover:from-blue-700 hover:to-purple-700 hover:shadow-xl hover:scale-105 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100 focus-visible:ring-2 focus-visible:ring-offset-2"
 					>
 						<span class="relative z-10 flex items-center gap-2">
 							{#if isSubmitting}
 								<span class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
 								Submitting...
 							{:else}
-								<span>✨</span>
+								<span role="img" aria-label="sparkles">✨</span>
 								Submit Feedback
 							{/if}
 						</span>

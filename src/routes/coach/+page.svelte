@@ -10,7 +10,7 @@
 		analytics: {
 			totalAlerts: number;
 			highPriorityAlerts: number;
-			avgConsistency: number | null;
+			avgStability: number | null;
 			avgAlignment: number | null;
 		};
 		recentAlerts: Array<{
@@ -44,7 +44,7 @@
 			class="group relative overflow-hidden rounded-2xl border-2 border-neutral-200 bg-gradient-to-br from-emerald-50 to-teal-50 p-6 shadow-sm transition-all hover:border-emerald-300 hover:shadow-md"
 		>
 			<div class="mb-3 flex items-center gap-2">
-				<span class="text-2xl">👥</span>
+				<span class="text-2xl" role="img" aria-label="people">👥</span>
 				<p class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Active Clients</p>
 			</div>
 			<p class="text-4xl font-bold text-neutral-900">{data.rosterSummary.active}</p>
@@ -62,7 +62,7 @@
 			class="group relative overflow-hidden rounded-2xl border-2 border-neutral-200 bg-gradient-to-br from-red-50 to-orange-50 p-6 shadow-sm transition-all hover:border-red-300 hover:shadow-md"
 		>
 			<div class="mb-3 flex items-center gap-2">
-				<span class="text-2xl">⚠️</span>
+				<span class="text-2xl" role="img" aria-label="warning">⚠️</span>
 				<p class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Total Alerts</p>
 			</div>
 			<p class="text-4xl font-bold text-neutral-900">{data.analytics.totalAlerts}</p>
@@ -82,13 +82,13 @@
 			class="group relative overflow-hidden rounded-2xl border-2 border-neutral-200 bg-gradient-to-br from-blue-50 to-cyan-50 p-6 shadow-sm transition-all hover:border-blue-300 hover:shadow-md"
 		>
 			<div class="mb-3 flex items-center gap-2">
-				<span class="text-2xl">📊</span>
-				<p class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Avg. Consistency</p>
+				<span class="text-2xl" role="img" aria-label="bar chart">📊</span>
+				<p class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Avg. Stability</p>
 			</div>
 			<p class="text-4xl font-bold text-neutral-900">
-				{data.analytics.avgConsistency !== null ? `${data.analytics.avgConsistency}/100` : '—'}
+				{data.analytics.avgStability !== null ? `${data.analytics.avgStability}/100` : '—'}
 			</p>
-			{#if data.analytics.avgConsistency !== null && data.analytics.avgConsistency >= 75}
+			{#if data.analytics.avgStability !== null && data.analytics.avgStability >= 75}
 				<p class="mt-2 text-xs text-emerald-600">Excellent! ✨</p>
 			{/if}
 			<div class="mt-3 text-xs font-semibold text-blue-700 opacity-0 transition-opacity group-hover:opacity-100">
@@ -100,7 +100,7 @@
 			class="group relative overflow-hidden rounded-2xl border-2 border-neutral-200 bg-gradient-to-br from-purple-50 to-pink-50 p-6 shadow-sm transition-all hover:border-purple-300 hover:shadow-md"
 		>
 			<div class="mb-3 flex items-center gap-2">
-				<span class="text-2xl">🎯</span>
+				<span class="text-2xl" role="img" aria-label="target">🎯</span>
 				<p class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Avg. Alignment</p>
 			</div>
 			<p class="text-4xl font-bold text-neutral-900">
@@ -120,7 +120,7 @@
 		<section class="rounded-2xl border-2 border-red-200 bg-gradient-to-br from-red-50 to-orange-50 p-6 shadow-sm">
 			<div class="mb-4 flex items-center justify-between">
 				<div class="flex items-center gap-2">
-					<span class="text-2xl">⚠️</span>
+					<span class="text-2xl" role="img" aria-label="warning">⚠️</span>
 					<h2 class="text-xl font-bold text-neutral-900">Recent Alerts</h2>
 				</div>
 				<a
@@ -164,7 +164,7 @@
 		>
 			<div class="mb-4 flex items-center gap-3">
 				<div class="rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 p-3">
-					<span class="text-2xl">📊</span>
+					<span class="text-2xl" role="img" aria-label="bar chart">📊</span>
 				</div>
 				<h2 class="text-xl font-bold text-neutral-900">Analytics</h2>
 			</div>
@@ -183,7 +183,7 @@
 		>
 			<div class="mb-4 flex items-center gap-3">
 				<div class="rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 p-3">
-					<span class="text-2xl">✉️</span>
+					<span class="text-2xl" role="img" aria-label="envelope">✉️</span>
 				</div>
 				<h2 class="text-xl font-bold text-neutral-900">Invitations</h2>
 			</div>
@@ -206,7 +206,7 @@
 		>
 			<div class="mb-4 flex items-center gap-3">
 				<div class="rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 p-3">
-					<span class="text-2xl">📋</span>
+					<span class="text-2xl" role="img" aria-label="clipboard">📋</span>
 				</div>
 				<h2 class="text-xl font-bold text-neutral-900">Client Roster</h2>
 			</div>

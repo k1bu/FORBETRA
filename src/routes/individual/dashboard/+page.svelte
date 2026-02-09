@@ -82,20 +82,11 @@
 		return 'from-purple-500 to-pink-500';
 	};
 
-	const getScoreColor = (score: number | null | undefined) => {
-		if (score === null || score === undefined) return 'text-neutral-400';
-		if (score < 3) return 'text-amber-600';
-		if (score < 6) return 'text-blue-600';
-		if (score < 8) return 'text-emerald-600';
-		return 'text-purple-600';
-	};
+	import PerformanceEffortChart from '$lib/components/PerformanceEffortChart.svelte';
+	import { getScoreColorNullable, getStabilityColor } from '$lib/utils/scoreColors';
 
-	const getConsistencyColor = (score: number | null | undefined) => {
-		if (score === null || score === undefined) return 'text-neutral-400';
-		if (score < 50) return 'text-amber-600';
-		if (score < 75) return 'text-blue-600';
-		return 'text-emerald-600';
-	};
+	const getScoreColor = (score: number | null | undefined, type: 'effort' | 'performance' = 'effort') =>
+		getScoreColorNullable(score, type);
 </script>
 
 <section class="mx-auto flex max-w-6xl flex-col gap-8 p-4 pb-12">
@@ -156,7 +147,7 @@
 			{#if data.identityAnchor}
 				<div class="mt-6 rounded-xl border-2 border-purple-200/50 bg-white/60 p-5 backdrop-blur-sm">
 					<div class="mb-3 flex items-center gap-2">
-						<span class="text-xl">🎯</span>
+						<span class="text-xl" role="img" aria-label="target">🎯</span>
 						<h2 class="text-sm font-semibold uppercase tracking-wide text-purple-700">Your Identity Anchor</h2>
 					</div>
 					<p class="text-base leading-relaxed text-neutral-800 italic">
@@ -194,7 +185,7 @@
 			{#if data.nextPrompt}
 				<div class="group relative overflow-hidden rounded-2xl border-2 border-neutral-200 bg-gradient-to-br from-blue-50 to-purple-50 p-6 shadow-sm transition-all hover:border-purple-300 hover:shadow-md">
 					<div class="mb-3 flex items-center gap-2">
-						<span class="text-2xl">⏰</span>
+						<span class="text-2xl" role="img" aria-label="alarm clock">⏰</span>
 						<p class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Next Up</p>
 					</div>
 					<p class="mb-1 text-lg font-bold text-neutral-900">{formatPromptLabel(data.nextPrompt.type)}</p>
@@ -214,7 +205,7 @@
 			<div class="group relative overflow-hidden rounded-2xl border-2 border-neutral-200 bg-white p-6 shadow-sm transition-all hover:border-blue-300 hover:shadow-md">
 				<div class="mb-3 flex items-center justify-between">
 					<div class="flex items-center gap-2">
-						<span class="text-2xl">📊</span>
+						<span class="text-2xl" role="img" aria-label="bar chart">📊</span>
 						<p class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Progress</p>
 					</div>
 				</div>
@@ -243,7 +234,7 @@
 			{#if data.feedbackSummary}
 				<div class="group relative overflow-hidden rounded-2xl border-2 border-neutral-200 bg-white p-6 shadow-sm transition-all hover:border-emerald-300 hover:shadow-md">
 					<div class="mb-3 flex items-center gap-2">
-						<span class="text-2xl">👥</span>
+						<span class="text-2xl" role="img" aria-label="people">👥</span>
 						<p class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Feedback</p>
 					</div>
 					<div class="mb-2 flex items-baseline gap-2">
@@ -254,10 +245,10 @@
 					</div>
 					<div class="space-y-1 text-xs text-neutral-600">
 						<p>
-							Effort: <span class="font-semibold {getScoreColor(data.feedbackSummary.avgEffort)}">{formatAverage(data.feedbackSummary.avgEffort)}</span>
+							Effort: <span class="font-semibold {getScoreColor(data.feedbackSummary.avgEffort, 'effort')}">{formatAverage(data.feedbackSummary.avgEffort)}</span>
 						</p>
 						<p>
-							Progress: <span class="font-semibold {getScoreColor(data.feedbackSummary.avgProgress)}">{formatAverage(data.feedbackSummary.avgProgress)}</span>
+							Progress: <span class="font-semibold {getScoreColor(data.feedbackSummary.avgProgress, 'performance')}">{formatAverage(data.feedbackSummary.avgProgress)}</span>
 						</p>
 					</div>
 				</div>
@@ -267,7 +258,7 @@
 			{#if data.engagement}
 				<div class="group relative overflow-hidden rounded-2xl border-2 border-neutral-200 bg-gradient-to-br from-emerald-50 to-teal-50 p-6 shadow-sm transition-all hover:border-emerald-300 hover:shadow-md">
 					<div class="mb-3 flex items-center gap-2">
-						<span class="text-2xl">🔥</span>
+						<span class="text-2xl" role="img" aria-label="fire">🔥</span>
 						<p class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Engagement</p>
 					</div>
 					{#if data.engagement.completionRate !== null}
@@ -308,7 +299,7 @@
 		<div class="space-y-6">
 			<div class="rounded-2xl border-2 border-neutral-200 bg-white p-6 shadow-sm">
 				<div class="mb-4 flex items-center gap-2">
-					<span class="text-xl">📅</span>
+					<span class="text-xl" role="img" aria-label="calendar">📅</span>
 					<h2 class="text-lg font-bold text-neutral-900">Cycle Details</h2>
 				</div>
 				<div class="mb-4 flex flex-wrap items-center gap-3 text-sm text-neutral-600">
@@ -343,7 +334,7 @@
 								}}
 								<div class="rounded-xl border-2 {stateColors[experience.state]} p-4 transition-all hover:shadow-md">
 									<div class="mb-2 flex items-center gap-2">
-										<span class="text-lg">{stateIcons[experience.state]}</span>
+										<span class="text-lg" role="img" aria-label={stateLabels[experience.state]}>{stateIcons[experience.state]}</span>
 										<span class="text-xs font-semibold uppercase tracking-wide text-neutral-600">{stateLabels[experience.state]}</span>
 									</div>
 									<p class="mb-2 font-semibold text-neutral-900">{experience.label}</p>
@@ -375,6 +366,17 @@
 					</div>
 				{/if}
 			</div>
+		</div>
+	{/if}
+
+	<!-- Performance/Effort Visualization -->
+	{#if data.cycle && data.visualizationData && data.visualizationData.individual && data.visualizationData.stakeholders && data.visualizationData.stakeholderList}
+		<div class="rounded-2xl border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 p-6 shadow-lg">
+			<PerformanceEffortChart
+				individualData={data.visualizationData.individual}
+				stakeholderData={data.visualizationData.stakeholders}
+				stakeholders={data.visualizationData.stakeholderList}
+			/>
 		</div>
 	{/if}
 </section>
