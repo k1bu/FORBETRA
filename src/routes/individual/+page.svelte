@@ -54,48 +54,35 @@
 	let showDetailedHeatStrip = $state(false);
 	let showSubgoals = $state(false);
 
-	// Gap display helpers
-	function gapColor(gap: number | null): string {
-		if (gap === null) return 'border-neutral-200';
-		const abs = Math.abs(gap);
-		if (abs <= 1) return 'border-green-300';
-		if (abs <= 2) return 'border-amber-300';
-		return 'border-red-300';
-	}
-	function gapBadgeColor(gap: number | null): string {
-		if (gap === null) return 'bg-neutral-100 text-neutral-500';
-		const abs = Math.abs(gap);
-		if (abs <= 1) return 'bg-green-100 text-green-700';
-		if (abs <= 2) return 'bg-amber-100 text-amber-700';
-		return 'bg-red-100 text-red-700';
-	}
-	function formatGap(gap: number | null): string {
-		if (gap === null) return '--';
-		return (gap > 0 ? '+' : '') + gap.toFixed(1);
-	}
-	function trendArrow(trend: 'widening' | 'closing' | 'stable' | null): string {
-		if (trend === 'widening') return '↗ widening';
-		if (trend === 'closing') return '↘ closing';
-		if (trend === 'stable') return '→ stable';
-		return '';
-	}
-	function gapInterpretation(name: string, effortGap: number | null, performanceGap: number | null): string | null {
-		if (effortGap !== null && Math.abs(effortGap) > 2) {
-			return effortGap > 0
-				? `${name} rates your effort lower than you do.`
-				: `${name} rates your effort higher than you do.`;
-		}
-		if (performanceGap !== null && Math.abs(performanceGap) > 2) {
-			return performanceGap > 0
-				? `${name} rates your performance lower than you do.`
-				: `${name} rates your performance higher than you do.`;
-		}
-		return null;
-	}
+	// Cycle extension
+	let extending = $state(false);
+	let extendError = $state<string | null>(null);
+	let extendSuccess = $state(false);
 
-	const sortedPerceptionGaps = $derived(
-		[...(data.perceptionGaps ?? [])].sort((a, b) => b.maxAbsGap - a.maxAbsGap)
-	);
+	async function extendCycle(weeks: number) {
+		if (!data.cycle) return;
+		extending = true;
+		extendError = null;
+		try {
+			const res = await fetch('/api/cycle/extend', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ cycleId: data.cycle.id, weeks })
+			});
+			if (!res.ok) {
+				const err = await res.json();
+				extendError = err.error ?? 'Something went wrong';
+				return;
+			}
+			extendSuccess = true;
+			// Reload to reflect new endDate
+			setTimeout(() => window.location.reload(), 1000);
+		} catch {
+			extendError = 'Network error. Please try again.';
+		} finally {
+			extending = false;
+		}
+	}
 
 	// Quick insights — pattern-based, derived from existing data
 	const quickInsights = $derived((() => {
@@ -224,9 +211,38 @@
 			{#if data.isFirstVisit}Welcome to Forbetra{:else}Welcome back{/if}
 		</p>
 		{#if data.currentWeek}
-			<span class="rounded-full bg-blue-100 px-3 py-0.5 text-xs font-semibold text-blue-700">Week {data.currentWeek}{#if data.totalWeeks} of {data.totalWeeks}{/if}</span>
+			{#if data.cycle?.isOverdue}
+				<span class="rounded-full bg-amber-100 px-3 py-0.5 text-xs font-semibold text-amber-700">Week {data.currentWeek} &middot; Cycle ended at week {data.totalWeeks}</span>
+			{:else}
+				<span class="rounded-full bg-blue-100 px-3 py-0.5 text-xs font-semibold text-blue-700">Week {data.currentWeek}{#if data.totalWeeks} of {data.totalWeeks}{/if}</span>
+			{/if}
 		{/if}
 	</div>
+
+	<!-- Cycle overdue banner -->
+	{#if data.cycle?.isOverdue && !extendSuccess}
+		<div class="flex flex-wrap items-center gap-3 rounded-xl border-2 border-amber-300 bg-amber-50 px-4 py-3">
+			<div class="flex-1 min-w-0">
+				<p class="text-sm font-semibold text-amber-900">Your cycle has passed its end date.</p>
+				<p class="text-xs text-amber-700">Extend to keep tracking, or wrap up when you're ready.</p>
+			</div>
+			{#if extendError}
+				<span class="text-xs text-red-600">{extendError}</span>
+			{/if}
+			<button
+				onclick={() => extendCycle(4)}
+				disabled={extending}
+				class="shrink-0 rounded-lg bg-amber-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-amber-700 transition-colors disabled:opacity-60"
+			>
+				{#if extending}Extending...{:else}Extend 4 weeks{/if}
+			</button>
+		</div>
+	{/if}
+	{#if extendSuccess}
+		<div class="flex items-center gap-2 rounded-xl border border-green-300 bg-green-50 px-4 py-3">
+			<span class="text-sm font-semibold text-green-700">Cycle extended! Reloading...</span>
+		</div>
+	{/if}
 
 	<!-- Objective Card -->
 	{#if data.objective}
@@ -325,115 +341,71 @@
 			</div>
 		{/if}
 
-		<!-- Compact Ratings Row -->
-		<div class="grid gap-4 md:grid-cols-2">
-			<!-- My Last Ratings -->
-			<div class="rounded-2xl border-2 border-neutral-200 bg-white p-5 shadow-sm">
-				<div class="mb-3 flex items-center justify-between">
-					<div class="flex items-center gap-2">
-						<span class="text-xl" role="img" aria-label="bar chart">📊</span>
-						<p class="text-xs font-semibold uppercase tracking-wide text-neutral-500">My Last Ratings</p>
-					</div>
-					{#if data.myLastRatings?.weekNumber}
-						<span class="text-xs text-neutral-400">Week {data.myLastRatings.weekNumber}</span>
-					{/if}
-				</div>
-				{#if data.myLastRatings && (data.myLastRatings.effort !== null || data.myLastRatings.performance !== null)}
-					<div class="flex gap-6">
-						{#if data.myLastRatings.effort !== null}
-							<div class="flex-1">
-								<span class="text-xs text-neutral-500">Effort</span>
-								<div class="flex items-baseline gap-2">
-									<span class="inline-block h-2 w-2 rounded-full {trendColor(data.myLastRatings.effortChange)}"></span>
-									<span class="text-2xl font-bold text-amber-600">{data.myLastRatings.effort}</span>
-									{#if data.myLastRatings.effortChange !== null && data.myLastRatings.weekNumber && data.myLastRatings.weekNumber > 1}
-										<span class="text-xs font-semibold {data.myLastRatings.effortChange >= 0 ? 'text-green-600' : 'text-red-600'}">
-											{data.myLastRatings.effortChange > 0 ? '+' : ''}{data.myLastRatings.effortChange.toFixed(1)}
-										</span>
-									{/if}
-								</div>
-							</div>
-						{/if}
-						{#if data.myLastRatings.performance !== null}
-							<div class="flex-1">
-								<span class="text-xs text-neutral-500">Performance</span>
-								<div class="flex items-baseline gap-2">
-									<span class="inline-block h-2 w-2 rounded-full {trendColor(data.myLastRatings.performanceChange)}"></span>
-									<span class="text-2xl font-bold text-indigo-600">{data.myLastRatings.performance}</span>
-									{#if data.myLastRatings.performanceChange !== null && data.myLastRatings.weekNumber && data.myLastRatings.weekNumber > 1}
-										<span class="text-xs font-semibold {data.myLastRatings.performanceChange >= 0 ? 'text-green-600' : 'text-red-600'}">
-											{data.myLastRatings.performanceChange > 0 ? '+' : ''}{data.myLastRatings.performanceChange.toFixed(1)}
-										</span>
-									{/if}
-								</div>
-							</div>
-						{/if}
-					</div>
-				{:else}
-					<p class="text-sm text-neutral-500">No ratings yet</p>
-				{/if}
-			</div>
-
-			<!-- Stakeholders' Last Ratings -->
-			<div class="rounded-2xl border-2 border-neutral-200 bg-white p-5 shadow-sm">
-				<div class="mb-3 flex items-center justify-between">
-					<div class="flex items-center gap-2">
-						<span class="text-xl" role="img" aria-label="people">👥</span>
-						<p class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Stakeholders' Last Ratings</p>
-					</div>
-					{#if data.stakeholdersLastRatings?.weekNumber}
-						<span class="text-xs text-neutral-400">Week {data.stakeholdersLastRatings.weekNumber}</span>
-					{/if}
-				</div>
-				{#if data.stakeholdersLastRatings && (data.stakeholdersLastRatings.effort !== null || data.stakeholdersLastRatings.performance !== null)}
-					<div class="flex gap-6">
-						{#if data.stakeholdersLastRatings.effort !== null}
-							<div class="flex-1">
-								<span class="text-xs text-neutral-500">Effort (Avg)</span>
-								<div class="flex items-baseline gap-2">
-									<span class="inline-block h-2 w-2 rounded-full {trendColor(data.stakeholdersLastRatings.effortChange)}"></span>
-									<span class="text-2xl font-bold text-amber-600">{data.stakeholdersLastRatings.effort}</span>
-									{#if data.stakeholdersLastRatings.effortChange !== null && data.stakeholdersLastRatings.weekNumber && data.stakeholdersLastRatings.weekNumber > 1}
-										<span class="text-xs font-semibold {data.stakeholdersLastRatings.effortChange >= 0 ? 'text-green-600' : 'text-red-600'}">
-											{data.stakeholdersLastRatings.effortChange > 0 ? '+' : ''}{data.stakeholdersLastRatings.effortChange.toFixed(1)}
-										</span>
-									{/if}
-								</div>
-							</div>
-						{/if}
-						{#if data.stakeholdersLastRatings.performance !== null}
-							<div class="flex-1">
-								<span class="text-xs text-neutral-500">Performance (Avg)</span>
-								<div class="flex items-baseline gap-2">
-									<span class="inline-block h-2 w-2 rounded-full {trendColor(data.stakeholdersLastRatings.performanceChange)}"></span>
-									<span class="text-2xl font-bold text-indigo-600">{data.stakeholdersLastRatings.performance}</span>
-									{#if data.stakeholdersLastRatings.performanceChange !== null && data.stakeholdersLastRatings.weekNumber && data.stakeholdersLastRatings.weekNumber > 1}
-										<span class="text-xs font-semibold {data.stakeholdersLastRatings.performanceChange >= 0 ? 'text-green-600' : 'text-red-600'}">
-											{data.stakeholdersLastRatings.performanceChange > 0 ? '+' : ''}{data.stakeholdersLastRatings.performanceChange.toFixed(1)}
-										</span>
-									{/if}
-								</div>
-							</div>
-						{/if}
-					</div>
-				{:else}
-					<p class="text-sm text-neutral-500">No stakeholder ratings yet</p>
-				{/if}
-			</div>
-		</div>
 	{/if}
 
-	<!-- Latest Ratings Scorecard — card per stakeholder -->
+	<!-- Latest Ratings Scorecard -->
 	{#if data.myLastRatings && data.latestScorecard && data.latestScorecard.length > 0}
 		<div class="rounded-2xl border-2 border-neutral-200 bg-white p-6 shadow-sm">
 			<h2 class="mb-1 text-lg font-bold text-neutral-900">Latest Ratings</h2>
 			<p class="mb-4 text-xs text-neutral-400">How you see yourself vs. how each stakeholder sees you. Negative gap = they rated you lower.</p>
+
+			<!-- Summary row: You vs Stakeholder Avg -->
+			<div class="mb-4 flex flex-wrap items-center gap-x-6 gap-y-2 rounded-lg bg-neutral-50 px-4 py-3">
+				<!-- Your scores -->
+				<div class="flex items-center gap-3">
+					<span class="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">You</span>
+					{#if data.myLastRatings.effort !== null}
+						<div class="flex items-center gap-1">
+							<div class="flex h-6 w-6 items-center justify-center rounded text-[10px] font-bold {effortBg(data.myLastRatings.effort)}">{data.myLastRatings.effort}</div>
+							{#if data.myLastRatings.effortChange !== null && data.myLastRatings.weekNumber && data.myLastRatings.weekNumber > 1}
+								<span class="text-[10px] font-semibold {data.myLastRatings.effortChange >= 0 ? 'text-green-600' : 'text-red-600'}">{data.myLastRatings.effortChange > 0 ? '+' : ''}{data.myLastRatings.effortChange.toFixed(1)}</span>
+							{/if}
+						</div>
+					{/if}
+					{#if data.myLastRatings.performance !== null}
+						<div class="flex items-center gap-1">
+							<div class="flex h-6 w-6 items-center justify-center rounded text-[10px] font-bold {perfBg(data.myLastRatings.performance)}">{data.myLastRatings.performance}</div>
+							{#if data.myLastRatings.performanceChange !== null && data.myLastRatings.weekNumber && data.myLastRatings.weekNumber > 1}
+								<span class="text-[10px] font-semibold {data.myLastRatings.performanceChange >= 0 ? 'text-green-600' : 'text-red-600'}">{data.myLastRatings.performanceChange > 0 ? '+' : ''}{data.myLastRatings.performanceChange.toFixed(1)}</span>
+							{/if}
+						</div>
+					{/if}
+				</div>
+				<!-- Stakeholder avg -->
+				{#if data.stakeholdersLastRatings && (data.stakeholdersLastRatings.effort !== null || data.stakeholdersLastRatings.performance !== null)}
+					<div class="h-4 w-px bg-neutral-300"></div>
+					<div class="flex items-center gap-3">
+						<span class="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">Stk Avg</span>
+						{#if data.stakeholdersLastRatings.effort !== null}
+							<div class="flex items-center gap-1">
+								<div class="flex h-6 w-6 items-center justify-center rounded text-[10px] font-bold {effortBg(data.stakeholdersLastRatings.effort)}">{data.stakeholdersLastRatings.effort}</div>
+								{#if data.stakeholdersLastRatings.effortChange !== null && data.stakeholdersLastRatings.weekNumber && data.stakeholdersLastRatings.weekNumber > 1}
+									<span class="text-[10px] font-semibold {data.stakeholdersLastRatings.effortChange >= 0 ? 'text-green-600' : 'text-red-600'}">{data.stakeholdersLastRatings.effortChange > 0 ? '+' : ''}{data.stakeholdersLastRatings.effortChange.toFixed(1)}</span>
+								{/if}
+							</div>
+						{/if}
+						{#if data.stakeholdersLastRatings.performance !== null}
+							<div class="flex items-center gap-1">
+								<div class="flex h-6 w-6 items-center justify-center rounded text-[10px] font-bold {perfBg(data.stakeholdersLastRatings.performance)}">{data.stakeholdersLastRatings.performance}</div>
+								{#if data.stakeholdersLastRatings.performanceChange !== null && data.stakeholdersLastRatings.weekNumber && data.stakeholdersLastRatings.weekNumber > 1}
+									<span class="text-[10px] font-semibold {data.stakeholdersLastRatings.performanceChange >= 0 ? 'text-green-600' : 'text-red-600'}">{data.stakeholdersLastRatings.performanceChange > 0 ? '+' : ''}{data.stakeholdersLastRatings.performanceChange.toFixed(1)}</span>
+								{/if}
+							</div>
+						{/if}
+					</div>
+				{/if}
+				<!-- Week label -->
+				{#if data.myLastRatings.weekNumber}
+					<span class="ml-auto text-[10px] text-neutral-400">Wk {data.myLastRatings.weekNumber}</span>
+				{/if}
+			</div>
 
 			<div class="grid gap-2 grid-cols-2 sm:grid-cols-4">
 				{#each data.latestScorecard as row}
 					{@const effortGap = (data.myLastRatings.effort !== null && row.stakeholderEffort !== null) ? Number((row.stakeholderEffort - data.myLastRatings.effort).toFixed(1)) : null}
 					{@const perfGap = (data.myLastRatings.performance !== null && row.stakeholderPerformance !== null) ? Number((row.stakeholderPerformance - data.myLastRatings.performance).toFixed(1)) : null}
 					{@const maxGap = Math.max(Math.abs(effortGap ?? 0), Math.abs(perfGap ?? 0))}
+					{@const gapData = (data.perceptionGaps ?? []).find(g => g.stakeholderId === row.stakeholderId)}
 					<div class="rounded-lg border p-2.5 {maxGap > 2 ? 'border-red-200' : maxGap > 1 ? 'border-amber-200' : 'border-neutral-200'}">
 						<!-- Column labels -->
 						<div class="mb-1.5 flex items-end justify-between">
@@ -496,6 +468,19 @@
 								{/if}
 							</div>
 						</div>
+
+						<!-- Trend indicator -->
+						{#if gapData && (gapData.effortGapTrend || gapData.performanceGapTrend)}
+							<div class="mt-1.5 border-t border-neutral-100 pt-1.5">
+								{#if gapData.effortGapTrend === 'closing' || gapData.performanceGapTrend === 'closing'}
+									<p class="text-[9px] text-green-600">Gap closing</p>
+								{:else if gapData.effortGapTrend === 'widening' || gapData.performanceGapTrend === 'widening'}
+									<p class="text-[9px] text-red-600">Gap widening</p>
+								{:else}
+									<p class="text-[9px] text-neutral-400">Gap stable</p>
+								{/if}
+							</div>
+						{/if}
 					</div>
 				{/each}
 			</div>
@@ -512,51 +497,6 @@
 					stakeholderData={data.visualizationData.stakeholders}
 					stakeholders={data.visualizationData.stakeholderList}
 				/>
-			</div>
-		{/if}
-
-		<!-- Section 2: Perception Gap Cards -->
-		{#if sortedPerceptionGaps.length > 0}
-			<div class="rounded-2xl border-2 border-neutral-200 bg-white p-6 shadow-sm">
-				<h2 class="mb-1 text-lg font-bold text-neutral-900">Perception Gaps</h2>
-				<p class="mb-4 text-xs text-neutral-400">How each stakeholder's ratings compare to your self-assessment. Positive = you rate yourself higher.</p>
-
-				<div class="grid gap-3 sm:grid-cols-2">
-					{#each sortedPerceptionGaps as gap}
-						{@const borderColor = gapColor(Math.abs(gap.effortGap ?? 0) > Math.abs(gap.performanceGap ?? 0) ? gap.effortGap : gap.performanceGap)}
-						{@const interpretation = gapInterpretation(gap.stakeholderName, gap.effortGap, gap.performanceGap)}
-						<div class="rounded-xl border-2 p-4 {borderColor}">
-							<p class="mb-3 text-sm font-semibold text-neutral-800">{gap.stakeholderName}</p>
-							<div class="flex gap-4">
-								<div class="flex-1">
-									<p class="mb-1 text-xs text-neutral-500">Effort Gap</p>
-									<div class="flex items-center gap-2">
-										<span class="rounded-md px-2 py-0.5 text-sm font-bold {gapBadgeColor(gap.effortGap)}">
-											{formatGap(gap.effortGap)}
-										</span>
-										{#if gap.effortGapTrend}
-											<span class="text-xs text-neutral-500">{trendArrow(gap.effortGapTrend)}</span>
-										{/if}
-									</div>
-								</div>
-								<div class="flex-1">
-									<p class="mb-1 text-xs text-neutral-500">Perf Gap</p>
-									<div class="flex items-center gap-2">
-										<span class="rounded-md px-2 py-0.5 text-sm font-bold {gapBadgeColor(gap.performanceGap)}">
-											{formatGap(gap.performanceGap)}
-										</span>
-										{#if gap.performanceGapTrend}
-											<span class="text-xs text-neutral-500">{trendArrow(gap.performanceGapTrend)}</span>
-										{/if}
-									</div>
-								</div>
-							</div>
-							{#if interpretation}
-								<p class="mt-2 text-xs italic text-neutral-500">{interpretation}</p>
-							{/if}
-						</div>
-					{/each}
-				</div>
 			</div>
 		{/if}
 
@@ -592,7 +532,7 @@
 							</thead>
 							<tbody>
 								<tr>
-									<td class="pr-2 py-0.5 text-right text-xs font-semibold text-indigo-600">My Effort</td>
+									<td class="pr-2 py-0.5 text-right text-xs font-semibold text-amber-600">My Effort</td>
 									{#each data.heatMapWeeks as week}
 										{@const isCurrent = week.weekNumber === data.currentWeek}
 										{@const isFuture = data.currentWeek !== null && week.weekNumber > data.currentWeek}
@@ -610,7 +550,7 @@
 									{/each}
 								</tr>
 								<tr>
-									<td class="pr-2 py-0.5 text-right text-xs font-semibold text-amber-600">My Perf</td>
+									<td class="pr-2 py-0.5 text-right text-xs font-semibold text-indigo-600">My Perf</td>
 									{#each data.heatMapWeeks as week}
 										{@const isCurrent = week.weekNumber === data.currentWeek}
 										{@const isFuture = data.currentWeek !== null && week.weekNumber > data.currentWeek}
@@ -678,16 +618,16 @@
 					<!-- Legend -->
 					<div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-neutral-500">
 						<div class="flex items-center gap-1.5">
-							<div class="h-3 w-3 rounded-sm bg-indigo-100"></div>
-							<div class="h-3 w-3 rounded-sm bg-indigo-400"></div>
-							<div class="h-3 w-3 rounded-sm bg-indigo-600"></div>
-							<span class="text-indigo-600">My Effort</span>
-						</div>
-						<div class="flex items-center gap-1.5">
 							<div class="h-3 w-3 rounded-sm bg-amber-100"></div>
 							<div class="h-3 w-3 rounded-sm bg-amber-400"></div>
 							<div class="h-3 w-3 rounded-sm bg-amber-500"></div>
-							<span class="text-amber-600">My Perf</span>
+							<span class="text-amber-600">My Effort</span>
+						</div>
+						<div class="flex items-center gap-1.5">
+							<div class="h-3 w-3 rounded-sm bg-indigo-100"></div>
+							<div class="h-3 w-3 rounded-sm bg-indigo-400"></div>
+							<div class="h-3 w-3 rounded-sm bg-indigo-600"></div>
+							<span class="text-indigo-600">My Perf</span>
 						</div>
 						{#if data.stakeholderAvgHeatMap && data.stakeholderAvgHeatMap.length > 0}
 							<div class="flex items-center gap-1.5">

@@ -908,7 +908,9 @@ export const load: PageServerLoad = async (event) => {
 			cycle: cycle
 				? {
 						id: cycle.id,
-						startDate: cycle.startDate.toISOString()
+						startDate: cycle.startDate.toISOString(),
+						endDate: cycle.endDate?.toISOString() ?? null,
+						isOverdue: !!(currentWeek && totalWeeks && currentWeek > totalWeeks)
 					}
 				: null,
 			currentWeek,
