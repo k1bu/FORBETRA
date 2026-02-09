@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import type { ActionData, PageData } from './$types';
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
@@ -7,13 +6,13 @@
 	let searchTerm = $state('');
 	let roleFilter = $state('ALL');
 
-	const viewAsUser = async (userId: string) => {
+	const viewAsUser = async (userId: string, path = '/') => {
 		await fetch('/api/admin/impersonate', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ userId })
 		});
-		await goto('/', { invalidateAll: true });
+		window.open(path, '_blank');
 	};
 
 	const filteredUsers = $derived(

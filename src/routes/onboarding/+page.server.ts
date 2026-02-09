@@ -27,12 +27,14 @@ const formatErrors = (issues: ZodIssue[]) =>
 export const load: PageServerLoad = async (event) => {
 	const { dbUser } = requireRole(event, 'INDIVIDUAL');
 
+	const isPreview = event.url.searchParams.get('preview') === 'true';
+
 	const existingObjective = await prisma.objective.findFirst({
 		where: { userId: dbUser.id },
 		select: { id: true }
 	});
 
-	if (existingObjective) {
+	if (existingObjective && !isPreview) {
 		throw redirect(303, '/onboarding/complete');
 	}
 

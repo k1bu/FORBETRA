@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import type { ActionData, PageData } from './$types';
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
@@ -15,13 +14,13 @@
 		return new Intl.DateTimeFormat('en-US', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value));
 	};
 
-	const viewAsUser = async () => {
+	const impersonateAndOpen = async (path = '/') => {
 		await fetch('/api/admin/impersonate', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ userId: user.id })
 		});
-		await goto('/', { invalidateAll: true });
+		window.open(path, '_blank');
 	};
 </script>
 
@@ -36,7 +35,7 @@
 		</div>
 		<div class="flex items-center gap-3">
 			<button
-				onclick={viewAsUser}
+				onclick={() => impersonateAndOpen('/')}
 				class="rounded border border-amber-200 bg-amber-50 px-3 py-1 text-sm font-medium text-amber-700 hover:bg-amber-100"
 			>
 				View as User
@@ -44,6 +43,44 @@
 			<span class="rounded-lg bg-neutral-100 px-3 py-1 text-sm font-bold uppercase text-neutral-600">{user.role}</span>
 		</div>
 	</header>
+
+	<!-- Quick Preview Actions -->
+	<div class="rounded-xl border border-blue-200 bg-blue-50/50 p-4 shadow-sm">
+		<h2 class="mb-3 text-sm font-bold uppercase tracking-wide text-blue-600">Preview User Flows</h2>
+		<p class="mb-3 text-xs text-neutral-600">Opens in a new window as this user. Admin panel stays open.</p>
+		<div class="flex flex-wrap gap-2">
+			<button
+				onclick={() => impersonateAndOpen('/onboarding?preview=true')}
+				class="rounded-lg border border-blue-200 bg-white px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-50"
+			>
+				Onboarding Flow
+			</button>
+			<button
+				onclick={() => impersonateAndOpen('/onboarding/initial-ratings?preview=true')}
+				class="rounded-lg border border-blue-200 bg-white px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-50"
+			>
+				Initial Ratings
+			</button>
+			<button
+				onclick={() => impersonateAndOpen('/reflections/checkin?preview=true')}
+				class="rounded-lg border border-blue-200 bg-white px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-50"
+			>
+				Check-in / Ratings
+			</button>
+			<button
+				onclick={() => impersonateAndOpen('/prompts/monday?preview=true')}
+				class="rounded-lg border border-blue-200 bg-white px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-50"
+			>
+				Monday Intention
+			</button>
+			<button
+				onclick={() => impersonateAndOpen('/individual')}
+				class="rounded-lg border border-blue-200 bg-white px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-50"
+			>
+				Individual Hub
+			</button>
+		</div>
+	</div>
 
 	{#if form?.error}
 		<div class="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{form.error}</div>
