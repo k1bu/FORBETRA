@@ -3,7 +3,8 @@ import { requireRole } from '$lib/server/auth';
 import { fail } from '@sveltejs/kit';
 import { randomBytes, createHash } from 'crypto';
 import type { Actions, PageServerLoad } from './$types';
-import type { Prisma, TokenType } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+import type { TokenType } from '@prisma/client';
 
 const generateTokenHash = (token: string) => createHash('sha256').update(token).digest('hex');
 

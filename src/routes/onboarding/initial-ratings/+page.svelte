@@ -1,7 +1,15 @@
 <script lang="ts">
 	import type { ActionData, PageData } from './$types';
+	import {
+		getScoreColor,
+		getScoreBgColor,
+		getButtonSelectedColors,
+		getButtonHoverColors,
+		getFocusRing,
+		getScoreLabel
+	} from '$lib/utils/scoreColors';
 
-	const { data, form }: { data: PageData; form: ActionData | null } = $props();
+	const { data, form }: { data: PageData; form: (ActionData & { success?: boolean }) | null } = $props();
 
 	let effortScore = $state(data.previousEntry?.effortScore ?? 5);
 	let performanceScore = $state(data.previousEntry?.performanceScore ?? 5);
@@ -14,62 +22,6 @@
 			performanceScore = data.previousEntry.performanceScore ?? 5;
 		}
 	});
-
-	const getScoreLabel = (score: number, type: 'effort' | 'progress') => {
-		if (type === 'effort') {
-			if (score <= 2) return 'Minimal focus';
-			if (score <= 4) return 'Inconsistent focus';
-			if (score <= 6) return 'Consistent focus';
-			if (score <= 8) return 'Strong focus';
-			return 'Exceptional focus';
-		} else {
-			if (score <= 2) return 'Limited impact';
-			if (score <= 4) return 'Emerging impact';
-			if (score <= 6) return 'Clear impact';
-			if (score <= 8) return 'Strong impact';
-			return 'Exceptional impact';
-		}
-	};
-
-	const getScoreColor = (score: number) => {
-		if (score <= 2) return 'text-yellow-600';
-		if (score <= 4) return 'text-orange-600';
-		if (score <= 6) return 'text-blue-600';
-		if (score <= 8) return 'text-emerald-600';
-		return 'text-purple-600';
-	};
-
-	const getScoreBgColor = (score: number) => {
-		if (score <= 2) return 'bg-yellow-50 border-yellow-200';
-		if (score <= 4) return 'bg-orange-50 border-orange-200';
-		if (score <= 6) return 'bg-blue-50 border-blue-200';
-		if (score <= 8) return 'bg-emerald-50 border-emerald-200';
-		return 'bg-purple-50 border-purple-200';
-	};
-
-	const getButtonSelectedColors = (score: number) => {
-		if (score <= 2) return 'border-yellow-500 bg-yellow-500 text-white';
-		if (score <= 4) return 'border-orange-500 bg-orange-500 text-white';
-		if (score <= 6) return 'border-blue-500 bg-blue-500 text-white';
-		if (score <= 8) return 'border-emerald-500 bg-emerald-500 text-white';
-		return 'border-purple-500 bg-purple-500 text-white';
-	};
-
-	const getButtonHoverColors = (score: number) => {
-		if (score <= 2) return 'hover:border-yellow-300 hover:bg-yellow-50';
-		if (score <= 4) return 'hover:border-orange-300 hover:bg-orange-50';
-		if (score <= 6) return 'hover:border-blue-300 hover:bg-blue-50';
-		if (score <= 8) return 'hover:border-emerald-300 hover:bg-emerald-50';
-		return 'hover:border-purple-300 hover:bg-purple-50';
-	};
-
-	const getFocusRing = (score: number) => {
-		if (score <= 2) return 'focus:ring-yellow-500';
-		if (score <= 4) return 'focus:ring-orange-500';
-		if (score <= 6) return 'focus:ring-blue-500';
-		if (score <= 8) return 'focus:ring-emerald-500';
-		return 'focus:ring-purple-500';
-	};
 
 	const handleSubmit = () => {
 		isSubmitting = true;
@@ -97,19 +49,21 @@
 			</p>
 		</div>
 
-		{#if form?.error}
-			<div class="mx-auto max-w-2xl rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-				<p class="font-medium">⚠️ {form.error}</p>
-			</div>
-		{/if}
+		<div aria-live="polite">
+			{#if form?.error}
+				<div class="mx-auto max-w-2xl rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+					<p class="font-medium">⚠️ {form.error}</p>
+				</div>
+			{/if}
 
-		{#if form?.success}
-			<div class="mx-auto max-w-2xl animate-in fade-in slide-in-from-top-2 rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 text-center">
-				<div class="mb-2 text-4xl">🎉</div>
-				<p class="text-lg font-semibold text-emerald-900">Ratings saved!</p>
-				<p class="mt-1 text-sm text-emerald-700">Your starting point has been recorded.</p>
-			</div>
-		{/if}
+			{#if form?.success}
+				<div class="mx-auto max-w-2xl animate-in fade-in slide-in-from-top-2 rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 text-center">
+					<div class="mb-2 text-4xl">🎉</div>
+					<p class="text-lg font-semibold text-emerald-900">Ratings saved!</p>
+					<p class="mt-1 text-sm text-emerald-700">Your starting point has been recorded.</p>
+				</div>
+			{/if}
+		</div>
 
 		<form method="post" onsubmit={handleSubmit} class="mx-auto w-full max-w-2xl space-y-8">
 			<input type="hidden" name="effortScore" value={effortScore} />
@@ -131,9 +85,9 @@
 				<div class="mb-5 grid grid-cols-6 gap-2 sm:grid-cols-11">
 					{#each Array(11) as _, i}
 						{@const isSelected = effortScore === i}
-						{@const buttonColors = getButtonSelectedColors(i)}
-						{@const hoverColors = getButtonHoverColors(i)}
-						{@const focusRing = getFocusRing(i)}
+						{@const buttonColors = getButtonSelectedColors(i, 'effort')}
+						{@const hoverColors = getButtonHoverColors(i, 'effort')}
+						{@const focusRing = getFocusRing(i, 'effort')}
 						<button
 							type="button"
 							onclick={() => (effortScore = i)}
@@ -150,8 +104,8 @@
 					<span class="text-xs font-medium text-neutral-500">Minimal</span>
 					<div
 						class="rounded-full px-3 py-1 text-xs font-semibold {getScoreBgColor(
-							effortScore
-						)} {getScoreColor(effortScore)}"
+							effortScore, 'effort'
+						)} {getScoreColor(effortScore, 'effort')}"
 					>
 						{getScoreLabel(effortScore, 'effort')}
 					</div>
@@ -175,9 +129,9 @@
 				<div class="mb-5 grid grid-cols-6 gap-2 sm:grid-cols-11">
 					{#each Array(11) as _, i}
 						{@const isSelected = performanceScore === i}
-						{@const buttonColors = getButtonSelectedColors(i)}
-						{@const hoverColors = getButtonHoverColors(i)}
-						{@const focusRing = getFocusRing(i)}
+						{@const buttonColors = getButtonSelectedColors(i, 'performance')}
+						{@const hoverColors = getButtonHoverColors(i, 'performance')}
+						{@const focusRing = getFocusRing(i, 'performance')}
 						<button
 							type="button"
 							onclick={() => (performanceScore = i)}
@@ -194,8 +148,8 @@
 					<span class="text-xs font-medium text-neutral-500">Limited</span>
 					<div
 						class="rounded-full px-3 py-1 text-xs font-semibold {getScoreBgColor(
-							performanceScore
-						)} {getScoreColor(performanceScore)}"
+							performanceScore, 'performance'
+						)} {getScoreColor(performanceScore, 'performance')}"
 					>
 						{getScoreLabel(performanceScore, 'progress')}
 					</div>
@@ -221,14 +175,14 @@
 				<button
 					type="submit"
 					disabled={isSubmitting}
-					class="group relative overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-3.5 font-semibold text-white shadow-lg transition-all hover:from-blue-700 hover:to-purple-700 hover:shadow-xl hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
+					class="group relative overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-3.5 font-semibold text-white shadow-lg transition-all hover:from-blue-700 hover:to-purple-700 hover:shadow-xl hover:scale-105 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100 focus-visible:ring-2 focus-visible:ring-offset-2"
 				>
 					<span class="relative z-10 flex items-center gap-2">
 						{#if isSubmitting}
 							<span class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
 							Saving...
 						{:else}
-							<span>✨</span>
+							<span role="img" aria-label="sparkles">✨</span>
 							Continue
 						{/if}
 					</span>

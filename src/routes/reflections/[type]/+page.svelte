@@ -58,7 +58,7 @@
 					</div>
 					{#if form?.success && form.subgoalId === subgoal.id}
 						<span class="text-sm text-emerald-600">Saved</span>
-					{:else if previous?.score !== null}
+					{:else if previous && previous.score !== null}
 						<span class="text-xs tracking-wide text-neutral-500 uppercase">
 							Last submitted: {previous.score}
 						</span>

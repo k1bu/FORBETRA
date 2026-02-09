@@ -15,7 +15,10 @@
 		"lint": "prettier --check . && eslint .",
 		"sync:clerk": "npx tsx scripts/sync-clerk-db.ts",
 		"delete:test-users": "npx tsx scripts/delete-test-users.ts",
-		"seed:test-data": "npx tsx scripts/seed-test-data.ts"
+		"seed:test-data": "npx tsx scripts/seed-test-data.ts",
+		"seed:comprehensive": "npx tsx scripts/seed-comprehensive.ts",
+		"seed:clean": "npx tsx scripts/clean-seed-data.ts",
+		"insights:backfill": "npx tsx scripts/backfill-insights.ts"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.4.0",
@@ -44,6 +47,7 @@
 		"vite": "^7.1.10"
 	},
 	"dependencies": {
+		"@anthropic-ai/sdk": "^0.74.0",
 		"@prisma/client": "^6.19.0",
 		"@sendgrid/mail": "^8.1.6",
 		"chart.js": "^4.4.0",

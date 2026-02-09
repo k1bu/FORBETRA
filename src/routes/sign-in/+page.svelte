@@ -3,5 +3,5 @@
 </script>
 
 <div class="flex justify-center p-8">
-	<SignIn after-sign-in-url="/" sign-up-url="/sign-up" />
+	<SignIn afterSignInUrl="/" signUpUrl="/sign-up" />
 </div>

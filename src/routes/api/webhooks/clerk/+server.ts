@@ -1,13 +1,18 @@
 import type { RequestHandler } from '@sveltejs/kit';
 import prisma from '$lib/server/prisma';
-import { Webhook, type WebhookEvent } from 'svix';
+import { Webhook } from 'svix';
+
+type ClerkWebhookEvent = {
+	type: string;
+	data: Record<string, unknown>;
+};
 
 const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
 
 const missingSecretResponse = new Response('Webhook secret not configured', { status: 500 });
 const badRequestResponse = new Response('Bad request', { status: 400 });
 
-const verifyClerkWebhook = async (request: Request): Promise<WebhookEvent | null> => {
+const verifyClerkWebhook = async (request: Request): Promise<ClerkWebhookEvent | null> => {
 	if (!WEBHOOK_SECRET) {
 		return null;
 	}
@@ -27,7 +32,7 @@ const verifyClerkWebhook = async (request: Request): Promise<WebhookEvent | null
 			'svix-id': svixId,
 			'svix-timestamp': svixTimestamp,
 			'svix-signature': svixSignature
-		});
+		}) as ClerkWebhookEvent;
 	} catch (error) {
 		console.error('Failed to verify Clerk webhook signature', error);
 		return null;
@@ -66,4 +71,3 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	return new Response(null, { status: 204 });
 };
-

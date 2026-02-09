@@ -74,7 +74,7 @@ export const load: PageServerLoad = async (event) => {
 	// Get all Effort (RATING_A) and Performance (RATING_B) scores for each subgoal
 	const previousRatingsBySubgoal = new Map<
 		string,
-		{ effortScore: number | null; performanceScore: number | null }
+		{ weekNumber: number; effortScore: number | null; performanceScore: number | null }
 	>();
 	const historicRatingsBySubgoal = new Map<
 		string,

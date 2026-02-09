@@ -70,6 +70,7 @@ model User {
   coachClientsOwned    CoachClient[]        @relation("CoachClientsIndividual")
   coachInvitationsSent CoachInvite[]        @relation("CoachInvites")
   coachInvitationsLinked CoachInvite[]      @relation("CoachInviteIndividual")
+  insights             Insight[]
 }
 
 model Objective {
@@ -92,21 +93,24 @@ model Objective {
 }
 
 model Cycle {
-  id          String      @id @default(cuid())
-  userId      String
-  objectiveId String
-  label       String?
-  startDate   DateTime
-  endDate     DateTime?
-  status      CycleStatus @default(PLANNED)
-  summary     String?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id                  String      @id @default(cuid())
+  userId              String
+  objectiveId         String
+  label               String?
+  startDate           DateTime
+  endDate             DateTime?
+  status              CycleStatus @default(PLANNED)
+  summary             String?
+  stakeholderCadence  String      @default("weekly")
+  autoThrottle        Boolean     @default(true)
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
 
   user      User      @relation(fields: [userId], references: [id])
   objective Objective @relation(fields: [objectiveId], references: [id])
   reflections Reflection[]
   coachNotes  CoachNote[]
+  insights    Insight[]
 
   @@index([userId])
   @@index([objectiveId])
@@ -243,6 +247,44 @@ model CoachClient {
   @@unique([coachId, individualId])
   @@index([coachId])
   @@index([individualId])
+}
+
+enum InsightType {
+  CHECK_IN
+  WEEKLY_SYNTHESIS
+  COACH_PREP
+  COACH_ALERT
+  CYCLE_REPORT
+}
+
+enum InsightStatus {
+  PENDING
+  GENERATING
+  COMPLETED
+  FAILED
+}
+
+model Insight {
+  id          String        @id @default(cuid())
+  userId      String
+  cycleId     String?
+  weekNumber  Int?
+  type        InsightType
+  status      InsightStatus @default(PENDING)
+  content     String?
+  promptHash  String?
+  modelId     String?
+  thumbs      Int?
+  metadata    Json?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  user  User   @relation(fields: [userId], references: [id])
+  cycle Cycle? @relation(fields: [cycleId], references: [id])
+
+  @@index([userId])
+  @@index([cycleId])
+  @@index([type, status])
 }
 
 model CoachInvite {

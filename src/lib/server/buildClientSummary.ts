@@ -22,6 +22,8 @@ type IndividualWithRelations = {
 			startDate: Date;
 			endDate: Date | null;
 			status: string;
+			stakeholderCadence?: string;
+			autoThrottle?: boolean;
 			reflections: Array<{
 				id: string;
 				weekNumber: number;
@@ -29,7 +31,7 @@ type IndividualWithRelations = {
 				submittedAt: Date | null;
 				effortScore: number | null;
 				performanceScore: number | null;
-				notes: string;
+				notes: string | null;
 			}>;
 			coachNotes: Array<{
 				id: string;
@@ -83,6 +85,8 @@ export type ClientSummary = {
 			completion: number;
 			weeksElapsed: number;
 			currentWeek: number | null;
+			stakeholderCadence: string;
+			autoThrottle: boolean;
 			recentReflections: Array<{
 				weekNumber: number;
 				effortScore: number | null;
@@ -95,7 +99,8 @@ export type ClientSummary = {
 		insights: {
 			avgEffort: number | null;
 			avgProgress: number | null;
-			consistencyScore: number | null;
+			stabilityScore: number | null;
+			trajectoryScore: number | null;
 			alignmentRatio: number | null;
 		} | null;
 	} | null;
@@ -226,8 +231,37 @@ export function buildClientSummary(
 		stdValues.length > 0
 			? stdValues.reduce((sum, value) => sum + value, 0) / stdValues.length
 			: null;
-	const consistencyScore =
+	const stabilityScore =
 		combinedStd !== null ? Math.max(0, Math.round(100 - combinedStd * 10)) : null;
+
+	// Trajectory: linear regression slope of last 4 weeks combined effort+performance
+	let trajectoryScore: number | null = null;
+	if (trendWeeks.length >= 2) {
+		const points: { x: number; y: number }[] = [];
+		for (const week of trendWeeks) {
+			const effortAvg =
+				week.effortScores.length > 0
+					? week.effortScores.reduce((s, v) => s + v, 0) / week.effortScores.length
+					: null;
+			const perfAvg =
+				week.performanceScores.length > 0
+					? week.performanceScores.reduce((s, v) => s + v, 0) / week.performanceScores.length
+					: null;
+			const vals = [effortAvg, perfAvg].filter((v): v is number => v !== null);
+			if (vals.length > 0) {
+				points.push({ x: week.weekNumber, y: vals.reduce((a, b) => a + b, 0) / vals.length });
+			}
+		}
+		if (points.length >= 2) {
+			const n = points.length;
+			const sumX = points.reduce((s, p) => s + p.x, 0);
+			const sumY = points.reduce((s, p) => s + p.y, 0);
+			const sumXY = points.reduce((s, p) => s + p.x * p.y, 0);
+			const sumX2 = points.reduce((s, p) => s + p.x * p.x, 0);
+			const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+			trajectoryScore = Math.max(-100, Math.min(100, Math.round(slope * 25)));
+		}
+	}
 
 	let respondedStakeholders = 0;
 	const stakeholders =
@@ -424,6 +458,8 @@ export function buildClientSummary(
 								completion,
 								weeksElapsed,
 								currentWeek: currentWeek ?? null,
+								stakeholderCadence: cycle.stakeholderCadence ?? 'weekly',
+								autoThrottle: cycle.autoThrottle ?? true,
 								recentReflections: reflectionTrend
 							}
 						: null,
@@ -434,7 +470,8 @@ export function buildClientSummary(
 						? {
 								avgEffort,
 								avgProgress,
-								consistencyScore,
+								stabilityScore,
+								trajectoryScore,
 								alignmentRatio
 							}
 						: null

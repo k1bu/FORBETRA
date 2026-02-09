@@ -26,20 +26,93 @@
 		return `${value}/100`;
 	};
 
-	const getScoreColor = (score: number | null | undefined) => {
-		if (score === null || score === undefined) return 'text-neutral-400';
-		if (score < 3) return 'text-amber-600';
-		if (score < 6) return 'text-blue-600';
-		if (score < 8) return 'text-emerald-600';
-		return 'text-purple-600';
+	import { getScoreColorNullable, getStabilityColor } from '$lib/utils/scoreColors';
+
+	const getScoreColor = (score: number | null | undefined, type: 'effort' | 'performance' = 'effort') =>
+		getScoreColorNullable(score, type);
+
+	// AI Performance Report state
+	let generating = $state(false);
+	let freshReport = $state<{ id: string; content: string; createdAt: string } | null>(null);
+	let generateError = $state<string | null>(null);
+	let reportThumbs = $state<number | null>(data.cycleReport?.thumbs ?? null);
+
+	const reportContent = $derived(freshReport?.content ?? data.cycleReport?.content ?? null);
+	const reportId = $derived(freshReport?.id ?? data.cycleReport?.id ?? null);
+	const reportDate = $derived(
+		freshReport?.createdAt
+			? new Date(freshReport.createdAt)
+			: data.cycleReport?.createdAt
+				? new Date(data.cycleReport.createdAt)
+				: null
+	);
+
+	async function generateReport() {
+		generating = true;
+		generateError = null;
+		try {
+			const res = await fetch('/api/insights/cycle-report', { method: 'POST' });
+			if (!res.ok) {
+				const err = await res.json();
+				generateError = err.error ?? 'Something went wrong';
+				return;
+			}
+			const result = await res.json();
+			freshReport = result;
+			reportThumbs = null;
+		} catch {
+			generateError = 'Network error. Please try again.';
+		} finally {
+			generating = false;
+		}
+	}
+
+	function parseReportSections(content: string): Array<{ title: string; body: string }> {
+		const sections: Array<{ title: string; body: string }> = [];
+		const parts = content.split(/^## /m);
+		for (const part of parts) {
+			const trimmed = part.trim();
+			if (!trimmed) continue;
+			const newlineIndex = trimmed.indexOf('\n');
+			if (newlineIndex === -1) {
+				sections.push({ title: trimmed, body: '' });
+			} else {
+				sections.push({
+					title: trimmed.slice(0, newlineIndex).trim(),
+					body: trimmed.slice(newlineIndex + 1).trim()
+				});
+			}
+		}
+		return sections;
+	}
+
+	const reportSections = $derived(reportContent ? parseReportSections(reportContent) : []);
+
+	const sectionColors: Record<string, string> = {
+		'Executive Summary': 'border-l-purple-500',
+		'Progress Trajectory': 'border-l-blue-500',
+		'Perception Analysis': 'border-l-teal-500',
+		'Key Strengths': 'border-l-emerald-500',
+		'Growth Opportunities': 'border-l-amber-500',
+		'Recommendations': 'border-l-indigo-500'
 	};
 
-	const getConsistencyColor = (score: number | null | undefined) => {
-		if (score === null || score === undefined) return 'text-neutral-400';
-		if (score < 50) return 'text-amber-600';
-		if (score < 75) return 'text-blue-600';
-		return 'text-emerald-600';
-	};
+	function getSectionColor(title: string): string {
+		for (const [key, color] of Object.entries(sectionColors)) {
+			if (title.toLowerCase().includes(key.toLowerCase())) return color;
+		}
+		return 'border-l-neutral-300';
+	}
+
+	async function submitReportFeedback(thumbs: number) {
+		if (!reportId) return;
+		reportThumbs = thumbs;
+		await fetch(`/api/insights/${reportId}/feedback`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ thumbs })
+		});
+	}
 </script>
 
 <section class="mx-auto flex max-w-6xl flex-col gap-8 p-4 pb-12">
@@ -47,7 +120,7 @@
 	<header class="flex items-center justify-between">
 		<div>
 			<h1 class="text-3xl font-bold text-neutral-900">Insights</h1>
-			<p class="mt-1 text-neutral-600">Track your progress and consistency over time</p>
+			<p class="mt-1 text-neutral-600">Track your progress and stability over time</p>
 		</div>
 		<a
 			href="/individual"
@@ -57,11 +130,86 @@
 		</a>
 	</header>
 
+	<!-- AI Performance Report -->
+	<div class="rounded-2xl border-2 border-purple-200 bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 p-6 shadow-sm">
+		<div class="mb-4 flex items-center justify-between">
+			<div class="flex items-center gap-2">
+				<span class="text-xl" role="img" aria-label="clipboard">&#128203;</span>
+				<h2 class="text-lg font-bold text-neutral-900">AI Performance Report</h2>
+			</div>
+			{#if reportDate}
+				<span class="text-xs text-neutral-500">
+					{new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(reportDate)}
+				</span>
+			{/if}
+		</div>
+
+		{#if generating}
+			<div class="flex flex-col items-center justify-center py-12">
+				<svg class="mb-3 h-8 w-8 animate-spin text-purple-500" fill="none" viewBox="0 0 24 24">
+					<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+					<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+				</svg>
+				<p class="text-sm font-medium text-purple-700">Analyzing your full cycle data...</p>
+				<p class="mt-1 text-xs text-neutral-500">This may take 10-15 seconds</p>
+			</div>
+		{:else if reportSections.length > 0}
+			<div class="space-y-3">
+				{#each reportSections as section}
+					<div class="rounded-lg border-l-4 bg-white/80 p-4 {getSectionColor(section.title)}">
+						<h3 class="mb-2 text-sm font-bold text-neutral-900">{section.title}</h3>
+						<div class="whitespace-pre-line text-sm leading-relaxed text-neutral-700">{section.body}</div>
+					</div>
+				{/each}
+			</div>
+
+			<!-- Feedback + Regenerate -->
+			<div class="mt-4 flex items-center justify-between">
+				<div class="flex gap-1">
+					<button
+						class="rounded px-2 py-1 text-xs transition-colors {reportThumbs === 1 ? 'bg-emerald-100 text-emerald-700' : 'text-neutral-400 hover:bg-neutral-100'}"
+						onclick={() => submitReportFeedback(1)}
+					>
+						&#128077; Helpful
+					</button>
+					<button
+						class="rounded px-2 py-1 text-xs transition-colors {reportThumbs === -1 ? 'bg-red-100 text-red-700' : 'text-neutral-400 hover:bg-neutral-100'}"
+						onclick={() => submitReportFeedback(-1)}
+					>
+						&#128078; Not helpful
+					</button>
+				</div>
+				<button
+					onclick={generateReport}
+					class="inline-flex items-center gap-1.5 rounded-lg border border-purple-300 bg-white px-3 py-1.5 text-xs font-semibold text-purple-700 transition-all hover:bg-purple-50"
+				>
+					Regenerate Report
+				</button>
+			</div>
+		{:else}
+			<!-- Empty state -->
+			<div class="py-8 text-center">
+				<p class="mb-2 text-sm text-neutral-600">
+					Get a comprehensive AI analysis of your full cycle — progress trajectory, perception gaps, strengths, and actionable recommendations.
+				</p>
+				{#if generateError}
+					<p class="mb-3 text-xs text-red-600">{generateError}</p>
+				{/if}
+				<button
+					onclick={generateReport}
+					class="inline-flex items-center gap-2 rounded-xl bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-purple-700 hover:shadow-lg"
+				>
+					Generate AI Report
+				</button>
+			</div>
+		{/if}
+	</div>
+
 	<!-- Reflection Trend -->
 	{#if data.reflectionTrend.weeks.length}
 		<div class="rounded-2xl border-2 border-neutral-200 bg-white p-6 shadow-sm">
 			<div class="mb-4 flex items-center gap-2">
-				<span class="text-xl">📈</span>
+				<span class="text-xl" role="img" aria-label="chart trending up">📈</span>
 				<h2 class="text-lg font-bold text-neutral-900">Reflection Trend (Last 4 Weeks)</h2>
 			</div>
 			<div class="overflow-x-auto">
@@ -91,10 +239,10 @@
 									{/if}
 								</td>
 								<td class="px-4 py-3">
-									<span class="font-semibold {getScoreColor(week.effortScore)}">{formatAverage(week.effortScore)}</span>
+									<span class="font-semibold {getScoreColor(week.effortScore, 'effort')}">{formatAverage(week.effortScore)}</span>
 								</td>
 								<td class="px-4 py-3">
-									<span class="font-semibold {getScoreColor(week.performanceScore)}">{formatAverage(week.performanceScore)}</span>
+									<span class="font-semibold {getScoreColor(week.performanceScore, 'performance')}">{formatAverage(week.performanceScore)}</span>
 								</td>
 							</tr>
 						{/each}
@@ -104,11 +252,11 @@
 			<div class="mt-4 flex gap-6 rounded-lg bg-neutral-50 px-4 py-3 text-sm">
 				<div>
 					<span class="text-neutral-500">Effort avg:</span>
-					<span class="ml-2 font-bold {getScoreColor(data.reflectionTrend.avgEffort)}">{formatAverage(data.reflectionTrend.avgEffort)}</span>
+					<span class="ml-2 font-bold {getScoreColor(data.reflectionTrend.avgEffort, 'effort')}">{formatAverage(data.reflectionTrend.avgEffort)}</span>
 				</div>
 				<div>
 					<span class="text-neutral-500">Progress avg:</span>
-					<span class="ml-2 font-bold {getScoreColor(data.reflectionTrend.avgProgress)}">{formatAverage(data.reflectionTrend.avgProgress)}</span>
+					<span class="ml-2 font-bold {getScoreColor(data.reflectionTrend.avgProgress, 'performance')}">{formatAverage(data.reflectionTrend.avgProgress)}</span>
 				</div>
 			</div>
 		</div>
@@ -118,26 +266,104 @@
 	{#if data.insights}
 		<div class="rounded-2xl border-2 border-neutral-200 bg-gradient-to-br from-purple-50 to-pink-50 p-6 shadow-sm">
 			<div class="mb-4 flex items-center gap-2">
-				<span class="text-xl">✨</span>
+				<span class="text-xl" role="img" aria-label="sparkles">✨</span>
 				<h2 class="text-lg font-bold text-neutral-900">Weekly Insights</h2>
 			</div>
 			<div class="grid gap-4 md:grid-cols-2">
 				<div class="rounded-xl border border-purple-200 bg-white/80 p-4 backdrop-blur-sm">
 					<p class="mb-1 text-xs font-semibold uppercase tracking-wide text-neutral-500">Avg. Effort (4-week)</p>
-					<p class="text-2xl font-bold {getScoreColor(data.insights.avgEffort)}">{formatAverage(data.insights.avgEffort)}</p>
+					<p class="text-2xl font-bold {getScoreColor(data.insights.avgEffort, 'effort')}">{formatAverage(data.insights.avgEffort)}</p>
 				</div>
 				<div class="rounded-xl border border-purple-200 bg-white/80 p-4 backdrop-blur-sm">
 					<p class="mb-1 text-xs font-semibold uppercase tracking-wide text-neutral-500">Avg. Progress (4-week)</p>
-					<p class="text-2xl font-bold {getScoreColor(data.insights.avgProgress)}">{formatAverage(data.insights.avgProgress)}</p>
+					<p class="text-2xl font-bold {getScoreColor(data.insights.avgProgress, 'performance')}">{formatAverage(data.insights.avgProgress)}</p>
 				</div>
 				<div class="rounded-xl border border-purple-200 bg-white/80 p-4 backdrop-blur-sm">
-					<p class="mb-1 text-xs font-semibold uppercase tracking-wide text-neutral-500">Consistency</p>
-					<p class="text-2xl font-bold {getConsistencyColor(data.insights.consistencyScore)}">{formatScore(data.insights.consistencyScore)}</p>
+					<p class="mb-1 text-xs font-semibold uppercase tracking-wide text-neutral-500">Stability</p>
+					<p class="text-2xl font-bold {getStabilityColor(data.insights.stabilityScore)}">{formatScore(data.insights.stabilityScore)}</p>
+				</div>
+				<div class="rounded-xl border border-purple-200 bg-white/80 p-4 backdrop-blur-sm">
+					<p class="mb-1 text-xs font-semibold uppercase tracking-wide text-neutral-500">Trajectory</p>
+					<p class="text-2xl font-bold {data.insights.trajectoryScore !== null && data.insights.trajectoryScore !== undefined ? (data.insights.trajectoryScore > 10 ? 'text-emerald-600' : data.insights.trajectoryScore < -10 ? 'text-red-600' : 'text-blue-600') : 'text-neutral-400'}">
+						{#if data.insights.trajectoryScore !== null && data.insights.trajectoryScore !== undefined}
+							{#if data.insights.trajectoryScore > 10}↑{:else if data.insights.trajectoryScore < -10}↓{:else}→{/if}
+							{data.insights.trajectoryScore > 0 ? '+' : ''}{data.insights.trajectoryScore}
+						{:else}
+							—
+						{/if}
+					</p>
 				</div>
 				<div class="rounded-xl border border-purple-200 bg-white/80 p-4 backdrop-blur-sm">
 					<p class="mb-1 text-xs font-semibold uppercase tracking-wide text-neutral-500">Stakeholder Alignment</p>
 					<p class="text-2xl font-bold text-emerald-600">{formatPercent(data.insights.alignmentRatio)}</p>
 				</div>
+			</div>
+		</div>
+	{/if}
+
+	<!-- Weekly AI Insights -->
+	{#if data.aiInsights && data.aiInsights.length > 0}
+		<div class="rounded-2xl border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 p-6 shadow-sm">
+			<div class="mb-4 flex items-center gap-2">
+				<span class="text-xl" role="img" aria-label="sparkles">&#10024;</span>
+				<h2 class="text-lg font-bold text-neutral-900">Weekly AI Insights</h2>
+			</div>
+			<div class="space-y-3">
+				{#each data.aiInsights as insight (insight.id)}
+					<details class="rounded-xl border border-indigo-200 bg-white/80 backdrop-blur-sm">
+						<summary class="flex cursor-pointer items-center justify-between px-4 py-3">
+							<div class="flex items-center gap-2">
+								<span class="rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-semibold text-indigo-700">
+									Week {insight.weekNumber ?? '--'}
+								</span>
+								<span class="text-sm font-medium text-neutral-700">
+									{new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(new Date(insight.createdAt))}
+								</span>
+							</div>
+							<div class="flex items-center gap-2">
+								{#if insight.thumbs === 1}
+									<span class="text-xs text-emerald-600">&#128077;</span>
+								{:else if insight.thumbs === -1}
+									<span class="text-xs text-red-600">&#128078;</span>
+								{/if}
+								<svg class="h-4 w-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+								</svg>
+							</div>
+						</summary>
+						<div class="border-t border-indigo-100 px-4 py-3">
+							<div class="prose prose-sm max-w-none text-neutral-700">
+								{insight.content ?? 'No content available.'}
+							</div>
+							<div class="mt-3 flex gap-1">
+								<button
+									class="rounded px-2 py-1 text-xs transition-colors {insight.thumbs === 1 ? 'bg-emerald-100 text-emerald-700' : 'text-neutral-400 hover:bg-neutral-100'}"
+									onclick={async () => {
+										await fetch(`/api/insights/${insight.id}/feedback`, {
+											method: 'POST',
+											headers: { 'Content-Type': 'application/json' },
+											body: JSON.stringify({ thumbs: 1 })
+										});
+									}}
+								>
+									&#128077; Helpful
+								</button>
+								<button
+									class="rounded px-2 py-1 text-xs transition-colors {insight.thumbs === -1 ? 'bg-red-100 text-red-700' : 'text-neutral-400 hover:bg-neutral-100'}"
+									onclick={async () => {
+										await fetch(`/api/insights/${insight.id}/feedback`, {
+											method: 'POST',
+											headers: { 'Content-Type': 'application/json' },
+											body: JSON.stringify({ thumbs: -1 })
+										});
+									}}
+								>
+									&#128078; Not helpful
+								</button>
+							</div>
+						</div>
+					</details>
+				{/each}
 			</div>
 		</div>
 	{/if}

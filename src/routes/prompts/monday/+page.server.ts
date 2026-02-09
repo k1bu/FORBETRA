@@ -7,7 +7,7 @@ import type { Actions, PageServerLoad } from './$types';
 
 const intentionSchema = z.object({
 	intention: z
-		.string({ required_error: 'Intention is required' })
+		.string({ error: 'Intention is required' })
 		.trim()
 		.min(25, 'Aim for at least 25 characters to clarify your intention')
 		.max(1500, 'Keep intentions under 1500 characters')

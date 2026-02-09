@@ -2,13 +2,10 @@ import { z } from 'zod';
 
 export const reflectionEntrySchema = z.object({
 	subgoalId: z
-		.string({ required_error: 'Subgoal is required' })
+		.string({ error: 'Subgoal is required' })
 		.cuid({ message: 'Invalid subgoal' }),
 	score: z.coerce
-		.number({
-			required_error: 'Score is required',
-			invalid_type_error: 'Score must be a number'
-		})
+		.number({ error: 'Score must be a number' })
 		.int()
 		.min(0, 'Minimum score is 0')
 		.max(10, 'Maximum score is 10'),
@@ -17,18 +14,12 @@ export const reflectionEntrySchema = z.object({
 
 export const checkInEntrySchema = z.object({
 	effortScore: z.coerce
-		.number({
-			required_error: 'Effort score is required',
-			invalid_type_error: 'Effort score must be a number'
-		})
+		.number({ error: 'Effort score must be a number' })
 		.int()
 		.min(0, 'Minimum effort score is 0')
 		.max(10, 'Maximum effort score is 10'),
 	performanceScore: z.coerce
-		.number({
-			required_error: 'Performance score is required',
-			invalid_type_error: 'Performance score must be a number'
-		})
+		.number({ error: 'Performance score must be a number' })
 		.int()
 		.min(0, 'Minimum performance score is 0')
 		.max(10, 'Maximum performance score is 10'),

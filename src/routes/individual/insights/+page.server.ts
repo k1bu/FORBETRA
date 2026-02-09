@@ -191,8 +191,37 @@ export const load: PageServerLoad = async (event) => {
 		stdValues.length > 0
 			? stdValues.reduce((sum, value) => sum + value, 0) / stdValues.length
 			: null;
-	const consistencyScore =
+	const stabilityScore =
 		combinedStd !== null ? Math.max(0, Math.round(100 - combinedStd * 10)) : null;
+
+	// Trajectory: linear regression slope of last 4 weeks combined effort+performance
+	let trajectoryScore: number | null = null;
+	if (trendWeeks.length >= 2) {
+		const points: { x: number; y: number }[] = [];
+		for (const week of trendWeeks) {
+			const effortAvg =
+				week.effortScores.length > 0
+					? week.effortScores.reduce((s, v) => s + v, 0) / week.effortScores.length
+					: null;
+			const perfAvg =
+				week.performanceScores.length > 0
+					? week.performanceScores.reduce((s, v) => s + v, 0) / week.performanceScores.length
+					: null;
+			const vals = [effortAvg, perfAvg].filter((v): v is number => v !== null);
+			if (vals.length > 0) {
+				points.push({ x: week.weekNumber, y: vals.reduce((a, b) => a + b, 0) / vals.length });
+			}
+		}
+		if (points.length >= 2) {
+			const n = points.length;
+			const sumX = points.reduce((s, p) => s + p.x, 0);
+			const sumY = points.reduce((s, p) => s + p.y, 0);
+			const sumXY = points.reduce((s, p) => s + p.x * p.y, 0);
+			const sumX2 = points.reduce((s, p) => s + p.x * p.x, 0);
+			const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+			trajectoryScore = Math.max(-100, Math.min(100, Math.round(slope * 25)));
+		}
+	}
 
 	let respondedThisWeek = 0;
 	if (currentWeek) {
@@ -220,6 +249,12 @@ export const load: PageServerLoad = async (event) => {
 	let gapLensData: {
 		effort: Array<{ weekNumber: number; difference: number }>;
 		performance: Array<{ weekNumber: number; difference: number }>;
+		stakeholders: Array<{
+			id: string;
+			name: string;
+			effortGaps: Array<{ weekNumber: number; difference: number }>;
+			performanceGaps: Array<{ weekNumber: number; difference: number }>;
+		}>;
 	} | null = null;
 
 	if (cycle) {
@@ -428,6 +463,45 @@ export const load: PageServerLoad = async (event) => {
 		};
 	}
 
+	// Load AI-generated insights for this cycle
+	let aiInsights: Array<{
+		id: string;
+		type: string;
+		content: string | null;
+		weekNumber: number | null;
+		thumbs: number | null;
+		createdAt: Date;
+	}> = [];
+
+	if (cycle) {
+		aiInsights = await prisma.insight.findMany({
+			where: {
+				userId: dbUser.id,
+				cycleId: cycle.id,
+				status: 'COMPLETED',
+				type: 'WEEKLY_SYNTHESIS'
+			},
+			orderBy: { weekNumber: 'desc' },
+			select: {
+				id: true,
+				type: true,
+				content: true,
+				weekNumber: true,
+				thumbs: true,
+				createdAt: true
+			}
+		});
+	}
+
+	let cycleReport: { id: string; content: string | null; createdAt: Date; thumbs: number | null } | null = null;
+	if (cycle) {
+		cycleReport = await prisma.insight.findFirst({
+			where: { userId: dbUser.id, cycleId: cycle.id, status: 'COMPLETED', type: 'CYCLE_REPORT' },
+			orderBy: { createdAt: 'desc' },
+			select: { id: true, content: true, createdAt: true, thumbs: true }
+		});
+	}
+
 	return {
 		objective: {
 			id: objective.id,
@@ -437,11 +511,14 @@ export const load: PageServerLoad = async (event) => {
 		insights: {
 			avgEffort: reflectionTrendSummary.avgEffort,
 			avgProgress: reflectionTrendSummary.avgProgress,
-			consistencyScore,
+			stabilityScore,
+			trajectoryScore,
 			alignmentRatio
 		},
 		correlationData,
-		gapLensData
+		gapLensData,
+		aiInsights,
+		cycleReport
 	};
 };
 

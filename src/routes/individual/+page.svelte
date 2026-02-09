@@ -8,40 +8,6 @@
 		throw new Error('Page data is missing');
 	}
 
-	// AI Coaching state
-	let generating = $state(false);
-	let freshInsight = $state<string | null>(null);
-	let generateError = $state<string | null>(null);
-	let insightExpanded = $state(false);
-
-	// Derived insight content (fresh takes priority)
-	let insightContent = $derived(freshInsight ?? data.latestInsight?.content ?? null);
-
-	async function generateSummary() {
-		generating = true;
-		generateError = null;
-		try {
-			const res = await fetch('/api/insights/hub-summary', { method: 'POST' });
-			if (!res.ok) {
-				const err = await res.json();
-				generateError = err.error ?? 'Something went wrong';
-				return;
-			}
-			const result = await res.json();
-			freshInsight = result.content;
-			insightExpanded = true;
-		} catch {
-			generateError = 'Network error. Please try again.';
-		} finally {
-			generating = false;
-		}
-	}
-
-	function truncate(text: string, maxLength: number): string {
-		if (text.length <= maxLength) return text;
-		return text.slice(0, maxLength).trimEnd() + '...';
-	}
-
 	function trendColor(change: number | null): string {
 		if (change === null) return 'bg-neutral-300';
 		if (change > 0) return 'bg-green-500';
@@ -777,70 +743,6 @@
 		{/if}
 	{/if}
 
-	<!-- AI Coaching Card -->
-	{#if data.isOnboardingComplete}
-		<div class="rounded-2xl border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-blue-50 p-6 shadow-sm">
-			<div class="mb-4 flex items-center gap-2">
-				<span class="text-xl" role="img" aria-label="robot">🤖</span>
-				<h2 class="text-lg font-bold text-neutral-900">AI Coach</h2>
-			</div>
-
-			{#if insightContent}
-				<div class="mb-3">
-					{#if data.latestInsight?.weekNumber && !freshInsight}
-						<p class="mb-2 text-xs text-purple-500">
-							Week {data.latestInsight.weekNumber}
-							<span class="ml-1 text-neutral-400">{data.latestInsight.type === 'WEEKLY_SYNTHESIS' ? 'Weekly Synthesis' : 'Check-in Insight'}</span>
-							{#if data.latestInsight.createdAt}
-								<span class="ml-1"> &middot; {new Date(data.latestInsight.createdAt).toLocaleDateString()}</span>
-							{/if}
-						</p>
-					{/if}
-					{#if freshInsight}
-						<p class="mb-2 text-xs font-medium text-green-600">Fresh summary generated just now</p>
-					{/if}
-					<div class="text-sm leading-relaxed text-neutral-700 whitespace-pre-line">
-						{#if insightExpanded || insightContent.length <= 300}
-							{insightContent}
-						{:else}
-							{truncate(insightContent, 300)}
-						{/if}
-					</div>
-					{#if insightContent.length > 300}
-						<button
-							class="mt-2 text-xs font-medium text-purple-600 hover:text-purple-800"
-							onclick={() => insightExpanded = !insightExpanded}
-						>
-							{insightExpanded ? 'Show less' : 'Read more'}
-						</button>
-					{/if}
-				</div>
-			{:else}
-				<p class="mb-4 text-sm text-neutral-500">Complete your first check-in to receive AI coaching insights.</p>
-			{/if}
-
-			{#if generateError}
-				<p class="mb-2 text-xs text-red-600">{generateError}</p>
-			{/if}
-
-			<button
-				onclick={generateSummary}
-				disabled={generating}
-				class="inline-flex items-center gap-2 rounded-xl bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-purple-700 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
-			>
-				{#if generating}
-					<svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-						<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-					</svg>
-					Generating...
-				{:else}
-					Generate Fresh Summary
-				{/if}
-			</button>
-		</div>
-	{/if}
-
 	<!-- Navigation Cards -->
 	{#if data.isOnboardingComplete}
 		<div class="grid gap-6 md:grid-cols-3">
@@ -873,7 +775,7 @@
 					<h2 class="text-xl font-bold text-neutral-900">Insights</h2>
 				</div>
 				<p class="mb-4 text-sm text-neutral-600">
-					Review reflection trends, stability metrics, and stakeholder alignment over time.
+					Review your AI performance report, reflection trends, and stakeholder alignment data.
 				</p>
 				<div class="flex items-center gap-2 text-sm font-semibold text-purple-700 transition-transform group-hover:translate-x-1">
 					View Insights <span>→</span>

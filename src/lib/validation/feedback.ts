@@ -2,15 +2,15 @@ import { z } from 'zod';
 
 export const stakeholderFeedbackSchema = z
 	.object({
-		token: z.string({ required_error: 'Feedback token is required' }).length(64, 'Invalid token'),
+		token: z.string({ error: 'Feedback token is required' }).length(64, 'Invalid token'),
 		effortScore: z.coerce
-			.number({ invalid_type_error: 'Provide a number between 0 and 10' })
+			.number({ error: 'Provide a number between 0 and 10' })
 			.int()
 			.min(0, 'Minimum score is 0')
 			.max(10, 'Maximum score is 10')
 			.optional(),
 		performanceScore: z.coerce
-			.number({ invalid_type_error: 'Provide a number between 0 and 10' })
+			.number({ error: 'Provide a number between 0 and 10' })
 			.int()
 			.min(0, 'Minimum score is 0')
 			.max(10, 'Maximum score is 10')

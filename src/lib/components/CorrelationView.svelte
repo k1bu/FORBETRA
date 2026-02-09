@@ -213,8 +213,8 @@
 				const weekData = weeklyData.find((w) => w.weekNumber === week);
 				return weekData?.individualEffort ?? null;
 			}),
-			borderColor: 'rgba(59, 130, 246, 0.5)',
-			backgroundColor: 'rgba(59, 130, 246, 0.05)',
+			borderColor: 'rgba(217, 119, 6, 0.5)',
+			backgroundColor: 'rgba(217, 119, 6, 0.05)',
 			borderWidth: 2,
 			borderDash: [5, 5],
 			tension: 0.3,
@@ -231,8 +231,8 @@
 				const weekData = weeklyData.find((w) => w.weekNumber === week);
 				return weekData?.individualPerformance ?? null;
 			}),
-			borderColor: 'rgba(168, 85, 247, 0.5)',
-			backgroundColor: 'rgba(168, 85, 247, 0.05)',
+			borderColor: 'rgba(79, 70, 229, 0.5)',
+			backgroundColor: 'rgba(79, 70, 229, 0.05)',
 			borderWidth: 2,
 			borderDash: [5, 5],
 			tension: 0.3,
@@ -257,13 +257,13 @@
 					label: 'My Correlation',
 					data: allWeeks.map((week) => {
 						const weekData = weeklyData.find((w) => w.weekNumber === week);
-						if (weekData?.individualEffort !== null && weekData.individualEffort !== undefined) {
+						if (weekData && weekData.individualEffort !== null && weekData.individualEffort !== undefined) {
 							// Predicted performance = slope * effort + intercept
 							return slope * weekData.individualEffort + intercept;
 						}
 						return null;
 					}),
-					borderColor: 'rgb(59, 130, 246)',
+					borderColor: 'rgb(217, 119, 6)',
 					backgroundColor: 'transparent',
 					borderWidth: 3,
 					borderDash: [],
@@ -297,8 +297,8 @@
 					const weekData = stakeholderAveragesByWeek.find((w) => w.weekNumber === week);
 					return weekData?.avgEffort ?? null;
 				}),
-				borderColor: 'rgba(16, 185, 129, 0.5)',
-				backgroundColor: 'rgba(16, 185, 129, 0.05)',
+				borderColor: 'rgba(245, 158, 11, 0.5)',
+				backgroundColor: 'rgba(245, 158, 11, 0.05)',
 				borderWidth: 2,
 				tension: 0.3,
 				pointRadius: 3,
@@ -314,8 +314,8 @@
 					const weekData = stakeholderAveragesByWeek.find((w) => w.weekNumber === week);
 					return weekData?.avgPerformance ?? null;
 				}),
-				borderColor: 'rgba(245, 101, 101, 0.5)',
-				backgroundColor: 'rgba(245, 101, 101, 0.05)',
+				borderColor: 'rgba(99, 102, 241, 0.5)',
+				backgroundColor: 'rgba(99, 102, 241, 0.05)',
 				borderWidth: 2,
 				tension: 0.3,
 				pointRadius: 3,
@@ -338,13 +338,13 @@
 						label: 'Stakeholders Correlation',
 						data: allWeeks.map((week) => {
 							const weekData = stakeholderAveragesByWeek.find((w) => w.weekNumber === week);
-							if (weekData?.avgEffort !== null && weekData.avgEffort !== undefined) {
+							if (weekData && weekData.avgEffort !== null && weekData.avgEffort !== undefined) {
 								// Predicted performance = slope * effort + intercept
 								return slope * weekData.avgEffort + intercept;
 							}
 							return null;
 						}),
-						borderColor: 'rgb(16, 185, 129)',
+						borderColor: 'rgb(99, 102, 241)',
 						backgroundColor: 'transparent',
 						borderWidth: 3,
 						borderDash: [],
@@ -428,7 +428,7 @@
 				responsive: true,
 				maintainAspectRatio: false,
 				interaction: {
-					mode: 'index',
+					mode: 'index' as const,
 					intersect: false
 				},
 				plugins: {
@@ -641,7 +641,7 @@
 			<div class="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-500">Correlation Lines</div>
 			<div class="space-y-2">
 				<div class="flex items-center gap-2">
-					<div class="h-1 w-8 rounded-full bg-blue-600"></div>
+					<div class="h-1 w-8 rounded-full bg-amber-600"></div>
 					<span class="text-sm font-medium text-neutral-700">My Correlation</span>
 					{#if individualCorrelation !== null}
 						<span class="text-xs text-neutral-500">(r={individualCorrelation.toFixed(2)})</span>
@@ -660,11 +660,11 @@
 			<div class="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-500">Individual Lines</div>
 			<div class="space-y-2">
 				<div class="flex items-center gap-2">
-					<div class="h-0.5 w-8 border-t-2 border-dashed border-blue-600/50"></div>
+					<div class="h-0.5 w-8 border-t-2 border-dashed border-amber-600/50"></div>
 					<span class="text-sm text-neutral-600">My Effort</span>
 				</div>
 				<div class="flex items-center gap-2">
-					<div class="h-0.5 w-8 border-t-2 border-dashed border-purple-600/50"></div>
+					<div class="h-0.5 w-8 border-t-2 border-dashed border-indigo-600/50"></div>
 					<span class="text-sm text-neutral-600">My Performance</span>
 				</div>
 				{#if showStakeholders}
@@ -682,8 +682,13 @@
 	</div>
 
 	<div class="h-[400px] w-full rounded-xl border-2 border-neutral-200 bg-white p-6">
-		{#if individualData.length > 0 || stakeholderData.length > 0}
+		{#if individualData.length >= 3 || stakeholderData.length >= 3}
 			<canvas bind:this={chartCanvas}></canvas>
+		{:else if individualData.length > 0 || stakeholderData.length > 0}
+			<div class="flex h-full flex-col items-center justify-center gap-2 text-neutral-500">
+				<p class="text-sm font-medium">Correlation patterns need at least 3 weeks of data.</p>
+				<p class="text-xs">You're on week {Math.max(...individualData.map(d => d.weekNumber), ...stakeholderData.map(d => d.weekNumber), 1)}. Keep going!</p>
+			</div>
 		{:else}
 			<div class="flex h-full items-center justify-center text-neutral-500">
 				<p>Not enough data to display correlation view. Complete more check-ins to see the relationship between effort and performance over time.</p>
