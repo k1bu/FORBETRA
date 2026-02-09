@@ -14,6 +14,7 @@ export const remindOverduePrompts = async () => {
 		include: {
 			user: true,
 			cycles: {
+				where: { status: 'ACTIVE' },
 				orderBy: { startDate: 'desc' },
 				take: 1,
 				include: {
@@ -34,8 +35,19 @@ export const remindOverduePrompts = async () => {
 				.map((reflection) => reflection.reflectionType)
 		);
 
+		// Determine expected reflection types based on check-in frequency
+		const freq = cycle.checkInFrequency ?? '3x';
+		let expectedTypes: readonly ('INTENTION' | 'RATING_A' | 'RATING_B')[];
+		if (freq === '1x') {
+			expectedTypes = ['RATING_A'] as const;
+		} else if (freq === '2x') {
+			expectedTypes = ['INTENTION', 'RATING_A'] as const;
+		} else {
+			expectedTypes = ['INTENTION', 'RATING_A', 'RATING_B'] as const;
+		}
+
 		const overdue: string[] = [];
-		(['INTENTION', 'RATING_A', 'RATING_B'] as const).forEach((type) => {
+		expectedTypes.forEach((type) => {
 			if (!submittedTypes.has(type)) {
 				overdue.push(type.toLowerCase());
 			}

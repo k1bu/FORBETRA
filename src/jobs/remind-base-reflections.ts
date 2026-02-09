@@ -80,6 +80,17 @@ export const remindBaseReflections = async () => {
 		const cycle = objective.cycles[0];
 		if (!cycle) continue;
 
+		// Skip reminders based on check-in frequency
+		const freq = cycle.checkInFrequency ?? '3x';
+		if (freq === '1x' && reflectionType !== 'RATING_A') {
+			// 1x frequency: only send for RATING_A (single combined check-in)
+			continue;
+		}
+		if (freq === '2x' && reflectionType === 'RATING_B') {
+			// 2x frequency: skip RATING_B (combine effort+performance into RATING_A)
+			continue;
+		}
+
 		const currentWeek = computeWeekNumber(cycle.startDate);
 
 		// Check if reflection already submitted for this week

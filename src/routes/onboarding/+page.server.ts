@@ -64,6 +64,8 @@ export const actions: Actions = {
 		const reminderDays = (formData.get('reminderDays') ?? 'wednesday_friday').toString() as
 			| 'wednesday_friday'
 			| 'tuesday_thursday';
+		const checkInFrequency = (formData.get('checkInFrequency') ?? '3x').toString() as '3x' | '2x' | '1x';
+		const stakeholderCadence = (formData.get('stakeholderCadence') ?? 'weekly').toString() as 'weekly' | 'biweekly';
 
 		const subgoals = Array.from({ length: MAX_SUBGOALS }, (_, index) => {
 			const label = (formData.get(`subgoalLabel${index + 1}`) ?? '').toString().trim();
@@ -87,7 +89,9 @@ export const actions: Actions = {
 			stakeholders,
 			cycleLabel,
 			cycleStartDate,
-			cycleDurationWeeks: cycleDurationWeeksRaw
+			cycleDurationWeeks: cycleDurationWeeksRaw,
+			checkInFrequency,
+			stakeholderCadence
 		};
 
 		const parsed = onboardingSchema.safeParse({
@@ -107,7 +111,9 @@ export const actions: Actions = {
 				: [],
 			cycleLabel: submission.cycleLabel.length > 0 ? submission.cycleLabel : undefined,
 			cycleStartDate: submission.cycleStartDate,
-			cycleDurationWeeks: cycleDurationWeeksValue
+			cycleDurationWeeks: cycleDurationWeeksValue,
+			checkInFrequency: submission.checkInFrequency,
+			stakeholderCadence: submission.stakeholderCadence
 		});
 
 		if (!parsed.success) {
@@ -202,7 +208,9 @@ export const actions: Actions = {
 						label: data.cycleLabel && data.cycleLabel.trim().length > 0 ? data.cycleLabel.trim() : 'Cycle 1',
 						startDate,
 						endDate,
-						status: 'ACTIVE'
+						status: 'ACTIVE',
+						checkInFrequency: data.checkInFrequency,
+						stakeholderCadence: data.stakeholderCadence
 					}
 				});
 

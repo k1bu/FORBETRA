@@ -125,6 +125,7 @@ export const load: PageServerLoad = async (event) => {
 	}
 
 	const currentWeek = computeWeekNumber(cycle.startDate);
+	const checkInFrequency = cycle.checkInFrequency ?? '3x';
 
 	// Check if type is specified in query params
 	const typeParam = event.url.searchParams.get('type');
@@ -137,18 +138,39 @@ export const load: PageServerLoad = async (event) => {
 		isAvailable: boolean;
 	};
 
-	if (typeParam === 'RATING_A' || typeParam === 'RATING_B') {
+	// For 1x frequency: always show combined effort+performance as RATING_A
+	if (checkInFrequency === '1x') {
+		const fridayDate = getDateForWeekday(5, cycle.startDate, currentWeek);
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		checkInInfo = {
+			type: 'RATING_A',
+			label: 'Weekly reflection',
+			availableDate: fridayDate,
+			isAvailable: isPreview || today >= fridayDate
+		};
+	} else if (checkInFrequency === '2x' && (!typeParam || typeParam === 'RATING_B')) {
+		// For 2x frequency: Mon=intention, other day=combined effort+performance as RATING_A
+		const fridayDate = getDateForWeekday(5, cycle.startDate, currentWeek);
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		checkInInfo = {
+			type: 'RATING_A',
+			label: 'End-of-week check-in',
+			availableDate: fridayDate,
+			isAvailable: isPreview || today >= fridayDate
+		};
+	} else if (typeParam === 'RATING_A' || typeParam === 'RATING_B') {
 		// Use the specified type
 		const tuesdayDate = getDateForWeekday(2, cycle.startDate, currentWeek);
 		const thursdayDate = getDateForWeekday(4, cycle.startDate, currentWeek);
-		const fridayDate = getDateForWeekday(5, cycle.startDate, currentWeek);
 		const today = new Date();
 		today.setHours(0, 0, 0, 0);
 
 		if (typeParam === 'RATING_A') {
 			checkInInfo = {
 				type: 'RATING_A',
-				label: 'Wednesday check-in',
+				label: checkInFrequency === '2x' ? 'End-of-week check-in' : 'Wednesday check-in',
 				availableDate: tuesdayDate,
 				isAvailable: isPreview || today >= tuesdayDate
 			};
@@ -261,6 +283,7 @@ export const load: PageServerLoad = async (event) => {
 	return {
 		checkInType: checkInInfo.type,
 		checkInLabel: checkInInfo.label,
+		checkInFrequency,
 		isAvailable: checkInInfo.isAvailable,
 		availableDate: checkInInfo.availableDate.toISOString(),
 		isLocked: isPreview ? false : isLocked, // Allow editing in preview mode

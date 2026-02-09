@@ -207,6 +207,35 @@ export const emailTemplates = {
 		text: `Reminder: You have overdue reflections\n\nHi ${data.individualName || 'there'},\n\nYou have some overdue reflections that need your attention.\n\n${data.objectiveTitle ? `Objective: ${data.objectiveTitle}\n\n` : ''}View dashboard: ${data.appUrl || baseUrl}/individual\n\nCatching up helps maintain your progress tracking.`
 	}),
 
+	cycleCompleted: (data: EmailTemplateData) => ({
+		subject: 'Your cycle is complete — your growth report is ready',
+		html: `
+			<!DOCTYPE html>
+			<html>
+			<head>
+				<meta charset="utf-8">
+				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			</head>
+			<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #334155; max-width: 600px; margin: 0 auto; padding: 20px;">
+				<div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
+					<h1 style="color: white; margin: 0; font-size: 28px; font-weight: 600;">Cycle Complete!</h1>
+				</div>
+				<div style="background: white; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+					<p style="font-size: 16px; margin-top: 0;">Hi ${data.individualName || 'there'},</p>
+					<p style="font-size: 16px;">Congratulations — you've completed your cycle${data.cycleLabel ? ` <strong>${data.cycleLabel}</strong>` : ''}!</p>
+					${data.objectiveTitle ? `<p style="font-size: 14px; color: #64748b; background: #f1f5f9; padding: 12px; border-radius: 6px; margin: 20px 0;"><strong>Objective:</strong> ${data.objectiveTitle}</p>` : ''}
+					<p style="font-size: 16px;">Your growth report is ready — it summarizes your progress, key patterns, and areas for continued development.</p>
+					<div style="text-align: center; margin: 30px 0;">
+						<a href="${data.appUrl || baseUrl}/individual/insights" style="display: inline-block; background: #10b981; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">View Your Cycle Report</a>
+					</div>
+					<p style="font-size: 14px; color: #64748b; margin-top: 30px;">When you're ready, start a new cycle to keep growing.</p>
+				</div>
+			</body>
+			</html>
+		`,
+		text: `Your cycle is complete — your growth report is ready\n\nHi ${data.individualName || 'there'},\n\nCongratulations — you've completed your cycle${data.cycleLabel ? ` "${data.cycleLabel}"` : ''}!\n\n${data.objectiveTitle ? `Objective: ${data.objectiveTitle}\n\n` : ''}Your growth report is ready — it summarizes your progress, key patterns, and areas for continued development.\n\nView your cycle report: ${data.appUrl || baseUrl}/individual/insights\n\nWhen you're ready, start a new cycle to keep growing.`
+	}),
+
 	reminderStakeholderFeedback: (data: EmailTemplateData) => ({
 		subject: `Reminder: Feedback request for ${data.individualName || 'your participant'}`,
 		html: `

@@ -113,6 +113,14 @@
 				</div>
 			</div>
 
+			<!-- Effort-Performance Gap Explanation -->
+			<div class="rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50/50 to-indigo-50/50 px-6 py-5">
+				<p class="text-sm font-semibold text-blue-900 mb-1">Why two scores?</p>
+				<p class="text-sm leading-relaxed text-slate-700">
+					The gap between effort and results is the most powerful growth signal. We track both so patterns become visible — where effort isn't translating to performance, and where results come easier than expected.
+				</p>
+			</div>
+
 			<!-- Performance Rating -->
 			<div class="rounded-2xl border-2 border-neutral-200 bg-white p-8 shadow-sm">
 				<div class="mb-6">

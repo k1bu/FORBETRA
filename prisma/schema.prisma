@@ -101,6 +101,7 @@ model Cycle {
   endDate             DateTime?
   status              CycleStatus @default(PLANNED)
   summary             String?
+  checkInFrequency    String      @default("3x")    // "3x" | "2x" | "1x"
   stakeholderCadence  String      @default("weekly")
   autoThrottle        Boolean     @default(true)
   createdAt           DateTime    @default(now())

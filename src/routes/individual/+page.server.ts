@@ -64,6 +64,10 @@ export const load: PageServerLoad = async (event) => {
 		const currentWeek = cycle ? computeWeekNumber(cycle.startDate) : null;
 
 		// Calculate summary metrics
+		// Determine check-in frequency for this cycle
+		const checkInFrequency = cycle?.checkInFrequency ?? '3x';
+		const checksPerWeek = checkInFrequency === '1x' ? 1 : checkInFrequency === '2x' ? 2 : 3;
+
 		let completionRate: number | null = null;
 		let currentStreak: number = 0;
 		let totalExpected: number = 0;
@@ -72,7 +76,7 @@ export const load: PageServerLoad = async (event) => {
 		let missedExperiences: number = 0;
 
 		if (cycle && currentWeek) {
-			totalExpected = currentWeek * 3;
+			totalExpected = currentWeek * checksPerWeek;
 			totalCompleted = cycle.reflections.length;
 			completionRate = totalExpected > 0 ? Math.round((totalCompleted / totalExpected) * 100) : 0;
 
@@ -81,7 +85,7 @@ export const load: PageServerLoad = async (event) => {
 				cycle.reflections.filter((r) => r.weekNumber === currentWeek).map((r) => r.reflectionType)
 			);
 
-			if (!submittedTypes.has('INTENTION')) openExperiences++;
+			if (checkInFrequency !== '1x' && !submittedTypes.has('INTENTION')) openExperiences++;
 			if (!submittedTypes.has('RATING_A')) {
 				const fridayDate = new Date(cycle.startDate);
 				const startDayOfWeek = cycle.startDate.getDay();
@@ -101,7 +105,7 @@ export const load: PageServerLoad = async (event) => {
 					openExperiences++;
 				}
 			}
-			if (!submittedTypes.has('RATING_B')) {
+			if (checkInFrequency === '3x' && !submittedTypes.has('RATING_B')) {
 				const nextWeekIntention = await prisma.reflection.findFirst({
 					where: {
 						cycleId: cycle.id,
@@ -133,9 +137,16 @@ export const load: PageServerLoad = async (event) => {
 
 			const expectedSequence: Array<{ week: number; type: string }> = [];
 			for (let week = 1; week <= currentWeek; week++) {
-				expectedSequence.push({ week, type: 'INTENTION' });
-				expectedSequence.push({ week, type: 'RATING_A' });
-				expectedSequence.push({ week, type: 'RATING_B' });
+				if (checkInFrequency === '1x') {
+					expectedSequence.push({ week, type: 'RATING_A' });
+				} else if (checkInFrequency === '2x') {
+					expectedSequence.push({ week, type: 'INTENTION' });
+					expectedSequence.push({ week, type: 'RATING_A' });
+				} else {
+					expectedSequence.push({ week, type: 'INTENTION' });
+					expectedSequence.push({ week, type: 'RATING_A' });
+					expectedSequence.push({ week, type: 'RATING_B' });
+				}
 			}
 
 			let streak = 0;
@@ -194,34 +205,78 @@ export const load: PageServerLoad = async (event) => {
 				cycle.reflections.filter((r) => r.weekNumber === currentWeek).map((r) => r.reflectionType)
 			);
 
-			if (!submittedTypes.has('INTENTION')) {
-				nextAction = {
-					type: 'INTENTION',
-					label: 'Complete your Monday intention reflection',
-					url: '/prompts/monday',
-					state: 'open'
-				};
-			} else if (!submittedTypes.has('RATING_A')) {
-				nextAction = {
-					type: 'RATING_A',
-					label: 'Complete your Wednesday check-in',
-					url: '/reflections/checkin?type=RATING_A',
-					state: 'open'
-				};
-			} else if (!submittedTypes.has('RATING_B')) {
-				nextAction = {
-					type: 'RATING_B',
-					label: 'Complete your Friday check-in',
-					url: '/reflections/checkin?type=RATING_B',
-					state: 'open'
-				};
+			if (checkInFrequency === '1x') {
+				// 1x: single weekly reflection
+				if (!submittedTypes.has('RATING_A')) {
+					nextAction = {
+						type: 'RATING_A',
+						label: 'Complete your weekly reflection',
+						url: '/reflections/checkin?type=RATING_A',
+						state: 'open'
+					};
+				} else {
+					nextAction = {
+						type: 'RATING_A',
+						label: "Complete next week's reflection",
+						url: '/reflections/checkin?type=RATING_A',
+						state: 'upcoming'
+					};
+				}
+			} else if (checkInFrequency === '2x') {
+				// 2x: intention + combined check-in
+				if (!submittedTypes.has('INTENTION')) {
+					nextAction = {
+						type: 'INTENTION',
+						label: 'Complete your Monday intention reflection',
+						url: '/prompts/monday',
+						state: 'open'
+					};
+				} else if (!submittedTypes.has('RATING_A')) {
+					nextAction = {
+						type: 'RATING_A',
+						label: 'Complete your end-of-week check-in',
+						url: '/reflections/checkin?type=RATING_A',
+						state: 'open'
+					};
+				} else {
+					nextAction = {
+						type: 'INTENTION',
+						label: "Complete next week's Monday intention reflection",
+						url: '/prompts/monday',
+						state: 'upcoming'
+					};
+				}
 			} else {
-				nextAction = {
-					type: 'INTENTION',
-					label: "Complete next week's Monday intention reflection",
-					url: '/prompts/monday',
-					state: 'upcoming'
-				};
+				// 3x: intention + Wednesday + Friday
+				if (!submittedTypes.has('INTENTION')) {
+					nextAction = {
+						type: 'INTENTION',
+						label: 'Complete your Monday intention reflection',
+						url: '/prompts/monday',
+						state: 'open'
+					};
+				} else if (!submittedTypes.has('RATING_A')) {
+					nextAction = {
+						type: 'RATING_A',
+						label: 'Complete your Wednesday check-in',
+						url: '/reflections/checkin?type=RATING_A',
+						state: 'open'
+					};
+				} else if (!submittedTypes.has('RATING_B')) {
+					nextAction = {
+						type: 'RATING_B',
+						label: 'Complete your Friday check-in',
+						url: '/reflections/checkin?type=RATING_B',
+						state: 'open'
+					};
+				} else {
+					nextAction = {
+						type: 'INTENTION',
+						label: "Complete next week's Monday intention reflection",
+						url: '/prompts/monday',
+						state: 'upcoming'
+					};
+				}
 			}
 
 			// Get latest individual ratings
@@ -910,7 +965,8 @@ export const load: PageServerLoad = async (event) => {
 						id: cycle.id,
 						startDate: cycle.startDate.toISOString(),
 						endDate: cycle.endDate?.toISOString() ?? null,
-						isOverdue: !!(currentWeek && totalWeeks && currentWeek > totalWeeks)
+						isOverdue: !!(currentWeek && totalWeeks && currentWeek > totalWeeks),
+						isCycleCompleted: cycle.status === 'COMPLETED'
 					}
 				: null,
 			currentWeek,

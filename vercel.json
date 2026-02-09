@@ -7,6 +7,18 @@
 		{
 			"path": "/api/jobs/remind-prompts",
 			"schedule": "0 14 * * 1-5"
+		},
+		{
+			"path": "/api/jobs/generate-insights",
+			"schedule": "0 20 * * 0"
+		},
+		{
+			"path": "/api/jobs/coach-prep",
+			"schedule": "0 7 * * 1"
+		},
+		{
+			"path": "/api/jobs/complete-cycles",
+			"schedule": "0 1 * * *"
 		}
 	]
 }

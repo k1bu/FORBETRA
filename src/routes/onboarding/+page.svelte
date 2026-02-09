@@ -28,7 +28,6 @@
 		cycleDurationWeeks: String(form?.values?.cycleDurationWeeks ?? 12)
 	};
 
-	const cycleOptions = [8, 12, 16];
 	const minSubgoalFields = 3;
 	const minStakeholderFields = 3;
 	const maxStakeholderFields = 5;
@@ -41,7 +40,11 @@
 	let cycleLabel = values.cycleLabel || (values.objectiveTitle || '');
 	let cycleStartDate = values.cycleStartDate;
 	let cycleDurationWeeks = values.cycleDurationWeeks || '12';
+	let cycleDurationMode: 'preset' | 'custom' = [8, 12, 16].includes(Number(cycleDurationWeeks)) ? 'preset' : 'custom';
+	let customDurationWeeks = cycleDurationMode === 'custom' ? cycleDurationWeeks : '';
 	let reminderDays: 'wednesday_friday' | 'tuesday_thursday' = 'wednesday_friday';
+	let checkInFrequency: '3x' | '2x' | '1x' = '3x';
+	let stakeholderCadence: 'weekly' | 'biweekly' = 'weekly';
 
 	let subgoalForms: SubgoalFormValue[] = Array.from({ length: initialSubgoalCount }, (_, index) => ({
 		label: values.subgoals[index]?.label ?? '',
@@ -62,12 +65,11 @@
 	let expandedObjectiveId: string | null = null;
 	let appliedObjectiveId: string | null = null;
 
-	// Step wizard state
+	// Step wizard state — 5 steps (science removed)
 	type Step = 'welcome' | 'objective' | 'subgoals' | 'cycle' | 'stakeholders';
-	// If form has errors, we're likely on the stakeholders step (since that's where "Complete Setup" is)
-	// Otherwise, start at welcome
+	const allSteps: Step[] = ['welcome', 'objective', 'subgoals', 'cycle', 'stakeholders'];
 	let currentStep: Step = Object.keys(errors).length > 0 ? 'stakeholders' : 'welcome';
-	let stepHistory: Step[] = currentStep === 'stakeholders' ? ['welcome', 'objective', 'subgoals', 'cycle', 'stakeholders'] : ['welcome'];
+	let stepHistory: Step[] = currentStep === 'stakeholders' ? [...allSteps] : ['welcome'];
 
 	function selectContext(contextId: string) {
 		selectedContextId = contextId;
@@ -121,6 +123,7 @@
 		cycleLabel = '';
 		cycleStartDate = data.defaults.startDate;
 		cycleDurationWeeks = '12';
+		cycleDurationMode = 'preset';
 		resetSubgoals();
 		resetStakeholders();
 		goToStep('objective');
@@ -140,7 +143,7 @@
 		const composedDescription = `${template.description}\n\n${template.contextSummary}`.trim();
 		objectiveTitle = template.title;
 		objectiveDescription = composedDescription;
-		cycleLabel = template.title; // Pre-fill cycle name with objective title
+		cycleLabel = template.title;
 		const prefilled = template.subgoals.slice(0, minSubgoalFields);
 		subgoalForms = Array.from({ length: minSubgoalFields }, (_, index) => ({
 			label: prefilled[index]?.label ?? '',
@@ -156,14 +159,23 @@
 			updateSubgoalField(emptyIndex, 'description', subgoal.description ?? '');
 			return;
 		}
-		// If all fields are filled and we haven't reached the max, add a new field
 		if (subgoalForms.length < 5) {
 			subgoalForms = [...subgoalForms, { label: subgoal.label, description: subgoal.description ?? '' }];
 		} else {
-			// If we're at max, replace the last one (user can manually adjust)
 			updateSubgoalField(subgoalForms.length - 1, 'label', subgoal.label);
 			updateSubgoalField(subgoalForms.length - 1, 'description', subgoal.description ?? '');
 		}
+	}
+
+	function selectPresetDuration(weeks: number) {
+		cycleDurationMode = 'preset';
+		cycleDurationWeeks = String(weeks);
+		customDurationWeeks = '';
+	}
+
+	function enableCustomDuration() {
+		cycleDurationMode = 'custom';
+		customDurationWeeks = cycleDurationWeeks;
 	}
 
 	function goToStep(step: Step) {
@@ -183,34 +195,37 @@
 			case 'cycle':
 				return cycleLabel.trim().length > 0 && cycleStartDate.length > 0;
 			case 'stakeholders':
-				return true; // Optional
+				return true;
 			default:
 				return false;
 		}
 	}
 
 	function nextStep() {
-		const steps: Step[] = ['welcome', 'objective', 'subgoals', 'cycle', 'stakeholders'];
-		const currentIndex = steps.indexOf(currentStep);
-		if (currentIndex < steps.length - 1 && canProceedFromStep(currentStep)) {
-			goToStep(steps[currentIndex + 1]);
+		const currentIndex = allSteps.indexOf(currentStep);
+		if (currentIndex < allSteps.length - 1 && canProceedFromStep(currentStep)) {
+			goToStep(allSteps[currentIndex + 1]);
 		}
 	}
 
 	function prevStep() {
-		const steps: Step[] = ['welcome', 'objective', 'subgoals', 'cycle', 'stakeholders'];
-		const currentIndex = steps.indexOf(currentStep);
+		const currentIndex = allSteps.indexOf(currentStep);
 		if (currentIndex > 0) {
-			goToStep(steps[currentIndex - 1]);
+			goToStep(allSteps[currentIndex - 1]);
 		}
 	}
 
+	function getDurationGuidance(weeks: number): string {
+		if (weeks <= 7) return 'Short sprint — focused skill experiments';
+		if (weeks <= 12) return 'Standard — enough time for meaningful patterns';
+		if (weeks <= 16) return 'Extended — deeper behavioral shifts';
+		return 'Long-arc — major transitions';
+	}
+
 	$: stepProgress = (() => {
-		const steps: Step[] = ['welcome', 'objective', 'subgoals', 'cycle', 'stakeholders'];
-		const stepIndex = steps.indexOf(currentStep);
-		// Welcome step is 0%, then each subsequent step is 25% more (4 steps after welcome)
+		const stepIndex = allSteps.indexOf(currentStep);
 		if (stepIndex === 0) return 0;
-		return (stepIndex / (steps.length - 1)) * 100;
+		return (stepIndex / (allSteps.length - 1)) * 100;
 	})();
 
 	const getError = (path: string) => errors[path]?.[0];
@@ -220,21 +235,53 @@
 			? contexts.find((context) => context.id === selectedContextId) ?? null
 			: null;
 	$: cycleDurationNumber = Number(cycleDurationWeeks) || data.defaults.durationWeeks;
-	// Explicitly track all dependencies for reactive updates - reference all variables directly
-	$: canAdvance = 
-		currentStep === 'objective' 
+	$: if (cycleDurationMode === 'custom' && customDurationWeeks) {
+		const parsed = Number(customDurationWeeks);
+		if (parsed >= 4 && parsed <= 26) {
+			cycleDurationWeeks = String(parsed);
+		}
+	}
+	$: canAdvance =
+		currentStep === 'objective'
 			? objectiveTitle.trim().length >= 3 && objectiveDescription.trim().length > 0
 			: currentStep === 'subgoals'
 				? subgoalForms.filter((s) => s.label.trim().length >= 3).length >= minSubgoalFields
 				: currentStep === 'cycle'
 					? cycleLabel.trim().length > 0 && cycleStartDate.length > 0
 					: currentStep === 'stakeholders'
-						? true // Optional
+						? true
 						: false;
-	// Auto-fill cycle name with objective title if cycle name is empty
 	$: if (objectiveTitle.trim().length > 0 && (!cycleLabel || cycleLabel.trim().length === 0)) {
 		cycleLabel = objectiveTitle;
 	}
+	$: endDatePreview = (() => {
+		if (!cycleStartDate || !cycleDurationNumber) return '';
+		const start = new Date(cycleStartDate);
+		if (isNaN(start.getTime())) return '';
+		const end = new Date(start);
+		end.setDate(end.getDate() + cycleDurationNumber * 7);
+		return end.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+	})();
+	$: weekPreviewDays = (() => {
+		const midDay = reminderDays === 'wednesday_friday' ? 'WED' : 'TUE';
+		const endDay = reminderDays === 'wednesday_friday' ? 'FRI' : 'THU';
+		if (checkInFrequency === '3x') {
+			return [
+				{ day: 'MON', label: 'Set your intention', time: '~2 min' },
+				{ day: midDay, label: 'Rate your effort', time: '~30 sec' },
+				{ day: endDay, label: 'Rate your performance', time: '~30 sec' }
+			];
+		} else if (checkInFrequency === '2x') {
+			return [
+				{ day: 'MON', label: 'Set your intention', time: '~2 min' },
+				{ day: endDay, label: 'Rate effort + performance', time: '~1 min' }
+			];
+		} else {
+			return [
+				{ day: endDay, label: 'Weekly reflection', time: '~2 min' }
+			];
+		}
+	})();
 </script>
 
 <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50">
@@ -243,7 +290,7 @@
 		{#if currentStep !== 'welcome'}
 			<div class="mb-8">
 				<div class="mb-3 flex items-center justify-between text-sm text-slate-600">
-					<span class="font-medium">Step {['welcome', 'objective', 'subgoals', 'cycle', 'stakeholders'].indexOf(currentStep) + 1} of 5</span>
+					<span class="font-medium">Step {allSteps.indexOf(currentStep) + 1} of {allSteps.length}</span>
 					<span class="text-slate-400">{Math.round(stepProgress)}% complete</span>
 				</div>
 				<div class="h-2 overflow-hidden rounded-full bg-slate-200">
@@ -279,11 +326,10 @@
 									>
 										1
 									</div>
-									<h3 class="font-semibold text-slate-900 text-sm md:text-base">Define Your Objective</h3>
+									<h3 class="font-semibold text-slate-900 text-sm md:text-base">Pick your focus</h3>
 								</div>
 								<p class="text-xs md:text-sm text-slate-600 leading-relaxed pl-[52px]">
-									Choose a development focus that matters to you right now. We have curated templates to
-									inspire you, or start from scratch.
+									Choose what you want to develop — from curated templates or your own custom objective.
 								</p>
 							</div>
 							<div class="group space-y-3">
@@ -293,11 +339,10 @@
 									>
 										2
 									</div>
-									<h3 class="font-semibold text-slate-900 text-sm md:text-base">Set Observable Subgoals</h3>
+									<h3 class="font-semibold text-slate-900 text-sm md:text-base">Define success</h3>
 								</div>
 								<p class="text-xs md:text-sm text-slate-600 leading-relaxed pl-[52px]">
-									Break your objective into 3 measurable behaviors that others can observe and provide
-									feedback on.
+									Break it into 3 behaviors others can observe — the clearer, the better.
 								</p>
 							</div>
 							<div class="group space-y-3">
@@ -307,11 +352,10 @@
 									>
 										3
 									</div>
-									<h3 class="font-semibold text-slate-900 text-sm md:text-base">Invite Stakeholders</h3>
+									<h3 class="font-semibold text-slate-900 text-sm md:text-base">Set the rhythm</h3>
 								</div>
 								<p class="text-xs md:text-sm text-slate-600 leading-relaxed pl-[52px]">
-									Add 3-5 people who regularly see you in action. They'll provide valuable perspective on your
-									growth journey.
+									Choose your timeline and invite the people who'll give you honest feedback.
 								</p>
 							</div>
 						</div>
@@ -351,9 +395,11 @@
 						<p class="font-medium">{getError('_general')}</p>
 					</div>
 				{/if}
-				<!-- Hidden input for reminder days -->
+				<!-- Hidden inputs -->
 				<input type="hidden" name="reminderDays" value={reminderDays} />
-				
+				<input type="hidden" name="checkInFrequency" value={checkInFrequency} />
+				<input type="hidden" name="stakeholderCadence" value={stakeholderCadence} />
+
 				<!-- Hidden inputs for all form data when on stakeholders step -->
 				{#if currentStep === 'stakeholders'}
 					<input type="hidden" name="objectiveTitle" value={objectiveTitle} />
@@ -367,7 +413,7 @@
 						<input type="hidden" name={`subgoalDescription${index + 1}`} value={subgoal.description} />
 					{/each}
 				{/if}
-				
+
 				<!-- Objective Step -->
 				{#if currentStep === 'objective'}
 					<div class="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
@@ -578,10 +624,9 @@
 					<div class="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
 						<div class="rounded-2xl border border-slate-200 bg-white p-8 shadow-lg">
 							<div class="mb-6 space-y-2">
-								<h2 class="text-3xl font-bold text-slate-900">Plan your cycle</h2>
+								<h2 class="text-3xl font-bold text-slate-900">Set the rhythm</h2>
 								<p class="text-slate-600">
-									Set the timeline for your growth journey. We'll schedule regular check-ins to track your
-									progress.
+									Choose your timeline and how often you want to check in. We'll build a schedule around your preferences.
 								</p>
 							</div>
 
@@ -622,30 +667,178 @@
 									{/if}
 								</div>
 
-								<div class="space-y-2 md:col-span-2">
-									<label class="block text-sm font-semibold text-slate-700" for="cycleDurationWeeks">
-										Duration
-									</label>
-									<select
-										id="cycleDurationWeeks"
-										name="cycleDurationWeeks"
-										class="w-full rounded-xl border-2 border-slate-300 px-4 py-3 text-slate-900 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10"
-										value={cycleDurationWeeks}
-										onchange={(event) => (cycleDurationWeeks = event.currentTarget.value)}
-									>
-										{#each cycleOptions as option (option)}
-											<option value={option}>{option} weeks</option>
+								<!-- Duration Selector: Preset Cards + Custom -->
+								<div class="space-y-3 md:col-span-2">
+									<label class="block text-sm font-semibold text-slate-700">Duration</label>
+									<input type="hidden" name="cycleDurationWeeks" value={cycleDurationWeeks} />
+									<div class="grid grid-cols-4 gap-3">
+										{#each [8, 12, 16] as weeks}
+											<button
+												type="button"
+												onclick={() => selectPresetDuration(weeks)}
+												class="relative rounded-xl border-2 px-4 py-3 text-center transition-all {cycleDurationMode === 'preset' && cycleDurationWeeks === String(weeks)
+													? 'border-blue-500 bg-blue-50 shadow-md'
+													: 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50'}"
+											>
+												<div class="text-lg font-bold text-slate-900">{weeks}</div>
+												<div class="text-xs text-slate-500">weeks</div>
+												{#if weeks === 12}
+													<div class="mt-1 text-[10px] font-semibold text-blue-600">recommended</div>
+												{/if}
+											</button>
 										{/each}
-									</select>
-									<p class="text-sm text-slate-500">
-										Your cycle will end {cycleDurationNumber * 7} days after your start date. We recommend
-										12 weeks for meaningful progress.
-									</p>
+										<button
+											type="button"
+											onclick={enableCustomDuration}
+											class="rounded-xl border-2 px-4 py-3 text-center transition-all {cycleDurationMode === 'custom'
+												? 'border-blue-500 bg-blue-50 shadow-md'
+												: 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50'}"
+										>
+											<div class="text-lg font-bold text-slate-900">?</div>
+											<div class="text-xs text-slate-500">Custom</div>
+										</button>
+									</div>
+									{#if cycleDurationMode === 'custom'}
+										<div class="flex items-center gap-3">
+											<input
+												type="number"
+												min="4"
+												max="26"
+												placeholder="4-26"
+												class="w-24 rounded-lg border-2 border-slate-300 px-3 py-2 text-center text-slate-900 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+												value={customDurationWeeks}
+												oninput={(event) => {
+													customDurationWeeks = event.currentTarget.value;
+													const parsed = Number(event.currentTarget.value);
+													if (parsed >= 4 && parsed <= 26) {
+														cycleDurationWeeks = String(parsed);
+													}
+												}}
+											/>
+											<span class="text-sm text-slate-600">weeks (4-26)</span>
+										</div>
+									{/if}
+									{#if endDatePreview}
+										<p class="text-sm text-slate-500">
+											Your cycle will end on <strong>{endDatePreview}</strong>
+										</p>
+									{/if}
+									<p class="text-xs text-slate-400">{getDurationGuidance(cycleDurationNumber)}</p>
 									{#if getError('cycleDurationWeeks')}
 										<p class="text-sm text-red-600">{getError('cycleDurationWeeks')}</p>
 									{/if}
 								</div>
 
+								<!-- Check-in Frequency Selector -->
+								<div class="space-y-3 md:col-span-2">
+									<label class="block text-sm font-semibold text-slate-700">Check-in frequency</label>
+									<div class="grid gap-3 md:grid-cols-3">
+										<label
+											class="group relative flex cursor-pointer rounded-xl border-2 p-4 transition-all {checkInFrequency === '3x'
+												? 'border-blue-500 bg-blue-50'
+												: 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50'}"
+										>
+											<input
+												type="radio"
+												name="_checkInFrequencyRadio"
+												value="3x"
+												checked={checkInFrequency === '3x'}
+												onchange={() => (checkInFrequency = '3x')}
+												class="sr-only"
+											/>
+											<div class="flex w-full items-start gap-3">
+												<div
+													class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 {checkInFrequency === '3x'
+														? 'border-blue-500 bg-blue-500'
+														: 'border-slate-300 bg-white'}"
+												>
+													{#if checkInFrequency === '3x'}
+														<div class="h-2 w-2 rounded-full bg-white"></div>
+													{/if}
+												</div>
+												<div class="flex-1">
+													<div class="font-semibold text-slate-900">3x/week</div>
+													<div class="text-xs text-slate-500">Monday intention, midweek effort, end-of-week performance</div>
+													<div class="mt-1 text-[10px] font-semibold text-blue-600">recommended</div>
+												</div>
+											</div>
+										</label>
+										<label
+											class="group relative flex cursor-pointer rounded-xl border-2 p-4 transition-all {checkInFrequency === '2x'
+												? 'border-blue-500 bg-blue-50'
+												: 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50'}"
+										>
+											<input
+												type="radio"
+												name="_checkInFrequencyRadio"
+												value="2x"
+												checked={checkInFrequency === '2x'}
+												onchange={() => (checkInFrequency = '2x')}
+												class="sr-only"
+											/>
+											<div class="flex w-full items-start gap-3">
+												<div
+													class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 {checkInFrequency === '2x'
+														? 'border-blue-500 bg-blue-500'
+														: 'border-slate-300 bg-white'}"
+												>
+													{#if checkInFrequency === '2x'}
+														<div class="h-2 w-2 rounded-full bg-white"></div>
+													{/if}
+												</div>
+												<div class="flex-1">
+													<div class="font-semibold text-slate-900">2x/week</div>
+													<div class="text-xs text-slate-500">Monday intention + end-of-week combined rating</div>
+												</div>
+											</div>
+										</label>
+										<label
+											class="group relative flex cursor-pointer rounded-xl border-2 p-4 transition-all {checkInFrequency === '1x'
+												? 'border-blue-500 bg-blue-50'
+												: 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50'}"
+										>
+											<input
+												type="radio"
+												name="_checkInFrequencyRadio"
+												value="1x"
+												checked={checkInFrequency === '1x'}
+												onchange={() => (checkInFrequency = '1x')}
+												class="sr-only"
+											/>
+											<div class="flex w-full items-start gap-3">
+												<div
+													class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 {checkInFrequency === '1x'
+														? 'border-blue-500 bg-blue-500'
+														: 'border-slate-300 bg-white'}"
+												>
+													{#if checkInFrequency === '1x'}
+														<div class="h-2 w-2 rounded-full bg-white"></div>
+													{/if}
+												</div>
+												<div class="flex-1">
+													<div class="font-semibold text-slate-900">1x/week</div>
+													<div class="text-xs text-slate-500">Single weekly reflection covering effort and performance</div>
+												</div>
+											</div>
+										</label>
+									</div>
+
+									<!-- Your Week Preview -->
+									<div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+										<p class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400">Your Week</p>
+										<div class="space-y-2">
+											{#each weekPreviewDays as item}
+												<div class="flex items-center gap-3 rounded-lg bg-white px-3 py-2 text-sm">
+													<span class="w-10 shrink-0 font-semibold text-blue-700">{item.day}</span>
+													<span class="flex-1 text-slate-700">{item.label}</span>
+													<span class="text-xs text-slate-400">{item.time}</span>
+												</div>
+											{/each}
+										</div>
+									</div>
+								</div>
+
+								<!-- Reminder Days Selector -->
 								<div class="space-y-2 md:col-span-2">
 									<label class="block text-sm font-semibold text-slate-700" for="reminderDays">
 										Feedback Reminder Days
@@ -729,6 +922,80 @@
 									Add 3-5 people who regularly observe you in action. They'll provide feedback on your
 									progress throughout the cycle. This step is optional — you can add them later.
 								</p>
+							</div>
+
+							<!-- Stakeholder feedback context -->
+							<div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50/50 p-4 text-sm text-slate-700">
+								<p class="font-medium text-emerald-900">Why stakeholder feedback?</p>
+								<p class="mt-1 text-emerald-800">
+									The people around you see things you can't. Their quick ratings (&lt; 60 sec) reveal blind spots and validate progress.
+								</p>
+							</div>
+
+							<!-- Stakeholder Cadence Selector -->
+							<div class="mb-6 space-y-3">
+								<label class="block text-sm font-semibold text-slate-700">How often should stakeholders rate you?</label>
+								<div class="grid gap-3 md:grid-cols-2">
+									<label
+										class="group relative flex cursor-pointer rounded-xl border-2 p-4 transition-all {stakeholderCadence === 'weekly'
+											? 'border-blue-500 bg-blue-50'
+											: 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50'}"
+									>
+										<input
+											type="radio"
+											name="_stakeholderCadenceRadio"
+											value="weekly"
+											checked={stakeholderCadence === 'weekly'}
+											onchange={() => (stakeholderCadence = 'weekly')}
+											class="sr-only"
+										/>
+										<div class="flex w-full items-start gap-3">
+											<div
+												class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 {stakeholderCadence === 'weekly'
+													? 'border-blue-500 bg-blue-500'
+													: 'border-slate-300 bg-white'}"
+											>
+												{#if stakeholderCadence === 'weekly'}
+													<div class="h-2 w-2 rounded-full bg-white"></div>
+												{/if}
+											</div>
+											<div class="flex-1">
+												<div class="font-semibold text-slate-900">Weekly</div>
+												<div class="text-xs text-slate-500">Stakeholders rate you every week — most data for insights</div>
+												<div class="mt-1 text-[10px] font-semibold text-blue-600">recommended</div>
+											</div>
+										</div>
+									</label>
+									<label
+										class="group relative flex cursor-pointer rounded-xl border-2 p-4 transition-all {stakeholderCadence === 'biweekly'
+											? 'border-blue-500 bg-blue-50'
+											: 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50'}"
+									>
+										<input
+											type="radio"
+											name="_stakeholderCadenceRadio"
+											value="biweekly"
+											checked={stakeholderCadence === 'biweekly'}
+											onchange={() => (stakeholderCadence = 'biweekly')}
+											class="sr-only"
+										/>
+										<div class="flex w-full items-start gap-3">
+											<div
+												class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 {stakeholderCadence === 'biweekly'
+													? 'border-blue-500 bg-blue-500'
+													: 'border-slate-300 bg-white'}"
+											>
+												{#if stakeholderCadence === 'biweekly'}
+													<div class="h-2 w-2 rounded-full bg-white"></div>
+												{/if}
+											</div>
+											<div class="flex-1">
+												<div class="font-semibold text-slate-900">Biweekly</div>
+												<div class="text-xs text-slate-500">Every two weeks — less burden on stakeholders</div>
+											</div>
+										</div>
+									</label>
+								</div>
 							</div>
 
 							{#if getError('stakeholders')}
@@ -880,7 +1147,7 @@
 							type="button"
 							onclick={prevStep}
 							disabled={currentStep === 'objective'}
-							class="inline-flex items-center gap-2 rounded-xl border-2 border-slate-300 bg-white px-6 py-3 font-medium text-slate-700 transition-all disabled:cursor-not-allowed disabled:opacity-50 hover:border-slate-400 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+							class="inline-flex items-center gap-2 rounded-xl border-2 border-slate-300 bg-white px-6 py-3 font-medium text-slate-700 transition-all disabled:cursor-not-allowed disabled:opacity-60 hover:border-slate-400 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
 						>
 							<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path
@@ -918,7 +1185,7 @@
 								type="button"
 								onclick={nextStep}
 								disabled={!canAdvance}
-								class="group inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-3 font-semibold text-white shadow-lg shadow-blue-500/25 transition-all disabled:cursor-not-allowed disabled:opacity-50 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+								class="group inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-3 font-semibold text-white shadow-lg shadow-blue-500/25 transition-all disabled:cursor-not-allowed disabled:opacity-60 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
 							>
 								Continue
 								<svg

@@ -177,7 +177,9 @@
 			{#if data.isFirstVisit}Welcome to Forbetra{:else}Welcome back{/if}
 		</p>
 		{#if data.currentWeek}
-			{#if data.cycle?.isOverdue}
+			{#if data.cycle?.isCycleCompleted}
+				<span class="rounded-full bg-green-100 px-3 py-0.5 text-xs font-semibold text-green-700">Cycle Complete</span>
+			{:else if data.cycle?.isOverdue}
 				<span class="rounded-full bg-amber-100 px-3 py-0.5 text-xs font-semibold text-amber-700">Week {data.currentWeek} &middot; Cycle ended at week {data.totalWeeks}</span>
 			{:else}
 				<span class="rounded-full bg-blue-100 px-3 py-0.5 text-xs font-semibold text-blue-700">Week {data.currentWeek}{#if data.totalWeeks} of {data.totalWeeks}{/if}</span>
@@ -185,8 +187,30 @@
 		{/if}
 	</div>
 
+	<!-- Cycle completed banner -->
+	{#if data.cycle?.isCycleCompleted}
+		<div class="flex flex-wrap items-center gap-3 rounded-xl border-2 border-green-300 bg-green-50 px-4 py-3">
+			<div class="flex-1 min-w-0">
+				<p class="text-sm font-semibold text-green-900">Your cycle is complete! Your growth report is ready.</p>
+				<p class="text-xs text-green-700">Review your progress or start a new cycle when you're ready.</p>
+			</div>
+			<a
+				href="/individual/insights"
+				class="shrink-0 rounded-lg bg-green-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-green-700 transition-colors"
+			>
+				View Cycle Report
+			</a>
+			<a
+				href="/onboarding"
+				class="shrink-0 rounded-lg border border-green-300 bg-white px-4 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50 transition-colors"
+			>
+				Start New Cycle
+			</a>
+		</div>
+	{/if}
+
 	<!-- Cycle overdue banner -->
-	{#if data.cycle?.isOverdue && !extendSuccess}
+	{#if data.cycle?.isOverdue && !data.cycle?.isCycleCompleted && !extendSuccess}
 		<div class="flex flex-wrap items-center gap-3 rounded-xl border-2 border-amber-300 bg-amber-50 px-4 py-3">
 			<div class="flex-1 min-w-0">
 				<p class="text-sm font-semibold text-amber-900">Your cycle has passed its end date.</p>

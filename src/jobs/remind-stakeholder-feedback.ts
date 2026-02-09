@@ -2,11 +2,18 @@ import prisma from '$lib/server/prisma';
 import { sendEmail } from '$lib/notifications/email';
 import { emailTemplates } from '$lib/notifications/emailTemplates';
 
+const computeWeekNumber = (startDate: Date) => {
+	const diff = Date.now() - startDate.getTime();
+	const weekMs = 7 * 24 * 60 * 60 * 1000;
+	return Math.max(1, Math.floor(diff / weekMs) + 1);
+};
+
 export const remindStakeholderFeedback = async () => {
 	const stakeholders = await prisma.stakeholder.findMany({
 		include: {
 			individual: {
 				select: {
+					id: true,
 					email: true,
 					name: true
 				}
@@ -18,6 +25,25 @@ export const remindStakeholderFeedback = async () => {
 		}
 	});
 
+	// Build a map of individual's active cycle cadence for biweekly check
+	const individualCycles = new Map<string, { stakeholderCadence: string; startDate: Date }>();
+	for (const stakeholder of stakeholders) {
+		const individualId = stakeholder.individual.id;
+		if (!individualCycles.has(individualId)) {
+			const cycle = await prisma.cycle.findFirst({
+				where: { userId: individualId, status: 'ACTIVE' },
+				orderBy: { startDate: 'desc' },
+				select: { stakeholderCadence: true, startDate: true }
+			});
+			if (cycle) {
+				individualCycles.set(individualId, {
+					stakeholderCadence: cycle.stakeholderCadence,
+					startDate: cycle.startDate
+				});
+			}
+		}
+	}
+
 	const baseUrl =
 		process.env.PUBLIC_APP_URL || process.env.VERCEL_URL
 			? `https://${process.env.PUBLIC_APP_URL || process.env.VERCEL_URL}`
@@ -26,6 +52,15 @@ export const remindStakeholderFeedback = async () => {
 	for (const stakeholder of stakeholders) {
 		const pending = stakeholder.tokens.filter((token) => token.expiresAt > new Date());
 		if (pending.length === 0) continue;
+
+		// Check biweekly cadence — skip on even weeks
+		const cycleInfo = individualCycles.get(stakeholder.individual.id);
+		if (cycleInfo && cycleInfo.stakeholderCadence === 'biweekly') {
+			const currentWeek = computeWeekNumber(cycleInfo.startDate);
+			if (currentWeek % 2 === 0) {
+				continue; // Only send on odd-numbered weeks
+			}
+		}
 
 		// Get the most recent pending token
 		const latestToken = pending[0];

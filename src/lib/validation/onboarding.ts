@@ -30,7 +30,9 @@ export const onboardingSchema = z.object({
 		.refine((value) => Number.isFinite(value), 'Select a cycle length')
 		.int()
 		.min(4, 'Pick at least 4 weeks')
-		.max(16, 'Keep cycles to 16 weeks or fewer')
+		.max(26, 'Keep cycles to 26 weeks or fewer'),
+	checkInFrequency: z.enum(['3x', '2x', '1x']).optional().default('3x'),
+	stakeholderCadence: z.enum(['weekly', 'biweekly']).optional().default('weekly')
 });
 
 export type OnboardingFormData = z.infer<typeof onboardingSchema>;
