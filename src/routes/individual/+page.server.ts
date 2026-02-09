@@ -1,6 +1,7 @@
 import { redirect } from '@sveltejs/kit';
 import prisma from '$lib/server/prisma';
 import { requireRole } from '$lib/server/auth';
+import { stdDev, computeWeekNumber } from '$lib/server/coachUtils';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
@@ -41,7 +42,6 @@ export const load: PageServerLoad = async (event) => {
 		const isFirstVisit = !hasAnyObjective;
 
 		// Check if onboarding is complete
-		// Onboarding is complete if: objective exists, has at least one subgoal, and has at least one cycle
 		const isOnboardingComplete = !!(
 			objective &&
 			objective.subgoals.length > 0 &&
@@ -60,14 +60,8 @@ export const load: PageServerLoad = async (event) => {
 
 		const cycle = objective.cycles[0] ?? null;
 		const currentTime = new Date();
-		const currentWeek = cycle
-			? Math.max(
-					1,
-					Math.floor(
-						(currentTime.getTime() - cycle.startDate.getTime()) / (7 * 24 * 60 * 60 * 1000)
-					)
-				)
-			: null;
+		// Use the same week calculation as the dashboard (Math.floor + 1)
+		const currentWeek = cycle ? computeWeekNumber(cycle.startDate) : null;
 
 		// Calculate summary metrics
 		let completionRate: number | null = null;
@@ -89,7 +83,6 @@ export const load: PageServerLoad = async (event) => {
 
 			if (!submittedTypes.has('INTENTION')) openExperiences++;
 			if (!submittedTypes.has('RATING_A')) {
-				// Check if it's past the deadline (Friday)
 				const fridayDate = new Date(cycle.startDate);
 				const startDayOfWeek = cycle.startDate.getDay();
 				const mondayOffset = startDayOfWeek === 0 ? -6 : 1 - startDayOfWeek;
@@ -109,7 +102,6 @@ export const load: PageServerLoad = async (event) => {
 				}
 			}
 			if (!submittedTypes.has('RATING_B')) {
-				// Check if next Monday intention is submitted (locks it)
 				const nextWeekIntention = await prisma.reflection.findFirst({
 					where: {
 						cycleId: cycle.id,
@@ -159,132 +151,7 @@ export const load: PageServerLoad = async (event) => {
 			currentStreak = streak;
 		}
 
-		// Prepare visualization data if cycle exists
-		let visualizationData: {
-			individual: Array<{
-				weekNumber: number;
-				effortScore: number | null;
-				performanceScore: number | null;
-			}>;
-			stakeholders: Array<{
-				weekNumber: number;
-				stakeholderId: string;
-				stakeholderName: string;
-				effortScore: number | null;
-				performanceScore: number | null;
-			}>;
-			stakeholderList: Array<{ id: string; name: string }>;
-		} | null = null;
-
-		if (cycle && isOnboardingComplete) {
-			// Build reflection trend map for all weeks
-			const reflectionTrendMap = new Map<
-				number,
-				{
-					weekNumber: number;
-					effortScores: number[];
-					performanceScores: number[];
-				}
-			>();
-
-			cycle.reflections.forEach((reflection) => {
-				const weekEntry = reflectionTrendMap.get(reflection.weekNumber) ?? {
-					weekNumber: reflection.weekNumber,
-					effortScores: [],
-					performanceScores: []
-				};
-
-				if (reflection.effortScore !== null && reflection.effortScore !== undefined) {
-					weekEntry.effortScores.push(reflection.effortScore);
-				}
-				if (reflection.performanceScore !== null && reflection.performanceScore !== undefined) {
-					weekEntry.performanceScores.push(reflection.performanceScore);
-				}
-
-				reflectionTrendMap.set(reflection.weekNumber, weekEntry);
-			});
-
-			const allReflectionWeeks = Array.from(reflectionTrendMap.values()).sort(
-				(a, b) => a.weekNumber - b.weekNumber
-			);
-
-			const individualWeeklyData = allReflectionWeeks.map((week) => {
-				const effortAverage =
-					week.effortScores.length > 0
-						? Number(
-								(
-									week.effortScores.reduce((sum, score) => sum + score, 0) /
-									week.effortScores.length
-								).toFixed(1)
-							)
-						: null;
-				const performanceAverage =
-					week.performanceScores.length > 0
-						? Number(
-								(
-									week.performanceScores.reduce((sum, score) => sum + score, 0) /
-									week.performanceScores.length
-								).toFixed(1)
-							)
-						: null;
-
-				return {
-					weekNumber: week.weekNumber,
-					effortScore: effortAverage,
-					performanceScore: performanceAverage
-				};
-			});
-
-			// Load all stakeholder feedback data for visualization
-			const stakeholderWeeklyData: Array<{
-				weekNumber: number;
-				stakeholderId: string;
-				stakeholderName: string;
-				effortScore: number | null;
-				performanceScore: number | null;
-			}> = [];
-
-			const allFeedbacks = await prisma.feedback.findMany({
-				where: {
-					reflection: {
-						cycleId: cycle.id
-					}
-				},
-				include: {
-					reflection: {
-						select: {
-							weekNumber: true
-						}
-					},
-					stakeholder: {
-						select: {
-							id: true,
-							name: true
-						}
-					}
-				}
-			});
-
-			allFeedbacks.forEach((feedback) => {
-				if (feedback.reflection) {
-					stakeholderWeeklyData.push({
-						weekNumber: feedback.reflection.weekNumber,
-						stakeholderId: feedback.stakeholder.id,
-						stakeholderName: feedback.stakeholder.name,
-						effortScore: feedback.effortScore,
-						performanceScore: feedback.performanceScore
-					});
-				}
-			});
-
-			visualizationData = {
-				individual: individualWeeklyData,
-				stakeholders: stakeholderWeeklyData,
-				stakeholderList: objective.stakeholders.map((s) => ({ id: s.id, name: s.name }))
-			};
-		}
-
-		// Calculate data for the three cards: Next Action, My Last Ratings, Stakeholders' Last Ratings
+		// Calculate data for the three cards
 		let nextAction: {
 			type: 'INTENTION' | 'RATING_A' | 'RATING_B';
 			label: string;
@@ -308,13 +175,25 @@ export const load: PageServerLoad = async (event) => {
 			weekNumber: number | null;
 		} | null = null;
 
+		let allFeedbacks: Array<{
+			stakeholderId: string;
+			effortScore: number | null;
+			performanceScore: number | null;
+			reflection: { weekNumber: number } | null;
+		}> = [];
+
+		// Build stakeholder name map (used by scorecard, heat maps, and visualization)
+		const stakeholderNameMap = new Map<string, string>();
+		for (const sh of objective.stakeholders) {
+			stakeholderNameMap.set(sh.id, sh.name);
+		}
+
 		if (cycle && currentWeek && isOnboardingComplete) {
 			// Calculate next action
 			const submittedTypes = new Set(
 				cycle.reflections.filter((r) => r.weekNumber === currentWeek).map((r) => r.reflectionType)
 			);
 
-			// Check for next open action
 			if (!submittedTypes.has('INTENTION')) {
 				nextAction = {
 					type: 'INTENTION',
@@ -337,7 +216,6 @@ export const load: PageServerLoad = async (event) => {
 					state: 'open'
 				};
 			} else {
-				// All current week actions completed, next is next week's intention
 				nextAction = {
 					type: 'INTENTION',
 					label: "Complete next week's Monday intention reflection",
@@ -346,12 +224,11 @@ export const load: PageServerLoad = async (event) => {
 				};
 			}
 
-			// Get latest individual ratings (most recent week with ratings)
+			// Get latest individual ratings
 			const reflectionsWithRatings = cycle.reflections
 				.filter((r) => r.effortScore !== null || r.performanceScore !== null)
 				.sort((a, b) => {
 					if (a.weekNumber !== b.weekNumber) return b.weekNumber - a.weekNumber;
-					// Prefer RATING_A/RATING_B over INTENTION for ratings
 					const typeOrder: Record<string, number> = { INTENTION: 0, RATING_A: 1, RATING_B: 2 };
 					return (typeOrder[b.reflectionType] ?? 0) - (typeOrder[a.reflectionType] ?? 0);
 				});
@@ -362,7 +239,6 @@ export const load: PageServerLoad = async (event) => {
 					(r) => r.weekNumber === latestWeek
 				);
 
-				// Get average effort and progress for latest week
 				const effortScores = latestWeekReflections
 					.map((r) => r.effortScore)
 					.filter((s): s is number => s !== null && s !== undefined);
@@ -383,7 +259,6 @@ export const load: PageServerLoad = async (event) => {
 							)
 						: null;
 
-				// Get previous week ratings for comparison
 				const previousWeek = latestWeek > 1 ? latestWeek - 1 : null;
 				let previousEffort: number | null = null;
 				let previousPerformance: number | null = null;
@@ -432,13 +307,17 @@ export const load: PageServerLoad = async (event) => {
 			}
 
 			// Get latest stakeholder ratings
-			const allFeedbacks = await prisma.feedback.findMany({
+			allFeedbacks = await prisma.feedback.findMany({
 				where: {
 					reflection: {
 						cycleId: cycle.id
 					}
 				},
-				include: {
+				select: {
+					stakeholderId: true,
+					effortScore: true,
+					performanceScore: true,
+					submittedAt: true,
 					reflection: {
 						select: {
 							weekNumber: true
@@ -451,7 +330,6 @@ export const load: PageServerLoad = async (event) => {
 			});
 
 			if (allFeedbacks.length > 0) {
-				// Group feedbacks by week
 				const feedbacksByWeek = new Map<
 					number,
 					Array<{ effortScore: number | null; performanceScore: number | null }>
@@ -470,7 +348,6 @@ export const load: PageServerLoad = async (event) => {
 					}
 				});
 
-				// Get latest week with feedback
 				const latestWeekWithFeedback = Math.max(...Array.from(feedbacksByWeek.keys()));
 				const latestWeekFeedbacks = feedbacksByWeek.get(latestWeekWithFeedback) ?? [];
 
@@ -500,7 +377,6 @@ export const load: PageServerLoad = async (event) => {
 							)
 						: null;
 
-				// Get previous week stakeholder ratings
 				const previousWeekWithFeedback =
 					latestWeekWithFeedback > 1 ? latestWeekWithFeedback - 1 : null;
 				let previousStakeholderEffort: number | null = null;
@@ -550,13 +426,472 @@ export const load: PageServerLoad = async (event) => {
 			}
 		}
 
+		// --- Latest Scorecard: per-stakeholder latest scores ---
+		let latestScorecard: Array<{
+			stakeholderId: string;
+			stakeholderName: string;
+			stakeholderEffort: number | null;
+			stakeholderPerformance: number | null;
+			stakeholderWeek: number | null;
+		}> = [];
+
+		if (isOnboardingComplete && allFeedbacks.length > 0) {
+			// Group feedbacks by stakeholderId, pick highest weekNumber per stakeholder
+			const latestByStakeholder = new Map<string, {
+				effortScore: number | null;
+				performanceScore: number | null;
+				weekNumber: number;
+			}>();
+
+			for (const fb of allFeedbacks) {
+				if (!fb.reflection) continue;
+				const existing = latestByStakeholder.get(fb.stakeholderId);
+				if (!existing || fb.reflection.weekNumber > existing.weekNumber) {
+					latestByStakeholder.set(fb.stakeholderId, {
+						effortScore: fb.effortScore,
+						performanceScore: fb.performanceScore,
+						weekNumber: fb.reflection.weekNumber
+					});
+				}
+			}
+
+			// Include all stakeholders (even those with no data yet)
+			for (const sh of objective.stakeholders) {
+				const data = latestByStakeholder.get(sh.id);
+				latestScorecard.push({
+					stakeholderId: sh.id,
+					stakeholderName: stakeholderNameMap.get(sh.id) ?? sh.name,
+					stakeholderEffort: data?.effortScore ?? null,
+					stakeholderPerformance: data?.performanceScore ?? null,
+					stakeholderWeek: data?.weekNumber ?? null
+				});
+			}
+		}
+
+		// --- Heat Map Data: weekly effort/performance averages ---
+		let heatMapWeeks: Array<{
+			weekNumber: number;
+			effort: number | null;
+			performance: number | null;
+		}> | null = null;
+		let totalWeeks: number | null = null;
+
+		if (cycle && currentWeek && isOnboardingComplete) {
+			const cycleEnd = cycle.endDate ?? null;
+			totalWeeks = cycleEnd
+				? Math.max(
+						1,
+						Math.ceil(
+							(cycleEnd.getTime() - cycle.startDate.getTime()) / (7 * 24 * 60 * 60 * 1000)
+						)
+					)
+				: currentWeek;
+
+			const weekMap = new Map<number, { efforts: number[]; performances: number[] }>();
+			for (const r of cycle.reflections) {
+				if (!weekMap.has(r.weekNumber)) {
+					weekMap.set(r.weekNumber, { efforts: [], performances: [] });
+				}
+				const w = weekMap.get(r.weekNumber)!;
+				if (r.effortScore !== null) w.efforts.push(r.effortScore);
+				if (r.performanceScore !== null) w.performances.push(r.performanceScore);
+			}
+
+			heatMapWeeks = [];
+			for (let wk = 1; wk <= totalWeeks; wk++) {
+				const d = weekMap.get(wk);
+				heatMapWeeks.push({
+					weekNumber: wk,
+					effort:
+						d && d.efforts.length > 0
+							? Number(
+									(d.efforts.reduce((a, b) => a + b, 0) / d.efforts.length).toFixed(1)
+								)
+							: null,
+					performance:
+						d && d.performances.length > 0
+							? Number(
+									(
+										d.performances.reduce((a, b) => a + b, 0) / d.performances.length
+									).toFixed(1)
+								)
+							: null
+				});
+			}
+		}
+
+		// --- Visualization Data: reshape for PerformanceEffortChart ---
+		let visualizationData: {
+			individual: Array<{ weekNumber: number; effortScore: number | null; performanceScore: number | null }>;
+			stakeholders: Array<{ weekNumber: number; stakeholderId: string; stakeholderName: string; effortScore: number | null; performanceScore: number | null }>;
+			stakeholderList: Array<{ id: string; name: string }>;
+		} | null = null;
+
+		if (isOnboardingComplete && heatMapWeeks && heatMapWeeks.length > 0) {
+			const individual = heatMapWeeks.map((w) => ({
+				weekNumber: w.weekNumber,
+				effortScore: w.effort,
+				performanceScore: w.performance
+			}));
+
+			const stakeholders = allFeedbacks
+				.filter((fb) => fb.reflection !== null)
+				.map((fb) => ({
+					weekNumber: fb.reflection!.weekNumber,
+					stakeholderId: fb.stakeholderId,
+					stakeholderName: stakeholderNameMap.get(fb.stakeholderId) ?? 'Unknown',
+					effortScore: fb.effortScore,
+					performanceScore: fb.performanceScore
+				}));
+
+			const stakeholderList = objective.stakeholders.map((s) => ({ id: s.id, name: s.name }));
+
+			visualizationData = { individual, stakeholders, stakeholderList };
+		}
+
+		// --- Stakeholder Heat Map: weekly avg + per-stakeholder breakdown ---
+		type WeekScore = { weekNumber: number; effort: number | null; performance: number | null };
+		let stakeholderAvgHeatMap: WeekScore[] | null = null;
+		let stakeholderDetail: Array<{
+			id: string;
+			name: string;
+			weeks: WeekScore[];
+		}> | null = null;
+		let perceptionGaps: Array<{
+			stakeholderId: string;
+			stakeholderName: string;
+			effortGap: number | null;
+			performanceGap: number | null;
+			effortGapTrend: 'widening' | 'closing' | 'stable' | null;
+			performanceGapTrend: 'widening' | 'closing' | 'stable' | null;
+			maxAbsGap: number;
+		}> | null = null;
+
+		if (cycle && currentWeek && isOnboardingComplete && totalWeeks && allFeedbacks.length > 0) {
+			// Build per-stakeholder, per-week buckets
+			const shWeekMap = new Map<
+				string,
+				{ name: string; weeks: Map<number, { efforts: number[]; performances: number[] }> }
+			>();
+
+			for (const fb of allFeedbacks) {
+				if (!fb.reflection) continue;
+				const wk = fb.reflection.weekNumber;
+				const shId = fb.stakeholderId;
+
+				if (!shWeekMap.has(shId)) {
+					shWeekMap.set(shId, {
+						name: stakeholderNameMap.get(shId) ?? 'Unknown',
+						weeks: new Map()
+					});
+				}
+				const sh = shWeekMap.get(shId)!;
+				if (!sh.weeks.has(wk)) {
+					sh.weeks.set(wk, { efforts: [], performances: [] });
+				}
+				const w = sh.weeks.get(wk)!;
+				if (fb.effortScore !== null) w.efforts.push(fb.effortScore);
+				if (fb.performanceScore !== null) w.performances.push(fb.performanceScore);
+			}
+
+			// Build aggregate stakeholder average per week
+			const aggWeekMap = new Map<number, { efforts: number[]; performances: number[] }>();
+			for (const [, sh] of shWeekMap) {
+				for (const [wk, scores] of sh.weeks) {
+					if (!aggWeekMap.has(wk)) {
+						aggWeekMap.set(wk, { efforts: [], performances: [] });
+					}
+					const agg = aggWeekMap.get(wk)!;
+					agg.efforts.push(...scores.efforts);
+					agg.performances.push(...scores.performances);
+				}
+			}
+
+			const avg = (arr: number[]) =>
+				arr.length > 0
+					? Number((arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1))
+					: null;
+
+			stakeholderAvgHeatMap = [];
+			for (let wk = 1; wk <= totalWeeks; wk++) {
+				const d = aggWeekMap.get(wk);
+				stakeholderAvgHeatMap.push({
+					weekNumber: wk,
+					effort: d ? avg(d.efforts) : null,
+					performance: d ? avg(d.performances) : null
+				});
+			}
+
+			// Build per-stakeholder detail
+			stakeholderDetail = Array.from(shWeekMap.entries()).map(([id, sh]) => {
+				const weeks: WeekScore[] = [];
+				for (let wk = 1; wk <= totalWeeks!; wk++) {
+					const d = sh.weeks.get(wk);
+					weeks.push({
+						weekNumber: wk,
+						effort: d ? avg(d.efforts) : null,
+						performance: d ? avg(d.performances) : null
+					});
+				}
+				return { id, name: sh.name, weeks };
+			});
+
+			// --- Perception Gaps: per-stakeholder self-vs-stakeholder comparison ---
+			// We need self scores per week (from heatMapWeeks or cycle.reflections)
+			const selfWeekMap = new Map<number, { efforts: number[]; performances: number[] }>();
+			for (const r of cycle.reflections) {
+				if (!selfWeekMap.has(r.weekNumber)) {
+					selfWeekMap.set(r.weekNumber, { efforts: [], performances: [] });
+				}
+				const w = selfWeekMap.get(r.weekNumber)!;
+				if (r.effortScore !== null) w.efforts.push(r.effortScore);
+				if (r.performanceScore !== null) w.performances.push(r.performanceScore);
+			}
+
+			perceptionGaps = Array.from(shWeekMap.entries()).map(([shId, sh]) => {
+				// Find weeks where both self and this stakeholder have data
+				const pairedWeeks: Array<{
+					weekNumber: number;
+					selfEffort: number;
+					selfPerf: number;
+					stkEffort: number;
+					stkPerf: number;
+				}> = [];
+
+				for (const [wk, stkScores] of sh.weeks) {
+					const selfScores = selfWeekMap.get(wk);
+					if (!selfScores) continue;
+
+					const selfEff = selfScores.efforts.length > 0
+						? selfScores.efforts.reduce((a, b) => a + b, 0) / selfScores.efforts.length
+						: null;
+					const selfPrf = selfScores.performances.length > 0
+						? selfScores.performances.reduce((a, b) => a + b, 0) / selfScores.performances.length
+						: null;
+					const stkEff = stkScores.efforts.length > 0
+						? stkScores.efforts.reduce((a, b) => a + b, 0) / stkScores.efforts.length
+						: null;
+					const stkPrf = stkScores.performances.length > 0
+						? stkScores.performances.reduce((a, b) => a + b, 0) / stkScores.performances.length
+						: null;
+
+					if (selfEff !== null && stkEff !== null && selfPrf !== null && stkPrf !== null) {
+						pairedWeeks.push({
+							weekNumber: wk,
+							selfEffort: selfEff,
+							selfPerf: selfPrf,
+							stkEffort: stkEff,
+							stkPerf: stkPrf
+						});
+					}
+				}
+
+				pairedWeeks.sort((a, b) => a.weekNumber - b.weekNumber);
+
+				if (pairedWeeks.length === 0) {
+					return {
+						stakeholderId: shId,
+						stakeholderName: sh.name,
+						effortGap: null,
+						performanceGap: null,
+						effortGapTrend: null as 'widening' | 'closing' | 'stable' | null,
+						performanceGapTrend: null as 'widening' | 'closing' | 'stable' | null,
+						maxAbsGap: 0
+					};
+				}
+
+				const latest = pairedWeeks[pairedWeeks.length - 1];
+				const effortGap = Number((latest.selfEffort - latest.stkEffort).toFixed(1));
+				const performanceGap = Number((latest.selfPerf - latest.stkPerf).toFixed(1));
+
+				// Trend: look at last 2-3 paired weeks
+				function computeTrend(
+					pairs: typeof pairedWeeks,
+					getSelfScore: (p: typeof pairedWeeks[0]) => number,
+					getStkScore: (p: typeof pairedWeeks[0]) => number
+				): 'widening' | 'closing' | 'stable' | null {
+					if (pairs.length < 2) return null;
+					const recent = pairs.slice(-3);
+					const gaps = recent.map(p => Math.abs(getSelfScore(p) - getStkScore(p)));
+					if (gaps.length < 2) return null;
+
+					let totalDelta = 0;
+					for (let i = 1; i < gaps.length; i++) {
+						totalDelta += gaps[i] - gaps[i - 1];
+					}
+					const avgDelta = totalDelta / (gaps.length - 1);
+
+					if (avgDelta > 0.5) return 'widening';
+					if (avgDelta < -0.5) return 'closing';
+					return 'stable';
+				}
+
+				const effortGapTrend = computeTrend(pairedWeeks, p => p.selfEffort, p => p.stkEffort);
+				const performanceGapTrend = computeTrend(pairedWeeks, p => p.selfPerf, p => p.stkPerf);
+				const maxAbsGap = Math.max(Math.abs(effortGap), Math.abs(performanceGap));
+
+				return {
+					stakeholderId: shId,
+					stakeholderName: sh.name,
+					effortGap,
+					performanceGap,
+					effortGapTrend,
+					performanceGapTrend,
+					maxAbsGap
+				};
+			}).filter(g => g.effortGap !== null || g.performanceGap !== null);
+		}
+
+		// --- Cycle Metrics: stability, trajectory, alignment ---
+		let stabilityScore: number | null = null;
+		let trajectoryScore: number | null = null;
+		let alignmentRatio: number | null = null;
+
+		if (cycle && currentWeek && isOnboardingComplete) {
+			const metricWeekMap = new Map<number, { efforts: number[]; performances: number[] }>();
+			for (const r of cycle.reflections) {
+				if (r.weekNumber > currentWeek - 4 && r.weekNumber <= currentWeek) {
+					if (!metricWeekMap.has(r.weekNumber)) {
+						metricWeekMap.set(r.weekNumber, { efforts: [], performances: [] });
+					}
+					const w = metricWeekMap.get(r.weekNumber)!;
+					if (r.effortScore !== null) w.efforts.push(r.effortScore);
+					if (r.performanceScore !== null) w.performances.push(r.performanceScore);
+				}
+			}
+
+			const last4Weeks = Array.from(metricWeekMap.entries())
+				.map(([wk, d]) => ({
+					weekNumber: wk,
+					effort:
+						d.efforts.length > 0
+							? d.efforts.reduce((a, b) => a + b, 0) / d.efforts.length
+							: null,
+					performance:
+						d.performances.length > 0
+							? d.performances.reduce((a, b) => a + b, 0) / d.performances.length
+							: null
+				}))
+				.sort((a, b) => a.weekNumber - b.weekNumber);
+
+			// Stability: 100 - (combined std dev * 10)
+			const effortValues = last4Weeks
+				.map((w) => w.effort)
+				.filter((v): v is number => v !== null);
+			const perfValues = last4Weeks
+				.map((w) => w.performance)
+				.filter((v): v is number => v !== null);
+			const efStd = stdDev(effortValues);
+			const prStd = stdDev(perfValues);
+			const stds = [efStd, prStd].filter((v): v is number => v !== null);
+			const combinedStd =
+				stds.length > 0 ? stds.reduce((a, b) => a + b, 0) / stds.length : null;
+			stabilityScore =
+				combinedStd !== null ? Math.max(0, Math.round(100 - combinedStd * 10)) : null;
+
+			// Trajectory: linear regression slope on last 4 weeks
+			if (last4Weeks.length >= 2) {
+				const points: { x: number; y: number }[] = [];
+				for (const week of last4Weeks) {
+					const vals = [week.effort, week.performance].filter(
+						(v): v is number => v !== null
+					);
+					if (vals.length > 0) {
+						points.push({
+							x: week.weekNumber,
+							y: vals.reduce((a, b) => a + b, 0) / vals.length
+						});
+					}
+				}
+				if (points.length >= 2) {
+					const n = points.length;
+					const sumX = points.reduce((s, p) => s + p.x, 0);
+					const sumY = points.reduce((s, p) => s + p.y, 0);
+					const sumXY = points.reduce((s, p) => s + p.x * p.y, 0);
+					const sumX2 = points.reduce((s, p) => s + p.x * p.x, 0);
+					const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+					trajectoryScore = Math.max(-100, Math.min(100, Math.round(slope * 25)));
+				}
+			}
+
+			// Alignment: ratio of stakeholders who responded this week
+			const totalStakeholders = objective.stakeholders.length;
+			if (totalStakeholders > 0 && allFeedbacks.length > 0) {
+				const thisWeekFeedbacks = allFeedbacks.filter(
+					(f) => f.reflection && f.reflection.weekNumber === currentWeek
+				);
+				const uniqueStakeholderIds = new Set(
+					thisWeekFeedbacks.map((f) => f.stakeholderId)
+				);
+				alignmentRatio = Math.round(
+					(uniqueStakeholderIds.size / totalStakeholders) * 100
+				);
+			}
+		}
+
+		// --- Latest AI Insight ---
+		let latestInsight: {
+			id: string;
+			content: string | null;
+			type: string;
+			weekNumber: number | null;
+			createdAt: string;
+		} | null = null;
+
+		if (cycle && isOnboardingComplete) {
+			const insight = await prisma.insight.findFirst({
+				where: {
+					userId: dbUser.id,
+					cycleId: cycle.id,
+					status: 'COMPLETED',
+					type: { in: ['CHECK_IN', 'WEEKLY_SYNTHESIS'] }
+				},
+				orderBy: { createdAt: 'desc' },
+				select: {
+					id: true,
+					content: true,
+					type: true,
+					weekNumber: true,
+					createdAt: true
+				}
+			});
+
+			if (insight) {
+				latestInsight = {
+					id: insight.id,
+					content: insight.content,
+					type: insight.type,
+					weekNumber: insight.weekNumber,
+					createdAt: insight.createdAt.toISOString()
+				};
+			}
+		}
+
+		// --- Identity Anchor: week 1 intention notes ---
+		let identityAnchor: string | null = null;
+		if (cycle && isOnboardingComplete) {
+			const intentionReflection = await prisma.reflection.findFirst({
+				where: {
+					cycleId: cycle.id,
+					userId: dbUser.id,
+					reflectionType: 'INTENTION',
+					weekNumber: 1
+				},
+				select: { notes: true }
+			});
+			if (intentionReflection?.notes) {
+				identityAnchor = intentionReflection.notes;
+			}
+		}
+
 		return {
 			isFirstVisit,
 			isOnboardingComplete,
 			objective: objective
 				? {
 						id: objective.id,
-						title: objective.title
+						title: objective.title,
+						subgoals: objective.subgoals.map((s) => ({ id: s.id, label: s.label }))
 					}
 				: null,
 			summary: isOnboardingComplete
@@ -576,10 +911,22 @@ export const load: PageServerLoad = async (event) => {
 						startDate: cycle.startDate.toISOString()
 					}
 				: null,
-			visualizationData,
+			currentWeek,
+			totalWeeks,
 			nextAction,
 			myLastRatings,
-			stakeholdersLastRatings
+			stakeholdersLastRatings,
+			heatMapWeeks,
+			stakeholderAvgHeatMap,
+			stakeholderDetail,
+			perceptionGaps,
+			cycleMetrics: isOnboardingComplete
+				? { stabilityScore, trajectoryScore, completionRate, alignmentRatio }
+				: null,
+			latestInsight,
+			identityAnchor,
+			latestScorecard: isOnboardingComplete ? latestScorecard : [],
+			visualizationData: isOnboardingComplete ? visualizationData : null
 		};
 	} catch (error: any) {
 		console.error('[individual:error] Failed to load individual page', {
