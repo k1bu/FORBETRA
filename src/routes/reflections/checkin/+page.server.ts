@@ -80,6 +80,8 @@ const getCheckInType = (
 };
 
 // Check if next Monday intention has been submitted (locks editing)
+// 48-hour grace period: even after submitting the next intention, the previous
+// week's check-ins remain editable for 48 hours.
 const isNextMondayIntentionSubmitted = async (
 	cycleId: string,
 	userId: string,
@@ -91,10 +93,16 @@ const isNextMondayIntentionSubmitted = async (
 			userId,
 			reflectionType: 'INTENTION',
 			weekNumber: currentWeek + 1
-		}
+		},
+		select: { submittedAt: true }
 	});
 
-	return !!nextWeekIntention;
+	if (!nextWeekIntention) return false;
+
+	// Grace period: 48 hours after intention submission
+	const gracePeriodMs = 48 * 60 * 60 * 1000;
+	const lockTime = new Date(nextWeekIntention.submittedAt.getTime() + gracePeriodMs);
+	return new Date() >= lockTime;
 };
 
 export const load: PageServerLoad = async (event) => {
@@ -125,8 +133,18 @@ export const load: PageServerLoad = async (event) => {
 		throw redirect(303, '/onboarding');
 	}
 
-	const currentWeek = computeWeekNumber(cycle.startDate);
+	const computedWeek = computeWeekNumber(cycle.startDate);
 	const checkInFrequency = cycle.checkInFrequency ?? '3x';
+
+	// Support ?week=N for catch-up on previous weeks
+	const weekParam = event.url.searchParams.get('week');
+	let currentWeek = computedWeek;
+	if (weekParam) {
+		const parsed = parseInt(weekParam, 10);
+		if (!Number.isNaN(parsed) && parsed >= 1 && parsed <= computedWeek) {
+			currentWeek = parsed;
+		}
+	}
 
 	// Check if type is specified in query params
 	const typeParam = event.url.searchParams.get('type');
@@ -338,9 +356,19 @@ export const actions: Actions = {
 			return fail(400, { error: 'No active cycle found. Complete onboarding first.' });
 		}
 
-		const weekNumber = computeWeekNumber(cycle.startDate);
+		const computedWeek = computeWeekNumber(cycle.startDate);
 		const isPreview = event.url.searchParams.get('preview') === 'true';
 		const typeParam = event.url.searchParams.get('type');
+
+		// Support ?week=N for catch-up submissions
+		const weekParam = event.url.searchParams.get('week');
+		let weekNumber = computedWeek;
+		if (weekParam) {
+			const parsed = parseInt(weekParam, 10);
+			if (!Number.isNaN(parsed) && parsed >= 1 && parsed <= computedWeek) {
+				weekNumber = parsed;
+			}
+		}
 
 		let checkInInfo: {
 			type: ReflectionType;

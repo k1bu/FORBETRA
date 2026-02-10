@@ -9,6 +9,13 @@ export type EmailTemplateData = {
 	appUrl?: string;
 };
 
+export type CoachInvitationData = {
+	coachName: string;
+	recipientName?: string;
+	message?: string;
+	inviteUrl: string;
+};
+
 const baseUrl =
 	process.env.PUBLIC_APP_URL || process.env.VERCEL_URL
 		? `https://${process.env.PUBLIC_APP_URL || process.env.VERCEL_URL}`
@@ -106,12 +113,12 @@ export const emailTemplates = {
 					<div style="text-align: center; margin: 30px 0;">
 						<a href="${data.feedbackLink}" style="display: inline-block; background: #3b82f6; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Share Feedback</a>
 					</div>
-					<p style="font-size: 12px; color: #94a3b8; text-align: center; margin-top: 20px;">This link expires in 7 days</p>
+					<p style="font-size: 12px; color: #94a3b8; text-align: center; margin-top: 20px;">This link expires in 10 days</p>
 				</div>
 			</body>
 			</html>
 		`,
-		text: `Quick feedback request for ${data.individualName || 'your participant'}\n\nHi ${data.stakeholderName || 'there'},\n\n${data.individualName || 'Your participant'} just completed a reflection and would love your feedback.\n\n${data.objectiveTitle ? `Objective: ${data.objectiveTitle}\n\n` : ''}This will take less than 60 seconds — just two quick questions about effort and progress.\n\nShare feedback: ${data.feedbackLink}\n\nThis link expires in 7 days`
+		text: `Quick feedback request for ${data.individualName || 'your participant'}\n\nHi ${data.stakeholderName || 'there'},\n\n${data.individualName || 'Your participant'} just completed a reflection and would love your feedback.\n\n${data.objectiveTitle ? `Objective: ${data.objectiveTitle}\n\n` : ''}This will take less than 60 seconds — just two quick questions about effort and progress.\n\nShare feedback: ${data.feedbackLink}\n\nThis link expires in 10 days`
 	}),
 
 	stakeholderFeedbackReceived: (data: EmailTemplateData) => ({
@@ -262,5 +269,42 @@ export const emailTemplates = {
 			</html>
 		`,
 		text: `Reminder: Feedback request for ${data.individualName || 'your participant'}\n\nHi ${data.stakeholderName || 'there'},\n\nYou have a pending feedback request from ${data.individualName || 'your participant'}.\n\nThis will take less than 60 seconds — just two quick questions.\n\nShare feedback: ${data.feedbackLink}\n\nThis link expires soon`
+	}),
+
+	coachInvitation: (data: CoachInvitationData) => ({
+		subject: `${data.coachName} invited you to join Forbetra`,
+		html: `
+			<!DOCTYPE html>
+			<html>
+			<head>
+				<meta charset="utf-8">
+				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			</head>
+			<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #334155; max-width: 600px; margin: 0 auto; padding: 20px;">
+				<div style="background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
+					<h1 style="color: white; margin: 0; font-size: 28px; font-weight: 600;">You're Invited</h1>
+				</div>
+				<div style="background: white; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+					<p style="font-size: 16px; margin-top: 0;">Hi ${data.recipientName || 'there'},</p>
+					<p style="font-size: 16px;"><strong>${data.coachName}</strong> has invited you to join Forbetra — a platform for structured personal development.</p>
+					${data.message ? `<div style="background: #f1f5f9; padding: 16px; border-radius: 8px; margin: 24px 0; border-left: 4px solid #6366f1;"><p style="margin: 0; font-size: 14px; color: #475569; font-style: italic;">"${data.message}"</p><p style="margin: 8px 0 0 0; font-size: 13px; color: #64748b;">— ${data.coachName}</p></div>` : ''}
+					<div style="background: #f1f5f9; padding: 20px; border-radius: 8px; margin: 24px 0;">
+						<p style="margin: 0; font-size: 14px; color: #64748b;"><strong>What to expect:</strong></p>
+						<ul style="margin: 12px 0 0 0; padding-left: 20px; font-size: 14px; color: #64748b;">
+							<li>Set a development objective and break it into observable behaviors</li>
+							<li>Track your effort and performance with weekly check-ins</li>
+							<li>Get feedback from stakeholders who see your work</li>
+							<li>Receive AI-powered insights and coaching from ${data.coachName}</li>
+						</ul>
+					</div>
+					<div style="text-align: center; margin: 30px 0;">
+						<a href="${data.inviteUrl}" style="display: inline-block; background: linear-gradient(135deg, #6366f1, #3b82f6); color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Accept Invitation</a>
+					</div>
+					<p style="font-size: 12px; color: #94a3b8; text-align: center; margin-top: 20px;">This invitation is valid for 14 days</p>
+				</div>
+			</body>
+			</html>
+		`,
+		text: `${data.coachName} invited you to join Forbetra\n\nHi ${data.recipientName || 'there'},\n\n${data.coachName} has invited you to join Forbetra — a platform for structured personal development.\n\n${data.message ? `"${data.message}"\n— ${data.coachName}\n\n` : ''}What to expect:\n- Set a development objective and break it into observable behaviors\n- Track your effort and performance with weekly check-ins\n- Get feedback from stakeholders who see your work\n- Receive AI-powered insights and coaching from ${data.coachName}\n\nAccept invitation: ${data.inviteUrl}\n\nThis invitation is valid for 14 days`
 	})
 };

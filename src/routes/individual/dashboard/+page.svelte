@@ -318,19 +318,22 @@
 									open: 'border-blue-300 bg-gradient-to-br from-blue-50 to-blue-100',
 									completed: 'border-emerald-300 bg-gradient-to-br from-emerald-50 to-emerald-100',
 									missed: 'border-amber-300 bg-gradient-to-br from-amber-50 to-amber-100',
-									upcoming: 'border-neutral-300 bg-gradient-to-br from-neutral-50 to-neutral-100'
+									upcoming: 'border-neutral-300 bg-gradient-to-br from-neutral-50 to-neutral-100',
+									catchup: 'border-orange-300 bg-gradient-to-br from-orange-50 to-amber-100'
 								}}
 								{@const stateIcons = {
 									open: '🔵',
 									completed: '✅',
 									missed: '⏸️',
-									upcoming: '⏳'
+									upcoming: '⏳',
+									catchup: '🕐'
 								}}
 								{@const stateLabels = {
 									open: 'Open',
 									completed: 'Completed',
 									missed: 'Missed',
-									upcoming: 'Upcoming'
+									upcoming: 'Upcoming',
+									catchup: 'Catch Up'
 								}}
 								<div class="rounded-xl border-2 {stateColors[experience.state]} p-4 transition-all hover:shadow-md">
 									<div class="mb-2 flex items-center gap-2">
@@ -355,6 +358,18 @@
 										>
 											{experience.state === 'open' ? 'Complete →' : 'View →'}
 										</a>
+									{:else if experience.state === 'catchup' && experience.url}
+										<a
+											href={experience.url}
+											class="inline-flex items-center gap-1 rounded-lg bg-orange-100 px-3 py-1.5 text-xs font-semibold text-orange-800 transition-all hover:bg-orange-200 hover:shadow-sm"
+										>
+											Catch up →
+										</a>
+										{#if experience.catchupDeadline}
+											<p class="mt-2 text-xs text-orange-700">
+												You have until {formatDateTime(experience.catchupDeadline)} to complete this
+											</p>
+										{/if}
 									{:else if experience.state === 'missed'}
 										<p class="text-xs font-medium text-neutral-600">Window closed — keep going this week!</p>
 									{:else if experience.state === 'upcoming'}

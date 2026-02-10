@@ -145,7 +145,7 @@ const getDateForWeekday = (weekday: number, startDate: Date, weekNumber: number)
 };
 
 // Get the state of a weekly experience
-type ExperienceState = 'open' | 'completed' | 'missed' | 'upcoming';
+type ExperienceState = 'open' | 'completed' | 'missed' | 'upcoming' | 'catchup';
 
 type WeeklyExperience = {
 	type: 'INTENTION' | 'RATING_A' | 'RATING_B';
@@ -155,6 +155,7 @@ type WeeklyExperience = {
 	deadlineDate: Date | null;
 	reflectionId: string | null;
 	url: string | null;
+	catchupDeadline: Date | null;
 };
 
 const getWeeklyExperiences = async (
@@ -184,16 +185,25 @@ const getWeeklyExperiences = async (
 	const nextMondayDate = new Date(mondayDate);
 	nextMondayDate.setDate(mondayDate.getDate() + 7);
 
-	// Check if next Monday intention is submitted (locks check-ins)
+	// Check if next Monday intention is submitted (locks check-ins after 48h grace)
 	const nextWeekIntention = await prismaClient.reflection.findFirst({
 		where: {
 			cycleId: cycle.id,
 			userId,
 			reflectionType: 'INTENTION',
 			weekNumber: currentWeek + 1
-		}
+		},
+		select: { submittedAt: true }
 	});
-	const isLocked = !!nextWeekIntention;
+
+	let isLocked = false;
+	let catchupDeadline: Date | null = null;
+	if (nextWeekIntention) {
+		const gracePeriodMs = 48 * 60 * 60 * 1000;
+		const lockTime = new Date(nextWeekIntention.submittedAt.getTime() + gracePeriodMs);
+		catchupDeadline = lockTime;
+		isLocked = new Date() >= lockTime;
+	}
 
 	// Get submitted reflections for current week
 	const submittedReflections = cycle.reflections.filter((r) => r.weekNumber === currentWeek);
@@ -217,8 +227,10 @@ const getWeeklyExperiences = async (
 	} else if (today < mondayDate) {
 		intentionState = 'upcoming';
 	} else if (isLocked) {
-		// If next Monday intention is submitted, this week's intention is missed
 		intentionState = 'missed';
+	} else if (nextWeekIntention && !isLocked) {
+		// Within 48h grace period
+		intentionState = 'catchup';
 	} else {
 		intentionState = 'open';
 	}
@@ -230,7 +242,12 @@ const getWeeklyExperiences = async (
 		availableDate: mondayDisplayDate,
 		deadlineDate: isLocked ? nextMondayDate : null,
 		reflectionId: intentionReflection?.id ?? null,
-		url: intentionState === 'open' || intentionState === 'completed' ? '/prompts/monday' : null
+		url: intentionState === 'open' || intentionState === 'completed'
+			? '/prompts/monday'
+			: intentionState === 'catchup'
+				? `/prompts/monday?week=${currentWeek}`
+				: null,
+		catchupDeadline: intentionState === 'catchup' ? catchupDeadline : null
 	});
 
 	// 2. Wednesday Check-in - Available Wednesday until Friday
@@ -239,9 +256,11 @@ const getWeeklyExperiences = async (
 		ratingAState = 'completed';
 	} else if (today < wednesdayDate) {
 		ratingAState = 'upcoming';
-	} else if (today > fridayDate || isLocked) {
-		// Missed if past Friday or next Monday intention submitted
+	} else if (isLocked) {
 		ratingAState = 'missed';
+	} else if (nextWeekIntention && !isLocked) {
+		// Next intention submitted but within 48h grace — catch up
+		ratingAState = 'catchup';
 	} else {
 		ratingAState = 'open';
 	}
@@ -256,7 +275,10 @@ const getWeeklyExperiences = async (
 		url:
 			ratingAState === 'open' || ratingAState === 'completed'
 				? '/reflections/checkin?type=RATING_A'
-				: null
+				: ratingAState === 'catchup'
+					? `/reflections/checkin?type=RATING_A&week=${currentWeek}`
+					: null,
+		catchupDeadline: ratingAState === 'catchup' ? catchupDeadline : null
 	});
 
 	// 3. Friday Check-in - Available Friday until next Monday intention
@@ -266,8 +288,10 @@ const getWeeklyExperiences = async (
 	} else if (today < fridayDate) {
 		ratingBState = 'upcoming';
 	} else if (isLocked) {
-		// Missed if next Monday intention submitted
 		ratingBState = 'missed';
+	} else if (nextWeekIntention && !isLocked) {
+		// Next intention submitted but within 48h grace — catch up
+		ratingBState = 'catchup';
 	} else {
 		ratingBState = 'open';
 	}
@@ -282,7 +306,10 @@ const getWeeklyExperiences = async (
 		url:
 			ratingBState === 'open' || ratingBState === 'completed'
 				? '/reflections/checkin?type=RATING_B'
-				: null
+				: ratingBState === 'catchup'
+					? `/reflections/checkin?type=RATING_B&week=${currentWeek}`
+					: null,
+		catchupDeadline: ratingBState === 'catchup' ? catchupDeadline : null
 	});
 
 	// Always return all three experiences for the current week
@@ -430,15 +457,17 @@ export const load: PageServerLoad = async (event) => {
 	const weeklyExperiences: Array<{
 		type: 'INTENTION' | 'RATING_A' | 'RATING_B';
 		label: string;
-		state: 'open' | 'completed' | 'missed' | 'upcoming';
+		state: 'open' | 'completed' | 'missed' | 'upcoming' | 'catchup';
 		availableDate: string | null;
 		deadlineDate: string | null;
 		reflectionId: string | null;
 		url: string | null;
+		catchupDeadline: string | null;
 	}> = weeklyExperiencesRaw.map((exp) => ({
 		...exp,
 		availableDate: exp.availableDate ? exp.availableDate.toISOString() : null,
-		deadlineDate: exp.deadlineDate ? exp.deadlineDate.toISOString() : null
+		deadlineDate: exp.deadlineDate ? exp.deadlineDate.toISOString() : null,
+		catchupDeadline: exp.catchupDeadline ? exp.catchupDeadline.toISOString() : null
 	}));
 
 	// Calculate nextPrompt based on current week's experiences
@@ -941,7 +970,7 @@ export const actions: Actions = {
 
 		const tokenValue = randomBytes(32).toString('hex');
 		const expiresAt = new Date();
-		expiresAt.setDate(expiresAt.getDate() + 7);
+		expiresAt.setDate(expiresAt.getDate() + 10);
 
 		await prisma.token.create({
 			data: {
