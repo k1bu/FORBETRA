@@ -1,11 +1,20 @@
 <script lang="ts">
 	import { SignedIn, SignedOut } from 'svelte-clerk';
 	import { enhance } from '$app/forms';
+	import { invalidateAll } from '$app/navigation';
 	import type { PageData } from './$types';
 
 	const { data, form }: { data: PageData; form: any } = $props();
 
 	let submitting = $state(false);
+
+	// Auto-retry when DB user hasn't synced yet
+	$effect(() => {
+		if (data.dbUser === null && data.showRoleSelection === false) {
+			const timer = setTimeout(() => invalidateAll(), 2000);
+			return () => clearTimeout(timer);
+		}
+	});
 </script>
 
 <SignedOut>

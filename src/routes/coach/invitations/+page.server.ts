@@ -2,6 +2,8 @@ import prisma from '$lib/server/prisma';
 import { requireRole } from '$lib/server/auth';
 import { fail } from '@sveltejs/kit';
 import { randomBytes, createHash } from 'crypto';
+import { sendEmail } from '$lib/notifications/email';
+import { emailTemplates } from '$lib/notifications/emailTemplates';
 import type { Actions, PageServerLoad } from './$types';
 import { Prisma } from '@prisma/client';
 import type { TokenType } from '@prisma/client';
@@ -178,6 +180,23 @@ export const actions: Actions = {
 			});
 
 			const inviteUrl = new URL(`/coach/invite/${tokenRaw}`, event.url.origin).toString();
+
+			// Send invitation email
+			try {
+				const coachName = dbUser.name ?? 'Your coach';
+				const template = emailTemplates.coachInvitation({
+					coachName,
+					recipientName: name || undefined,
+					message: message || undefined,
+					inviteUrl
+				});
+				await sendEmail({
+					to: email,
+					...template
+				});
+			} catch (error) {
+				console.error('[email:error] Failed to send coach invitation email', error);
+			}
 
 			return {
 				success: true,
