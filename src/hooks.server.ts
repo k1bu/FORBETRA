@@ -5,7 +5,7 @@ import type { Handle } from '@sveltejs/kit';
 import type { Prisma, UserRole } from '@prisma/client';
 
 const DEFAULT_ROLE: UserRole = 'INDIVIDUAL';
-const ALLOWED_ROLES = new Set<UserRole>(['INDIVIDUAL', 'COACH', 'STAKEHOLDER', 'ADMIN']);
+const ALLOWED_ROLES = new Set<UserRole>(['INDIVIDUAL', 'COACH', 'STAKEHOLDER', 'ADMIN', 'ORG_ADMIN']);
 
 const clerkHandle = withClerkHandler();
 
@@ -194,7 +194,38 @@ export const handle = sequence(clerkHandle, async ({ event, resolve }) => {
 						{ userId: dbUser.id, email: dbUser.email },
 						linkError
 					);
-					// Don't fail the request if linking invites fails
+				}
+
+				// Domain-based organization auto-assignment
+				try {
+					const emailDomain = primaryEmail.toLowerCase().split('@')[1];
+					if (emailDomain) {
+						const org = await prisma.organization.findUnique({
+							where: { domain: emailDomain }
+						});
+						if (org) {
+							await prisma.organizationMember.upsert({
+								where: {
+									organizationId_userId: {
+										organizationId: org.id,
+										userId: dbUser.id
+									}
+								},
+								update: {},
+								create: {
+									organizationId: org.id,
+									userId: dbUser.id,
+									role: 'MEMBER'
+								}
+							});
+						}
+					}
+				} catch (orgError) {
+					console.error('[auth:error] Failed to auto-assign organization', {
+						userId: dbUser.id,
+						email: dbUser.email,
+						error: orgError
+					});
 				}
 
 				event.locals.dbUser = dbUser;

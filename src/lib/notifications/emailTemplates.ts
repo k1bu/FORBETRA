@@ -274,6 +274,84 @@ export const emailTemplates = {
 		text: `Reminder: Feedback request for ${data.individualName || 'your participant'}\n\nHi ${data.stakeholderName || 'there'},\n\nYou have a pending feedback request from ${data.individualName || 'your participant'}.\n\nThis will take less than 60 seconds — just two quick questions.\n\nShare feedback: ${data.feedbackLink}\n\nThis link expires soon`
 	}),
 
+	stakeholderThankYou: (data: EmailTemplateData) => ({
+		subject: `Thank you for your feedback on ${data.individualName || 'your participant'}`,
+		html: `
+			<!DOCTYPE html>
+			<html>
+			<head>
+				<meta charset="utf-8">
+				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			</head>
+			<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #334155; max-width: 600px; margin: 0 auto; padding: 20px;">
+				<div style="background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
+					<h1 style="color: white; margin: 0; font-size: 24px; font-weight: 600;">Thank You!</h1>
+				</div>
+				<div style="background: white; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+					<p style="font-size: 16px; margin-top: 0;">Hi ${data.stakeholderName || 'there'},</p>
+					<p style="font-size: 16px;">Your Week ${data.weekNumber ?? ''} feedback for <strong>${data.individualName || 'your participant'}</strong> has been recorded.</p>
+					<p style="font-size: 16px;">Your perspective matters — it helps reveal blind spots and validate progress that might otherwise go unnoticed.</p>
+					<div style="background: #f5f3ff; padding: 16px; border-radius: 8px; margin: 24px 0; text-align: center;">
+						<p style="margin: 0; font-size: 14px; color: #6d28d9;">The gap between self-perception and external feedback is the most powerful growth signal.</p>
+					</div>
+					<p style="font-size: 14px; color: #64748b;">You'll receive the next feedback request when ${data.individualName || 'they'} completes their next check-in.</p>
+				</div>
+			</body>
+			</html>
+		`,
+		text: `Thank you for your feedback on ${data.individualName || 'your participant'}\n\nHi ${data.stakeholderName || 'there'},\n\nYour Week ${data.weekNumber ?? ''} feedback for ${data.individualName || 'your participant'} has been recorded.\n\nYour perspective matters — it helps reveal blind spots and validate progress that might otherwise go unnoticed.\n\nYou'll receive the next feedback request when ${data.individualName || 'they'} completes their next check-in.`
+	}),
+
+	stakeholderImpactSummary: (data: {
+		stakeholderName?: string;
+		individualName?: string;
+		weeksContributed: number;
+		totalFeedbacks: number;
+		effortTrend: 'up' | 'down' | 'stable';
+		performanceTrend: 'up' | 'down' | 'stable';
+	}) => {
+		const trendIcon = (trend: string) => trend === 'up' ? '↑' : trend === 'down' ? '↓' : '→';
+		const trendLabel = (trend: string) => trend === 'up' ? 'trending up' : trend === 'down' ? 'trending down' : 'stable';
+		return {
+			subject: `Your impact on ${data.individualName || 'your participant'}'s growth — monthly summary`,
+			html: `
+				<!DOCTYPE html>
+				<html>
+				<head>
+					<meta charset="utf-8">
+					<meta name="viewport" content="width=device-width, initial-scale=1.0">
+				</head>
+				<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #334155; max-width: 600px; margin: 0 auto; padding: 20px;">
+					<div style="background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
+						<h1 style="color: white; margin: 0; font-size: 24px; font-weight: 600;">Your Impact Summary</h1>
+					</div>
+					<div style="background: white; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+						<p style="font-size: 16px; margin-top: 0;">Hi ${data.stakeholderName || 'there'},</p>
+						<p style="font-size: 16px;">Here's a snapshot of your contribution to <strong>${data.individualName || 'your participant'}'s</strong> development this month.</p>
+						<div style="display: flex; gap: 12px; margin: 24px 0;">
+							<div style="flex: 1; background: #f0fdfa; padding: 16px; border-radius: 8px; text-align: center;">
+								<p style="margin: 0; font-size: 28px; font-weight: 700; color: #0d9488;">${data.weeksContributed}</p>
+								<p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">Weeks contributed</p>
+							</div>
+							<div style="flex: 1; background: #f5f3ff; padding: 16px; border-radius: 8px; text-align: center;">
+								<p style="margin: 0; font-size: 28px; font-weight: 700; color: #7c3aed;">${data.totalFeedbacks}</p>
+								<p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">Total feedbacks</p>
+							</div>
+						</div>
+						<div style="background: #f1f5f9; padding: 20px; border-radius: 8px; margin: 24px 0;">
+							<p style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #334155;">Trends (based on your ratings):</p>
+							<p style="margin: 0 0 6px 0; font-size: 14px; color: #64748b;">${trendIcon(data.effortTrend)} Effort: ${trendLabel(data.effortTrend)}</p>
+							<p style="margin: 0; font-size: 14px; color: #64748b;">${trendIcon(data.performanceTrend)} Performance: ${trendLabel(data.performanceTrend)}</p>
+						</div>
+						<p style="font-size: 14px; color: #64748b;">Your continued feedback helps ${data.individualName || 'them'} stay accountable and see the full picture of their growth. Thank you!</p>
+					</div>
+				</body>
+				</html>
+			`,
+			text: `Your impact on ${data.individualName || 'your participant'}'s growth — monthly summary\n\nHi ${data.stakeholderName || 'there'},\n\nHere's a snapshot of your contribution to ${data.individualName || 'your participant'}'s development this month.\n\nWeeks contributed: ${data.weeksContributed}\nTotal feedbacks: ${data.totalFeedbacks}\n\nTrends (based on your ratings):\n${trendIcon(data.effortTrend)} Effort: ${trendLabel(data.effortTrend)}\n${trendIcon(data.performanceTrend)} Performance: ${trendLabel(data.performanceTrend)}\n\nYour continued feedback helps ${data.individualName || 'them'} stay accountable and see the full picture of their growth. Thank you!`
+		};
+	},
+
 	coachInvitation: (data: CoachInvitationData) => ({
 		subject: `${data.coachName} invited you to join Forbetra`,
 		html: `

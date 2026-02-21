@@ -1,6 +1,7 @@
 import prisma from '$lib/server/prisma';
 import { sendEmail } from '$lib/notifications/email';
 import { emailTemplates } from '$lib/notifications/emailTemplates';
+import { sendSms } from '$lib/notifications/sms';
 import { computeWeekNumber } from '$lib/server/coachUtils';
 
 export const remindBaseReflections = async () => {
@@ -154,6 +155,28 @@ export const remindBaseReflections = async () => {
 				`[job:remind-base-reflections] Failed to send reminder to ${objective.user.email}`,
 				error
 			);
+		}
+
+		// Send SMS reminder if user has a phone number
+		if (objective.user.phone) {
+			try {
+				const dayLabel = reflectionType === 'INTENTION' ? 'Monday' : reflectionType === 'RATING_A' ? 'Wednesday' : 'Friday';
+				const checkInUrl = reflectionType === 'INTENTION'
+					? `${baseUrl}/prompts/monday`
+					: `${baseUrl}/reflections/checkin?type=${reflectionType}`;
+				await sendSms({
+					to: objective.user.phone,
+					body: `Forbetra: Time for your ${dayLabel} check-in (Week ${currentWeek}). ${checkInUrl}`
+				});
+				console.info(
+					`[job:remind-base-reflections] Sent SMS reminder to ${objective.user.phone} for week ${currentWeek}`
+				);
+			} catch (error) {
+				console.error(
+					`[job:remind-base-reflections] Failed to send SMS to ${objective.user.phone}`,
+					error
+				);
+			}
 		}
 	}
 };

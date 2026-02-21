@@ -1,6 +1,7 @@
 <svelte:options runes={false} />
 
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import type { ActionData } from './$types';
 	import type { PageData } from './$types';
 	import type {
@@ -15,10 +16,56 @@
 	type SubgoalFormValue = { label: string; description: string };
 	type StakeholderFormValue = { name: string; email: string; relationship: string };
 
+	const DRAFT_KEY = 'forbetra-onboarding-draft';
+	const DRAFT_MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24 hours
+
 	const contexts = data.contexts;
 	const errors = (form?.errors as Record<string, string[]>) ?? {};
 	const isEditing = data.isEditing;
+	const isPrePopulated = (data as any).isPrePopulated ?? false;
 	const existingData = data.existingData;
+
+	let draftRestored = false;
+	let restoredDraft: any = null;
+
+	// Restore draft on mount (only if not editing and not pre-populated)
+	onMount(() => {
+		if (isEditing || isPrePopulated || existingData) return;
+		try {
+			const raw = localStorage.getItem(DRAFT_KEY);
+			if (raw) {
+				const draft = JSON.parse(raw);
+				if (draft.savedAt && Date.now() - draft.savedAt < DRAFT_MAX_AGE_MS) {
+					if (draft.objectiveTitle) objectiveTitle = draft.objectiveTitle;
+					if (draft.objectiveDescription) objectiveDescription = draft.objectiveDescription;
+					if (draft.cycleLabel) cycleLabel = draft.cycleLabel;
+					if (draft.cycleStartDate) cycleStartDate = draft.cycleStartDate;
+					if (draft.cycleDurationWeeks) cycleDurationWeeks = draft.cycleDurationWeeks;
+					if (draft.checkInFrequency) checkInFrequency = draft.checkInFrequency;
+					if (draft.stakeholderCadence) stakeholderCadence = draft.stakeholderCadence;
+					if (draft.reminderDays) reminderDays = draft.reminderDays;
+					if (typeof draft.revealScores === 'boolean') revealScores = draft.revealScores;
+					if (draft.phone) phone = draft.phone;
+					if (Array.isArray(draft.subgoalForms) && draft.subgoalForms.length > 0) {
+						subgoalForms = draft.subgoalForms;
+					}
+					if (Array.isArray(draft.stakeholderForms) && draft.stakeholderForms.length > 0) {
+						stakeholderForms = draft.stakeholderForms;
+					}
+					if (draft.currentStep && allSteps.includes(draft.currentStep)) {
+						currentStep = draft.currentStep;
+						stepHistory = allSteps.slice(0, allSteps.indexOf(draft.currentStep) + 1);
+					}
+					cycleDurationMode = [8, 12, 16].includes(Number(cycleDurationWeeks)) ? 'preset' : 'custom';
+					if (cycleDurationMode === 'custom') customDurationWeeks = cycleDurationWeeks;
+					draftRestored = true;
+					setTimeout(() => { draftRestored = false; }, 3000);
+				} else {
+					localStorage.removeItem(DRAFT_KEY);
+				}
+			}
+		} catch {}
+	});
 
 	const values = {
 		objectiveTitle: form?.values?.objectiveTitle ?? existingData?.objectiveTitle ?? '',
@@ -48,6 +95,7 @@
 	let checkInFrequency: '3x' | '2x' | '1x' = (existingData?.checkInFrequency as '3x' | '2x' | '1x') ?? '3x';
 	let stakeholderCadence: 'weekly' | 'biweekly' = (existingData?.stakeholderCadence as 'weekly' | 'biweekly') ?? 'weekly';
 	let revealScores = true;
+	let phone = '';
 
 	let subgoalForms: SubgoalFormValue[] = Array.from({ length: initialSubgoalCount }, (_, index) => ({
 		label: values.subgoals[index]?.label ?? '',
@@ -71,8 +119,8 @@
 	// Step wizard state — 5 steps (science removed)
 	type Step = 'welcome' | 'objective' | 'subgoals' | 'cycle' | 'stakeholders';
 	const allSteps: Step[] = ['welcome', 'objective', 'subgoals', 'cycle', 'stakeholders'];
-	let currentStep: Step = Object.keys(errors).length > 0 ? 'stakeholders' : isEditing ? 'objective' : 'welcome';
-	let stepHistory: Step[] = currentStep === 'stakeholders' ? [...allSteps] : isEditing ? ['objective'] : ['welcome'];
+	let currentStep: Step = Object.keys(errors).length > 0 ? 'stakeholders' : isEditing ? 'objective' : isPrePopulated ? 'objective' : 'welcome';
+	let stepHistory: Step[] = currentStep === 'stakeholders' ? [...allSteps] : (isEditing || isPrePopulated) ? ['objective'] : ['welcome'];
 
 	function selectContext(contextId: string) {
 		selectedContextId = contextId;
@@ -225,6 +273,33 @@
 		return 'Long-arc — major transitions';
 	}
 
+	// Draft save/restore
+	let saveTimeout: ReturnType<typeof setTimeout> | null = null;
+	$: draftData = {
+		objectiveTitle,
+		objectiveDescription,
+		cycleLabel,
+		cycleStartDate,
+		cycleDurationWeeks,
+		checkInFrequency,
+		stakeholderCadence,
+		reminderDays,
+		revealScores,
+		phone,
+		subgoalForms,
+		stakeholderForms,
+		currentStep,
+		savedAt: Date.now()
+	};
+	$: if (typeof window !== 'undefined' && !isEditing && !isPrePopulated) {
+		if (saveTimeout) clearTimeout(saveTimeout);
+		saveTimeout = setTimeout(() => {
+			try {
+				localStorage.setItem(DRAFT_KEY, JSON.stringify(draftData));
+			} catch {}
+		}, 1000);
+	}
+
 	$: stepProgress = (() => {
 		const stepIndex = allSteps.indexOf(currentStep);
 		if (stepIndex === 0) return 0;
@@ -288,6 +363,18 @@
 </script>
 
 <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50">
+	{#if draftRestored}
+		<div class="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-800 shadow-lg transition-opacity">
+			Draft restored
+		</div>
+	{/if}
+	{#if isPrePopulated}
+		<div class="mx-auto max-w-5xl pt-4 px-4">
+			<div class="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+				<p class="font-medium">Your coach has pre-filled some details. Feel free to adjust anything below.</p>
+			</div>
+		</div>
+	{/if}
 	<section class="mx-auto max-w-5xl space-y-8 pb-12 pt-8">
 		<!-- Progress Bar -->
 		{#if currentStep !== 'welcome'}
@@ -913,6 +1000,24 @@
 											</div>
 										</label>
 									</div>
+								</div>
+
+								<!-- Phone for SMS reminders -->
+								<div class="mt-6 pt-6 border-t border-slate-200">
+									<label class="block text-sm font-semibold text-slate-700" for="phone">
+										Phone for SMS reminders <span class="font-normal text-slate-400">(optional)</span>
+									</label>
+									<p class="mt-1 text-xs text-slate-500 mb-3">
+										Get a quick text reminder when it's time for your check-in. We'll never share your number.
+									</p>
+									<input
+										type="tel"
+										id="phone"
+										name="phone"
+										bind:value={phone}
+										placeholder="+1 (555) 123-4567"
+										class="w-full rounded-xl border-2 border-slate-300 px-4 py-3 text-base text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all"
+									/>
 								</div>
 							</div>
 						</div>

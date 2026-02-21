@@ -1,6 +1,22 @@
+import twilio from 'twilio';
+
 export type SmsPayload = {
 	to: string;
 	body: string;
+};
+
+let client: ReturnType<typeof twilio> | null = null;
+
+const getClient = () => {
+	if (!client) {
+		const sid = process.env.TWILIO_ACCOUNT_SID;
+		const token = process.env.TWILIO_AUTH_TOKEN;
+		if (!sid || !token) {
+			throw new Error('Missing TWILIO_ACCOUNT_SID or TWILIO_AUTH_TOKEN');
+		}
+		client = twilio(sid, token);
+	}
+	return client;
 };
 
 export const sendSms = async (payload: SmsPayload) => {
@@ -9,13 +25,17 @@ export const sendSms = async (payload: SmsPayload) => {
 		return;
 	}
 
-	// TODO: integrate with Twilio or preferred provider
-	// Example Twilio usage:
-	// const client = twilio(process.env.TWILIO_ACCOUNT_SID!, process.env.TWILIO_AUTH_TOKEN!);
-	// await client.messages.create({
-	// 	body: payload.body,
-	// 	to: payload.to,
-	// 	from: process.env.TWILIO_FROM_NUMBER!
-	// });
-	throw new Error('SMS sending not yet implemented in production.');
+	const fromNumber = process.env.TWILIO_FROM_NUMBER;
+	if (!fromNumber) {
+		throw new Error('Missing TWILIO_FROM_NUMBER');
+	}
+
+	const twilioClient = getClient();
+	await twilioClient.messages.create({
+		body: payload.body,
+		to: payload.to,
+		from: fromNumber
+	});
+
+	console.info(`[sms:sent] SMS sent to ${payload.to}`);
 };

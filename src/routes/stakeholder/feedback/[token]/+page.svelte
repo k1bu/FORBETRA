@@ -353,6 +353,23 @@
 				</div>
 			</div>
 
+			{#if data.subgoals && data.subgoals.length > 0}
+				<div class="rounded-xl border border-indigo-200 bg-gradient-to-br from-indigo-50/50 to-purple-50/50 px-5 py-4">
+					<p class="mb-3 text-sm font-semibold text-indigo-900">Behaviors to observe</p>
+					<div class="space-y-2">
+						{#each data.subgoals as subgoal}
+							<div class="rounded-lg border border-indigo-100 bg-white px-4 py-3">
+								<p class="text-sm font-semibold text-neutral-900">{subgoal.label}</p>
+								{#if subgoal.description}
+									<p class="mt-1 text-xs text-neutral-600">{subgoal.description}</p>
+								{/if}
+							</div>
+						{/each}
+					</div>
+					<p class="mt-3 text-xs text-indigo-600">Keep these in mind as you rate effort and performance below.</p>
+				</div>
+			{/if}
+
 			{#if data.previousRatings && (data.previousRatings.effortScore !== null || data.previousRatings.performanceScore !== null)}
 				{@const historicRatings = data.historicRatings ?? []}
 				<div class="rounded-xl border border-blue-100/50 bg-gradient-to-br from-blue-50/40 to-blue-50/60 p-4">
@@ -392,7 +409,11 @@
 								Focused Effort
 							</label>
 							<p class="text-xs text-neutral-500">
-								How much attention did {data.reflection.participantName} give to their objective: "{data.reflection.objectiveTitle || 'the objective'}" this week?
+								{#if data.subgoals && data.subgoals.length > 0}
+									How much focused effort did {data.reflection.participantName} invest in the behaviors listed above this week?
+								{:else}
+									How much attention did {data.reflection.participantName} give to their objective: "{data.reflection.objectiveTitle || 'the objective'}" this week?
+								{/if}
 							</p>
 						</div>
 					</div>
@@ -450,7 +471,11 @@
 								Performance
 							</label>
 							<p class="text-xs text-neutral-500">
-								How effective was {data.reflection.participantName}'s performance related to their objective: "{data.reflection.objectiveTitle || 'the objective'}" this week?
+								{#if data.subgoals && data.subgoals.length > 0}
+									How visible were the results of these behaviors from your perspective this week?
+								{:else}
+									How effective was {data.reflection.participantName}'s performance related to their objective: "{data.reflection.objectiveTitle || 'the objective'}" this week?
+								{/if}
 							</p>
 						</div>
 					</div>

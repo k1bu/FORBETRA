@@ -5,7 +5,7 @@ import { clerkClient } from 'svelte-clerk/server';
 import type { Actions, PageServerLoad } from './$types';
 import type { UserRole } from '@prisma/client';
 
-const ALLOWED_ROLES: UserRole[] = ['INDIVIDUAL', 'COACH', 'STAKEHOLDER', 'ADMIN'];
+const ALLOWED_ROLES: UserRole[] = ['INDIVIDUAL', 'COACH', 'STAKEHOLDER', 'ADMIN', 'ORG_ADMIN'];
 
 export const load: PageServerLoad = async (event) => {
 	requireRole(event, 'ADMIN');

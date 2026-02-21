@@ -68,6 +68,29 @@ export const actions: Actions = {
 		const name = String(formData.get('name') ?? '').trim();
 		const message = String(formData.get('message') ?? '').trim();
 
+		// Parse optional pre-fill payload
+		const objectiveTitle = String(formData.get('prefillObjectiveTitle') ?? '').trim();
+		const objectiveDescription = String(formData.get('prefillObjectiveDescription') ?? '').trim();
+		const subgoalsJson = String(formData.get('prefillSubgoals') ?? '').trim();
+		const stakeholdersJson = String(formData.get('prefillStakeholders') ?? '').trim();
+		const cycleDurationWeeks = String(formData.get('prefillCycleDurationWeeks') ?? '').trim();
+		const checkInFrequency = String(formData.get('prefillCheckInFrequency') ?? '').trim();
+		const stakeholderCadence = String(formData.get('prefillStakeholderCadence') ?? '').trim();
+
+		let payload: Record<string, any> | null = null;
+		if (objectiveTitle.length > 0) {
+			payload = { objectiveTitle, objectiveDescription };
+			try {
+				if (subgoalsJson) payload.subgoals = JSON.parse(subgoalsJson);
+			} catch {}
+			try {
+				if (stakeholdersJson) payload.stakeholders = JSON.parse(stakeholdersJson);
+			} catch {}
+			if (cycleDurationWeeks) payload.cycleDurationWeeks = Number(cycleDurationWeeks) || 12;
+			if (checkInFrequency) payload.checkInFrequency = checkInFrequency;
+			if (stakeholderCadence) payload.stakeholderCadence = stakeholderCadence;
+		}
+
 		if (!email || !email.includes('@')) {
 			return fail(400, {
 				error: 'Please provide a valid email address.',
@@ -109,6 +132,7 @@ export const actions: Actions = {
 						data: {
 							name: name.length > 0 ? name : existingInvite.name,
 							message: message.length > 0 ? message : existingInvite.message,
+							payload: payload ?? undefined,
 							tokenHash,
 							expiresAt,
 							acceptedAt: null,
@@ -135,6 +159,7 @@ export const actions: Actions = {
 						email,
 						name: name.length > 0 ? name : null,
 						message: message.length > 0 ? message : null,
+						payload: payload ?? undefined,
 						tokenHash,
 						expiresAt
 					}

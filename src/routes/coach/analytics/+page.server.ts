@@ -158,6 +158,56 @@ export const load: PageServerLoad = async (event) => {
 				)
 			: null;
 
+	// --- Client Comparison Table ---
+	const clientComparison = clientSummaries
+		.filter((c) => c.objective && !c.archived)
+		.map((c) => ({
+			name: c.name,
+			objective: c.objective?.title ?? '',
+			avgEffort: c.objective?.insights?.avgEffort ?? null,
+			avgProgress: c.objective?.insights?.avgProgress ?? null,
+			stability: c.objective?.insights?.stabilityScore ?? null,
+			trajectory: c.objective?.insights?.trajectoryScore ?? null,
+			alignment: c.objective?.insights?.alignmentRatio ?? null,
+			completionRate: c.objective?.cycle?.completion ?? null,
+			alertCount: c.alerts.length,
+			currentWeek: c.objective?.cycle?.currentWeek ?? null
+		}));
+
+	// --- Portfolio Time Series: weekly averages across all active clients ---
+	const weeklyBuckets = new Map<number, { efforts: number[]; performances: number[]; clientIds: Set<string> }>();
+	for (const client of clientSummaries) {
+		if (client.archived || !client.objective || !client.visualizationData) continue;
+		const weeklyData = client.visualizationData.individual ?? [];
+		for (const week of weeklyData) {
+			if (!weeklyBuckets.has(week.weekNumber)) {
+				weeklyBuckets.set(week.weekNumber, { efforts: [], performances: [], clientIds: new Set() });
+			}
+			const bucket = weeklyBuckets.get(week.weekNumber)!;
+			if (week.effortScore !== null) {
+				bucket.efforts.push(week.effortScore);
+				bucket.clientIds.add(client.id);
+			}
+			if (week.performanceScore !== null) {
+				bucket.performances.push(week.performanceScore);
+				bucket.clientIds.add(client.id);
+			}
+		}
+	}
+
+	const portfolioTimeSeries = Array.from(weeklyBuckets.entries())
+		.map(([weekNumber, bucket]) => ({
+			weekNumber,
+			avgEffort: bucket.efforts.length > 0
+				? Number((bucket.efforts.reduce((a, b) => a + b, 0) / bucket.efforts.length).toFixed(1))
+				: null,
+			avgPerformance: bucket.performances.length > 0
+				? Number((bucket.performances.reduce((a, b) => a + b, 0) / bucket.performances.length).toFixed(1))
+				: null,
+			clientCount: bucket.clientIds.size
+		}))
+		.sort((a, b) => a.weekNumber - b.weekNumber);
+
 	return {
 		coach: {
 			name: dbUser.name ?? 'Coach'
@@ -172,7 +222,9 @@ export const load: PageServerLoad = async (event) => {
 			avgAlignment,
 			overallAvgEffort,
 			overallAvgProgress
-		}
+		},
+		clientComparison,
+		portfolioTimeSeries
 	};
 };
 

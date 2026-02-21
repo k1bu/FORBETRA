@@ -1,0 +1,177 @@
+import prisma from '$lib/server/prisma';
+import { requireRole } from '$lib/server/auth';
+import { fail, redirect } from '@sveltejs/kit';
+import { randomBytes, createHash } from 'crypto';
+import { sendEmail } from '$lib/notifications/email';
+import { emailTemplates } from '$lib/notifications/emailTemplates';
+import type { Actions, PageServerLoad } from './$types';
+import type { TokenType } from '@prisma/client';
+
+const generateTokenHash = (token: string) => createHash('sha256').update(token).digest('hex');
+const createInviteToken = () => randomBytes(32).toString('hex');
+
+export const load: PageServerLoad = async (event) => {
+	const { dbUser } = requireRole(event, 'COACH');
+
+	// Skip onboarding if already completed
+	if (dbUser.coachOnboardingCompletedAt) {
+		throw redirect(307, '/coach');
+	}
+
+	// Smart check: skip if coach already has clients (existing coach)
+	const clientCount = await prisma.coachClient.count({
+		where: { coachId: dbUser.id }
+	});
+
+	if (clientCount > 0) {
+		// Backfill the field for existing coaches
+		await prisma.user.update({
+			where: { id: dbUser.id },
+			data: { coachOnboardingCompletedAt: new Date() }
+		});
+		throw redirect(307, '/coach');
+	}
+
+	return {
+		coach: {
+			name: dbUser.name ?? 'Coach',
+			email: dbUser.email
+		}
+	};
+};
+
+export const actions: Actions = {
+	createInvite: async (event) => {
+		const { dbUser } = requireRole(event, 'COACH');
+
+		const formData = await event.request.formData();
+		const email = String(formData.get('email') ?? '').trim().toLowerCase();
+		const name = String(formData.get('name') ?? '').trim();
+		const message = String(formData.get('message') ?? '').trim();
+
+		if (!email || !email.includes('@')) {
+			return fail(400, {
+				error: 'Please provide a valid email address.',
+				values: { email, name, message }
+			});
+		}
+
+		// Check for existing invite from this coach to this email
+		const existingInvite = await prisma.coachInvite.findFirst({
+			where: {
+				coachId: dbUser.id,
+				email
+			}
+		});
+
+		if (existingInvite && !existingInvite.cancelledAt && !existingInvite.acceptedAt) {
+			return fail(400, {
+				error: 'An active invitation already exists for this email.',
+				values: { email, name, message }
+			});
+		}
+
+		const tokenRaw = createInviteToken();
+		const tokenHash = generateTokenHash(tokenRaw);
+		const expiresAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+
+		try {
+			await prisma.$transaction(async (tx) => {
+				if (existingInvite) {
+					await tx.token.deleteMany({
+						where: {
+							tokenHash: existingInvite.tokenHash,
+							type: 'COACH_INVITE'
+						}
+					});
+
+					await tx.coachInvite.update({
+						where: { id: existingInvite.id },
+						data: {
+							name: name.length > 0 ? name : existingInvite.name,
+							message: message.length > 0 ? message : existingInvite.message,
+							tokenHash,
+							expiresAt,
+							acceptedAt: null,
+							cancelledAt: null,
+							individualId: null
+						}
+					});
+
+					await tx.token.create({
+						data: {
+							type: 'COACH_INVITE' satisfies TokenType,
+							tokenHash,
+							userId: dbUser.id,
+							expiresAt
+						}
+					});
+				} else {
+					await tx.coachInvite.create({
+						data: {
+							coachId: dbUser.id,
+							email,
+							name: name.length > 0 ? name : null,
+							message: message.length > 0 ? message : null,
+							tokenHash,
+							expiresAt
+						}
+					});
+
+					await tx.token.create({
+						data: {
+							type: 'COACH_INVITE' satisfies TokenType,
+							tokenHash,
+							userId: dbUser.id,
+							expiresAt
+						}
+					});
+				}
+
+				// Mark onboarding as complete
+				await tx.user.update({
+					where: { id: dbUser.id },
+					data: { coachOnboardingCompletedAt: new Date() }
+				});
+			});
+
+			const inviteUrl = new URL(`/coach/invite/${tokenRaw}`, event.url.origin).toString();
+
+			// Send invitation email
+			try {
+				const coachName = dbUser.name ?? 'Your coach';
+				const template = emailTemplates.coachInvitation({
+					coachName,
+					recipientName: name || undefined,
+					message: message || undefined,
+					inviteUrl
+				});
+				await sendEmail({
+					to: email,
+					...template
+				});
+			} catch (error) {
+				console.error('[email:error] Failed to send coach invitation email', error);
+			}
+
+			return {
+				success: true,
+				inviteUrl
+			};
+		} catch (error) {
+			console.error('Failed to create coach invite during onboarding', error);
+			throw error;
+		}
+	},
+
+	skip: async (event) => {
+		const { dbUser } = requireRole(event, 'COACH');
+
+		await prisma.user.update({
+			where: { id: dbUser.id },
+			data: { coachOnboardingCompletedAt: new Date() }
+		});
+
+		return { skipped: true };
+	}
+};

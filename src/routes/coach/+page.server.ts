@@ -1,10 +1,26 @@
 import prisma from '$lib/server/prisma';
 import { requireRole } from '$lib/server/auth';
+import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { buildClientSummary } from '$lib/server/buildClientSummary';
 
 export const load: PageServerLoad = async (event) => {
 	const { dbUser } = requireRole(event, 'COACH');
+
+	// Redirect new coaches to onboarding (skip if already completed or has clients)
+	if (!dbUser.coachOnboardingCompletedAt) {
+		const clientCount = await prisma.coachClient.count({
+			where: { coachId: dbUser.id }
+		});
+		if (clientCount === 0) {
+			throw redirect(307, '/coach/onboarding');
+		}
+		// Backfill for existing coaches with clients
+		await prisma.user.update({
+			where: { id: dbUser.id },
+			data: { coachOnboardingCompletedAt: new Date() }
+		});
+	}
 
 	// Load minimal data for hub overview
 	const coachClients = await prisma.coachClient.findMany({

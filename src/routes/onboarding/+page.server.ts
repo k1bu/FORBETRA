@@ -46,14 +46,15 @@ export const load: PageServerLoad = async (event) => {
 		objectiveId: string;
 		objectiveTitle: string;
 		objectiveDescription: string;
-		subgoals: Array<{ id: string; label: string; description: string }>;
-		stakeholders: Array<{ id: string; name: string; email: string; relationship: string }>;
+		subgoals: Array<{ id?: string; label: string; description: string }>;
+		stakeholders: Array<{ id?: string; name: string; email: string; relationship: string }>;
 		cycleLabel: string;
 		cycleStartDate: string;
 		cycleDurationWeeks: number;
 		checkInFrequency: string;
 		stakeholderCadence: string;
 	} | null = null;
+	let isPrePopulated = false;
 
 	if (existingObjective && !isPreview) {
 		const cycle = existingObjective.cycles[0] ?? null;
@@ -84,6 +85,42 @@ export const load: PageServerLoad = async (event) => {
 		};
 	}
 
+	// Check for coach invite with pre-fill payload (only if no existing objective)
+	if (!existingData && !isPreview) {
+		const coachInvite = await prisma.coachInvite.findFirst({
+			where: {
+				email: dbUser.email.toLowerCase(),
+				acceptedAt: { not: null },
+				payload: { not: null as any }
+			},
+			orderBy: { updatedAt: 'desc' },
+			select: { payload: true }
+		});
+
+		if (coachInvite?.payload && typeof coachInvite.payload === 'object') {
+			const p = coachInvite.payload as Record<string, any>;
+			if (p.objectiveTitle) {
+				existingData = {
+					objectiveId: '',
+					objectiveTitle: p.objectiveTitle ?? '',
+					objectiveDescription: p.objectiveDescription ?? '',
+					subgoals: Array.isArray(p.subgoals)
+						? p.subgoals.map((s: any) => ({ label: s.label ?? '', description: s.description ?? '' }))
+						: [],
+					stakeholders: Array.isArray(p.stakeholders)
+						? p.stakeholders.map((s: any) => ({ name: s.name ?? '', email: s.email ?? '', relationship: '' }))
+						: [],
+					cycleLabel: p.objectiveTitle ?? '',
+					cycleStartDate: new Date().toISOString().slice(0, 10),
+					cycleDurationWeeks: p.cycleDurationWeeks ?? 12,
+					checkInFrequency: p.checkInFrequency ?? '3x',
+					stakeholderCadence: p.stakeholderCadence ?? 'weekly'
+				};
+				isPrePopulated = true;
+			}
+		}
+	}
+
 	return {
 		user: {
 			name: dbUser.name,
@@ -95,7 +132,8 @@ export const load: PageServerLoad = async (event) => {
 		},
 		contexts: onboardingContexts,
 		existingData,
-		isEditing: !!existingData
+		isEditing: !!existingData && !isPrePopulated,
+		isPrePopulated
 	};
 };
 
@@ -120,6 +158,7 @@ export const actions: Actions = {
 		const checkInFrequency = (formData.get('checkInFrequency') ?? '3x').toString() as '3x' | '2x' | '1x';
 		const stakeholderCadence = (formData.get('stakeholderCadence') ?? 'weekly').toString() as 'weekly' | 'biweekly';
 		const revealScores = (formData.get('revealScores') ?? 'true').toString() === 'true';
+		const phone = (formData.get('phone') ?? '').toString().trim() || null;
 
 		const subgoals = Array.from({ length: MAX_SUBGOALS }, (_, index) => {
 			const label = (formData.get(`subgoalLabel${index + 1}`) ?? '').toString().trim();
@@ -291,7 +330,7 @@ export const actions: Actions = {
 					// Update reminder days
 					await tx.user.update({
 						where: { id: dbUser.id },
-						data: { reminderDays }
+						data: { reminderDays, phone }
 					});
 				});
 
@@ -378,7 +417,7 @@ export const actions: Actions = {
 					// Store reminder days preference in User model
 					await tx.user.update({
 						where: { id: dbUser.id },
-						data: { reminderDays }
+						data: { reminderDays, phone }
 					});
 
 					const pendingInvites = await tx.coachInvite.findMany({

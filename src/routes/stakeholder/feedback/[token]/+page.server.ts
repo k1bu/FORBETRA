@@ -29,6 +29,10 @@ export const load: PageServerLoad = async ({ params, url }) => {
 				participantName: 'John Doe',
 				objectiveTitle: 'Improve executive presence'
 			},
+			subgoals: [
+				{ label: 'Active listening in meetings', description: 'Make eye contact, paraphrase others, ask clarifying questions' },
+				{ label: 'Confident presentations', description: 'Speak with clear structure and conviction in team updates' }
+			],
 			isPreview: true,
 			isFirstFeedback: true,
 			previousRatings: {
@@ -65,7 +69,12 @@ export const load: PageServerLoad = async ({ params, url }) => {
 							objective: {
 								select: {
 									title: true,
-									description: true
+									description: true,
+									subgoals: {
+										where: { active: true },
+										orderBy: { createdAt: 'asc' },
+										select: { id: true, label: true, description: true }
+									}
 								}
 							}
 						}
@@ -155,6 +164,11 @@ export const load: PageServerLoad = async ({ params, url }) => {
 
 	const isFirstFeedback = historicRatings.length === 0;
 
+	const subgoals = (token.reflection.cycle.objective?.subgoals ?? []).map((s) => ({
+		label: s.label,
+		description: s.description
+	}));
+
 	return {
 		token: token.tokenHash,
 		stakeholder: {
@@ -168,6 +182,7 @@ export const load: PageServerLoad = async ({ params, url }) => {
 			participantName: token.reflection.user.name ?? 'Participant',
 			objectiveTitle: token.reflection.cycle.objective?.title?.trim() || 'the objective'
 		},
+		subgoals,
 		revealScores: token.reflection.cycle.revealScores,
 		isPreview: false,
 		isFirstFeedback,
@@ -228,7 +243,7 @@ export const actions: Actions = {
 		// Fetch stakeholder and reflection details for notification
 		const stakeholder = await prisma.stakeholder.findUnique({
 			where: { id: token.stakeholderId! },
-			select: { name: true, individual: { select: { id: true, name: true, email: true } } }
+			select: { name: true, email: true, individual: { select: { id: true, name: true, email: true } } }
 		});
 
 		const reflection = await prisma.reflection.findUnique({
@@ -236,6 +251,7 @@ export const actions: Actions = {
 			select: {
 				effortScore: true,
 				performanceScore: true,
+				weekNumber: true,
 				user: {
 					select: {
 						name: true
@@ -299,6 +315,23 @@ export const actions: Actions = {
 			} catch (error) {
 				console.error('[email:error] Failed to send stakeholder feedback notification', error);
 				// Don't fail the request if email fails
+			}
+		}
+
+		// Send thank-you email to stakeholder
+		if (stakeholder?.email && reflection) {
+			try {
+				const template = emailTemplates.stakeholderThankYou({
+					stakeholderName: stakeholder.name || undefined,
+					individualName: reflection.user.name || undefined,
+					weekNumber: reflection.weekNumber
+				});
+				await sendEmail({
+					to: stakeholder.email,
+					...template
+				});
+			} catch (error) {
+				console.error('[email:error] Failed to send stakeholder thank-you email', error);
 			}
 		}
 

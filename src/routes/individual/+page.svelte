@@ -876,6 +876,42 @@
 					Manage Stakeholders <span>→</span>
 				</div>
 			</a>
+
+			<a
+				href="/individual/history"
+				class="group relative overflow-hidden rounded-2xl border-2 border-neutral-200 bg-gradient-to-br from-white to-amber-50/30 p-8 shadow-sm transition-all hover:border-amber-300 hover:shadow-lg focus-visible:ring-2 focus-visible:ring-offset-2"
+			>
+				<div class="mb-4 flex items-center gap-3">
+					<div class="rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 p-3">
+						<span class="text-2xl" role="img" aria-label="scroll">📜</span>
+					</div>
+					<h2 class="text-xl font-bold text-neutral-900">History</h2>
+				</div>
+				<p class="mb-4 text-sm text-neutral-600">
+					Browse all past reflections, ratings, and stakeholder feedback week by week.
+				</p>
+				<div class="flex items-center gap-2 text-sm font-semibold text-amber-700 transition-transform group-hover:translate-x-1">
+					View History <span>→</span>
+				</div>
+			</a>
+
+			<a
+				href="/individual/ask"
+				class="group relative overflow-hidden rounded-2xl border-2 border-neutral-200 bg-gradient-to-br from-white to-cyan-50/30 p-8 shadow-sm transition-all hover:border-cyan-300 hover:shadow-lg focus-visible:ring-2 focus-visible:ring-offset-2"
+			>
+				<div class="mb-4 flex items-center gap-3">
+					<div class="rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 p-3">
+						<span class="text-2xl" role="img" aria-label="speech bubble">💬</span>
+					</div>
+					<h2 class="text-xl font-bold text-neutral-900">Ask About Your Data</h2>
+				</div>
+				<p class="mb-4 text-sm text-neutral-600">
+					Chat with AI about your progress, patterns, and what your data reveals.
+				</p>
+				<div class="flex items-center gap-2 text-sm font-semibold text-cyan-700 transition-transform group-hover:translate-x-1">
+					Start a Conversation <span>→</span>
+				</div>
+			</a>
 		</div>
 	{/if}
 	{/if}<!-- end today view (nav cards) -->

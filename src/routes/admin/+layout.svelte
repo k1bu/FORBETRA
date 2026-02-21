@@ -11,6 +11,7 @@
 		{ href: '/admin/stakeholders', label: 'Stakeholders', icon: 'people' },
 		{ href: '/admin/coaches', label: 'Coach Assignments', icon: 'link' },
 		{ href: '/admin/insights', label: 'Insights', icon: 'sparkle' },
+		{ href: '/admin/organizations', label: 'Organizations', icon: 'building' },
 		{ href: '/admin/seed', label: 'Seed Data', icon: 'database' }
 	];
 </script>

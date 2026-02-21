@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import type { ActionData, PageData } from './$types';
 	import {
 		getScoreColor,
@@ -10,6 +11,13 @@
 	} from '$lib/utils/scoreColors';
 
 	const { data, form }: { data: PageData; form: (ActionData & { success?: boolean }) | null } = $props();
+
+	// Clear onboarding draft on mount (user reached initial-ratings = onboarding form complete)
+	onMount(() => {
+		try {
+			localStorage.removeItem('forbetra-onboarding-draft');
+		} catch {}
+	});
 
 	let effortScore = $state(data.previousEntry?.effortScore ?? 5);
 	let performanceScore = $state(data.previousEntry?.performanceScore ?? 5);
