@@ -1,8 +1,11 @@
 <script lang="ts">
 	import { SignedIn, SignedOut } from 'svelte-clerk';
+	import { enhance } from '$app/forms';
 	import type { PageData } from './$types';
 
-	const { data }: { data: PageData } = $props();
+	const { data, form }: { data: PageData; form: any } = $props();
+
+	let submitting = $state(false);
 </script>
 
 <SignedOut>
@@ -83,61 +86,158 @@
 </SignedOut>
 
 <SignedIn>
-	<section class="mx-auto flex min-h-[60vh] max-w-4xl flex-col justify-center gap-6 px-4 py-12">
-		{#if data.dbUser}
-			<div class="space-y-3">
-				<p class="text-sm uppercase tracking-[0.35em] text-slate-400">Signed in</p>
-				<h1 class="text-3xl font-semibold text-slate-900">
-					Welcome back, <span class="font-medium">{data.dbUser.name ?? data.dbUser.email}</span>
-				</h1>
-				<p class="text-slate-600">
-					You are currently operating as
-					<span class="font-semibold uppercase text-slate-900">{data.dbUser.role}</span>.
-				</p>
+	{#if data.showRoleSelection}
+		<section class="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12">
+			<div class="w-full max-w-3xl space-y-10">
+				<div class="space-y-3 text-center">
+					<p class="text-xs uppercase tracking-[0.6em] text-slate-400">Welcome to</p>
+					<h1 class="text-4xl font-semibold tracking-[0.18em] text-slate-900">FORBETRA</h1>
+					<div class="mx-auto h-[2px] w-24 rounded-full bg-neutral-200"></div>
+					{#if data.dbUser?.name}
+						<p class="mx-auto max-w-md text-lg text-slate-500">{data.dbUser.name}, how will you be using Forbetra?</p>
+					{:else}
+						<p class="mx-auto max-w-md text-lg text-slate-500">How will you be using Forbetra?</p>
+					{/if}
+				</div>
+
+				{#if form?.error}
+					<p class="rounded-xl bg-red-50 px-4 py-3 text-center text-sm text-red-600">{form.error}</p>
+				{/if}
+
+				<div class="grid gap-6 sm:grid-cols-2">
+					<form method="post" action="?/selectRole" use:enhance={() => { submitting = true; return async ({ update }) => { submitting = false; await update(); }; }}>
+						<input type="hidden" name="role" value="INDIVIDUAL" />
+						<button
+							type="submit"
+							disabled={submitting}
+							class="group w-full cursor-pointer rounded-3xl border-2 border-slate-200 bg-white p-8 text-left transition-all duration-200 hover:-translate-y-1 hover:border-blue-400 hover:shadow-[0_20px_40px_-20px_rgba(59,130,246,0.3)] disabled:pointer-events-none disabled:opacity-60"
+						>
+							<div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+								</svg>
+							</div>
+							<h2 class="mb-2 text-xl font-semibold text-slate-900">Individual</h2>
+							<p class="mb-4 text-sm leading-relaxed text-slate-500">
+								Set development objectives, reflect weekly, and get feedback from stakeholders.
+							</p>
+							<div class="space-y-2 text-xs text-slate-400">
+								<div class="flex items-center gap-2">
+									<span class="inline-block h-1.5 w-1.5 rounded-full bg-blue-400"></span>
+									Focused development objectives
+								</div>
+								<div class="flex items-center gap-2">
+									<span class="inline-block h-1.5 w-1.5 rounded-full bg-blue-400"></span>
+									Weekly reflection rituals
+								</div>
+								<div class="flex items-center gap-2">
+									<span class="inline-block h-1.5 w-1.5 rounded-full bg-blue-400"></span>
+									Stakeholder feedback loops
+								</div>
+							</div>
+							<div class="mt-6 text-sm font-semibold text-blue-600 transition group-hover:text-blue-700">
+								{#if submitting}Setting up&hellip;{:else}Get started &rarr;{/if}
+							</div>
+						</button>
+					</form>
+
+					<form method="post" action="?/selectRole" use:enhance={() => { submitting = true; return async ({ update }) => { submitting = false; await update(); }; }}>
+						<input type="hidden" name="role" value="COACH" />
+						<button
+							type="submit"
+							disabled={submitting}
+							class="group w-full cursor-pointer rounded-3xl border-2 border-slate-200 bg-white p-8 text-left transition-all duration-200 hover:-translate-y-1 hover:border-blue-400 hover:shadow-[0_20px_40px_-20px_rgba(59,130,246,0.3)] disabled:pointer-events-none disabled:opacity-60"
+						>
+							<div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+								</svg>
+							</div>
+							<h2 class="mb-2 text-xl font-semibold text-slate-900">Coach</h2>
+							<p class="mb-4 text-sm leading-relaxed text-slate-500">
+								Invite clients, track their progress, and provide guidance.
+							</p>
+							<div class="space-y-2 text-xs text-slate-400">
+								<div class="flex items-center gap-2">
+									<span class="inline-block h-1.5 w-1.5 rounded-full bg-slate-400"></span>
+									Client roster management
+								</div>
+								<div class="flex items-center gap-2">
+									<span class="inline-block h-1.5 w-1.5 rounded-full bg-slate-400"></span>
+									Progress tracking & alerts
+								</div>
+								<div class="flex items-center gap-2">
+									<span class="inline-block h-1.5 w-1.5 rounded-full bg-slate-400"></span>
+									Data-driven coaching notes
+								</div>
+							</div>
+							<div class="mt-6 text-sm font-semibold text-slate-600 transition group-hover:text-slate-800">
+								{#if submitting}Setting up&hellip;{:else}Get started &rarr;{/if}
+							</div>
+						</button>
+					</form>
+				</div>
+
+				<p class="text-center text-xs text-slate-400">You can change your role later from settings.</p>
 			</div>
-			{#if data.dbUser.role === 'INDIVIDUAL'}
-				<div class="grid gap-4 sm:grid-cols-2">
-					<a
-						href="/onboarding"
-						class="rounded-2xl bg-slate-900 px-5 py-3 text-center text-sm font-semibold text-white transition hover:bg-slate-700"
-					>
-						Complete onboarding
-					</a>
-					<a
-						href="/individual"
-						class="rounded-2xl border border-slate-300 px-5 py-3 text-center text-sm font-semibold text-slate-800 transition hover:border-slate-400 hover:bg-slate-50"
-					>
-						View dashboard
-					</a>
-				</div>
-			{:else if data.dbUser.role === 'COACH'}
-				<div class="space-y-3 text-sm text-slate-600">
-					<p>
-						Coach dashboards surface your roster and performance alerts. We'll notify you as soon as new
-						insights land.
+		</section>
+	{:else}
+		<section class="mx-auto flex min-h-[60vh] max-w-4xl flex-col justify-center gap-6 px-4 py-12">
+			{#if data.dbUser}
+				<div class="space-y-3">
+					<p class="text-sm uppercase tracking-[0.35em] text-slate-400">Signed in</p>
+					<h1 class="text-3xl font-semibold text-slate-900">
+						Welcome back, <span class="font-medium">{data.dbUser.name ?? data.dbUser.email}</span>
+					</h1>
+					<p class="text-slate-600">
+						You are currently operating as
+						<span class="font-semibold uppercase text-slate-900">{data.dbUser.role}</span>.
 					</p>
-					<a
-						href="/coach"
-						class="inline-flex items-center justify-center rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900"
-					>
-						Go to coach dashboard
-					</a>
 				</div>
-			{:else if data.dbUser.role === 'STAKEHOLDER'}
-				<p class="text-sm text-slate-600">
-					Stay tuned—feedback prompts arrive when your participant submits reflections for the week.
-				</p>
+				{#if data.dbUser.role === 'INDIVIDUAL'}
+					<div class="grid gap-4 sm:grid-cols-2">
+						<a
+							href="/onboarding"
+							class="rounded-2xl bg-slate-900 px-5 py-3 text-center text-sm font-semibold text-white transition hover:bg-slate-700"
+						>
+							Complete onboarding
+						</a>
+						<a
+							href="/individual"
+							class="rounded-2xl border border-slate-300 px-5 py-3 text-center text-sm font-semibold text-slate-800 transition hover:border-slate-400 hover:bg-slate-50"
+						>
+							View dashboard
+						</a>
+					</div>
+				{:else if data.dbUser.role === 'COACH'}
+					<div class="space-y-3 text-sm text-slate-600">
+						<p>
+							Coach dashboards surface your roster and performance alerts. We'll notify you as soon as new
+							insights land.
+						</p>
+						<a
+							href="/coach"
+							class="inline-flex items-center justify-center rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900"
+						>
+							Go to coach dashboard
+						</a>
+					</div>
+				{:else if data.dbUser.role === 'STAKEHOLDER'}
+					<p class="text-sm text-slate-600">
+						Stay tuned—feedback prompts arrive when your participant submits reflections for the week.
+					</p>
+				{:else}
+					<p class="text-sm text-slate-600">
+						Continue to <a href="/admin/users" class="font-semibold text-slate-900 underline">admin controls</a> to manage roles and oversight.
+					</p>
+				{/if}
 			{:else}
-				<p class="text-sm text-slate-600">
-					Continue to <a href="/admin/users" class="font-semibold text-slate-900 underline">admin controls</a> to manage roles and oversight.
+				<p class="text-center text-slate-500">
+					We're finalizing your profile. Refresh this page if things don't update in a few seconds.
 				</p>
 			{/if}
-		{:else}
-			<p class="text-center text-slate-500">
-				We're finalizing your profile. Refresh this page if things don't update in a few seconds.
-			</p>
-		{/if}
-	</section>
+		</section>
+	{/if}
 </SignedIn>
 
 <style>
