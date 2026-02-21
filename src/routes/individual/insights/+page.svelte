@@ -27,6 +27,7 @@
 	};
 
 	import { getScoreColorNullable, getStabilityColor } from '$lib/utils/scoreColors';
+	import { addToast } from '$lib/stores/toasts.svelte';
 
 	const getScoreColor = (score: number | null | undefined, type: 'effort' | 'performance' = 'effort') =>
 		getScoreColorNullable(score, type);
@@ -120,6 +121,7 @@
 			}
 
 			reportThumbs = null;
+			addToast('Report generated', 'success');
 		} catch {
 			generateError = 'Network error. Please try again.';
 			if (!freshReport?.content) {

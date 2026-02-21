@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { ClientSummary } from '$lib/server/buildClientSummary';
 	import PerformanceEffortChart from '$lib/components/PerformanceEffortChart.svelte';
+	import { addToast } from '$lib/stores/toasts.svelte';
 
 	export let data: {
 		coach: { name: string };
@@ -89,9 +90,13 @@
 					createdAt: new Date(result.createdAt)
 				};
 				data = data;
+				addToast('Coach prep generated', 'success');
+			} else {
+				addToast('Failed to generate prep', 'error');
 			}
 		} catch (err) {
 			console.error('Failed to generate coach prep', err);
+			addToast('Failed to generate prep', 'error');
 		} finally {
 			generatingPrepFor = null;
 		}
@@ -234,7 +239,12 @@
 						<!-- Client header info -->
 						<header class="flex flex-wrap items-start justify-between gap-3">
 							<div class="flex-1">
-								<h2 class="text-xl font-bold text-neutral-900">{client.name}</h2>
+								<div class="flex items-center gap-3">
+									<h2 class="text-xl font-bold text-neutral-900">{client.name}</h2>
+									<a href="/coach/session/{client.id}" class="text-xs font-semibold text-blue-600 hover:text-blue-800">
+										Open Session →
+									</a>
+								</div>
 								<p class="text-sm text-neutral-600">{client.email}</p>
 								<p class="mt-1 text-xs text-neutral-500">
 									Joined {formatRelativeDays(client.joinedAt)}

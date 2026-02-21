@@ -9,8 +9,15 @@
 		getFocusRing,
 		getScoreLabel
 	} from '$lib/utils/scoreColors';
+	import { addToast } from '$lib/stores/toasts.svelte';
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
+
+	$effect(() => {
+		if (form?.success) {
+			addToast('Check-in submitted!', 'success');
+		}
+	});
 
 	let effortScore = $state(data.previousEntry?.effortScore ?? 5);
 	let performanceScore = $state(data.previousEntry?.performanceScore ?? 5);

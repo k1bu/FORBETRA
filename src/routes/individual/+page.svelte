@@ -1,8 +1,28 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import PerformanceEffortChart from '$lib/components/PerformanceEffortChart.svelte';
+	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
 
 	const { data }: { data: PageData } = $props();
+
+	const validViews = ['today', 'progress', 'scorecard'] as const;
+	type View = typeof validViews[number];
+
+	const activeView = $derived<View>((() => {
+		const param = $page.url.searchParams.get('view');
+		return validViews.includes(param as View) ? (param as View) : 'today';
+	})());
+
+	function setView(view: View) {
+		const url = new URL($page.url);
+		if (view === 'today') {
+			url.searchParams.delete('view');
+		} else {
+			url.searchParams.set('view', view);
+		}
+		goto(url.toString(), { replaceState: true, noScroll: true });
+	}
 
 	if (!data) {
 		throw new Error('Page data is missing');
@@ -194,6 +214,26 @@
 		</div>
 	</div>
 
+	<!-- Tab Navigation -->
+	{#if data.isOnboardingComplete}
+		<nav class="flex gap-1 rounded-xl border border-neutral-200 bg-neutral-50 p-1">
+			{#each [
+				{ id: 'today', label: 'Today' },
+				{ id: 'progress', label: 'Progress' },
+				{ id: 'scorecard', label: 'Scorecard' }
+			] as tab}
+				<button
+					onclick={() => setView(tab.id as View)}
+					class="flex-1 rounded-lg px-4 py-2 text-sm font-semibold transition-all
+						{activeView === tab.id ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500 hover:text-neutral-700'}"
+				>
+					{tab.label}
+				</button>
+			{/each}
+		</nav>
+	{/if}
+
+	{#if activeView === 'today'}
 	<!-- Cycle completed banner -->
 	{#if data.cycle?.isCycleCompleted}
 		<div class="flex flex-wrap items-center gap-3 rounded-xl border-2 border-green-300 bg-green-50 px-4 py-3">
@@ -339,8 +379,10 @@
 		{/if}
 
 	{/if}
+	{/if}<!-- end today view -->
 
 	<!-- Latest Ratings Scorecard -->
+	{#if activeView === 'scorecard'}
 	{#if data.myLastRatings && data.latestScorecard && data.latestScorecard.length > 0}
 		<div class="rounded-2xl border-2 border-neutral-200 bg-white p-6 shadow-sm">
 			<h2 class="mb-1 text-lg font-bold text-neutral-900">Latest Ratings</h2>
@@ -483,8 +525,10 @@
 			</div>
 		</div>
 	{/if}
+	{/if}<!-- end scorecard view -->
 
 	<!-- Insight Visualizations -->
+	{#if activeView === 'progress'}
 	{#if data.isOnboardingComplete && data.heatMapWeeks && data.heatMapWeeks.length > 0}
 		<!-- Performance & Effort Chart -->
 		{#if data.visualizationData && data.visualizationData.individual.length > 0}
@@ -773,8 +817,10 @@
 			</div>
 		{/if}
 	{/if}
+	{/if}<!-- end progress view -->
 
 	<!-- Navigation Cards -->
+	{#if activeView === 'today'}
 	{#if data.isOnboardingComplete}
 		<div class="grid gap-6 md:grid-cols-3">
 			<a
@@ -832,4 +878,5 @@
 			</a>
 		</div>
 	{/if}
+	{/if}<!-- end today view (nav cards) -->
 </section>

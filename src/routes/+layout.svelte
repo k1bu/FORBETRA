@@ -6,6 +6,7 @@
 	import { page } from '$app/stores';
 	import { goto, invalidateAll } from '$app/navigation';
 	import type { LayoutData } from './$types';
+	import ToastContainer from '$lib/components/ToastContainer.svelte';
 
 	const { children, data }: { children: Snippet; data: LayoutData } = $props();
 
@@ -77,4 +78,5 @@
 	<main id="main-content" class={`min-h-screen ${data.dbUser ? 'p-4' : ''}`}>
 		{@render children()}
 	</main>
+	<ToastContainer />
 </ClerkProvider>
