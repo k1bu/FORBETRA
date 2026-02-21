@@ -10,8 +10,9 @@
 
 	const { children, data }: { children: Snippet; data: LayoutData } = $props();
 
-	const displayRole = data.dbUser?.role ?? null;
 	const isImpersonating = $derived(data.realUser != null);
+	const isRoleSelection = $derived(($page.data as any).showRoleSelection === true);
+	const displayRole = $derived(isRoleSelection ? null : (data.dbUser?.role ?? null));
 
 	const isActive = (href: string) => {
 		const pathname = $page.url.pathname;
@@ -47,7 +48,7 @@
 			<nav class="flex items-center gap-3" aria-label="Main navigation">
 				{#if data.dbUser}
 					<div class="flex items-center gap-3">
-						{#if data.dbUser.role === 'INDIVIDUAL'}
+						{#if data.dbUser.role === 'INDIVIDUAL' && !isRoleSelection}
 							<a
 								href="/individual"
 								class="text-sm transition-colors hover:text-black {isActive('/individual') ? 'font-semibold text-black' : 'text-neutral-600'}"
