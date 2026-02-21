@@ -30,11 +30,58 @@ export const load: PageServerLoad = async (event) => {
 
 	const existingObjective = await prisma.objective.findFirst({
 		where: { userId: dbUser.id },
-		select: { id: true }
+		orderBy: { createdAt: 'desc' },
+		include: {
+			subgoals: { orderBy: { createdAt: 'asc' } },
+			stakeholders: { orderBy: { createdAt: 'asc' } },
+			cycles: {
+				orderBy: { startDate: 'desc' },
+				take: 1
+			}
+		}
 	});
 
+	// If editing, load existing data; otherwise show blank form
+	let existingData: {
+		objectiveId: string;
+		objectiveTitle: string;
+		objectiveDescription: string;
+		subgoals: Array<{ id: string; label: string; description: string }>;
+		stakeholders: Array<{ id: string; name: string; email: string; relationship: string }>;
+		cycleLabel: string;
+		cycleStartDate: string;
+		cycleDurationWeeks: number;
+		checkInFrequency: string;
+		stakeholderCadence: string;
+	} | null = null;
+
 	if (existingObjective && !isPreview) {
-		throw redirect(303, '/onboarding/complete');
+		const cycle = existingObjective.cycles[0] ?? null;
+		const durationWeeks = cycle?.endDate && cycle?.startDate
+			? Math.round((cycle.endDate.getTime() - cycle.startDate.getTime()) / (7 * 24 * 60 * 60 * 1000))
+			: 12;
+
+		existingData = {
+			objectiveId: existingObjective.id,
+			objectiveTitle: existingObjective.title,
+			objectiveDescription: existingObjective.description ?? '',
+			subgoals: existingObjective.subgoals.map((s) => ({
+				id: s.id,
+				label: s.label,
+				description: s.description ?? ''
+			})),
+			stakeholders: existingObjective.stakeholders.map((s) => ({
+				id: s.id,
+				name: s.name,
+				email: s.email,
+				relationship: s.relationship ?? ''
+			})),
+			cycleLabel: cycle?.label ?? '',
+			cycleStartDate: cycle?.startDate.toISOString().slice(0, 10) ?? new Date().toISOString().slice(0, 10),
+			cycleDurationWeeks: durationWeeks,
+			checkInFrequency: cycle?.checkInFrequency ?? '3x',
+			stakeholderCadence: cycle?.stakeholderCadence ?? 'weekly'
+		};
 	}
 
 	return {
@@ -46,7 +93,9 @@ export const load: PageServerLoad = async (event) => {
 			startDate: new Date().toISOString().slice(0, 10),
 			durationWeeks: 12
 		},
-		contexts: onboardingContexts
+		contexts: onboardingContexts,
+		existingData,
+		isEditing: !!existingData
 	};
 };
 
@@ -55,6 +104,9 @@ export const actions: Actions = {
 		const { dbUser } = requireRole(event, 'INDIVIDUAL');
 
 		const formData = await event.request.formData();
+
+		const objectiveId = (formData.get('objectiveId') ?? '').toString().trim();
+		const isEditMode = objectiveId.length > 0;
 
 		const objectiveTitle = (formData.get('objectiveTitle') ?? '').toString().trim();
 		const objectiveDescription = (formData.get('objectiveDescription') ?? '').toString().trim();
@@ -81,7 +133,7 @@ export const actions: Actions = {
 				.toString()
 				.trim();
 			return { name, email, relationship };
-		}).filter((stakeholder) => stakeholder.name && stakeholder.email); // Only include stakeholders with both name and email (required by validation)
+		}).filter((stakeholder) => stakeholder.name && stakeholder.email);
 
 		const submission = {
 			objectiveTitle,
@@ -122,13 +174,6 @@ export const actions: Actions = {
 				'[onboarding:validation] Validation failed:',
 				JSON.stringify(parsed.error.issues, null, 2)
 			);
-			console.error('[onboarding:validation] Submission data:', {
-				objectiveTitle: submission.objectiveTitle,
-				subgoalsCount: submission.subgoals.length,
-				stakeholdersCount: submission.stakeholders.length,
-				cycleStartDate: submission.cycleStartDate,
-				cycleDurationWeeks: cycleDurationWeeksValue
-			});
 			return fail(400, {
 				errors: formatErrors(parsed.error.issues),
 				values: submission
@@ -138,149 +183,262 @@ export const actions: Actions = {
 		const data = parsed.data;
 
 		try {
-			await prisma.$transaction(async (tx) => {
-				const objective = await tx.objective.create({
-					data: {
-						userId: dbUser.id,
-						title: data.objectiveTitle,
-						description: data.objectiveDescription ?? null
-					}
-				});
-
-				for (const subgoal of data.subgoals) {
-					await tx.subgoal.create({
+			if (isEditMode) {
+				// --- EDIT MODE: update existing objective ---
+				await prisma.$transaction(async (tx) => {
+					// Update objective
+					await tx.objective.update({
+						where: { id: objectiveId },
 						data: {
-							objectiveId: objective.id,
-							label: subgoal.label,
-							description: subgoal.description ?? null
+							title: data.objectiveTitle,
+							description: data.objectiveDescription ?? null
 						}
 					});
-				}
 
-				if (data.stakeholders && data.stakeholders.length > 0) {
-					for (const stakeholder of data.stakeholders) {
-						await tx.stakeholder.create({
+					// Soft-replace subgoals: deactivate old ones, create new ones
+					await tx.subgoal.updateMany({
+						where: { objectiveId },
+						data: { active: false }
+					});
+
+					for (const subgoal of data.subgoals) {
+						await tx.subgoal.create({
 							data: {
-								individualId: dbUser.id,
+								objectiveId,
+								label: subgoal.label,
+								description: subgoal.description ?? null
+							}
+						});
+					}
+
+					// Upsert stakeholders: match by email, create new ones
+					const existingStakeholders = await tx.stakeholder.findMany({
+						where: { objectiveId },
+						select: { id: true, email: true }
+					});
+					const existingEmailMap = new Map(existingStakeholders.map((s) => [s.email.toLowerCase(), s.id]));
+
+					if (data.stakeholders && data.stakeholders.length > 0) {
+						for (const stakeholder of data.stakeholders) {
+							const existingId = existingEmailMap.get(stakeholder.email.toLowerCase());
+							if (existingId) {
+								await tx.stakeholder.update({
+									where: { id: existingId },
+									data: {
+										name: stakeholder.name,
+										relationship: stakeholder.relationship ?? null
+									}
+								});
+							} else {
+								await tx.stakeholder.create({
+									data: {
+										individualId: dbUser.id,
+										objectiveId,
+										name: stakeholder.name,
+										email: stakeholder.email,
+										relationship: stakeholder.relationship ?? null
+									}
+								});
+
+								// Send welcome email to new stakeholder
+								setTimeout(async () => {
+									try {
+										const template = emailTemplates.welcomeStakeholder({
+											individualName: dbUser.name || undefined,
+											stakeholderName: stakeholder.name || undefined,
+											appUrl:
+												process.env.PUBLIC_APP_URL || process.env.VERCEL_URL
+													? `https://${process.env.PUBLIC_APP_URL || process.env.VERCEL_URL}`
+													: 'https://app.forbetra.com'
+										});
+										await sendEmail({
+											to: stakeholder.email,
+											...template
+										});
+									} catch (error) {
+										console.error('[email:error] Failed to send stakeholder welcome email', error);
+									}
+								}, 0);
+							}
+						}
+					}
+
+					// Update cycle config
+					const existingCycle = await tx.cycle.findFirst({
+						where: { objectiveId },
+						orderBy: { startDate: 'desc' }
+					});
+
+					if (existingCycle) {
+						const startDate = new Date(data.cycleStartDate);
+						const endDate = new Date(startDate);
+						endDate.setDate(endDate.getDate() + data.cycleDurationWeeks * 7);
+
+						await tx.cycle.update({
+							where: { id: existingCycle.id },
+							data: {
+								label: data.cycleLabel && data.cycleLabel.trim().length > 0 ? data.cycleLabel.trim() : existingCycle.label,
+								startDate,
+								endDate,
+								checkInFrequency: data.checkInFrequency,
+								stakeholderCadence: data.stakeholderCadence
+							}
+						});
+					}
+
+					// Update reminder days
+					await tx.user.update({
+						where: { id: dbUser.id },
+						data: { reminderDays }
+					});
+				});
+
+				// Edit mode: skip initial-ratings, go directly to complete
+				throw redirect(303, '/onboarding/complete');
+			} else {
+				// --- CREATE MODE: original logic ---
+				await prisma.$transaction(async (tx) => {
+					const objective = await tx.objective.create({
+						data: {
+							userId: dbUser.id,
+							title: data.objectiveTitle,
+							description: data.objectiveDescription ?? null
+						}
+					});
+
+					for (const subgoal of data.subgoals) {
+						await tx.subgoal.create({
+							data: {
 								objectiveId: objective.id,
-								name: stakeholder.name,
-								email: stakeholder.email,
-								relationship: stakeholder.relationship ?? null
+								label: subgoal.label,
+								description: subgoal.description ?? null
+							}
+						});
+					}
+
+					if (data.stakeholders && data.stakeholders.length > 0) {
+						for (const stakeholder of data.stakeholders) {
+							await tx.stakeholder.create({
+								data: {
+									individualId: dbUser.id,
+									objectiveId: objective.id,
+									name: stakeholder.name,
+									email: stakeholder.email,
+									relationship: stakeholder.relationship ?? null
+								}
+							});
+
+							setTimeout(async () => {
+								try {
+									const template = emailTemplates.welcomeStakeholder({
+										individualName: dbUser.name || undefined,
+										stakeholderName: stakeholder.name || undefined,
+										appUrl:
+											process.env.PUBLIC_APP_URL || process.env.VERCEL_URL
+												? `https://${process.env.PUBLIC_APP_URL || process.env.VERCEL_URL}`
+												: 'https://app.forbetra.com'
+									});
+									await sendEmail({
+										to: stakeholder.email,
+										...template
+									});
+								} catch (error) {
+									console.error('[email:error] Failed to send stakeholder welcome email', error);
+								}
+							}, 0);
+						}
+					}
+
+					const startDate = new Date(data.cycleStartDate);
+					if (isNaN(startDate.getTime())) {
+						throw new Error(`Invalid start date: ${data.cycleStartDate}`);
+					}
+					const endDate = new Date(startDate);
+					endDate.setDate(endDate.getDate() + data.cycleDurationWeeks * 7);
+					if (isNaN(endDate.getTime())) {
+						throw new Error(`Invalid end date calculation for start date: ${data.cycleStartDate}`);
+					}
+
+					await tx.cycle.create({
+						data: {
+							userId: dbUser.id,
+							objectiveId: objective.id,
+							label: data.cycleLabel && data.cycleLabel.trim().length > 0 ? data.cycleLabel.trim() : 'Cycle 1',
+							startDate,
+							endDate,
+							status: 'ACTIVE',
+							checkInFrequency: data.checkInFrequency,
+							stakeholderCadence: data.stakeholderCadence
+						}
+					});
+
+					// Store reminder days preference in User model
+					await tx.user.update({
+						where: { id: dbUser.id },
+						data: { reminderDays }
+					});
+
+					const pendingInvites = await tx.coachInvite.findMany({
+						where: {
+							email: dbUser.email.toLowerCase(),
+							acceptedAt: null,
+							cancelledAt: null,
+							expiresAt: {
+								gt: new Date()
+							}
+						},
+						select: {
+							id: true,
+							coachId: true,
+							tokenHash: true
+						}
+					});
+
+					for (const invite of pendingInvites) {
+						await tx.coachInvite.update({
+							where: { id: invite.id },
+							data: {
+								acceptedAt: new Date(),
+								individualId: dbUser.id
 							}
 						});
 
-						// Send welcome email to stakeholder (after transaction)
-						// We'll do this outside the transaction to avoid blocking
-						setTimeout(async () => {
-							try {
-								const template = emailTemplates.welcomeStakeholder({
-									individualName: dbUser.name || undefined,
-									stakeholderName: stakeholder.name || undefined,
-									appUrl:
-										process.env.PUBLIC_APP_URL || process.env.VERCEL_URL
-											? `https://${process.env.PUBLIC_APP_URL || process.env.VERCEL_URL}`
-											: 'https://app.forbetra.com'
-								});
-								await sendEmail({
-									to: stakeholder.email,
-									...template
-								});
-							} catch (error) {
-								console.error('[email:error] Failed to send stakeholder welcome email', error);
-							}
-						}, 0);
-					}
-				}
-
-				const startDate = new Date(data.cycleStartDate);
-				if (isNaN(startDate.getTime())) {
-					throw new Error(`Invalid start date: ${data.cycleStartDate}`);
-				}
-				const endDate = new Date(startDate);
-				endDate.setDate(endDate.getDate() + data.cycleDurationWeeks * 7);
-				if (isNaN(endDate.getTime())) {
-					throw new Error(`Invalid end date calculation for start date: ${data.cycleStartDate}`);
-				}
-
-				await tx.cycle.create({
-					data: {
-						userId: dbUser.id,
-						objectiveId: objective.id,
-						label: data.cycleLabel && data.cycleLabel.trim().length > 0 ? data.cycleLabel.trim() : 'Cycle 1',
-						startDate,
-						endDate,
-						status: 'ACTIVE',
-						checkInFrequency: data.checkInFrequency,
-						stakeholderCadence: data.stakeholderCadence
-					}
-				});
-
-				// Store reminder days preference in User model
-				await tx.user.update({
-					where: { id: dbUser.id },
-					data: { reminderDays }
-				});
-
-				const pendingInvites = await tx.coachInvite.findMany({
-					where: {
-						email: dbUser.email.toLowerCase(),
-						acceptedAt: null,
-						cancelledAt: null,
-						expiresAt: {
-							gt: new Date()
-						}
-					},
-					select: {
-						id: true,
-						coachId: true,
-						tokenHash: true
-					}
-				});
-
-				for (const invite of pendingInvites) {
-					await tx.coachInvite.update({
-						where: { id: invite.id },
-						data: {
-							acceptedAt: new Date(),
-							individualId: dbUser.id
-						}
-					});
-
-					await tx.coachClient.upsert({
-						where: {
-							coachId_individualId: {
+						await tx.coachClient.upsert({
+							where: {
+								coachId_individualId: {
+									coachId: invite.coachId,
+									individualId: dbUser.id
+								}
+							},
+							update: {
+								archivedAt: null
+							},
+							create: {
 								coachId: invite.coachId,
 								individualId: dbUser.id
 							}
-						},
-						update: {
-							archivedAt: null
-						},
-						create: {
-							coachId: invite.coachId,
-							individualId: dbUser.id
-						}
-					});
+						});
 
-					await tx.token.updateMany({
-						where: {
-							tokenHash: invite.tokenHash,
-							type: 'COACH_INVITE'
-						},
-						data: {
-							usedAt: new Date()
-						}
-					});
-				}
-			});
-		} catch (error) {
-			console.error('[onboarding:error] Failed to create objective:', error);
-			// Log more details about the error
-			if (error instanceof Error) {
-				console.error('[onboarding:error] Error message:', error.message);
-				console.error('[onboarding:error] Error stack:', error.stack);
+						await tx.token.updateMany({
+							where: {
+								tokenHash: invite.tokenHash,
+								type: 'COACH_INVITE'
+							},
+							data: {
+								usedAt: new Date()
+							}
+						});
+					}
+				});
+
+				throw redirect(303, '/onboarding/initial-ratings');
 			}
-			// Return a more helpful error message in development
+		} catch (error) {
+			// Re-throw redirects
+			if (error && typeof error === 'object' && 'status' in error && 'location' in error) {
+				throw error;
+			}
+			console.error('[onboarding:error] Failed to save:', error);
 			const errorMessage =
 				process.env.NODE_ENV === 'development' && error instanceof Error
 					? `Failed to save: ${error.message}`
@@ -290,7 +448,5 @@ export const actions: Actions = {
 				values: submission
 			});
 		}
-
-		throw redirect(303, '/onboarding/initial-ratings');
 	}
 };

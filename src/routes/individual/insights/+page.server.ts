@@ -2,14 +2,7 @@ import { redirect } from '@sveltejs/kit';
 import prisma from '$lib/server/prisma';
 import { requireRole } from '$lib/server/auth';
 import type { PageServerLoad } from './$types';
-
-const stdDev = (values: number[]) => {
-	if (values.length === 0) return null;
-	const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
-	const variance =
-		values.reduce((sum, value) => sum + Math.pow(value - mean, 2), 0) / values.length;
-	return Math.sqrt(variance);
-};
+import { stdDev } from '$lib/server/coachUtils';
 
 export const load: PageServerLoad = async (event) => {
 	const { dbUser } = requireRole(event, 'INDIVIDUAL');

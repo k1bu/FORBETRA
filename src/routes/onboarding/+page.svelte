@@ -17,15 +17,17 @@
 
 	const contexts = data.contexts;
 	const errors = (form?.errors as Record<string, string[]>) ?? {};
+	const isEditing = data.isEditing;
+	const existingData = data.existingData;
 
 	const values = {
-		objectiveTitle: form?.values?.objectiveTitle ?? '',
-		objectiveDescription: form?.values?.objectiveDescription ?? '',
-		subgoals: (form?.values?.subgoals as SubgoalFormValue[] | undefined) ?? [],
-		stakeholders: (form?.values?.stakeholders as StakeholderFormValue[] | undefined) ?? [],
-		cycleLabel: form?.values?.cycleLabel ?? (form?.values?.objectiveTitle ?? ''),
-		cycleStartDate: form?.values?.cycleStartDate ?? data.defaults.startDate,
-		cycleDurationWeeks: String(form?.values?.cycleDurationWeeks ?? 12)
+		objectiveTitle: form?.values?.objectiveTitle ?? existingData?.objectiveTitle ?? '',
+		objectiveDescription: form?.values?.objectiveDescription ?? existingData?.objectiveDescription ?? '',
+		subgoals: (form?.values?.subgoals as SubgoalFormValue[] | undefined) ?? existingData?.subgoals ?? [],
+		stakeholders: (form?.values?.stakeholders as StakeholderFormValue[] | undefined) ?? existingData?.stakeholders ?? [],
+		cycleLabel: form?.values?.cycleLabel ?? existingData?.cycleLabel ?? (form?.values?.objectiveTitle ?? ''),
+		cycleStartDate: form?.values?.cycleStartDate ?? existingData?.cycleStartDate ?? data.defaults.startDate,
+		cycleDurationWeeks: String(form?.values?.cycleDurationWeeks ?? existingData?.cycleDurationWeeks ?? 12)
 	};
 
 	const minSubgoalFields = 3;
@@ -43,8 +45,8 @@
 	let cycleDurationMode: 'preset' | 'custom' = [8, 12, 16].includes(Number(cycleDurationWeeks)) ? 'preset' : 'custom';
 	let customDurationWeeks = cycleDurationMode === 'custom' ? cycleDurationWeeks : '';
 	let reminderDays: 'wednesday_friday' | 'tuesday_thursday' = 'wednesday_friday';
-	let checkInFrequency: '3x' | '2x' | '1x' = '3x';
-	let stakeholderCadence: 'weekly' | 'biweekly' = 'weekly';
+	let checkInFrequency: '3x' | '2x' | '1x' = (existingData?.checkInFrequency as '3x' | '2x' | '1x') ?? '3x';
+	let stakeholderCadence: 'weekly' | 'biweekly' = (existingData?.stakeholderCadence as 'weekly' | 'biweekly') ?? 'weekly';
 
 	let subgoalForms: SubgoalFormValue[] = Array.from({ length: initialSubgoalCount }, (_, index) => ({
 		label: values.subgoals[index]?.label ?? '',
@@ -68,8 +70,8 @@
 	// Step wizard state — 5 steps (science removed)
 	type Step = 'welcome' | 'objective' | 'subgoals' | 'cycle' | 'stakeholders';
 	const allSteps: Step[] = ['welcome', 'objective', 'subgoals', 'cycle', 'stakeholders'];
-	let currentStep: Step = Object.keys(errors).length > 0 ? 'stakeholders' : 'welcome';
-	let stepHistory: Step[] = currentStep === 'stakeholders' ? [...allSteps] : ['welcome'];
+	let currentStep: Step = Object.keys(errors).length > 0 ? 'stakeholders' : isEditing ? 'objective' : 'welcome';
+	let stepHistory: Step[] = currentStep === 'stakeholders' ? [...allSteps] : isEditing ? ['objective'] : ['welcome'];
 
 	function selectContext(contextId: string) {
 		selectedContextId = contextId;
@@ -396,6 +398,9 @@
 					</div>
 				{/if}
 				<!-- Hidden inputs -->
+				{#if isEditing && existingData}
+					<input type="hidden" name="objectiveId" value={existingData.objectiveId} />
+				{/if}
 				<input type="hidden" name="reminderDays" value={reminderDays} />
 				<input type="hidden" name="checkInFrequency" value={checkInFrequency} />
 				<input type="hidden" name="stakeholderCadence" value={stakeholderCadence} />
@@ -1165,7 +1170,7 @@
 								type="submit"
 								class="group inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-3 font-semibold text-white shadow-lg shadow-blue-500/25 transition-all hover:scale-105 hover:shadow-xl hover:shadow-blue-500/30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
 							>
-								Complete Setup
+								{isEditing ? 'Save Changes' : 'Complete Setup'}
 								<svg
 									class="h-5 w-5 transition-transform group-hover:translate-x-1"
 									fill="none"

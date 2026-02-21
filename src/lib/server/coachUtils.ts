@@ -1,16 +1,24 @@
 import type { Prisma } from '@prisma/client';
 
+/** Number of days before a feedback token expires */
+export const FEEDBACK_TOKEN_EXPIRY_DAYS = 10;
+
 export const toIsoDate = (value: Date | null | undefined) => (value ? value.toISOString() : null);
 
 export const weeksBetween = (start: Date, end: Date) =>
 	Math.max(1, Math.ceil((end.getTime() - start.getTime()) / (7 * 24 * 60 * 60 * 1000)));
 
-// Helper to compute week number from start date
+// Helper to compute week number from start date (normalized to midnight)
 export const computeWeekNumber = (startDate: Date): number => {
 	const now = new Date();
-	const diff = now.getTime() - startDate.getTime();
+	now.setHours(0, 0, 0, 0);
+	const start = new Date(startDate);
+	start.setHours(0, 0, 0, 0);
+
+	const diffMs = now.getTime() - start.getTime();
 	const msPerWeek = 7 * 24 * 60 * 60 * 1000;
-	return Math.max(1, Math.floor(diff / msPerWeek) + 1);
+	const fullWeeks = Math.floor(diffMs / msPerWeek);
+	return Math.max(1, fullWeeks + 1);
 };
 
 export const weekNumberForDate = (startDate: Date, target: Date) => {
@@ -27,3 +35,41 @@ export const stdDev = (values: number[]) => {
 	return Math.sqrt(variance);
 };
 
+// Get the date for a specific weekday in a given week (1 = Monday, 3 = Wednesday, 5 = Friday)
+export const getDateForWeekday = (weekday: number, startDate: Date, weekNumber: number): Date => {
+	// Normalize startDate to local midnight
+	const start = new Date(startDate);
+	start.setHours(0, 0, 0, 0);
+
+	// Find the Monday of the week that contains startDate
+	const startDayOfWeek = start.getDay();
+	const mondayOffset = startDayOfWeek === 0 ? 1 : 1 - startDayOfWeek;
+	const cycleMonday = new Date(start);
+	cycleMonday.setDate(start.getDate() + mondayOffset);
+	cycleMonday.setHours(0, 0, 0, 0);
+
+	// Calculate the Monday of the target week
+	const targetMonday = new Date(cycleMonday);
+	targetMonday.setDate(cycleMonday.getDate() + (weekNumber - 1) * 7);
+	targetMonday.setHours(0, 0, 0, 0);
+
+	// Add days to get to the target weekday
+	const targetDate = new Date(targetMonday);
+	targetDate.setDate(targetMonday.getDate() + (weekday - 1));
+	targetDate.setHours(0, 0, 0, 0);
+
+	return targetDate;
+};
+
+// Linear regression slope for trajectory calculations
+export const linearRegressionSlope = (points: { x: number; y: number }[]): number | null => {
+	if (points.length < 2) return null;
+	const n = points.length;
+	const sumX = points.reduce((s, p) => s + p.x, 0);
+	const sumY = points.reduce((s, p) => s + p.y, 0);
+	const sumXY = points.reduce((s, p) => s + p.x * p.y, 0);
+	const sumX2 = points.reduce((s, p) => s + p.x * p.x, 0);
+	const denom = n * sumX2 - sumX * sumX;
+	if (denom === 0) return null;
+	return (n * sumXY - sumX * sumY) / denom;
+};

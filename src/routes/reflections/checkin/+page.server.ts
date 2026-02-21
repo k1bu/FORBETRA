@@ -4,35 +4,7 @@ import { requireRole } from '$lib/server/auth';
 import { checkInEntrySchema } from '$lib/validation/reflection';
 import type { Actions, PageServerLoad } from './$types';
 import type { ReflectionType } from '@prisma/client';
-
-// Helper to compute week number from start date
-const computeWeekNumber = (startDate: Date): number => {
-	const now = new Date();
-	const diff = now.getTime() - startDate.getTime();
-	const msPerWeek = 7 * 24 * 60 * 60 * 1000;
-	return Math.max(1, Math.floor(diff / msPerWeek) + 1);
-};
-
-// Get the date for a specific weekday in a given week (1 = Monday, 3 = Wednesday, 5 = Friday)
-const getDateForWeekday = (weekday: number, startDate: Date, weekNumber: number): Date => {
-	// Find the Monday of the week that contains startDate
-	const startDayOfWeek = startDate.getDay();
-	const mondayOffset = startDayOfWeek === 0 ? -6 : 1 - startDayOfWeek; // Monday is day 1
-	const cycleMonday = new Date(startDate);
-	cycleMonday.setDate(startDate.getDate() + mondayOffset);
-	cycleMonday.setHours(0, 0, 0, 0);
-
-	// Calculate the Monday of the target week (weekNumber weeks from cycle start)
-	const targetMonday = new Date(cycleMonday);
-	targetMonday.setDate(cycleMonday.getDate() + (weekNumber - 1) * 7);
-
-	// Add days to get to the target weekday (Wednesday = 3, Friday = 5)
-	const targetDate = new Date(targetMonday);
-	targetDate.setDate(targetMonday.getDate() + (weekday - 1));
-	targetDate.setHours(0, 0, 0, 0);
-
-	return targetDate;
-};
+import { computeWeekNumber, getDateForWeekday } from '$lib/server/coachUtils';
 
 // Determine which check-in type based on current date
 const getCheckInType = (

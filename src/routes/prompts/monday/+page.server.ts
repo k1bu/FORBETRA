@@ -4,6 +4,7 @@ import { requireRole } from '$lib/server/auth';
 import { getIntentionPromptForWeek } from '$lib/prompts/intention';
 import { z } from 'zod';
 import type { Actions, PageServerLoad } from './$types';
+import { computeWeekNumber } from '$lib/server/coachUtils';
 
 const intentionSchema = z.object({
 	intention: z
@@ -12,14 +13,6 @@ const intentionSchema = z.object({
 		.min(25, 'Aim for at least 25 characters to clarify your intention')
 		.max(1500, 'Keep intentions under 1500 characters')
 });
-
-// Helper to compute week number from start date
-const computeWeekNumber = (startDate: Date): number => {
-	const now = new Date();
-	const diff = now.getTime() - startDate.getTime();
-	const msPerWeek = 7 * 24 * 60 * 60 * 1000;
-	return Math.max(1, Math.floor(diff / msPerWeek) + 1);
-};
 
 export const load: PageServerLoad = async (event) => {
 	const isPreview = event.url.searchParams.get('preview') === 'true';

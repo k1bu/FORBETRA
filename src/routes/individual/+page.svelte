@@ -201,7 +201,7 @@
 				View Cycle Report
 			</a>
 			<a
-				href="/onboarding"
+				href="/individual/new-cycle"
 				class="shrink-0 rounded-lg border border-green-300 bg-white px-4 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50 transition-colors"
 			>
 				Start New Cycle

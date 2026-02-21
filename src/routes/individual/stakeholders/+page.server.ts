@@ -6,6 +6,7 @@ import { randomBytes } from 'node:crypto';
 import { sendEmail } from '$lib/notifications/email';
 import { emailTemplates } from '$lib/notifications/emailTemplates';
 import { Prisma } from '@prisma/client';
+import { FEEDBACK_TOKEN_EXPIRY_DAYS } from '$lib/server/coachUtils';
 
 export const load: PageServerLoad = async (event) => {
 	const { dbUser } = requireRole(event, 'INDIVIDUAL');
@@ -222,7 +223,7 @@ export const actions: Actions = {
 
 		const tokenValue = randomBytes(32).toString('hex');
 		const expiresAt = new Date();
-		expiresAt.setDate(expiresAt.getDate() + 7);
+		expiresAt.setDate(expiresAt.getDate() + FEEDBACK_TOKEN_EXPIRY_DAYS);
 
 		await prisma.token.create({
 			data: {

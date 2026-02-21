@@ -175,14 +175,14 @@ export const emailTemplates = {
 						${data.objectiveTitle ? `<p style="font-size: 14px; color: #64748b; background: #f1f5f9; padding: 12px; border-radius: 6px; margin: 20px 0;"><strong>Objective:</strong> ${data.objectiveTitle}</p>` : ''}
 						<p style="font-size: 16px;">Take a moment to check in on your effort and progress this week.</p>
 						<div style="text-align: center; margin: 30px 0;">
-							<a href="${data.appUrl || baseUrl}/reflections/${data.reflectionType?.toLowerCase() || 'checkin'}" style="display: inline-block; background: #f59e0b; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Complete Check-in</a>
+							<a href="${data.appUrl || baseUrl}${data.reflectionType === 'intention' ? '/prompts/monday' : `/reflections/checkin?type=${(data.reflectionType ?? 'RATING_A').toUpperCase()}`}" style="display: inline-block; background: #f59e0b; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Complete Check-in</a>
 						</div>
 						<p style="font-size: 14px; color: #64748b; margin-top: 30px;">Staying consistent helps you track your growth.</p>
 					</div>
 				</body>
 				</html>
 			`,
-			text: `Reminder: Time for your ${dayLabel} check-in\n\nHi ${data.individualName || 'there'},\n\nIt's ${dayLabel} — time for your weekly check-in!\n\n${data.objectiveTitle ? `Objective: ${data.objectiveTitle}\n\n` : ''}Take a moment to check in on your effort and progress this week.\n\nComplete check-in: ${data.appUrl || baseUrl}/reflections/${data.reflectionType?.toLowerCase() || 'checkin'}\n\nThis helps you stay consistent and track your growth.`
+			text: `Reminder: Time for your ${dayLabel} check-in\n\nHi ${data.individualName || 'there'},\n\nIt's ${dayLabel} — time for your weekly check-in!\n\n${data.objectiveTitle ? `Objective: ${data.objectiveTitle}\n\n` : ''}Take a moment to check in on your effort and progress this week.\n\nComplete check-in: ${data.appUrl || baseUrl}${data.reflectionType === 'intention' ? '/prompts/monday' : `/reflections/checkin?type=${(data.reflectionType ?? 'RATING_A').toUpperCase()}`}\n\nThis helps you stay consistent and track your growth.`
 		};
 	},
 

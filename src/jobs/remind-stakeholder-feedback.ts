@@ -1,12 +1,7 @@
 import prisma from '$lib/server/prisma';
 import { sendEmail } from '$lib/notifications/email';
 import { emailTemplates } from '$lib/notifications/emailTemplates';
-
-const computeWeekNumber = (startDate: Date) => {
-	const diff = Date.now() - startDate.getTime();
-	const weekMs = 7 * 24 * 60 * 60 * 1000;
-	return Math.max(1, Math.floor(diff / weekMs) + 1);
-};
+import { computeWeekNumber } from '$lib/server/coachUtils';
 
 export const remindStakeholderFeedback = async () => {
 	const stakeholders = await prisma.stakeholder.findMany({

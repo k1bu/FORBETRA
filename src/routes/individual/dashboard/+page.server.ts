@@ -6,14 +6,7 @@ import { randomBytes } from 'node:crypto';
 import { sendEmail } from '$lib/notifications/email';
 import { emailTemplates } from '$lib/notifications/emailTemplates';
 import { Prisma } from '@prisma/client';
-
-const stdDev = (values: number[]) => {
-	if (values.length === 0) return null;
-	const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
-	const variance =
-		values.reduce((sum, value) => sum + Math.pow(value - mean, 2), 0) / values.length;
-	return Math.sqrt(variance);
-};
+import { stdDev, computeWeekNumber, getDateForWeekday, toIsoDate, weeksBetween, FEEDBACK_TOKEN_EXPIRY_DAYS } from '$lib/server/coachUtils';
 
 type PromptType = 'INTENTION' | 'RATING_A' | 'RATING_B';
 
@@ -89,60 +82,6 @@ const getNextPrompt = (
 	return next;
 };
 
-const toIsoDate = (value: Date | null | undefined) => (value ? value.toISOString() : null);
-
-const weeksBetween = (start: Date, end: Date) =>
-	Math.max(1, Math.ceil((end.getTime() - start.getTime()) / (7 * 24 * 60 * 60 * 1000)));
-
-// Helper to compute week number from start date
-// Week 1 is the week containing the start date, week 2 is 7 days later, etc.
-// If start date is Nov 9 (Sunday) and today is Nov 17 (Monday):
-// - Days difference: 8 days
-// - Full weeks: floor(8/7) = 1
-// - Week number: 1 + 1 = 2 (we're in the second week)
-const computeWeekNumber = (startDate: Date): number => {
-	const now = new Date();
-	now.setHours(0, 0, 0, 0);
-	const start = new Date(startDate);
-	start.setHours(0, 0, 0, 0);
-
-	const diffMs = now.getTime() - start.getTime();
-	const msPerWeek = 7 * 24 * 60 * 60 * 1000;
-	const fullWeeks = Math.floor(diffMs / msPerWeek);
-	// Week 1 is days 0-6, week 2 is days 7-13, etc.
-	const weekNumber = fullWeeks + 1;
-	return Math.max(1, weekNumber);
-};
-
-// Get the date for a specific weekday in a given week (1 = Monday, 3 = Wednesday, 5 = Friday)
-const getDateForWeekday = (weekday: number, startDate: Date, weekNumber: number): Date => {
-	// Normalize startDate to local midnight
-	const start = new Date(startDate);
-	start.setHours(0, 0, 0, 0);
-
-	// Find the Monday of the week that contains startDate
-	// JavaScript getDay(): 0=Sunday, 1=Monday, ..., 6=Saturday
-	const startDayOfWeek = start.getDay();
-	// Calculate offset to get to Monday of the week containing startDate
-	// If Sunday (0), go forward 1 day. If Monday (1), no change. If Tuesday (2), go back 1, etc.
-	const mondayOffset = startDayOfWeek === 0 ? 1 : 1 - startDayOfWeek;
-	const cycleMonday = new Date(start);
-	cycleMonday.setDate(start.getDate() + mondayOffset);
-	cycleMonday.setHours(0, 0, 0, 0);
-
-	// Calculate the Monday of the target week (weekNumber weeks from cycle start)
-	// Week 1 starts on cycleMonday, week 2 starts 7 days later, etc.
-	const targetMonday = new Date(cycleMonday);
-	targetMonday.setDate(cycleMonday.getDate() + (weekNumber - 1) * 7);
-	targetMonday.setHours(0, 0, 0, 0);
-
-	// Add days to get to the target weekday (Wednesday = 3, Friday = 5)
-	const targetDate = new Date(targetMonday);
-	targetDate.setDate(targetMonday.getDate() + (weekday - 1));
-	targetDate.setHours(0, 0, 0, 0);
-
-	return targetDate;
-};
 
 // Get the state of a weekly experience
 type ExperienceState = 'open' | 'completed' | 'missed' | 'upcoming' | 'catchup';
@@ -970,7 +909,7 @@ export const actions: Actions = {
 
 		const tokenValue = randomBytes(32).toString('hex');
 		const expiresAt = new Date();
-		expiresAt.setDate(expiresAt.getDate() + 10);
+		expiresAt.setDate(expiresAt.getDate() + FEEDBACK_TOKEN_EXPIRY_DAYS);
 
 		await prisma.token.create({
 			data: {
