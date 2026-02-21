@@ -7,6 +7,7 @@ export type EmailTemplateData = {
 	weekNumber?: number;
 	reflectionType?: string;
 	appUrl?: string;
+	currentStreak?: number;
 };
 
 export type CoachInvitationData = {
@@ -173,6 +174,7 @@ export const emailTemplates = {
 						<p style="font-size: 16px; margin-top: 0;">Hi ${data.individualName || 'there'},</p>
 						<p style="font-size: 16px;">It's ${dayLabel} — time for your weekly check-in!</p>
 						${data.objectiveTitle ? `<p style="font-size: 14px; color: #64748b; background: #f1f5f9; padding: 12px; border-radius: 6px; margin: 20px 0;"><strong>Objective:</strong> ${data.objectiveTitle}</p>` : ''}
+						${data.currentStreak && data.currentStreak >= 3 ? `<p style="font-size: 16px; color: #c2410c; font-weight: 600;">🔥 You're on a ${data.currentStreak} check-in streak — keep it going!</p>` : ''}
 						<p style="font-size: 16px;">Take a moment to check in on your effort and progress this week.</p>
 						<div style="text-align: center; margin: 30px 0;">
 							<a href="${data.appUrl || baseUrl}${data.reflectionType === 'intention' ? '/prompts/monday' : `/reflections/checkin?type=${(data.reflectionType ?? 'RATING_A').toUpperCase()}`}" style="display: inline-block; background: #f59e0b; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Complete Check-in</a>
@@ -182,7 +184,7 @@ export const emailTemplates = {
 				</body>
 				</html>
 			`,
-			text: `Reminder: Time for your ${dayLabel} check-in\n\nHi ${data.individualName || 'there'},\n\nIt's ${dayLabel} — time for your weekly check-in!\n\n${data.objectiveTitle ? `Objective: ${data.objectiveTitle}\n\n` : ''}Take a moment to check in on your effort and progress this week.\n\nComplete check-in: ${data.appUrl || baseUrl}${data.reflectionType === 'intention' ? '/prompts/monday' : `/reflections/checkin?type=${(data.reflectionType ?? 'RATING_A').toUpperCase()}`}\n\nThis helps you stay consistent and track your growth.`
+			text: `Reminder: Time for your ${dayLabel} check-in\n\nHi ${data.individualName || 'there'},\n\nIt's ${dayLabel} — time for your weekly check-in!\n\n${data.currentStreak && data.currentStreak >= 3 ? `🔥 You're on a ${data.currentStreak} check-in streak — keep it going!\n\n` : ''}${data.objectiveTitle ? `Objective: ${data.objectiveTitle}\n\n` : ''}Take a moment to check in on your effort and progress this week.\n\nComplete check-in: ${data.appUrl || baseUrl}${data.reflectionType === 'intention' ? '/prompts/monday' : `/reflections/checkin?type=${(data.reflectionType ?? 'RATING_A').toUpperCase()}`}\n\nThis helps you stay consistent and track your growth.`
 		};
 	},
 
@@ -201,6 +203,7 @@ export const emailTemplates = {
 				</div>
 				<div style="background: white; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
 					<p style="font-size: 16px; margin-top: 0;">Hi ${data.individualName || 'there'},</p>
+					${data.currentStreak && data.currentStreak >= 3 ? `<p style="font-size: 16px; color: #c2410c; font-weight: 600;">🔥 You have a ${data.currentStreak} streak on the line — don't break it!</p>` : ''}
 					<p style="font-size: 16px;">You have some overdue reflections that need your attention.</p>
 					${data.objectiveTitle ? `<p style="font-size: 14px; color: #64748b; background: #f1f5f9; padding: 12px; border-radius: 6px; margin: 20px 0;"><strong>Objective:</strong> ${data.objectiveTitle}</p>` : ''}
 					<div style="text-align: center; margin: 30px 0;">
@@ -211,7 +214,7 @@ export const emailTemplates = {
 			</body>
 			</html>
 		`,
-		text: `Reminder: You have overdue reflections\n\nHi ${data.individualName || 'there'},\n\nYou have some overdue reflections that need your attention.\n\n${data.objectiveTitle ? `Objective: ${data.objectiveTitle}\n\n` : ''}View dashboard: ${data.appUrl || baseUrl}/individual\n\nCatching up helps maintain your progress tracking.`
+		text: `Reminder: You have overdue reflections\n\nHi ${data.individualName || 'there'},\n\n${data.currentStreak && data.currentStreak >= 3 ? `🔥 You have a ${data.currentStreak} streak on the line — don't break it!\n\n` : ''}You have some overdue reflections that need your attention.\n\n${data.objectiveTitle ? `Objective: ${data.objectiveTitle}\n\n` : ''}View dashboard: ${data.appUrl || baseUrl}/individual\n\nCatching up helps maintain your progress tracking.`
 	}),
 
 	cycleCompleted: (data: EmailTemplateData) => ({

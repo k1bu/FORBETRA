@@ -71,6 +71,32 @@
 	let noteFormOpen = false;
 	let noteTextareaEl: HTMLTextAreaElement | undefined;
 
+	let generatingPrepFor: string | null = null;
+
+	async function generatePrep(clientId: string) {
+		generatingPrepFor = clientId;
+		try {
+			const res = await fetch('/api/insights/coach-prep', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ individualId: clientId })
+			});
+			const result = await res.json();
+			if (res.ok && result.content) {
+				data.coachPrepMap[clientId] = {
+					id: result.id,
+					content: result.content,
+					createdAt: new Date(result.createdAt)
+				};
+				data = data;
+			}
+		} catch (err) {
+			console.error('Failed to generate coach prep', err);
+		} finally {
+			generatingPrepFor = null;
+		}
+	}
+
 	function trapFocus(e: KeyboardEvent) {
 		if (e.key !== 'Tab') return;
 		const modal = (e.currentTarget as HTMLElement);
@@ -362,10 +388,20 @@
 						{#if !client.archived && data.coachPrepMap[client.id]}
 							{@const prep = data.coachPrepMap[client.id]}
 							<section class="rounded-xl border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 p-4">
-								<div class="mb-3 flex items-center gap-2">
-									<span class="text-lg" role="img" aria-label="sparkles">&#10024;</span>
-									<h3 class="text-sm font-bold text-neutral-900">AI Coach Prep</h3>
-									<span class="text-xs text-neutral-500">{formatRelativeDays(prep.createdAt?.toString())}</span>
+								<div class="mb-3 flex items-center justify-between">
+									<div class="flex items-center gap-2">
+										<span class="text-lg" role="img" aria-label="sparkles">&#10024;</span>
+										<h3 class="text-sm font-bold text-neutral-900">AI Coach Prep</h3>
+										<span class="text-xs text-neutral-500">{formatRelativeDays(prep.createdAt?.toString())}</span>
+									</div>
+									<button
+										type="button"
+										disabled={generatingPrepFor === client.id}
+										onclick={() => generatePrep(client.id)}
+										class="rounded-lg border-2 border-indigo-300 bg-white px-3 py-1.5 text-xs font-semibold text-indigo-700 transition-all hover:border-indigo-400 hover:bg-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed"
+									>
+										{generatingPrepFor === client.id ? 'Generating...' : 'Refresh Prep'}
+									</button>
 								</div>
 								{#if data.alertMap[client.id]?.length}
 									<div class="mb-3 rounded-lg border border-red-200 bg-red-50 p-2">
@@ -377,6 +413,24 @@
 								{/if}
 								<div class="prose prose-sm max-w-none text-neutral-700">
 									{prep.content ?? 'No prep available.'}
+								</div>
+							</section>
+						{:else if !client.archived && client.objective?.cycle}
+							<section class="rounded-xl border-2 border-dashed border-indigo-200 bg-indigo-50/50 p-4">
+								<div class="flex items-center justify-between">
+									<div class="flex items-center gap-2">
+										<span class="text-lg" role="img" aria-label="sparkles">&#10024;</span>
+										<h3 class="text-sm font-bold text-neutral-900">AI Coach Prep</h3>
+										<span class="text-xs text-neutral-500">Not yet generated</span>
+									</div>
+									<button
+										type="button"
+										disabled={generatingPrepFor === client.id}
+										onclick={() => generatePrep(client.id)}
+										class="rounded-lg border-2 border-indigo-300 bg-white px-3 py-1.5 text-xs font-semibold text-indigo-700 transition-all hover:border-indigo-400 hover:bg-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed"
+									>
+										{generatingPrepFor === client.id ? 'Generating...' : 'Generate Prep'}
+									</button>
 								</div>
 							</section>
 						{/if}

@@ -17,6 +17,7 @@
 	const DRAFT_KEY = `feedback-draft-${data.token}`;
 	const DRAFT_MAX_AGE_MS = 4 * 60 * 60 * 1000; // 4 hours
 
+	let showWelcome = $state(data.isFirstFeedback);
 	let draftRestored = $state(false);
 
 	const reflectionLabel = (() => {
@@ -65,9 +66,9 @@
 	const individualScores = $derived(form?.individualScores ?? previewIndividualScores);
 	const participantName = $derived(individualScores?.participantName ?? data.reflection.participantName);
 
-	// Show reveal when form is successfully submitted
+	// Show reveal when form is successfully submitted (only if reveal is enabled)
 	$effect(() => {
-		if (form?.success && form?.individualScores) {
+		if (form?.success && form?.individualScores && data.revealScores !== false) {
 			// Small delay for better UX
 			setTimeout(() => {
 				showReveal = true;
@@ -167,7 +168,71 @@
 		{/if}
 	</div>
 
-	{#if form?.success || (data.isPreview && showReveal)}
+	{#if showWelcome && !form?.success}
+		<div class="mx-auto max-w-2xl space-y-6">
+			<div class="rounded-2xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 via-white to-purple-50 p-8 shadow-lg">
+				<div class="mb-6 text-center">
+					<div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg shadow-blue-200">
+						<span class="text-3xl">👋</span>
+					</div>
+					<h2 class="text-2xl font-bold text-neutral-900">Welcome, {data.stakeholder.name}</h2>
+					<p class="mt-2 text-base text-neutral-600">
+						<strong>{data.reflection.participantName}</strong> has invited you to help track their development.
+					</p>
+				</div>
+
+				<div class="mb-6 rounded-xl border-2 border-blue-100 bg-white p-5">
+					<p class="mb-1 text-xs font-semibold uppercase tracking-wide text-blue-600">What they're working on</p>
+					<p class="text-lg font-bold text-neutral-900">{data.reflection.objectiveTitle}</p>
+				</div>
+
+				<div class="mb-6 space-y-3">
+					<p class="text-sm font-semibold text-neutral-800">What you'll do:</p>
+					<div class="space-y-2">
+						<div class="flex items-start gap-3 rounded-lg bg-white p-3 border border-neutral-200">
+							<span class="mt-0.5 text-lg">💪</span>
+							<div>
+								<p class="text-sm font-semibold text-neutral-900">Rate their effort</p>
+								<p class="text-xs text-neutral-600">How intentional and consistent their focus has been (0-10)</p>
+							</div>
+						</div>
+						<div class="flex items-start gap-3 rounded-lg bg-white p-3 border border-neutral-200">
+							<span class="mt-0.5 text-lg">📈</span>
+							<div>
+								<p class="text-sm font-semibold text-neutral-900">Rate their performance</p>
+								<p class="text-xs text-neutral-600">How visible the results are from your perspective (0-10)</p>
+							</div>
+						</div>
+						<div class="flex items-start gap-3 rounded-lg bg-white p-3 border border-neutral-200">
+							<span class="mt-0.5 text-lg">✍️</span>
+							<div>
+								<p class="text-sm font-semibold text-neutral-900">Optionally share observations</p>
+								<p class="text-xs text-neutral-600">A sentence or two about what you've noticed</p>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="mb-6 rounded-lg bg-purple-50 border border-purple-200 p-4">
+					<p class="text-sm text-purple-800 leading-relaxed">
+						<strong>Why it matters:</strong> Your perspective reveals blind spots. The gap between self-perception and external feedback is the most powerful growth signal.
+					</p>
+				</div>
+
+				<div class="text-center space-y-3">
+					<p class="text-xs text-neutral-500">Takes about 60 seconds</p>
+					<button
+						type="button"
+						onclick={() => { showWelcome = false; }}
+						class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-3.5 font-semibold text-white shadow-lg transition-all hover:from-blue-700 hover:to-purple-700 hover:shadow-xl hover:scale-105"
+					>
+						Got it, let's go
+						<span>&#8594;</span>
+					</button>
+				</div>
+			</div>
+		</div>
+	{:else if form?.success || (data.isPreview && showReveal)}
 		<div class="mx-auto max-w-2xl space-y-6">
 			<!-- Initial Success Message -->
 			<div aria-live="polite" class="animate-in fade-in slide-in-from-top-2 rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 text-center">
@@ -176,8 +241,8 @@
 				<p class="mt-1 text-sm text-emerald-700">Thank you for sharing your perspective. Your feedback has been recorded.</p>
 			</div>
 
-			<!-- Reveal Section -->
-			{#if showReveal && individualScores}
+			<!-- Reveal Section (only when revealScores is enabled) -->
+			{#if showReveal && individualScores && data.revealScores !== false}
 				<div class="slide-in-from-bottom-4 rounded-2xl border-2 border-purple-200 bg-gradient-to-br from-purple-50 via-blue-50 to-purple-50 p-8 shadow-lg">
 					<div class="mb-6 text-center">
 						<div class="mb-3 text-5xl">🎁</div>
@@ -271,7 +336,7 @@
 		</div>
 	{/if}
 
-	{#if !form?.success && !(data.isPreview && showReveal)}
+	{#if !form?.success && !(data.isPreview && showReveal) && !showWelcome}
 		<div class="mx-auto w-full max-w-2xl space-y-6">
 			<form method="post" onsubmit={handleSubmit} class="space-y-6">
 			<input type="hidden" name="token" value={data.token} />

@@ -36,6 +36,117 @@ async function callClaude(prompt: string, maxTokens: number = 1024): Promise<str
 	return textBlock?.text ?? '';
 }
 
+function callClaudeStreaming(prompt: string, maxTokens: number = 4096): ReadableStream<string> {
+	return new ReadableStream<string>({
+		async start(controller) {
+			try {
+				const stream = anthropic.messages.stream({
+					model: MODEL_ID,
+					max_tokens: maxTokens,
+					system: SYSTEM_MESSAGE,
+					messages: [{ role: 'user', content: prompt }]
+				});
+
+				for await (const event of stream) {
+					if (
+						event.type === 'content_block_delta' &&
+						event.delta.type === 'text_delta'
+					) {
+						controller.enqueue(event.delta.text);
+					}
+				}
+
+				controller.close();
+			} catch (error) {
+				controller.error(error);
+			}
+		}
+	});
+}
+
+export async function generateCycleReportStreaming(
+	userId: string,
+	cycleId: string
+): Promise<{ insightId: string; stream: ReadableStream<string> } | null> {
+	// Create PENDING insight record
+	const insight = await prisma.insight.create({
+		data: {
+			userId,
+			cycleId,
+			weekNumber: null,
+			type: 'CYCLE_REPORT',
+			status: 'PENDING',
+			modelId: MODEL_ID
+		}
+	});
+
+	try {
+		await prisma.insight.update({
+			where: { id: insight.id },
+			data: { status: 'GENERATING' }
+		});
+
+		// Reuse the same context-gathering logic as generateCycleReport
+		const prompt = await buildCycleReportContext(userId, cycleId);
+
+		const rawStream = callClaudeStreaming(prompt, 4096);
+		let accumulated = '';
+
+		// Wrap the stream to accumulate content and save on completion
+		const wrappedStream = new ReadableStream<string>({
+			async start(controller) {
+				const reader = rawStream.getReader();
+				try {
+					while (true) {
+						const { done, value } = await reader.read();
+						if (done) break;
+						accumulated += value;
+						controller.enqueue(value);
+					}
+
+					// Stream complete — save accumulated content
+					await prisma.insight.update({
+						where: { id: insight.id },
+						data: {
+							status: 'COMPLETED',
+							content: accumulated,
+							promptHash: simpleHash(prompt)
+						}
+					});
+
+					controller.close();
+				} catch (error) {
+					await prisma.insight.update({
+						where: { id: insight.id },
+						data: {
+							status: 'FAILED',
+							metadata: { error: error instanceof Error ? error.message : 'Unknown error' }
+						}
+					});
+					controller.error(error);
+				}
+			}
+		});
+
+		return { insightId: insight.id, stream: wrappedStream };
+	} catch (error: any) {
+		console.error('[insight:error] Failed to start streaming CYCLE_REPORT', {
+			insightId: insight.id,
+			error: error.message
+		});
+
+		await prisma.insight.update({
+			where: { id: insight.id },
+			data: {
+				status: 'FAILED',
+				metadata: { error: error.message }
+			}
+		});
+
+		return null;
+	}
+}
+
 async function createAndGenerateInsight(
 	userId: string,
 	cycleId: string | null,
@@ -473,219 +584,214 @@ export async function generateCoachPrep(
 /**
  * Generate a CYCLE_REPORT insight — comprehensive full-cycle analysis.
  */
-export async function generateCycleReport(
-	userId: string,
-	cycleId: string
-): Promise<string | null> {
-	return createAndGenerateInsight(userId, cycleId, null, 'CYCLE_REPORT', async () => {
-		const cycle = await prisma.cycle.findUnique({
-			where: { id: cycleId },
-			include: {
-				objective: {
-					include: {
-						subgoals: { where: { active: true } },
-						stakeholders: {
-							include: {
-								feedbacks: {
-									orderBy: { submittedAt: 'desc' },
-									include: {
-										stakeholder: { select: { name: true } },
-										reflection: {
-											select: {
-												weekNumber: true,
-												effortScore: true,
-												performanceScore: true
-											}
+async function buildCycleReportContext(userId: string, cycleId: string): Promise<string> {
+	const cycle = await prisma.cycle.findUnique({
+		where: { id: cycleId },
+		include: {
+			objective: {
+				include: {
+					subgoals: { where: { active: true } },
+					stakeholders: {
+						include: {
+							feedbacks: {
+								orderBy: { submittedAt: 'desc' },
+								include: {
+									stakeholder: { select: { name: true } },
+									reflection: {
+										select: {
+											weekNumber: true,
+											effortScore: true,
+											performanceScore: true
 										}
 									}
 								}
 							}
 						}
 					}
-				},
-				reflections: {
-					where: { userId },
-					orderBy: { weekNumber: 'asc' },
-					select: {
-						weekNumber: true,
-						reflectionType: true,
-						effortScore: true,
-						performanceScore: true,
-						notes: true
-					}
-				},
-				coachNotes: {
-					orderBy: { createdAt: 'desc' },
-					take: 10,
-					select: { content: true }
 				}
-			}
-		});
-
-		if (!cycle) throw new Error('Cycle not found');
-
-		const currentWeek = computeWeekNumber(cycle.startDate);
-		const totalWeeks = cycle.endDate
-			? Math.max(
-					1,
-					Math.ceil(
-						(cycle.endDate.getTime() - cycle.startDate.getTime()) / (7 * 24 * 60 * 60 * 1000)
-					)
-				)
-			: currentWeek;
-
-		// Full-cycle weekly averages
-		const weeklyAverages = getWeeklyAverages(cycle.reflections);
-
-		// Stability (using all weeks)
-		const effortValues = weeklyAverages.map((w) => w.effort).filter((v): v is number => v !== null);
-		const perfValues = weeklyAverages.map((w) => w.performance).filter((v): v is number => v !== null);
-		const efStd = stdDev(effortValues);
-		const prStd = stdDev(perfValues);
-		const stds = [efStd, prStd].filter((v): v is number => v !== null);
-		const combinedStd =
-			stds.length > 0 ? stds.reduce((a, b) => a + b, 0) / stds.length : null;
-		const stabilityScore =
-			combinedStd !== null ? Math.max(0, Math.round(100 - combinedStd * 10)) : null;
-
-		// Trajectory (linear regression on all weeks)
-		let trajectoryScore: number | null = null;
-		if (weeklyAverages.length >= 2) {
-			const points: { x: number; y: number }[] = [];
-			for (const w of weeklyAverages) {
-				const vals = [w.effort, w.performance].filter((v): v is number => v !== null);
-				if (vals.length > 0) {
-					points.push({ x: w.weekNumber, y: vals.reduce((a, b) => a + b, 0) / vals.length });
+			},
+			reflections: {
+				where: { userId },
+				orderBy: { weekNumber: 'asc' },
+				select: {
+					weekNumber: true,
+					reflectionType: true,
+					effortScore: true,
+					performanceScore: true,
+					notes: true
 				}
-			}
-			if (points.length >= 2) {
-				const n = points.length;
-				const sumX = points.reduce((s, p) => s + p.x, 0);
-				const sumY = points.reduce((s, p) => s + p.y, 0);
-				const sumXY = points.reduce((s, p) => s + p.x * p.y, 0);
-				const sumX2 = points.reduce((s, p) => s + p.x * p.x, 0);
-				const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
-				trajectoryScore = Math.max(-100, Math.min(100, Math.round(slope * 25)));
+			},
+			coachNotes: {
+				orderBy: { createdAt: 'desc' },
+				take: 10,
+				select: { content: true }
 			}
 		}
+	});
 
-		// Completion rate
-		const ratingWeeks = new Set(
-			cycle.reflections
-				.filter((r) => r.reflectionType === 'RATING_A' || r.reflectionType === 'RATING_B')
-				.map((r) => r.weekNumber)
-		);
-		const completionRate = totalWeeks > 0 ? Math.round((ratingWeeks.size / Math.min(currentWeek, totalWeeks)) * 100) : null;
+	if (!cycle) throw new Error('Cycle not found');
 
-		// Build stakeholder feedback and perception gaps
-		const allStakeholderFeedback: Array<{
-			weekNumber: number;
-			stakeholderName: string;
-			effort: number | null;
-			performance: number | null;
-		}> = [];
+	const currentWeek = computeWeekNumber(cycle.startDate);
+	const totalWeeks = cycle.endDate
+		? Math.max(
+				1,
+				Math.ceil(
+					(cycle.endDate.getTime() - cycle.startDate.getTime()) / (7 * 24 * 60 * 60 * 1000)
+				)
+			)
+		: currentWeek;
 
-		const gapByStakeholder = new Map<
-			string,
-			Array<{ weekNumber: number; effortGap: number | null; performanceGap: number | null }>
-		>();
+	const weeklyAverages = getWeeklyAverages(cycle.reflections);
 
-		cycle.objective.stakeholders.forEach((sh) => {
-			sh.feedbacks.forEach((fb) => {
-				if (!fb.reflection) return;
-				const wk = fb.reflection.weekNumber;
+	const effortValues = weeklyAverages.map((w) => w.effort).filter((v): v is number => v !== null);
+	const perfValues = weeklyAverages.map((w) => w.performance).filter((v): v is number => v !== null);
+	const efStd = stdDev(effortValues);
+	const prStd = stdDev(perfValues);
+	const stds = [efStd, prStd].filter((v): v is number => v !== null);
+	const combinedStd =
+		stds.length > 0 ? stds.reduce((a, b) => a + b, 0) / stds.length : null;
+	const stabilityScore =
+		combinedStd !== null ? Math.max(0, Math.round(100 - combinedStd * 10)) : null;
 
-				allStakeholderFeedback.push({
-					weekNumber: wk,
-					stakeholderName: fb.stakeholder.name,
-					effort: fb.effortScore,
-					performance: fb.performanceScore
-				});
+	let trajectoryScore: number | null = null;
+	if (weeklyAverages.length >= 2) {
+		const points: { x: number; y: number }[] = [];
+		for (const w of weeklyAverages) {
+			const vals = [w.effort, w.performance].filter((v): v is number => v !== null);
+			if (vals.length > 0) {
+				points.push({ x: w.weekNumber, y: vals.reduce((a, b) => a + b, 0) / vals.length });
+			}
+		}
+		if (points.length >= 2) {
+			const n = points.length;
+			const sumX = points.reduce((s, p) => s + p.x, 0);
+			const sumY = points.reduce((s, p) => s + p.y, 0);
+			const sumXY = points.reduce((s, p) => s + p.x * p.y, 0);
+			const sumX2 = points.reduce((s, p) => s + p.x * p.x, 0);
+			const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+			trajectoryScore = Math.max(-100, Math.min(100, Math.round(slope * 25)));
+		}
+	}
 
-				const name = fb.stakeholder.name;
-				if (!gapByStakeholder.has(name)) {
-					gapByStakeholder.set(name, []);
-				}
+	const ratingWeeks = new Set(
+		cycle.reflections
+			.filter((r) => r.reflectionType === 'RATING_A' || r.reflectionType === 'RATING_B')
+			.map((r) => r.weekNumber)
+	);
+	const completionRate = totalWeeks > 0 ? Math.round((ratingWeeks.size / Math.min(currentWeek, totalWeeks)) * 100) : null;
 
-				const selfWeek = weeklyAverages.find((w) => w.weekNumber === wk);
-				const effortGap =
-					selfWeek?.effort !== null && selfWeek?.effort !== undefined && fb.effortScore !== null
-						? Number((selfWeek.effort - fb.effortScore).toFixed(1))
-						: null;
-				const performanceGap =
-					selfWeek?.performance !== null && selfWeek?.performance !== undefined && fb.performanceScore !== null
-						? Number((selfWeek.performance - fb.performanceScore).toFixed(1))
-						: null;
+	const allStakeholderFeedback: Array<{
+		weekNumber: number;
+		stakeholderName: string;
+		effort: number | null;
+		performance: number | null;
+	}> = [];
 
-				gapByStakeholder.get(name)!.push({ weekNumber: wk, effortGap, performanceGap });
+	const gapByStakeholder = new Map<
+		string,
+		Array<{ weekNumber: number; effortGap: number | null; performanceGap: number | null }>
+	>();
+
+	cycle.objective.stakeholders.forEach((sh) => {
+		sh.feedbacks.forEach((fb) => {
+			if (!fb.reflection) return;
+			const wk = fb.reflection.weekNumber;
+
+			allStakeholderFeedback.push({
+				weekNumber: wk,
+				stakeholderName: fb.stakeholder.name,
+				effort: fb.effortScore,
+				performance: fb.performanceScore
 			});
+
+			const name = fb.stakeholder.name;
+			if (!gapByStakeholder.has(name)) {
+				gapByStakeholder.set(name, []);
+			}
+
+			const selfWeek = weeklyAverages.find((w) => w.weekNumber === wk);
+			const effortGap =
+				selfWeek?.effort !== null && selfWeek?.effort !== undefined && fb.effortScore !== null
+					? Number((selfWeek.effort - fb.effortScore).toFixed(1))
+					: null;
+			const performanceGap =
+				selfWeek?.performance !== null && selfWeek?.performance !== undefined && fb.performanceScore !== null
+					? Number((selfWeek.performance - fb.performanceScore).toFixed(1))
+					: null;
+
+			gapByStakeholder.get(name)!.push({ weekNumber: wk, effortGap, performanceGap });
 		});
+	});
 
-		// Compute perception gap trends per stakeholder
-		const perceptionGaps: CycleReportContext['perceptionGaps'] = [];
-		gapByStakeholder.forEach((gaps, stakeholderName) => {
-			const sorted = gaps.sort((a, b) => a.weekNumber - b.weekNumber);
-			const latest = sorted[sorted.length - 1];
+	const perceptionGaps: CycleReportContext['perceptionGaps'] = [];
+	gapByStakeholder.forEach((gaps, stakeholderName) => {
+		const sorted = gaps.sort((a, b) => a.weekNumber - b.weekNumber);
+		const latest = sorted[sorted.length - 1];
 
-			const computeTrend = (getter: (g: typeof gaps[0]) => number | null): 'widening' | 'closing' | 'stable' | null => {
-				const vals = sorted.map(getter).filter((v): v is number => v !== null);
-				if (vals.length < 2) return null;
-				const absFirst = Math.abs(vals[0]);
-				const absLast = Math.abs(vals[vals.length - 1]);
-				if (absLast - absFirst > 0.5) return 'widening';
-				if (absFirst - absLast > 0.5) return 'closing';
-				return 'stable';
-			};
-
-			perceptionGaps.push({
-				stakeholderName,
-				latestEffortGap: latest?.effortGap ?? null,
-				latestPerformanceGap: latest?.performanceGap ?? null,
-				effortGapTrend: computeTrend((g) => g.effortGap),
-				performanceGapTrend: computeTrend((g) => g.performanceGap)
-			});
-		});
-
-		// Alignment ratio (stakeholders who responded this week)
-		let respondedThisWeek = 0;
-		cycle.objective.stakeholders.forEach((sh) => {
-			const hasThisWeek = sh.feedbacks.some(
-				(fb) => fb.reflection && fb.reflection.weekNumber === currentWeek
-			);
-			if (hasThisWeek) respondedThisWeek++;
-		});
-		const alignmentRatio =
-			cycle.objective.stakeholders.length > 0
-				? Math.round((respondedThisWeek / cycle.objective.stakeholders.length) * 100)
-				: null;
-
-		// Weekly intentions
-		const weeklyIntentions = cycle.reflections
-			.filter((r) => r.reflectionType === 'INTENTION' && r.notes)
-			.map((r) => ({ weekNumber: r.weekNumber, notes: r.notes! }));
-
-		// Identity anchor (week 1 intention)
-		const identityAnchor =
-			weeklyIntentions.find((i) => i.weekNumber === 1)?.notes ?? null;
-
-		const context: CycleReportContext = {
-			objectiveTitle: cycle.objective.title,
-			subgoals: cycle.objective.subgoals.map((s) => s.label),
-			cycleStartDate: cycle.startDate.toISOString().split('T')[0],
-			currentWeek,
-			totalWeeks,
-			weeklyScores: weeklyAverages,
-			stakeholderFeedback: allStakeholderFeedback,
-			perceptionGaps,
-			stabilityScore,
-			trajectoryScore,
-			completionRate,
-			alignmentRatio,
-			weeklyIntentions,
-			coachNotes: cycle.coachNotes.map((n) => n.content),
-			identityAnchor
+		const computeTrend = (getter: (g: typeof gaps[0]) => number | null): 'widening' | 'closing' | 'stable' | null => {
+			const vals = sorted.map(getter).filter((v): v is number => v !== null);
+			if (vals.length < 2) return null;
+			const absFirst = Math.abs(vals[0]);
+			const absLast = Math.abs(vals[vals.length - 1]);
+			if (absLast - absFirst > 0.5) return 'widening';
+			if (absFirst - absLast > 0.5) return 'closing';
+			return 'stable';
 		};
 
-		return buildCycleReportPrompt(context);
+		perceptionGaps.push({
+			stakeholderName,
+			latestEffortGap: latest?.effortGap ?? null,
+			latestPerformanceGap: latest?.performanceGap ?? null,
+			effortGapTrend: computeTrend((g) => g.effortGap),
+			performanceGapTrend: computeTrend((g) => g.performanceGap)
+		});
+	});
+
+	let respondedThisWeek = 0;
+	cycle.objective.stakeholders.forEach((sh) => {
+		const hasThisWeek = sh.feedbacks.some(
+			(fb) => fb.reflection && fb.reflection.weekNumber === currentWeek
+		);
+		if (hasThisWeek) respondedThisWeek++;
+	});
+	const alignmentRatio =
+		cycle.objective.stakeholders.length > 0
+			? Math.round((respondedThisWeek / cycle.objective.stakeholders.length) * 100)
+			: null;
+
+	const weeklyIntentions = cycle.reflections
+		.filter((r) => r.reflectionType === 'INTENTION' && r.notes)
+		.map((r) => ({ weekNumber: r.weekNumber, notes: r.notes! }));
+
+	const identityAnchor =
+		weeklyIntentions.find((i) => i.weekNumber === 1)?.notes ?? null;
+
+	const context: CycleReportContext = {
+		objectiveTitle: cycle.objective.title,
+		subgoals: cycle.objective.subgoals.map((s) => s.label),
+		cycleStartDate: cycle.startDate.toISOString().split('T')[0],
+		currentWeek,
+		totalWeeks,
+		weeklyScores: weeklyAverages,
+		stakeholderFeedback: allStakeholderFeedback,
+		perceptionGaps,
+		stabilityScore,
+		trajectoryScore,
+		completionRate,
+		alignmentRatio,
+		weeklyIntentions,
+		coachNotes: cycle.coachNotes.map((n) => n.content),
+		identityAnchor
+	};
+
+	return buildCycleReportPrompt(context);
+}
+
+export async function generateCycleReport(
+	userId: string,
+	cycleId: string
+): Promise<string | null> {
+	return createAndGenerateInsight(userId, cycleId, null, 'CYCLE_REPORT', async () => {
+		return buildCycleReportContext(userId, cycleId);
 	}, 4096);
 }

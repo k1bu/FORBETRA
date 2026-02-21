@@ -98,6 +98,7 @@ export const actions: Actions = {
 
 		const formData = await event.request.formData();
 		const reminderDays = (formData.get('reminderDays') ?? 'wednesday_friday').toString();
+		const revealScores = (formData.get('revealScores') ?? 'true').toString() === 'true';
 
 		const parsed = newCycleSchema.safeParse({
 			cycleLabel: (formData.get('cycleLabel') ?? '').toString().trim(),
@@ -143,7 +144,8 @@ export const actions: Actions = {
 					endDate,
 					status: 'ACTIVE',
 					checkInFrequency: data.checkInFrequency,
-					stakeholderCadence: data.stakeholderCadence
+					stakeholderCadence: data.stakeholderCadence,
+					revealScores
 				}
 			});
 

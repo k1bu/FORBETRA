@@ -92,7 +92,13 @@
 			<div class="mx-auto max-w-2xl animate-in fade-in slide-in-from-top-2 rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 text-center">
 				<div class="mb-2 text-4xl">🎉</div>
 				<p class="text-lg font-semibold text-emerald-900">Check-in saved!</p>
-				<p class="mt-1 text-sm text-emerald-700">Your reflection has been recorded. Keep up the great work!</p>
+				{#if form.streak && form.streak >= 3}
+					<p class="mt-1 text-sm font-semibold text-orange-700">
+						🔥 You're on a {form.streak} check-in streak!{#if form.streak >= 12} Incredible consistency!{:else if form.streak >= 9} Outstanding!{:else if form.streak >= 6} Keep it going!{/if}
+					</p>
+				{:else}
+					<p class="mt-1 text-sm text-emerald-700">Your reflection has been recorded. Keep up the great work!</p>
+				{/if}
 				<a
 					href="/individual"
 					class="mt-4 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-emerald-700 hover:shadow-lg"

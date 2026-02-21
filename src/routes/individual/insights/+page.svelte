@@ -50,18 +50,81 @@
 	async function generateReport() {
 		generating = true;
 		generateError = null;
+		freshReport = { id: '', content: '', createdAt: new Date().toISOString() };
 		try {
-			const res = await fetch('/api/insights/cycle-report', { method: 'POST' });
+			const res = await fetch('/api/insights/cycle-report', {
+				method: 'POST',
+				headers: { Accept: 'text/event-stream' }
+			});
+
 			if (!res.ok) {
 				const err = await res.json();
 				generateError = err.error ?? 'Something went wrong';
+				freshReport = null;
 				return;
 			}
-			const result = await res.json();
-			freshReport = result;
+
+			const reader = res.body?.getReader();
+			if (!reader) {
+				generateError = 'Streaming not supported';
+				freshReport = null;
+				return;
+			}
+
+			const decoder = new TextDecoder();
+			let buffer = '';
+
+			while (true) {
+				const { done, value } = await reader.read();
+				if (done) break;
+
+				buffer += decoder.decode(value, { stream: true });
+				const lines = buffer.split('\n');
+				buffer = lines.pop() ?? '';
+
+				for (const line of lines) {
+					if (line.startsWith('event: meta')) {
+						// Next data line contains the insight ID
+						continue;
+					}
+					if (line.startsWith('event: done')) {
+						continue;
+					}
+					if (line.startsWith('event: error')) {
+						continue;
+					}
+					if (line.startsWith('data: ')) {
+						const payload = line.slice(6);
+						try {
+							const parsed = JSON.parse(payload);
+							if (typeof parsed === 'string') {
+								// Text chunk
+								freshReport = {
+									id: freshReport?.id ?? '',
+									content: (freshReport?.content ?? '') + parsed,
+									createdAt: freshReport?.createdAt ?? new Date().toISOString()
+								};
+							} else if (parsed.id && typeof parsed.id === 'string') {
+								// Meta event with insight ID
+								freshReport = {
+									id: parsed.id,
+									content: freshReport?.content ?? '',
+									createdAt: freshReport?.createdAt ?? new Date().toISOString()
+								};
+							}
+						} catch {
+							// Ignore malformed JSON
+						}
+					}
+				}
+			}
+
 			reportThumbs = null;
 		} catch {
 			generateError = 'Network error. Please try again.';
+			if (!freshReport?.content) {
+				freshReport = null;
+			}
 		} finally {
 			generating = false;
 		}
@@ -145,14 +208,33 @@
 		</div>
 
 		{#if generating}
-			<div class="flex flex-col items-center justify-center py-12">
-				<svg class="mb-3 h-8 w-8 animate-spin text-purple-500" fill="none" viewBox="0 0 24 24">
-					<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-					<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-				</svg>
-				<p class="text-sm font-medium text-purple-700">Analyzing your full cycle data...</p>
-				<p class="mt-1 text-xs text-neutral-500">This may take 10-15 seconds</p>
-			</div>
+			{#if reportSections.length > 0}
+				<!-- Streaming: show sections as they arrive -->
+				<div class="space-y-3">
+					{#each reportSections as section}
+						<div class="rounded-lg border-l-4 bg-white/80 p-4 {getSectionColor(section.title)} animate-in fade-in">
+							<h3 class="mb-2 text-sm font-bold text-neutral-900">{section.title}</h3>
+							<div class="whitespace-pre-line text-sm leading-relaxed text-neutral-700">{section.body}</div>
+						</div>
+					{/each}
+				</div>
+				<div class="mt-3 flex items-center gap-2 text-xs text-purple-600">
+					<svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+						<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+					</svg>
+					<span class="font-medium">Generating...</span>
+				</div>
+			{:else}
+				<div class="flex flex-col items-center justify-center py-12">
+					<svg class="mb-3 h-8 w-8 animate-spin text-purple-500" fill="none" viewBox="0 0 24 24">
+						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+						<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+					</svg>
+					<p class="text-sm font-medium text-purple-700">Analyzing your full cycle data...</p>
+					<p class="mt-1 text-xs text-neutral-500">Sections will appear as they're generated</p>
+				</div>
+			{/if}
 		{:else if reportSections.length > 0}
 			<div class="space-y-3">
 				{#each reportSections as section}

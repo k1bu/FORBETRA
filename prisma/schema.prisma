@@ -57,6 +57,7 @@ model User {
   reminderDays String? // 'wednesday_friday' or 'tuesday_thursday'
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  coachOnboardingCompletedAt DateTime?
 
   objectives           Objective[]
   cycles               Cycle[]
@@ -104,6 +105,7 @@ model Cycle {
   checkInFrequency    String      @default("3x")    // "3x" | "2x" | "1x"
   stakeholderCadence  String      @default("weekly")
   autoThrottle        Boolean     @default(true)
+  revealScores        Boolean     @default(true)
   createdAt           DateTime    @default(now())
   updatedAt           DateTime    @updatedAt
 

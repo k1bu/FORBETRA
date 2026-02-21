@@ -49,10 +49,42 @@ export const remindOverduePrompts = async () => {
 		});
 
 		if (overdue.length > 0) {
+			// Compute current streak for motivational messaging
+			let currentStreak = 0;
+			try {
+				const completedSet = new Set(
+					cycle.reflections.map((r) => `${r.weekNumber}-${r.reflectionType}`)
+				);
+				const streakExpected: Array<{ week: number; type: string }> = [];
+				for (let w = 1; w <= currentWeek; w++) {
+					if (freq === '1x') {
+						streakExpected.push({ week: w, type: 'RATING_A' });
+					} else if (freq === '2x') {
+						streakExpected.push({ week: w, type: 'INTENTION' });
+						streakExpected.push({ week: w, type: 'RATING_A' });
+					} else {
+						streakExpected.push({ week: w, type: 'INTENTION' });
+						streakExpected.push({ week: w, type: 'RATING_A' });
+						streakExpected.push({ week: w, type: 'RATING_B' });
+					}
+				}
+				for (let i = streakExpected.length - 1; i >= 0; i--) {
+					const expected = streakExpected[i];
+					if (completedSet.has(`${expected.week}-${expected.type}`)) {
+						currentStreak++;
+					} else {
+						break;
+					}
+				}
+			} catch {
+				// Streak computation is non-critical
+			}
+
 			try {
 				const template = emailTemplates.reminderOverdue({
 					individualName: objective.user.name || undefined,
 					objectiveTitle: objective.title,
+					currentStreak,
 					appUrl:
 						process.env.PUBLIC_APP_URL || process.env.VERCEL_URL
 							? `https://${process.env.PUBLIC_APP_URL || process.env.VERCEL_URL}`

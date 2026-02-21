@@ -462,9 +462,50 @@ export const actions: Actions = {
 				}
 			});
 
+			// Compute streak after successful upsert
+			let streak = 0;
+			try {
+				const allReflections = await prisma.reflection.findMany({
+					where: { cycleId: cycle.id },
+					select: { weekNumber: true, reflectionType: true }
+				});
+
+				const completedSet = new Set(
+					allReflections.map((r) => `${r.weekNumber}-${r.reflectionType}`)
+				);
+
+				const checkInFrequency = cycle.checkInFrequency ?? '3x';
+				const currentWeek = computeWeekNumber(cycle.startDate);
+				const expectedSequence: Array<{ week: number; type: string }> = [];
+				for (let w = 1; w <= currentWeek; w++) {
+					if (checkInFrequency === '1x') {
+						expectedSequence.push({ week: w, type: 'RATING_A' });
+					} else if (checkInFrequency === '2x') {
+						expectedSequence.push({ week: w, type: 'INTENTION' });
+						expectedSequence.push({ week: w, type: 'RATING_A' });
+					} else {
+						expectedSequence.push({ week: w, type: 'INTENTION' });
+						expectedSequence.push({ week: w, type: 'RATING_A' });
+						expectedSequence.push({ week: w, type: 'RATING_B' });
+					}
+				}
+
+				for (let i = expectedSequence.length - 1; i >= 0; i--) {
+					const expected = expectedSequence[i];
+					if (completedSet.has(`${expected.week}-${expected.type}`)) {
+						streak++;
+					} else {
+						break;
+					}
+				}
+			} catch {
+				// Streak computation is non-critical
+			}
+
 			return {
 				success: true,
-				type: checkInInfo.type
+				type: checkInInfo.type,
+				streak
 			};
 		} catch (error) {
 			console.error('Failed to record check-in', error);

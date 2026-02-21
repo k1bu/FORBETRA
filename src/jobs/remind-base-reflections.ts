@@ -100,6 +100,38 @@ export const remindBaseReflections = async () => {
 			continue;
 		}
 
+		// Compute current streak for motivational messaging
+		let currentStreak = 0;
+		try {
+			const completedSet = new Set(
+				cycle.reflections.map((r) => `${r.weekNumber}-${r.reflectionType}`)
+			);
+			const freq = cycle.checkInFrequency ?? '3x';
+			const expectedSequence: Array<{ week: number; type: string }> = [];
+			for (let w = 1; w <= currentWeek; w++) {
+				if (freq === '1x') {
+					expectedSequence.push({ week: w, type: 'RATING_A' });
+				} else if (freq === '2x') {
+					expectedSequence.push({ week: w, type: 'INTENTION' });
+					expectedSequence.push({ week: w, type: 'RATING_A' });
+				} else {
+					expectedSequence.push({ week: w, type: 'INTENTION' });
+					expectedSequence.push({ week: w, type: 'RATING_A' });
+					expectedSequence.push({ week: w, type: 'RATING_B' });
+				}
+			}
+			for (let i = expectedSequence.length - 1; i >= 0; i--) {
+				const expected = expectedSequence[i];
+				if (completedSet.has(`${expected.week}-${expected.type}`)) {
+					currentStreak++;
+				} else {
+					break;
+				}
+			}
+		} catch {
+			// Streak computation is non-critical
+		}
+
 		// Send reminder email
 		try {
 			const template = emailTemplates.reminderBase({
@@ -107,7 +139,8 @@ export const remindBaseReflections = async () => {
 				objectiveTitle: objective.title,
 				reflectionType: reflectionType.toLowerCase(),
 				weekNumber: currentWeek,
-				appUrl: baseUrl
+				appUrl: baseUrl,
+				currentStreak
 			});
 			await sendEmail({
 				to: objective.user.email,

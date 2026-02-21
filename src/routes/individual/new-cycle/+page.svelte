@@ -12,6 +12,7 @@
 	let checkInFrequency: '3x' | '2x' | '1x' = $state((data.defaults.checkInFrequency as '3x' | '2x' | '1x') ?? '3x');
 	let stakeholderCadence: 'weekly' | 'biweekly' = $state((data.defaults.stakeholderCadence as 'weekly' | 'biweekly') ?? 'weekly');
 	let reminderDays: 'wednesday_friday' | 'tuesday_thursday' = $state('wednesday_friday');
+	let revealScores = $state(true);
 
 	function selectPresetDuration(weeks: number) {
 		cycleDurationMode = 'preset';
@@ -115,6 +116,7 @@
 			<input type="hidden" name="checkInFrequency" value={checkInFrequency} />
 			<input type="hidden" name="stakeholderCadence" value={stakeholderCadence} />
 			<input type="hidden" name="cycleDurationWeeks" value={cycleDurationWeeks} />
+			<input type="hidden" name="revealScores" value={revealScores ? 'true' : 'false'} />
 
 			<div class="rounded-2xl border border-slate-200 bg-white p-8 shadow-lg space-y-6">
 				<div class="space-y-2">
@@ -298,6 +300,22 @@
 								</label>
 							{/each}
 						</div>
+					</div>
+
+					<!-- Reveal Scores Toggle -->
+					<div class="space-y-2 md:col-span-2">
+						<label class="flex items-center gap-3 cursor-pointer">
+							<input
+								type="checkbox"
+								checked={revealScores}
+								onchange={() => (revealScores = !revealScores)}
+								class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+							/>
+							<div>
+								<span class="text-sm font-semibold text-slate-700">Allow stakeholders to see my self-scores after they submit feedback</span>
+								<p class="text-xs text-slate-500">When enabled, stakeholders see how you rated yourself so they can compare perspectives.</p>
+							</div>
+						</label>
 					</div>
 
 					<!-- Stakeholder Cadence -->

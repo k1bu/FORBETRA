@@ -119,6 +119,7 @@ export const actions: Actions = {
 			| 'tuesday_thursday';
 		const checkInFrequency = (formData.get('checkInFrequency') ?? '3x').toString() as '3x' | '2x' | '1x';
 		const stakeholderCadence = (formData.get('stakeholderCadence') ?? 'weekly').toString() as 'weekly' | 'biweekly';
+		const revealScores = (formData.get('revealScores') ?? 'true').toString() === 'true';
 
 		const subgoals = Array.from({ length: MAX_SUBGOALS }, (_, index) => {
 			const label = (formData.get(`subgoalLabel${index + 1}`) ?? '').toString().trim();
@@ -281,7 +282,8 @@ export const actions: Actions = {
 								startDate,
 								endDate,
 								checkInFrequency: data.checkInFrequency,
-								stakeholderCadence: data.stakeholderCadence
+								stakeholderCadence: data.stakeholderCadence,
+								revealScores
 							}
 						});
 					}
@@ -368,7 +370,8 @@ export const actions: Actions = {
 							endDate,
 							status: 'ACTIVE',
 							checkInFrequency: data.checkInFrequency,
-							stakeholderCadence: data.stakeholderCadence
+							stakeholderCadence: data.stakeholderCadence,
+							revealScores
 						}
 					});
 

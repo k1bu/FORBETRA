@@ -176,15 +176,22 @@
 		<p class="text-sm text-neutral-500">
 			{#if data.isFirstVisit}Welcome to Forbetra{:else}Welcome back{/if}
 		</p>
-		{#if data.currentWeek}
-			{#if data.cycle?.isCycleCompleted}
-				<span class="rounded-full bg-green-100 px-3 py-0.5 text-xs font-semibold text-green-700">Cycle Complete</span>
-			{:else if data.cycle?.isOverdue}
-				<span class="rounded-full bg-amber-100 px-3 py-0.5 text-xs font-semibold text-amber-700">Week {data.currentWeek} &middot; Cycle ended at week {data.totalWeeks}</span>
-			{:else}
-				<span class="rounded-full bg-blue-100 px-3 py-0.5 text-xs font-semibold text-blue-700">Week {data.currentWeek}{#if data.totalWeeks} of {data.totalWeeks}{/if}</span>
+		<div class="flex items-center gap-2">
+			{#if data.summary?.currentStreak && data.summary.currentStreak > 0}
+				<span class="rounded-full bg-orange-100 px-3 py-0.5 text-xs font-semibold text-orange-700">
+					🔥 {data.summary.currentStreak}{#if data.summary.currentStreak >= 12}+ streak!{:else if data.summary.currentStreak >= 9} streak!{:else if data.summary.currentStreak >= 6} streak{:else if data.summary.currentStreak >= 3} streak{:else} streak{/if}
+				</span>
 			{/if}
-		{/if}
+			{#if data.currentWeek}
+				{#if data.cycle?.isCycleCompleted}
+					<span class="rounded-full bg-green-100 px-3 py-0.5 text-xs font-semibold text-green-700">Cycle Complete</span>
+				{:else if data.cycle?.isOverdue}
+					<span class="rounded-full bg-amber-100 px-3 py-0.5 text-xs font-semibold text-amber-700">Week {data.currentWeek} &middot; Cycle ended at week {data.totalWeeks}</span>
+				{:else}
+					<span class="rounded-full bg-blue-100 px-3 py-0.5 text-xs font-semibold text-blue-700">Week {data.currentWeek}{#if data.totalWeeks} of {data.totalWeeks}{/if}</span>
+				{/if}
+			{/if}
+		</div>
 	</div>
 
 	<!-- Cycle completed banner -->

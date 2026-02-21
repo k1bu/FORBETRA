@@ -30,6 +30,7 @@ export const load: PageServerLoad = async ({ params, url }) => {
 				objectiveTitle: 'Improve executive presence'
 			},
 			isPreview: true,
+			isFirstFeedback: true,
 			previousRatings: {
 				weekNumber: 2,
 				effortScore: 7,
@@ -60,9 +61,11 @@ export const load: PageServerLoad = async ({ params, url }) => {
 					cycle: {
 						select: {
 							label: true,
+							revealScores: true,
 							objective: {
 								select: {
-									title: true
+									title: true,
+									description: true
 								}
 							}
 						}
@@ -150,6 +153,8 @@ export const load: PageServerLoad = async ({ params, url }) => {
 		}
 	}
 
+	const isFirstFeedback = historicRatings.length === 0;
+
 	return {
 		token: token.tokenHash,
 		stakeholder: {
@@ -163,7 +168,9 @@ export const load: PageServerLoad = async ({ params, url }) => {
 			participantName: token.reflection.user.name ?? 'Participant',
 			objectiveTitle: token.reflection.cycle.objective?.title?.trim() || 'the objective'
 		},
+		revealScores: token.reflection.cycle.revealScores,
 		isPreview: false,
+		isFirstFeedback,
 		previousRatings,
 		historicRatings
 	};
@@ -236,6 +243,7 @@ export const actions: Actions = {
 				},
 				cycle: {
 					select: {
+						revealScores: true,
 						objective: {
 							select: {
 								title: true
@@ -296,7 +304,7 @@ export const actions: Actions = {
 
 		return {
 			success: true,
-			individualScores: reflection
+			individualScores: reflection && reflection.cycle.revealScores
 				? {
 						effortScore: reflection.effortScore,
 						performanceScore: reflection.performanceScore,

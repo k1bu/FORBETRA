@@ -47,6 +47,7 @@
 	let reminderDays: 'wednesday_friday' | 'tuesday_thursday' = 'wednesday_friday';
 	let checkInFrequency: '3x' | '2x' | '1x' = (existingData?.checkInFrequency as '3x' | '2x' | '1x') ?? '3x';
 	let stakeholderCadence: 'weekly' | 'biweekly' = (existingData?.stakeholderCadence as 'weekly' | 'biweekly') ?? 'weekly';
+	let revealScores = true;
 
 	let subgoalForms: SubgoalFormValue[] = Array.from({ length: initialSubgoalCount }, (_, index) => ({
 		label: values.subgoals[index]?.label ?? '',
@@ -404,6 +405,7 @@
 				<input type="hidden" name="reminderDays" value={reminderDays} />
 				<input type="hidden" name="checkInFrequency" value={checkInFrequency} />
 				<input type="hidden" name="stakeholderCadence" value={stakeholderCadence} />
+				<input type="hidden" name="revealScores" value={revealScores ? 'true' : 'false'} />
 
 				<!-- Hidden inputs for all form data when on stakeholders step -->
 				{#if currentStep === 'stakeholders'}
@@ -935,6 +937,22 @@
 								<p class="mt-1 text-emerald-800">
 									The people around you see things you can't. Their quick ratings (&lt; 60 sec) reveal blind spots and validate progress.
 								</p>
+							</div>
+
+							<!-- Reveal Scores Toggle -->
+							<div class="mb-6">
+								<label class="flex items-center gap-3 cursor-pointer">
+									<input
+										type="checkbox"
+										checked={revealScores}
+										onchange={() => (revealScores = !revealScores)}
+										class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+									/>
+									<div>
+										<span class="text-sm font-semibold text-slate-700">Allow stakeholders to see my self-scores after they submit feedback</span>
+										<p class="text-xs text-slate-500">When enabled, stakeholders see how you rated yourself so they can compare perspectives.</p>
+									</div>
+								</label>
 							</div>
 
 							<!-- Stakeholder Cadence Selector -->
