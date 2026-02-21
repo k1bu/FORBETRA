@@ -281,24 +281,22 @@ export const actions: Actions = {
 								});
 
 								// Send welcome email to new stakeholder
-								setTimeout(async () => {
-									try {
-										const template = emailTemplates.welcomeStakeholder({
-											individualName: dbUser.name || undefined,
-											stakeholderName: stakeholder.name || undefined,
-											appUrl:
-												process.env.PUBLIC_APP_URL || process.env.VERCEL_URL
-													? `https://${process.env.PUBLIC_APP_URL || process.env.VERCEL_URL}`
-													: 'https://app.forbetra.com'
-										});
-										await sendEmail({
-											to: stakeholder.email,
-											...template
-										});
-									} catch (error) {
-										console.error('[email:error] Failed to send stakeholder welcome email', error);
-									}
-								}, 0);
+								try {
+									const template = emailTemplates.welcomeStakeholder({
+										individualName: dbUser.name || undefined,
+										stakeholderName: stakeholder.name || undefined,
+										appUrl:
+											process.env.PUBLIC_APP_URL || process.env.VERCEL_URL
+												? `https://${process.env.PUBLIC_APP_URL || process.env.VERCEL_URL}`
+												: 'https://app.forbetra.com'
+									});
+									await sendEmail({
+										to: stakeholder.email,
+										...template
+									});
+								} catch (error) {
+									console.error('[email:error] Failed to send stakeholder welcome email', error);
+								}
 							}
 						}
 					}
@@ -369,24 +367,22 @@ export const actions: Actions = {
 								}
 							});
 
-							setTimeout(async () => {
-								try {
-									const template = emailTemplates.welcomeStakeholder({
-										individualName: dbUser.name || undefined,
-										stakeholderName: stakeholder.name || undefined,
-										appUrl:
-											process.env.PUBLIC_APP_URL || process.env.VERCEL_URL
-												? `https://${process.env.PUBLIC_APP_URL || process.env.VERCEL_URL}`
-												: 'https://app.forbetra.com'
-									});
-									await sendEmail({
-										to: stakeholder.email,
-										...template
-									});
-								} catch (error) {
-									console.error('[email:error] Failed to send stakeholder welcome email', error);
-								}
-							}, 0);
+							try {
+								const template = emailTemplates.welcomeStakeholder({
+									individualName: dbUser.name || undefined,
+									stakeholderName: stakeholder.name || undefined,
+									appUrl:
+										process.env.PUBLIC_APP_URL || process.env.VERCEL_URL
+											? `https://${process.env.PUBLIC_APP_URL || process.env.VERCEL_URL}`
+											: 'https://app.forbetra.com'
+								});
+								await sendEmail({
+									to: stakeholder.email,
+									...template
+								});
+							} catch (error) {
+								console.error('[email:error] Failed to send stakeholder welcome email', error);
+							}
 						}
 					}
 

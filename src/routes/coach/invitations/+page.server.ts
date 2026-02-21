@@ -93,7 +93,7 @@ export const actions: Actions = {
 			if (stakeholderCadence) payload.stakeholderCadence = stakeholderCadence;
 		}
 
-		if (!email || !email.includes('@')) {
+		if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
 			return fail(400, {
 				error: 'Please provide a valid email address.',
 				values: { email, name, message }
@@ -182,6 +182,7 @@ export const actions: Actions = {
 			const inviteUrl = new URL(`/coach/invite/${tokenRaw}`, event.url.origin).toString();
 
 			// Send invitation email
+			let emailFailed = false;
 			try {
 				const coachName = dbUser.name ?? 'Your coach';
 				const template = emailTemplates.coachInvitation({
@@ -195,13 +196,15 @@ export const actions: Actions = {
 					...template
 				});
 			} catch (error) {
+				emailFailed = true;
 				console.error('[email:error] Failed to send coach invitation email', error);
 			}
 
 			return {
 				success: true,
 				inviteId: invite.id,
-				inviteUrl
+				inviteUrl,
+				emailFailed
 			};
 		} catch (error) {
 			if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {

@@ -111,6 +111,7 @@ export const actions: Actions = {
 					await tx.stakeholder.deleteMany({
 						where: { OR: [{ individualId: userId }, { invitedById: userId }] }
 					});
+					await tx.insight.deleteMany({ where: { userId: userId } });
 					await tx.token.deleteMany({ where: { userId: userId } });
 
 					// Finally delete the user

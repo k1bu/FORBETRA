@@ -49,7 +49,7 @@ export const actions: Actions = {
 		const name = String(formData.get('name') ?? '').trim();
 		const message = String(formData.get('message') ?? '').trim();
 
-		if (!email || !email.includes('@')) {
+		if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
 			return fail(400, {
 				error: 'Please provide a valid email address.',
 				values: { email, name, message }
@@ -138,6 +138,7 @@ export const actions: Actions = {
 			const inviteUrl = new URL(`/coach/invite/${tokenRaw}`, event.url.origin).toString();
 
 			// Send invitation email
+			let emailFailed = false;
 			try {
 				const coachName = dbUser.name ?? 'Your coach';
 				const template = emailTemplates.coachInvitation({
@@ -151,12 +152,14 @@ export const actions: Actions = {
 					...template
 				});
 			} catch (error) {
+				emailFailed = true;
 				console.error('[email:error] Failed to send coach invitation email', error);
 			}
 
 			return {
 				success: true,
-				inviteUrl
+				inviteUrl,
+				emailFailed
 			};
 		} catch (error) {
 			console.error('Failed to create coach invite during onboarding', error);

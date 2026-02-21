@@ -25,7 +25,7 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
 		path: '/',
 		httpOnly: true,
 		sameSite: 'lax',
-		secure: false,
+		secure: process.env.NODE_ENV === 'production',
 		maxAge: MAX_AGE
 	});
 

@@ -6,12 +6,7 @@ const isAuthorized = (request: Request) => {
 	if (!secret) return false;
 
 	const header = request.headers.get('authorization');
-	if (header && header === `Bearer ${secret}`) {
-		return true;
-	}
-
-	const token = new URL(request.url).searchParams.get('token');
-	return token === secret;
+	return header === `Bearer ${secret}`;
 };
 
 export const GET: RequestHandler = async ({ request }) => {

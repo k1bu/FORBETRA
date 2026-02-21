@@ -122,6 +122,11 @@
 						<span class="text-xl" role="img" aria-label="check mark">✅</span>
 						<p class="font-semibold">Invitation created successfully!</p>
 					</div>
+					{#if form.emailFailed}
+						<div class="rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-xs text-amber-700">
+							The invitation email could not be sent. Please share the link below directly.
+						</div>
+					{/if}
 					{#if form.inviteUrl}
 						<div class="rounded-lg border-2 border-emerald-300 bg-white px-4 py-3 text-xs text-emerald-700">
 							<p class="mb-2 font-bold uppercase tracking-wide text-emerald-800">Invite Link</p>
