@@ -10,6 +10,8 @@
 		getScoreLabel
 	} from '$lib/utils/scoreColors';
 
+	import { CircleCheck, Send } from 'lucide-svelte';
+
 	const { data, form }: { data: PageData; form: (ActionData & { success?: boolean }) | null } = $props();
 
 	// Clear onboarding draft on mount (user reached initial-ratings = onboarding form complete)
@@ -35,6 +37,10 @@
 		isSubmitting = true;
 	};
 </script>
+
+<svelte:head>
+	<title>Initial Ratings | Forbetra</title>
+</svelte:head>
 
 <div class="min-h-screen bg-surface-base">
 	<section class="mx-auto max-w-4xl space-y-8 p-4 pb-12 pt-8">
@@ -66,7 +72,7 @@
 
 			{#if form?.success}
 				<div class="mx-auto max-w-2xl animate-in fade-in slide-in-from-top-2 rounded-xl border border-success/30 bg-success-muted p-6 text-center">
-					<div class="mb-2 text-4xl">🎉</div>
+					<CircleCheck class="mx-auto mb-2 h-10 w-10 text-success" />
 					<p class="text-lg font-semibold text-success">Ratings saved!</p>
 					<p class="mt-1 text-sm text-success">Your starting point has been recorded.</p>
 				</div>
@@ -90,7 +96,7 @@
 				</div>
 
 				<!-- Button Grid -->
-				<div class="mb-5 grid grid-cols-6 gap-2 sm:grid-cols-11">
+				<div class="mb-5 grid grid-cols-6 gap-2 sm:grid-cols-11" role="radiogroup" aria-label="Select effort score">
 					{#each Array(11) as _, i}
 						{@const isSelected = effortScore === i}
 						{@const buttonColors = getButtonSelectedColors(i, 'effort')}
@@ -99,6 +105,7 @@
 						<button
 							type="button"
 							onclick={() => (effortScore = i)}
+							aria-pressed={isSelected}
 							class="flex h-10 w-full items-center justify-center rounded-lg border-2 text-sm font-semibold transition-all {isSelected
 								? buttonColors + ' shadow-md'
 								: 'border-border-default bg-surface-raised text-text-secondary ' + hoverColors} focus:outline-none focus:ring-2 {focusRing} focus:ring-offset-2"
@@ -142,7 +149,7 @@
 				</div>
 
 				<!-- Button Grid -->
-				<div class="mb-5 grid grid-cols-6 gap-2 sm:grid-cols-11">
+				<div class="mb-5 grid grid-cols-6 gap-2 sm:grid-cols-11" role="radiogroup" aria-label="Select performance score">
 					{#each Array(11) as _, i}
 						{@const isSelected = performanceScore === i}
 						{@const buttonColors = getButtonSelectedColors(i, 'performance')}
@@ -151,6 +158,7 @@
 						<button
 							type="button"
 							onclick={() => (performanceScore = i)}
+							aria-pressed={isSelected}
 							class="flex h-10 w-full items-center justify-center rounded-lg border-2 text-sm font-semibold transition-all {isSelected
 								? buttonColors + ' shadow-md'
 								: 'border-border-default bg-surface-raised text-text-secondary ' + hoverColors} focus:outline-none focus:ring-2 {focusRing} focus:ring-offset-2"
@@ -167,9 +175,9 @@
 							performanceScore, 'performance'
 						)} {getScoreColor(performanceScore, 'performance')}"
 					>
-						{getScoreLabel(performanceScore, 'progress')}
+						{getScoreLabel(performanceScore, 'performance')}
 					</div>
-					<span class="text-xs font-medium text-text-tertiary">Relentless commitment</span>
+					<span class="text-xs font-medium text-text-tertiary">Transformative impact</span>
 				</div>
 			</div>
 
@@ -198,7 +206,7 @@
 							<span class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
 							Saving...
 						{:else}
-							<span role="img" aria-label="sparkles">✨</span>
+							<Send class="h-4 w-4" />
 							Continue
 						{/if}
 					</span>

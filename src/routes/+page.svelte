@@ -17,6 +17,11 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Forbetra — You. And Improved.</title>
+	<meta name="description" content="Forbetra is a personal development platform that helps you set goals, reflect weekly, and gather stakeholder feedback to drive real growth." />
+</svelte:head>
+
 <SignedOut>
 	<section class="landing relative flex min-h-screen w-full flex-col bg-surface-base md:flex-row">
 		<nav class="absolute inset-x-0 top-0 z-20 flex items-center justify-start px-8 py-6 text-sm text-text-tertiary" aria-hidden="true"></nav>
@@ -38,7 +43,7 @@
 					<h1 class="text-5xl font-semibold tracking-[0.18em] text-text-primary">FORBETRA</h1>
 					<div class="h-[2px] w-24 rounded-full bg-border-default"></div>
 					<p class="text-lg leading-relaxed text-text-tertiary">
-						FORBETRA is a tool to help you improve. Structure your development, align with stakeholders
+						Forbetra is a tool to help you improve. Structure your development, align with stakeholders
 						invested in your growth, and make true progress.
 					</p>
 				</div>
@@ -69,7 +74,7 @@
 			<div class="absolute inset-0 md:border-l md:border-border-default" aria-hidden="true"></div>
 			<div class="relative z-10 w-full max-w-xl space-y-8 rounded-3xl glass-raised p-12 shadow-[0_30px_60px_-34px_rgba(0,0,0,0.5)] backdrop-blur">
 				<header class="space-y-3 text-center md:text-left">
-					<h2 class="text-3xl font-semibold text-text-primary">Welcome to FORBETRA</h2>
+					<h2 class="text-3xl font-semibold text-text-primary">Welcome to Forbetra</h2>
 					<p class="text-sm text-text-tertiary">Sign in to continue your progress or create a new account to begin.</p>
 				</header>
 				<div class="space-y-4">

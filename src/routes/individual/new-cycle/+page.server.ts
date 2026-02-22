@@ -15,7 +15,7 @@ const newCycleSchema = z.object({
 		.int()
 		.min(4, 'Pick at least 4 weeks')
 		.max(26, 'Keep cycles to 26 weeks or fewer'),
-	checkInFrequency: z.enum(['3x', '2x', '1x']).default('3x'),
+	checkInFrequency: z.string().min(1, 'Select at least one check-in day').default('3x'),
 	stakeholderCadence: z.enum(['weekly', 'biweekly']).default('weekly'),
 	reminderDays: z.enum(['wednesday_friday', 'tuesday_thursday']).default('wednesday_friday')
 });
@@ -86,17 +86,8 @@ export const actions: Actions = {
 	default: async (event) => {
 		const { dbUser } = requireRole(event, 'INDIVIDUAL');
 
-		const objective = await prisma.objective.findFirst({
-			where: { userId: dbUser.id, active: true },
-			orderBy: { createdAt: 'desc' },
-			select: { id: true }
-		});
-
-		if (!objective) {
-			return fail(400, { error: 'No active objective found.' });
-		}
-
 		const formData = await event.request.formData();
+		const cycleMode = (formData.get('cycleMode') ?? 'continue').toString();
 		const reminderDays = (formData.get('reminderDays') ?? 'wednesday_friday').toString();
 		const revealScores = (formData.get('revealScores') ?? 'true').toString() === 'true';
 
@@ -126,19 +117,66 @@ export const actions: Actions = {
 		endDate.setDate(endDate.getDate() + data.cycleDurationWeeks * 7);
 
 		try {
-			// Mark any existing ACTIVE cycles as COMPLETED
-			await prisma.cycle.updateMany({
-				where: {
-					objectiveId: objective.id,
-					status: 'ACTIVE'
-				},
-				data: { status: 'COMPLETED' }
-			});
+			let objectiveId: string;
+
+			if (cycleMode === 'fresh') {
+				// Create a new objective (mark old ones as inactive)
+				const freshTitle = (formData.get('freshObjectiveTitle') ?? '').toString().trim();
+				const freshDescription = (formData.get('freshObjectiveDescription') ?? '').toString().trim();
+
+				if (freshTitle.length < 3) {
+					return fail(400, { error: 'Objective title must be at least 3 characters.', values: Object.fromEntries(formData) as Record<string, string> });
+				}
+
+				// Deactivate all existing active objectives
+				await prisma.objective.updateMany({
+					where: { userId: dbUser.id, active: true },
+					data: { active: false }
+				});
+
+				// Mark any existing ACTIVE cycles as COMPLETED
+				await prisma.cycle.updateMany({
+					where: { userId: dbUser.id, status: 'ACTIVE' },
+					data: { status: 'COMPLETED' }
+				});
+
+				// Create the new objective
+				const newObjective = await prisma.objective.create({
+					data: {
+						userId: dbUser.id,
+						title: freshTitle,
+						description: freshDescription || null,
+						active: true
+					}
+				});
+				objectiveId = newObjective.id;
+			} else {
+				// Continue with existing objective
+				const objective = await prisma.objective.findFirst({
+					where: { userId: dbUser.id, active: true },
+					orderBy: { createdAt: 'desc' },
+					select: { id: true }
+				});
+
+				if (!objective) {
+					return fail(400, { error: 'No active objective found.' });
+				}
+				objectiveId = objective.id;
+
+				// Mark any existing ACTIVE cycles as COMPLETED
+				await prisma.cycle.updateMany({
+					where: {
+						objectiveId: objectiveId,
+						status: 'ACTIVE'
+					},
+					data: { status: 'COMPLETED' }
+				});
+			}
 
 			await prisma.cycle.create({
 				data: {
 					userId: dbUser.id,
-					objectiveId: objective.id,
+					objectiveId,
 					label: data.cycleLabel,
 					startDate,
 					endDate,

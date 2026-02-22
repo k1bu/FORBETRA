@@ -1,5 +1,21 @@
 <script lang="ts">
 	import type { ActionData, PageData } from './$types';
+	import { enhance } from '$app/forms';
+
+	import { CheckCircle, Copy, Check } from 'lucide-svelte';
+
+	let copiedLink = $state<string | null>(null);
+	let submittingStakeholderId = $state<string | null>(null);
+
+	const copyToClipboard = async (url: string) => {
+		try {
+			await navigator.clipboard.writeText(url);
+			copiedLink = url;
+			setTimeout(() => {
+				copiedLink = null;
+			}, 2000);
+		} catch {}
+	};
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
 
@@ -18,7 +34,7 @@
 	const stakeholderSuccess = form?.action === 'stakeholder' && form?.success ? true : false;
 
 	const formatDateTime = (value: string | null) => {
-		if (!value) return '—';
+		if (!value) return '\u2014';
 		return new Intl.DateTimeFormat('en-US', {
 			dateStyle: 'medium',
 			timeStyle: 'short'
@@ -26,19 +42,15 @@
 	};
 </script>
 
+<svelte:head>
+	<title>Stakeholders | Forbetra</title>
+</svelte:head>
+
 <section class="mx-auto flex max-w-6xl flex-col gap-8 p-4 pb-12">
 	<!-- Header -->
-	<header class="flex items-center justify-between">
-		<div>
-			<h1 class="text-3xl font-bold text-text-primary">Stakeholders</h1>
-			<p class="mt-1 text-text-secondary">Manage the people who provide feedback on your progress</p>
-		</div>
-		<a
-			href="/individual"
-			class="rounded-lg border border-border-strong bg-surface-raised px-4 py-2 text-sm font-semibold text-text-secondary transition-all hover:border-accent/30 hover:bg-accent-muted hover:text-accent"
-		>
-			← Back to Hub
-		</a>
+	<header>
+		<h1 class="text-3xl font-bold text-text-primary">Stakeholders</h1>
+		<p class="mt-1 text-text-secondary">Manage the people who provide feedback on your progress</p>
 	</header>
 
 	{#if form?.action === 'feedback'}
@@ -48,8 +60,25 @@
 			</div>
 		{:else if form.feedbackLink}
 			<div class="rounded-xl border border-success/20 bg-success-muted p-4 text-sm text-success">
-				<p class="mb-2 font-semibold">✅ Feedback link generated!</p>
-				<p class="mb-2 font-mono break-all text-xs">{form.feedbackLink}</p>
+				<p class="mb-2 font-semibold flex items-center gap-1.5"><CheckCircle class="h-4 w-4" /> Feedback link generated!</p>
+				<div class="mb-2 flex items-center gap-2">
+				<p class="font-mono break-all text-xs flex-1">{form.feedbackLink}</p>
+				<button
+					type="button"
+					onclick={() => copyToClipboard(form.feedbackLink ?? '')}
+					class="shrink-0 rounded-md border border-success/30 bg-success-muted p-1.5 text-success transition-all hover:bg-success/20"
+					aria-label="Copy feedback link"
+				>
+					{#if copiedLink === form.feedbackLink}
+						<Check class="h-4 w-4" />
+					{:else}
+						<Copy class="h-4 w-4" />
+					{/if}
+				</button>
+				{#if copiedLink === form.feedbackLink}
+					<span class="text-xs font-medium text-success">Copied</span>
+				{/if}
+			</div>
 				{#if form.expiresAt}
 					<p class="text-xs text-success">Expires {formatDateTime(form.expiresAt)}.</p>
 				{/if}
@@ -81,17 +110,36 @@
 										{formatDateTime(stakeholder.lastFeedback.submittedAt)}
 									</p>
 									{#if stakeholder.lastFeedback.isCurrentWeek}
-										<p class="mt-1 font-semibold text-success">✅ Responded this week</p>
+										<p class="mt-1 font-semibold text-success flex items-center gap-1"><CheckCircle class="h-3.5 w-3.5" /> Responded this week</p>
 									{/if}
 								</div>
 							{/if}
-							<form method="post" action="?/generateFeedback" class="mt-3">
+							<form
+								method="post"
+								action="?/generateFeedback"
+								class="mt-3"
+								use:enhance={() => {
+									submittingStakeholderId = stakeholder.id;
+									return async ({ update }) => {
+										await update();
+										submittingStakeholderId = null;
+									};
+								}}
+							>
 								<input type="hidden" name="stakeholderId" value={stakeholder.id} />
 								<button
 									type="submit"
-									class="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-xs font-semibold text-text-secondary transition-all hover:border-accent/30 hover:bg-accent-muted hover:text-accent"
+									disabled={submittingStakeholderId === stakeholder.id}
+									class="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-xs font-semibold text-text-secondary transition-all hover:border-accent/30 hover:bg-accent-muted hover:text-accent disabled:cursor-not-allowed disabled:opacity-60"
 								>
-									Generate Feedback Link
+									{#if submittingStakeholderId === stakeholder.id}
+										<span class="inline-flex items-center gap-2">
+											<span class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-text-secondary border-t-transparent"></span>
+											Generating...
+										</span>
+									{:else}
+										Generate Feedback Link
+									{/if}
 								</button>
 							</form>
 						</div>
@@ -109,7 +157,7 @@
 			<h2 class="text-lg font-bold text-text-primary">Add a Stakeholder</h2>
 			<div class="rounded-2xl border border-border-default bg-surface-raised p-6">
 				<p class="mb-4 text-sm text-text-secondary">
-					Invite 3–5 people who regularly observe your leadership.
+					Invite 3\u20135 people who regularly observe your development.
 				</p>
 				{#if stakeholderError}
 					<div class="mb-3 rounded-lg border border-error/20 bg-error-muted px-3 py-2 text-xs text-error">
@@ -117,40 +165,56 @@
 					</div>
 				{:else if stakeholderSuccess}
 					<div class="mb-3 rounded-lg border border-success/20 bg-success-muted px-3 py-2 text-xs text-success">
-						✅ Stakeholder added successfully!
+						<CheckCircle class="h-3.5 w-3.5 inline" /> Stakeholder added successfully!
 					</div>
 				{/if}
 				<form method="post" action="?/addStakeholder" class="space-y-3">
-					<input
-						name="name"
-						type="text"
-						class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
-						placeholder="Name"
-						value={stakeholderFormValues.name}
-						required
-					/>
-					<input
-						name="email"
-						type="email"
-						class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
-						placeholder="Email"
-						value={stakeholderFormValues.email}
-						required
-					/>
-					<input
-						name="relationship"
-						type="text"
-						class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
-						placeholder="Relationship (optional)"
-						value={stakeholderFormValues.relationship}
-					/>
-					<input
-						name="phone"
-						type="tel"
-						class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
-						placeholder="Phone (optional)"
-						value={stakeholderFormValues.phone}
-					/>
+					<div>
+						<label for="stakeholder-name" class="mb-1 block text-sm font-medium text-text-primary">Name</label>
+						<input
+							id="stakeholder-name"
+							name="name"
+							type="text"
+							class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
+							placeholder="Name"
+							value={stakeholderFormValues.name}
+							required
+						/>
+					</div>
+					<div>
+						<label for="stakeholder-email" class="mb-1 block text-sm font-medium text-text-primary">Email</label>
+						<input
+							id="stakeholder-email"
+							name="email"
+							type="email"
+							class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
+							placeholder="Email"
+							value={stakeholderFormValues.email}
+							required
+						/>
+					</div>
+					<div>
+						<label for="stakeholder-relationship" class="mb-1 block text-sm font-medium text-text-primary">Relationship <span class="font-normal text-text-tertiary">(optional)</span></label>
+						<input
+							id="stakeholder-relationship"
+							name="relationship"
+							type="text"
+							class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
+							placeholder="Relationship"
+							value={stakeholderFormValues.relationship}
+						/>
+					</div>
+					<div>
+						<label for="stakeholder-phone" class="mb-1 block text-sm font-medium text-text-primary">Phone <span class="font-normal text-text-tertiary">(optional)</span></label>
+						<input
+							id="stakeholder-phone"
+							name="phone"
+							type="tel"
+							class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
+							placeholder="Phone"
+							value={stakeholderFormValues.phone}
+						/>
+					</div>
 					<button
 						type="submit"
 						class="w-full rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-accent-hover"

@@ -89,7 +89,7 @@ export const getFocusRing = (score: number, type: ScoreType): string => {
 };
 
 // --- Score labels ---
-export const getScoreLabel = (score: number, type: 'effort' | 'progress'): string => {
+export const getScoreLabel = (score: number, type: 'effort' | 'performance' | 'progress'): string => {
 	if (type === 'effort') {
 		if (score <= 2) return 'Rarely intentional';
 		if (score <= 4) return 'Sporadic effort';

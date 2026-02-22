@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { addToast } from '$lib/stores/toasts.svelte';
-	import { Mail, AlertTriangle, CircleCheck, Clock, Lightbulb, Inbox, Send } from 'lucide-svelte';
+	import { Mail, AlertTriangle, CircleCheck, Clock, Lightbulb, Inbox, Send, Copy, Check } from 'lucide-svelte';
 	import type { PageData, ActionData } from './$types';
 
 	type PrefillSubgoal = { label: string; description: string };
@@ -9,8 +9,22 @@
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
 
+	let copiedInviteUrl = $state(false);
+
+	async function copyInviteUrl(url: string) {
+		try {
+			await navigator.clipboard.writeText(url);
+			copiedInviteUrl = true;
+			setTimeout(() => {
+				copiedInviteUrl = false;
+			}, 2000);
+		} catch {
+			// Fallback: do nothing
+		}
+	}
+
 	const defaultInviteMessage =
-		`Hi there—I'd love for you to join me in FORBETRA so we can track your progress together. ` +
+		`Hi there—I'd love for you to join me in Forbetra so we can track your progress together. ` +
 		`The link above will guide you through creating your account and connecting with me as your coach.`;
 
 	let showPrefill = $state(false);
@@ -134,6 +148,10 @@
 	];
 </script>
 
+<svelte:head>
+	<title>Invitations | Forbetra</title>
+</svelte:head>
+
 <section class="mx-auto flex max-w-7xl flex-col gap-8 p-4 pb-12">
 	<!-- Email mode banner -->
 	{#if data.emailMode === 'mock'}
@@ -166,7 +184,7 @@
 					<h2 class="text-xl font-bold text-text-primary">Invite an Individual</h2>
 				</div>
 				<p class="text-sm text-text-secondary">
-					Send a secure invite so they join FORBETRA automatically linked to you.
+					Send a secure invite so they join Forbetra automatically linked to you.
 				</p>
 			</header>
 
@@ -229,9 +247,26 @@
 					{#if form.inviteUrl}
 						<div class="rounded-lg border border-success/50 bg-surface-raised px-4 py-3 text-xs text-success">
 							<p class="mb-2 font-bold uppercase tracking-wide text-success">Invite Link</p>
-							<p class="mb-2 break-all font-mono font-medium">{form.inviteUrl}</p>
+							<div class="mb-2 flex items-center gap-2">
+								<p class="flex-1 break-all font-mono font-medium">{form.inviteUrl}</p>
+								<button
+									type="button"
+									onclick={() => copyInviteUrl(form?.inviteUrl ?? '')}
+									class="shrink-0 rounded-md border border-success/30 bg-success-muted p-1.5 text-success transition-all hover:bg-success/20"
+									aria-label="Copy invite link"
+								>
+									{#if copiedInviteUrl}
+										<Check class="h-4 w-4" />
+									{:else}
+										<Copy class="h-4 w-4" />
+									{/if}
+								</button>
+								{#if copiedInviteUrl}
+									<span class="text-xs font-medium text-success">Copied!</span>
+								{/if}
+							</div>
 							<p class="text-success">
-								<Lightbulb class="h-3.5 w-3.5 inline text-text-muted" /> Copy and share this link. It expires in 30 days.
+								<Lightbulb class="h-3.5 w-3.5 inline text-text-muted" /> Share this link with your client. It expires in 30 days.
 							</p>
 						</div>
 					{/if}
@@ -301,16 +336,16 @@
 					{#if showPrefill}
 						<div class="space-y-4 border-t border-border-default px-4 py-4">
 							<div class="space-y-1">
-								<label class="text-xs font-semibold text-text-secondary">Objective Title</label>
-								<input type="text" name="prefillObjectiveTitle" bind:value={prefillObjectiveTitle} placeholder="e.g., Enhance strategic thinking" class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary" />
+								<label for="prefillObjectiveTitle" class="text-xs font-semibold text-text-secondary">Objective Title</label>
+								<input id="prefillObjectiveTitle" type="text" name="prefillObjectiveTitle" bind:value={prefillObjectiveTitle} placeholder="e.g., Enhance strategic thinking" class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary" />
 							</div>
 							<div class="space-y-1">
-								<label class="text-xs font-semibold text-text-secondary">Objective Description</label>
-								<textarea name="prefillObjectiveDescription" bind:value={prefillObjectiveDescription} rows="2" placeholder="Why this matters..." class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary"></textarea>
+								<label for="prefillObjectiveDescription" class="text-xs font-semibold text-text-secondary">Objective Description</label>
+								<textarea id="prefillObjectiveDescription" name="prefillObjectiveDescription" bind:value={prefillObjectiveDescription} rows="2" placeholder="Why this matters..." class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary"></textarea>
 							</div>
 							<!-- Subgoals -->
 							<div class="space-y-2">
-								<label class="text-xs font-semibold text-text-secondary">Subgoals (up to 3)</label>
+								<p class="text-xs font-semibold text-text-secondary">Sub-objectives (up to 3)</p>
 								{#each prefillSubgoals as subgoal, i}
 									<div class="flex gap-2">
 										<input type="text" bind:value={subgoal.label} placeholder="Behavior label" class="flex-1 rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-sm text-text-primary" />
@@ -321,12 +356,12 @@
 									</div>
 								{/each}
 								{#if prefillSubgoals.length < 3}
-									<button type="button" onclick={addPrefillSubgoal} class="text-xs font-medium text-accent hover:text-accent-hover">+ Add subgoal</button>
+									<button type="button" onclick={addPrefillSubgoal} class="text-xs font-medium text-accent hover:text-accent-hover">+ Add sub-objective</button>
 								{/if}
 							</div>
 							<!-- Stakeholders -->
 							<div class="space-y-2">
-								<label class="text-xs font-semibold text-text-secondary">Stakeholders (up to 3)</label>
+								<p class="text-xs font-semibold text-text-secondary">Stakeholders (up to 3)</p>
 								{#each prefillStakeholders as sh, i}
 									<div class="flex gap-2">
 										<input type="text" bind:value={sh.name} placeholder="Name" class="flex-1 rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-sm text-text-primary" />
@@ -343,24 +378,24 @@
 							<!-- Cycle settings -->
 							<div class="grid gap-3 md:grid-cols-3">
 								<div class="space-y-1">
-									<label class="text-xs font-semibold text-text-secondary">Duration</label>
-									<select name="prefillCycleDurationWeeks" bind:value={prefillCycleDurationWeeks} class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-sm text-text-primary">
+									<label for="prefillCycleDurationWeeks" class="text-xs font-semibold text-text-secondary">Duration</label>
+									<select id="prefillCycleDurationWeeks" name="prefillCycleDurationWeeks" bind:value={prefillCycleDurationWeeks} class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-sm text-text-primary">
 										<option value="8">8 weeks</option>
 										<option value="12">12 weeks</option>
 										<option value="16">16 weeks</option>
 									</select>
 								</div>
 								<div class="space-y-1">
-									<label class="text-xs font-semibold text-text-secondary">Check-in Frequency</label>
-									<select name="prefillCheckInFrequency" bind:value={prefillCheckInFrequency} class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-sm text-text-primary">
+									<label for="prefillCheckInFrequency" class="text-xs font-semibold text-text-secondary">Check-in Frequency</label>
+									<select id="prefillCheckInFrequency" name="prefillCheckInFrequency" bind:value={prefillCheckInFrequency} class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-sm text-text-primary">
 										<option value="3x">3x/week</option>
 										<option value="2x">2x/week</option>
 										<option value="1x">1x/week</option>
 									</select>
 								</div>
 								<div class="space-y-1">
-									<label class="text-xs font-semibold text-text-secondary">Stakeholder Cadence</label>
-									<select name="prefillStakeholderCadence" bind:value={prefillStakeholderCadence} class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-sm text-text-primary">
+									<label for="prefillStakeholderCadence" class="text-xs font-semibold text-text-secondary">Stakeholder Cadence</label>
+									<select id="prefillStakeholderCadence" name="prefillStakeholderCadence" bind:value={prefillStakeholderCadence} class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-sm text-text-primary">
 										<option value="weekly">Weekly</option>
 										<option value="biweekly">Biweekly</option>
 									</select>

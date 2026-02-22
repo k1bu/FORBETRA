@@ -52,7 +52,7 @@
 	const individualFlows = $derived<FlowCard[]>([
 		{
 			label: 'Onboarding',
-			description: 'Objective setup, subgoals, cycle config, stakeholder invites',
+			description: 'Objective setup, sub-objectives, cycle config, stakeholder invites',
 			action: () => impersonateAndOpen(selectedIndividualId, '/onboarding?preview=true')
 		},
 		{

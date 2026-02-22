@@ -162,6 +162,7 @@ export const load: PageServerLoad = async (event) => {
 	const clientComparison = clientSummaries
 		.filter((c) => c.objective && !c.archived)
 		.map((c) => ({
+			clientId: c.id,
 			name: c.name,
 			objective: c.objective?.title ?? '',
 			avgEffort: c.objective?.insights?.avgEffort ?? null,

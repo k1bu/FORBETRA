@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
+	import { enhance } from '$app/forms';
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
 
@@ -9,8 +10,41 @@
 	let cycleDurationWeeks = $state(String(formValues?.cycleDurationWeeks ?? data.defaults.durationWeeks));
 	let cycleDurationMode: 'preset' | 'custom' = $state([8, 12, 16].includes(Number(cycleDurationWeeks)) ? 'preset' : 'custom');
 	let customDurationWeeks = $state(cycleDurationMode === 'custom' ? cycleDurationWeeks : '');
-	let checkInFrequency: '3x' | '2x' | '1x' = $state((data.defaults.checkInFrequency as '3x' | '2x' | '1x') ?? '3x');
+	// Day picker for unified check-ins
+	const allDays = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
+	const dayLabels: Record<string, string> = { mon: 'Mon', tue: 'Tue', wed: 'Wed', thu: 'Thu', fri: 'Fri', sat: 'Sat', sun: 'Sun' };
+
+	function parseExistingDays(freq: string): string[] {
+		if (freq === '3x') return ['mon', 'wed', 'fri'];
+		if (freq === '2x') return ['tue', 'fri'];
+		if (freq === '1x') return ['fri'];
+		const days = freq.split(',').map(d => d.trim().toLowerCase()).filter(d => allDays.includes(d as any));
+		return days.length > 0 ? days : ['tue', 'fri'];
+	}
+
+	let selectedDays = $state<string[]>(parseExistingDays(data.defaults.checkInFrequency ?? '3x'));
+	const checkInFrequency = $derived(selectedDays.length > 0 ? selectedDays.join(',') : 'fri');
+
+	function toggleDay(day: string) {
+		if (selectedDays.includes(day)) {
+			if (selectedDays.length > 1) {
+				selectedDays = selectedDays.filter(d => d !== day);
+			}
+		} else {
+			selectedDays = [...selectedDays, day];
+		}
+	}
+
+	function applyPreset(preset: string[]) {
+		selectedDays = [...preset];
+	}
+	// Cycle mode: continue with same objective or start fresh
+	let cycleMode: 'continue' | 'fresh' = $state('continue');
+	let freshObjectiveTitle = $state('');
+	let freshObjectiveDescription = $state('');
+
 	let stakeholderCadence: 'weekly' | 'biweekly' = $state((data.defaults.stakeholderCadence as 'weekly' | 'biweekly') ?? 'weekly');
+	let isSubmitting = $state(false);
 	let reminderDays: 'wednesday_friday' | 'tuesday_thursday' = $state('wednesday_friday');
 	let revealScores = $state(true);
 
@@ -43,24 +77,22 @@
 	}
 
 	const weekPreviewDays = $derived((() => {
-		const midDay = reminderDays === 'wednesday_friday' ? 'WED' : 'TUE';
-		const endDay = reminderDays === 'wednesday_friday' ? 'FRI' : 'THU';
-		if (checkInFrequency === '3x') {
-			return [
-				{ day: 'MON', label: 'Set your intention', time: '~2 min' },
-				{ day: midDay, label: 'Rate your effort', time: '~30 sec' },
-				{ day: endDay, label: 'Rate your performance', time: '~30 sec' }
-			];
-		} else if (checkInFrequency === '2x') {
-			return [
-				{ day: 'MON', label: 'Set your intention', time: '~2 min' },
-				{ day: endDay, label: 'Rate effort + performance', time: '~1 min' }
-			];
-		} else {
-			return [{ day: endDay, label: 'Weekly reflection', time: '~2 min' }];
+		const days: Array<{ day: string; label: string; time: string }> = [];
+		// Week 1 Monday is always an intention
+		days.push({ day: 'MON', label: 'Week 1: Set your intention', time: '~2 min' });
+		// Each selected day = unified check-in
+		const sortOrder = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+		const sorted = [...selectedDays].sort((a, b) => sortOrder.indexOf(a) - sortOrder.indexOf(b));
+		for (const day of sorted) {
+			days.push({ day: dayLabels[day] ?? day.toUpperCase(), label: 'Effort + performance + notes', time: '~2 min' });
 		}
+		return days;
 	})());
 </script>
+
+<svelte:head>
+	<title>New Cycle | Forbetra</title>
+</svelte:head>
 
 <div class="min-h-screen bg-surface-base">
 	<section class="mx-auto max-w-3xl space-y-8 pb-12 pt-8 px-4">
@@ -76,32 +108,103 @@
 			<p class="text-text-secondary">Continue working on your objective with a fresh cycle and updated settings.</p>
 		</div>
 
-		<!-- Objective Context (read-only) -->
-		<div class="rounded-2xl border border-border-default bg-surface-raised p-6">
-			<p class="mb-1 text-[10px] font-semibold uppercase tracking-wider text-text-muted">Your Objective</p>
-			<h2 class="text-xl font-bold text-text-primary">{data.objective.title}</h2>
-			{#if data.objective.description}
-				<p class="mt-1 text-sm text-text-secondary">{data.objective.description}</p>
-			{/if}
-			{#if data.subgoals.length > 0}
-				<div class="mt-4">
-					<p class="mb-2 text-xs font-semibold uppercase tracking-wider text-text-muted">Sub-objectives</p>
-					<ul class="space-y-1">
-						{#each data.subgoals as subgoal}
-							<li class="flex items-start gap-2 text-sm text-text-secondary">
-								<span class="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-accent"></span>
-								{subgoal.label}
-							</li>
-						{/each}
-					</ul>
-				</div>
-			{/if}
-			{#if data.lastCycle}
-				<div class="mt-4 rounded-lg bg-surface-subtle px-3 py-2 text-xs text-text-tertiary">
-					Previous cycle: <strong>{data.lastCycle.label ?? 'Cycle'}</strong>
-				</div>
-			{/if}
+		<!-- Objective Mode Toggle -->
+		<div class="rounded-2xl border border-border-default bg-surface-raised p-6 space-y-4">
+			<p class="text-sm font-semibold text-text-secondary">What would you like to do?</p>
+			<div class="grid gap-3 md:grid-cols-2">
+				<button
+					type="button"
+					onclick={() => (cycleMode = 'continue')}
+					class="flex items-start gap-3 rounded-xl border p-4 text-left transition-all {cycleMode === 'continue'
+						? 'border-accent bg-accent-muted'
+						: 'border-border-default bg-surface-raised hover:border-accent/30 hover:bg-surface-subtle'}"
+				>
+					<div class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 {cycleMode === 'continue' ? 'border-accent bg-accent' : 'border-border-strong bg-surface-raised'}">
+						{#if cycleMode === 'continue'}
+							<div class="h-2 w-2 rounded-full bg-white"></div>
+						{/if}
+					</div>
+					<div>
+						<p class="font-semibold text-text-primary">Continue with same objective</p>
+						<p class="text-xs text-text-tertiary">Keep your current objective and sub-objectives</p>
+					</div>
+				</button>
+				<button
+					type="button"
+					onclick={() => (cycleMode = 'fresh')}
+					class="flex items-start gap-3 rounded-xl border p-4 text-left transition-all {cycleMode === 'fresh'
+						? 'border-accent bg-accent-muted'
+						: 'border-border-default bg-surface-raised hover:border-accent/30 hover:bg-surface-subtle'}"
+				>
+					<div class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 {cycleMode === 'fresh' ? 'border-accent bg-accent' : 'border-border-strong bg-surface-raised'}">
+						{#if cycleMode === 'fresh'}
+							<div class="h-2 w-2 rounded-full bg-white"></div>
+						{/if}
+					</div>
+					<div>
+						<p class="font-semibold text-text-primary">Start with a new objective</p>
+						<p class="text-xs text-text-tertiary">Set a fresh objective and sub-objectives</p>
+					</div>
+				</button>
+			</div>
 		</div>
+
+		<!-- Objective Context -->
+		{#if cycleMode === 'continue'}
+			<div class="rounded-2xl border border-border-default bg-surface-raised p-6">
+				<p class="mb-1 text-[10px] font-semibold uppercase tracking-wider text-text-muted">Your Objective</p>
+				<h2 class="text-xl font-bold text-text-primary">{data.objective.title}</h2>
+				{#if data.objective.description}
+					<p class="mt-1 text-sm text-text-secondary">{data.objective.description}</p>
+				{/if}
+				{#if data.subgoals.length > 0}
+					<div class="mt-4">
+						<p class="mb-2 text-xs font-semibold uppercase tracking-wider text-text-muted">Sub-objectives</p>
+						<ul class="space-y-1">
+							{#each data.subgoals as subgoal}
+								<li class="flex items-start gap-2 text-sm text-text-secondary">
+									<span class="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-accent"></span>
+									{subgoal.label}
+								</li>
+							{/each}
+						</ul>
+					</div>
+				{/if}
+				{#if data.lastCycle}
+					<div class="mt-4 rounded-lg bg-surface-subtle px-3 py-2 text-xs text-text-tertiary">
+						Previous cycle: <strong>{data.lastCycle.label ?? 'Cycle'}</strong>
+					</div>
+				{/if}
+			</div>
+		{:else}
+			<!-- Fresh objective form -->
+			<div class="rounded-2xl border border-border-default bg-surface-raised p-6 space-y-4">
+				<p class="text-[10px] font-semibold uppercase tracking-wider text-text-muted">New Objective</p>
+				<div class="space-y-2">
+					<label class="block text-sm font-semibold text-text-secondary" for="freshObjectiveTitle">What do you want to work on?</label>
+					<input
+						id="freshObjectiveTitle"
+						type="text"
+						required
+						placeholder="e.g. Develop executive presence in team meetings"
+						class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10"
+						value={freshObjectiveTitle}
+						oninput={(e) => (freshObjectiveTitle = e.currentTarget.value)}
+					/>
+				</div>
+				<div class="space-y-2">
+					<label class="block text-sm font-semibold text-text-secondary" for="freshObjectiveDescription">Description (optional)</label>
+					<textarea
+						id="freshObjectiveDescription"
+						rows="3"
+						placeholder="Add any context about what success looks like..."
+						class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-sm text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10"
+						value={freshObjectiveDescription}
+						oninput={(e) => (freshObjectiveDescription = e.currentTarget.value)}
+					></textarea>
+				</div>
+			</div>
+		{/if}
 
 		<!-- Form errors -->
 		{#if form?.error}
@@ -111,12 +214,17 @@
 		{/if}
 
 		<!-- Cycle Config Form -->
-		<form method="post" class="space-y-8">
+		<form method="post" class="space-y-8" use:enhance={() => { isSubmitting = true; return async ({ update }) => { isSubmitting = false; await update(); }; }}>
 			<input type="hidden" name="reminderDays" value={reminderDays} />
 			<input type="hidden" name="checkInFrequency" value={checkInFrequency} />
 			<input type="hidden" name="stakeholderCadence" value={stakeholderCadence} />
 			<input type="hidden" name="cycleDurationWeeks" value={cycleDurationWeeks} />
 			<input type="hidden" name="revealScores" value={revealScores ? 'true' : 'false'} />
+			<input type="hidden" name="cycleMode" value={cycleMode} />
+			{#if cycleMode === 'fresh'}
+				<input type="hidden" name="freshObjectiveTitle" value={freshObjectiveTitle} />
+				<input type="hidden" name="freshObjectiveDescription" value={freshObjectiveDescription} />
+			{/if}
 
 			<div class="rounded-2xl border border-border-default bg-surface-raised p-8 space-y-6">
 				<div class="space-y-2">
@@ -154,7 +262,7 @@
 
 					<!-- Duration -->
 					<div class="space-y-3 md:col-span-2">
-						<label class="block text-sm font-semibold text-text-secondary">Duration</label>
+						<p class="block text-sm font-semibold text-text-secondary">Duration</p>
 						<div class="grid grid-cols-4 gap-3">
 							{#each [8, 12, 16] as weeks}
 								<button
@@ -210,43 +318,39 @@
 						<p class="text-xs text-text-muted">{getDurationGuidance(cycleDurationNumber)}</p>
 					</div>
 
-					<!-- Check-in Frequency -->
+					<!-- Check-in Days Picker -->
 					<div class="space-y-3 md:col-span-2">
-						<label class="block text-sm font-semibold text-text-secondary">Check-in frequency</label>
-						<div class="grid gap-3 md:grid-cols-3">
-							{#each [
-								{ value: '3x', label: '3x/week', desc: 'Monday intention, midweek effort, end-of-week performance', rec: true },
-								{ value: '2x', label: '2x/week', desc: 'Monday intention + end-of-week combined rating', rec: false },
-								{ value: '1x', label: '1x/week', desc: 'Single weekly reflection covering effort and performance', rec: false }
-							] as opt}
-								<label
-									class="group relative flex cursor-pointer rounded-xl border p-4 transition-all {checkInFrequency === opt.value
-										? 'border-accent bg-accent-muted'
-										: 'border-border-default bg-surface-raised hover:border-accent/30 hover:bg-surface-subtle'}"
+						<p class="block text-sm font-semibold text-text-secondary">Check-in days</p>
+						<p class="text-xs text-text-tertiary">Select which days you want to check in. Each check-in covers effort + performance + notes.</p>
+
+						<!-- Quick Presets -->
+						<div class="flex flex-wrap gap-2">
+							<button type="button" onclick={() => applyPreset(['tue', 'fri'])}
+								class="rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all {selectedDays.join(',') === 'tue,fri' ? 'border-accent bg-accent-muted text-accent' : 'border-border-default bg-surface-raised text-text-secondary hover:border-accent/30'}">
+								Tue + Fri (recommended)
+							</button>
+							<button type="button" onclick={() => applyPreset(['mon', 'wed', 'fri'])}
+								class="rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all {selectedDays.join(',') === 'mon,wed,fri' ? 'border-accent bg-accent-muted text-accent' : 'border-border-default bg-surface-raised text-text-secondary hover:border-accent/30'}">
+								Mon + Wed + Fri
+							</button>
+							<button type="button" onclick={() => applyPreset(['fri'])}
+								class="rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all {selectedDays.join(',') === 'fri' ? 'border-accent bg-accent-muted text-accent' : 'border-border-default bg-surface-raised text-text-secondary hover:border-accent/30'}">
+								Fri only
+							</button>
+						</div>
+
+						<!-- Day Buttons -->
+						<div class="grid grid-cols-7 gap-2">
+							{#each allDays as day}
+								<button
+									type="button"
+									onclick={() => toggleDay(day)}
+									class="flex flex-col items-center justify-center rounded-xl border py-3 transition-all {selectedDays.includes(day)
+										? 'border-accent bg-accent-muted text-accent font-bold'
+										: 'border-border-default bg-surface-raised text-text-tertiary hover:border-accent/30 hover:bg-surface-subtle'}"
 								>
-									<input
-										type="radio"
-										name="_checkInFrequencyRadio"
-										value={opt.value}
-										checked={checkInFrequency === opt.value}
-										onchange={() => (checkInFrequency = opt.value as '3x' | '2x' | '1x')}
-										class="sr-only"
-									/>
-									<div class="flex w-full items-start gap-3">
-										<div class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 {checkInFrequency === opt.value ? 'border-accent bg-accent' : 'border-border-strong bg-surface-raised'}">
-											{#if checkInFrequency === opt.value}
-												<div class="h-2 w-2 rounded-full bg-white"></div>
-											{/if}
-										</div>
-										<div class="flex-1">
-											<div class="font-semibold text-text-primary">{opt.label}</div>
-											<div class="text-xs text-text-tertiary">{opt.desc}</div>
-											{#if opt.rec}
-												<div class="mt-1 text-[10px] font-semibold text-accent">recommended</div>
-											{/if}
-										</div>
-									</div>
-								</label>
+									<span class="text-sm">{dayLabels[day]}</span>
+								</button>
 							{/each}
 						</div>
 
@@ -267,7 +371,7 @@
 
 					<!-- Reminder Days -->
 					<div class="space-y-2 md:col-span-2">
-						<label class="block text-sm font-semibold text-text-secondary">Feedback Reminder Days</label>
+						<p class="block text-sm font-semibold text-text-secondary">Feedback Reminder Days</p>
 						<div class="grid gap-4 md:grid-cols-2">
 							{#each [
 								{ value: 'wednesday_friday', label: 'Wednesday & Friday', desc: 'Default option' },
@@ -320,7 +424,7 @@
 
 					<!-- Stakeholder Cadence -->
 					<div class="space-y-3 md:col-span-2">
-						<label class="block text-sm font-semibold text-text-secondary">Stakeholder feedback cadence</label>
+						<p class="block text-sm font-semibold text-text-secondary">Stakeholder feedback cadence</p>
 						<div class="grid gap-3 md:grid-cols-2">
 							{#each [
 								{ value: 'weekly', label: 'Weekly', desc: 'Stakeholders rate you every week', rec: true },
@@ -370,12 +474,18 @@
 				</a>
 				<button
 					type="submit"
-					class="group inline-flex items-center gap-2 rounded-xl bg-accent px-8 py-3 font-semibold text-white transition-all hover:bg-accent-hover focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
+					disabled={isSubmitting}
+					class="group inline-flex items-center gap-2 rounded-xl bg-accent px-8 py-3 font-semibold text-white transition-all hover:bg-accent-hover focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
 				>
-					Start Cycle
-					<svg class="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-					</svg>
+					{#if isSubmitting}
+						<span class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+						Creating...
+					{:else}
+						Start Cycle
+						<svg class="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+						</svg>
+					{/if}
 				</button>
 			</div>
 		</form>

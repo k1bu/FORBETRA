@@ -1,39 +1,7 @@
 <script lang="ts">
-	type InviteStatus = 'invalid' | 'expired' | 'cancelled' | 'accepted' | 'valid';
+	import type { ActionData, PageData } from './$types';
 
-	type PageData = {
-		status: InviteStatus;
-		token?: string;
-		invite: {
-			id: string;
-			email: string;
-			name: string | null;
-			message: string | null;
-			coach: {
-				id: string;
-				name: string;
-				email: string;
-			};
-			expiresAt: string;
-			acceptedAt: string | null;
-			cancelledAt: string | null;
-			createdAt: string;
-			individualId: string | null;
-		} | null;
-		user: {
-			id: string;
-			email: string;
-			role: string;
-			name: string | null;
-		} | null;
-	};
-
-	type ActionState = {
-		success?: boolean;
-		error?: string;
-	};
-
-	const { data, form }: { data: PageData; form: ActionState | null } = $props();
+	const { data, form }: { data: PageData; form: ActionData | null } = $props();
 
 	const formatDate = (value: string | null | undefined) => {
 		if (!value) return '—';
@@ -60,12 +28,16 @@
 	};
 </script>
 
+<svelte:head>
+	<title>Accept Invitation | Forbetra</title>
+</svelte:head>
+
 <section class="mx-auto flex min-h-[70vh] max-w-3xl flex-col gap-6 px-4 py-12">
 	<header class="space-y-2 text-center">
 		<h1 class="text-3xl font-semibold text-text-primary">Join your coach</h1>
 		{#if data.invite}
 			<p class="text-sm text-text-tertiary">
-				{data.invite.coach.name} has invited you to collaborate in FORBETRA.
+				{data.invite.coach.name} has invited you to collaborate in Forbetra.
 			</p>
 		{:else}
 			<p class="text-sm text-text-tertiary">We couldn't find this invitation.</p>

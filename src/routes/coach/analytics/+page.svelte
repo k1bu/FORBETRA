@@ -1,43 +1,22 @@
 <script lang="ts">
+	import type { PageData } from './$types';
 	import { AlertTriangle, BarChart3, Target, TrendingUp } from 'lucide-svelte';
-	import type { ClientSummary } from '$lib/server/buildClientSummary';
 
-	export let data: {
-		coach: { name: string };
-		clients: ClientSummary[];
-		analytics: {
-			totalAlerts: number;
-			highPriorityAlerts: number;
-			mediumPriorityAlerts: number;
-			lowPriorityAlerts: number;
-			avgStability: number | null;
-			avgAlignment: number | null;
-			overallAvgEffort: number | null;
-			overallAvgProgress: number | null;
-		};
-		clientComparison: Array<{
-			name: string;
-			objective: string;
-			avgEffort: number | null;
-			avgProgress: number | null;
-			stability: number | null;
-			trajectory: number | null;
-			alignment: number | null;
-			completionRate: number | null;
-			alertCount: number;
-			currentWeek: number | null;
-		}>;
-		portfolioTimeSeries: Array<{
-			weekNumber: number;
-			avgEffort: number | null;
-			avgPerformance: number | null;
-			clientCount: number;
-		}>;
-	};
+	const { data }: { data: PageData } = $props();
+
+	import { goto } from '$app/navigation';
 
 	type SortKey = 'name' | 'avgEffort' | 'avgProgress' | 'stability' | 'trajectory' | 'completionRate' | 'alertCount';
-	let sortKey: SortKey = 'name';
-	let sortAsc = true;
+	let sortKey = $state<SortKey>('name');
+	let sortAsc = $state(true);
+	let showAllWeeks = $state(false);
+
+	const MAX_VISIBLE_WEEKS = 16;
+	const visibleTimeSeries = $derived(
+		showAllWeeks || data.portfolioTimeSeries.length <= MAX_VISIBLE_WEEKS
+			? data.portfolioTimeSeries
+			: data.portfolioTimeSeries.slice(-MAX_VISIBLE_WEEKS)
+	);
 
 	const toggleSort = (key: SortKey) => {
 		if (sortKey === key) {
@@ -48,7 +27,7 @@
 		}
 	};
 
-	$: sortedComparison = [...data.clientComparison].sort((a, b) => {
+	const sortedComparison = $derived([...data.clientComparison].sort((a, b) => {
 		const aVal = a[sortKey];
 		const bVal = b[sortKey];
 		if (aVal === null && bVal === null) return 0;
@@ -56,7 +35,7 @@
 		if (bVal === null) return -1;
 		const cmp = typeof aVal === 'string' ? aVal.localeCompare(bVal as string) : (aVal as number) - (bVal as number);
 		return sortAsc ? cmp : -cmp;
-	});
+	}));
 
 	const formatPercent = (value: number | null | undefined) => {
 		if (value === null || value === undefined) return '—';
@@ -75,9 +54,13 @@
 
 	const sortIndicator = (key: SortKey) => {
 		if (sortKey !== key) return '';
-		return sortAsc ? ' ↑' : ' ↓';
+		return sortAsc ? ' \u2191' : ' \u2193';
 	};
 </script>
+
+<svelte:head>
+	<title>Analytics | Forbetra</title>
+</svelte:head>
 
 <section class="mx-auto flex max-w-7xl flex-col gap-8 p-4 pb-12">
 	<!-- Header -->
@@ -145,40 +128,61 @@
 	{#if data.clientComparison.length > 0}
 		<section class="rounded-lg border border-border-default bg-surface-raised p-6">
 			<h2 class="mb-4 text-2xl font-bold text-text-primary">Client Comparison</h2>
-			<div class="overflow-x-auto">
-				<table class="w-full border-collapse text-sm">
+			<div class="scroll-shadow-container relative">
+				<div class="overflow-x-auto">
+					<table class="w-full border-collapse text-sm">
 					<thead>
 						<tr class="border-b border-border-default">
-							<th class="cursor-pointer px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-text-tertiary hover:text-text-primary" on:click={() => toggleSort('name')}>
-								Name{sortIndicator('name')}
+							<th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-text-tertiary" aria-sort={sortKey === 'name' ? (sortAsc ? 'ascending' : 'descending') : 'none'}>
+								<button class="flex items-center gap-1" onclick={() => toggleSort('name')}>
+									Name{sortIndicator('name')}
+								</button>
 							</th>
 							<th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-text-tertiary">
 								Objective
 							</th>
-							<th class="cursor-pointer px-3 py-2 text-center text-xs font-semibold uppercase tracking-wider text-text-tertiary hover:text-text-primary" on:click={() => toggleSort('avgEffort')}>
-								Effort{sortIndicator('avgEffort')}
+							<th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wider text-text-tertiary" aria-sort={sortKey === 'avgEffort' ? (sortAsc ? 'ascending' : 'descending') : 'none'}>
+								<button class="flex items-center gap-1" onclick={() => toggleSort('avgEffort')}>
+									Effort{sortIndicator('avgEffort')}
+								</button>
 							</th>
-							<th class="cursor-pointer px-3 py-2 text-center text-xs font-semibold uppercase tracking-wider text-text-tertiary hover:text-text-primary" on:click={() => toggleSort('avgProgress')}>
-								Performance{sortIndicator('avgProgress')}
+							<th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wider text-text-tertiary" aria-sort={sortKey === 'avgProgress' ? (sortAsc ? 'ascending' : 'descending') : 'none'}>
+								<button class="flex items-center gap-1" onclick={() => toggleSort('avgProgress')}>
+									Performance{sortIndicator('avgProgress')}
+								</button>
 							</th>
-							<th class="cursor-pointer px-3 py-2 text-center text-xs font-semibold uppercase tracking-wider text-text-tertiary hover:text-text-primary" on:click={() => toggleSort('stability')}>
-								Stability{sortIndicator('stability')}
+							<th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wider text-text-tertiary" aria-sort={sortKey === 'stability' ? (sortAsc ? 'ascending' : 'descending') : 'none'}>
+								<button class="flex items-center gap-1" onclick={() => toggleSort('stability')}>
+									Stability{sortIndicator('stability')}
+								</button>
 							</th>
-							<th class="cursor-pointer px-3 py-2 text-center text-xs font-semibold uppercase tracking-wider text-text-tertiary hover:text-text-primary" on:click={() => toggleSort('trajectory')}>
-								Trajectory{sortIndicator('trajectory')}
+							<th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wider text-text-tertiary" aria-sort={sortKey === 'trajectory' ? (sortAsc ? 'ascending' : 'descending') : 'none'}>
+								<button class="flex items-center gap-1" onclick={() => toggleSort('trajectory')}>
+									Trajectory{sortIndicator('trajectory')}
+								</button>
 							</th>
-							<th class="cursor-pointer px-3 py-2 text-center text-xs font-semibold uppercase tracking-wider text-text-tertiary hover:text-text-primary" on:click={() => toggleSort('completionRate')}>
-								Completion{sortIndicator('completionRate')}
+							<th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wider text-text-tertiary" aria-sort={sortKey === 'completionRate' ? (sortAsc ? 'ascending' : 'descending') : 'none'}>
+								<button class="flex items-center gap-1" onclick={() => toggleSort('completionRate')}>
+									Completion{sortIndicator('completionRate')}
+								</button>
 							</th>
-							<th class="cursor-pointer px-3 py-2 text-center text-xs font-semibold uppercase tracking-wider text-text-tertiary hover:text-text-primary" on:click={() => toggleSort('alertCount')}>
-								Alerts{sortIndicator('alertCount')}
+							<th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wider text-text-tertiary" aria-sort={sortKey === 'alertCount' ? (sortAsc ? 'ascending' : 'descending') : 'none'}>
+								<button class="flex items-center gap-1" onclick={() => toggleSort('alertCount')}>
+									Alerts{sortIndicator('alertCount')}
+								</button>
 							</th>
 						</tr>
 					</thead>
 					<tbody>
 						{#each sortedComparison as row}
-							<tr class="border-b border-border-default hover:bg-surface-subtle transition-colors">
-								<td class="px-3 py-2.5 font-semibold text-text-primary">{row.name}</td>
+							<tr
+								class="border-b border-border-default transition-colors hover:bg-accent-muted/50"
+								tabindex="0"
+								role="link"
+								onclick={() => goto(`/coach/session/${row.clientId}`)}
+								onkeydown={(e) => { if (e.key === 'Enter') goto(`/coach/session/${row.clientId}`) }}
+							>
+								<td class="px-3 py-2.5 font-semibold text-accent hover:underline">{row.name}</td>
 								<td class="px-3 py-2.5 text-text-secondary max-w-[200px] truncate">{row.objective}</td>
 								<td class="px-3 py-2.5 text-center font-semibold {row.avgEffort !== null && row.avgEffort >= 7 ? 'text-success' : row.avgEffort !== null && row.avgEffort < 4 ? 'text-error' : 'text-text-secondary'}">
 									{formatAverage(row.avgEffort)}
@@ -216,6 +220,25 @@
 						{/each}
 					</tbody>
 				</table>
+				</div>
+			</div>
+		</section>
+	{:else}
+		<section class="rounded-lg border border-dashed border-border-strong bg-surface-raised p-12">
+			<div class="flex flex-col items-center justify-center text-center">
+				<div class="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-accent-muted">
+					<BarChart3 class="h-7 w-7 text-accent" />
+				</div>
+				<h3 class="mb-1 text-lg font-bold text-text-primary">No client data yet</h3>
+				<p class="mb-6 max-w-sm text-sm text-text-secondary">
+					Invite clients to see performance analytics here.
+				</p>
+				<a
+					href="/coach/invitations"
+					class="inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-accent-hover"
+				>
+					Invite Clients
+				</a>
 			</div>
 		</section>
 	{/if}
@@ -226,20 +249,20 @@
 			<h2 class="mb-1 text-2xl font-bold text-text-primary">Portfolio Trends</h2>
 			<p class="mb-4 text-xs text-text-tertiary">Weekly averages across all active clients</p>
 			<div class="overflow-x-auto">
-				<div class="flex items-end gap-1" style="min-width: {data.portfolioTimeSeries.length * 60}px; height: 200px;">
-					{#each data.portfolioTimeSeries as week}
+				<div class="flex items-end gap-1" style="min-width: {visibleTimeSeries.length * 60}px; height: 200px;">
+					{#each visibleTimeSeries as week}
 						{@const maxScore = 10}
 						{@const effortHeight = week.avgEffort !== null ? (week.avgEffort / maxScore) * 160 : 0}
 						{@const perfHeight = week.avgPerformance !== null ? (week.avgPerformance / maxScore) * 160 : 0}
 						<div class="flex flex-col items-center gap-1 flex-1 min-w-[50px]">
 							<div class="flex items-end gap-0.5" style="height: 160px;">
 								<div
-									class="w-5 rounded-t bg-amber-400 transition-all"
+									class="w-5 rounded-t bg-data-effort transition-all"
 									style="height: {effortHeight}px;"
 									title="Effort: {week.avgEffort ?? '—'}"
 								></div>
 								<div
-									class="w-5 rounded-t bg-indigo-500 transition-all"
+									class="w-5 rounded-t bg-data-performance transition-all"
 									style="height: {perfHeight}px;"
 									title="Performance: {week.avgPerformance ?? '—'}"
 								></div>
@@ -252,99 +275,50 @@
 			</div>
 			<div class="mt-3 flex items-center gap-4 text-xs text-text-tertiary">
 				<div class="flex items-center gap-1.5">
-					<div class="h-3 w-3 rounded-sm bg-amber-400"></div>
+					<div class="h-3 w-3 rounded-sm bg-data-effort"></div>
 					<span>Avg Effort</span>
 				</div>
 				<div class="flex items-center gap-1.5">
-					<div class="h-3 w-3 rounded-sm bg-indigo-500"></div>
+					<div class="h-3 w-3 rounded-sm bg-data-performance"></div>
 					<span>Avg Performance</span>
 				</div>
+				{#if data.portfolioTimeSeries.length > MAX_VISIBLE_WEEKS}
+					<button
+						type="button"
+						onclick={() => (showAllWeeks = !showAllWeeks)}
+						class="ml-auto rounded-lg border border-border-default bg-surface-raised px-3 py-1 text-xs font-semibold text-text-secondary transition-all hover:border-accent/30 hover:text-accent"
+					>
+						{showAllWeeks ? 'Show recent 16 weeks' : `Show all ${data.portfolioTimeSeries.length} weeks`}
+					</button>
+				{/if}
 			</div>
 		</section>
 	{/if}
 
-	<!-- Client Analytics Breakdown -->
-	<section class="space-y-6 rounded-lg border border-border-default bg-surface-raised p-6">
-		<h2 class="text-2xl font-bold text-text-primary">Client Performance Overview</h2>
-
-		{#if data.clients.length === 0}
-			<div class="rounded-xl border border-dashed border-border-strong bg-surface-raised p-8 text-center">
-				<p class="text-sm text-text-tertiary">No clients yet. Invite clients to see analytics.</p>
-			</div>
-		{:else}
-			<div class="space-y-4">
-				{#each data.clients as client (client.id)}
-					<div
-						class="rounded-xl border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30"
-					>
-						<div class="mb-4 flex items-start justify-between">
-							<div>
-								<h3 class="text-lg font-bold text-text-primary">{client.name}</h3>
-								<p class="text-sm text-text-secondary">{client.email}</p>
-							</div>
-							{#if client.alerts.length > 0}
-								<div class="flex items-center gap-1.5">
-									<span class="h-2 w-2 rounded-full {client.alerts.some((a) => a.severity === 'high') ? 'bg-error' : client.alerts.some((a) => a.severity === 'medium') ? 'bg-warning' : 'bg-accent'}"></span>
-									<span class="text-xs font-semibold {client.alerts.some((a) => a.severity === 'high') ? 'text-error' : client.alerts.some((a) => a.severity === 'medium') ? 'text-warning' : 'text-accent'}">
-										{client.alerts.length} alert{client.alerts.length === 1 ? '' : 's'}
-									</span>
-								</div>
-							{/if}
-						</div>
-
-						{#if client.objective?.insights}
-							<div class="grid gap-4 md:grid-cols-4">
-								<div class="rounded-lg border border-border-default bg-surface-raised p-4">
-									<p class="mb-1 text-xs text-text-tertiary">Stability</p>
-									<p class="text-2xl font-bold text-accent">
-										{formatScore(client.objective.insights.stabilityScore)}
-									</p>
-								</div>
-								<div class="rounded-lg border border-border-default bg-surface-raised p-4">
-									<p class="mb-1 text-xs text-text-tertiary">Alignment</p>
-									<p class="text-2xl font-bold text-accent">
-										{formatPercent(client.objective.insights.alignmentRatio)}
-									</p>
-								</div>
-								<div class="rounded-lg border border-border-default bg-surface-raised p-4">
-									<p class="mb-1 text-xs text-text-tertiary">Avg Effort</p>
-									<p class="text-2xl font-bold text-success">
-										{formatAverage(client.objective.insights.avgEffort)}/5
-									</p>
-								</div>
-								<div class="rounded-lg border border-border-default bg-surface-raised p-4">
-									<p class="mb-1 text-xs text-text-tertiary">Avg Progress</p>
-									<p class="text-2xl font-bold text-teal-600">
-										{formatAverage(client.objective.insights.avgProgress)}/5
-									</p>
-								</div>
-							</div>
-						{:else}
-							<p class="text-sm text-text-tertiary">No active objective or cycle data available.</p>
-						{/if}
-
-						{#if client.alerts.length > 0}
-							<div class="mt-4 rounded-lg border border-border-default bg-surface-raised p-4">
-								<p class="mb-2 text-xs font-bold uppercase text-text-tertiary">Alerts</p>
-								<ul class="space-y-1 text-xs text-text-secondary">
-									{#each client.alerts as alert (alert.type)}
-										<li class="flex items-start gap-2">
-											<span
-												class="mt-0.5 h-2 w-2 rounded-full {alert.severity === 'high'
-													? 'bg-red-600'
-													: alert.severity === 'medium'
-													? 'bg-amber-500'
-													: 'bg-blue-500'}"
-											></span>
-											<span>{alert.message}</span>
-										</li>
-									{/each}
-								</ul>
-							</div>
-						{/if}
-					</div>
-				{/each}
-			</div>
-		{/if}
-	</section>
 </section>
+
+<style>
+	.scroll-shadow-container::before,
+	.scroll-shadow-container::after {
+		content: '';
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		width: 24px;
+		pointer-events: none;
+		z-index: 1;
+		transition: opacity 0.2s ease;
+	}
+
+	.scroll-shadow-container::before {
+		left: 0;
+		background: linear-gradient(to right, var(--color-surface-raised, #fff), transparent);
+		opacity: 0;
+	}
+
+	.scroll-shadow-container::after {
+		right: 0;
+		background: linear-gradient(to left, var(--color-surface-raised, #fff), transparent);
+		opacity: 1;
+	}
+</style>

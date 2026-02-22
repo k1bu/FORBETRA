@@ -181,19 +181,15 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Insights | Forbetra</title>
+</svelte:head>
+
 <section class="mx-auto flex max-w-6xl flex-col gap-8 p-4 pb-12">
 	<!-- Header -->
-	<header class="flex items-center justify-between">
-		<div>
-			<h1 class="text-3xl font-bold text-text-primary">Insights</h1>
-			<p class="mt-1 text-text-secondary">Track your progress and stability over time</p>
-		</div>
-		<a
-			href="/individual"
-			class="rounded-lg border border-border-strong bg-surface-raised px-4 py-2 text-sm font-semibold text-text-secondary transition-all hover:border-accent/30 hover:bg-accent-muted hover:text-accent"
-		>
-			← Back to Hub
-		</a>
+	<header>
+		<h1 class="text-3xl font-bold text-text-primary">Insights</h1>
+		<p class="mt-1 text-text-secondary">Track your progress and stability over time</p>
 	</header>
 
 	<!-- AI Performance Report -->
@@ -229,14 +225,14 @@
 					<span class="font-medium">Generating...</span>
 				</div>
 			{:else}
-				<div class="flex flex-col items-center justify-center py-12">
-					<svg class="mb-3 h-8 w-8 animate-spin text-accent" fill="none" viewBox="0 0 24 24">
-						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-						<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-					</svg>
-					<p class="text-sm font-medium text-accent">Analyzing your full cycle data...</p>
-					<p class="mt-1 text-xs text-text-tertiary">Sections will appear as they're generated</p>
+				<div class="space-y-3 animate-pulse">
+					<div class="h-4 w-3/4 rounded bg-surface-subtle"></div>
+					<div class="h-4 w-full rounded bg-surface-subtle"></div>
+					<div class="h-4 w-5/6 rounded bg-surface-subtle"></div>
+					<div class="h-4 w-2/3 rounded bg-surface-subtle"></div>
 				</div>
+				<p class="mt-4 text-center text-sm font-medium text-accent">Generating insights...</p>
+				<p class="mt-1 text-center text-xs text-text-tertiary">Sections will appear as they're generated</p>
 			{/if}
 		{:else if reportSections.length > 0}
 			<div class="space-y-3">

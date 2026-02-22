@@ -25,7 +25,7 @@
 
 	<!-- Subgoals -->
 	<div class="rounded-xl border border-border-default bg-surface-raised p-4">
-		<h2 class="mb-3 text-sm font-bold uppercase tracking-wide text-text-tertiary">Subgoals ({obj.subgoals.length})</h2>
+		<h2 class="mb-3 text-sm font-bold uppercase tracking-wide text-text-tertiary">Sub-objectives ({obj.subgoals.length})</h2>
 		{#if obj.subgoals.length > 0}
 			<ul class="space-y-2">
 				{#each obj.subgoals as sg, idx (sg.id)}
@@ -42,7 +42,7 @@
 				{/each}
 			</ul>
 		{:else}
-			<p class="text-sm text-text-tertiary">No subgoals defined.</p>
+			<p class="text-sm text-text-tertiary">No sub-objectives defined.</p>
 		{/if}
 	</div>
 

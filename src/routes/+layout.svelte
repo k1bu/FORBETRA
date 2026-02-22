@@ -6,7 +6,7 @@
 	import type { Snippet } from 'svelte';
 	import { ClerkProvider, SignedIn, UserButton } from 'svelte-clerk';
 	import { page } from '$app/stores';
-	import { goto, invalidateAll } from '$app/navigation';
+	import { afterNavigate, goto, invalidateAll } from '$app/navigation';
 	import type { LayoutData } from './$types';
 	import ToastContainer from '$lib/components/ToastContainer.svelte';
 
@@ -28,6 +28,20 @@
 		await fetch('/api/admin/impersonate', { method: 'DELETE' });
 		await goto('/admin/users', { invalidateAll: true });
 	};
+
+	afterNavigate(() => {
+		// Focus main content area for accessibility after page transitions
+		const h1 = document.querySelector('main h1');
+		if (h1 instanceof HTMLElement) {
+			h1.setAttribute('tabindex', '-1');
+			h1.focus({ preventScroll: true });
+		} else {
+			const main = document.getElementById('main-content');
+			if (main) {
+				main.focus({ preventScroll: true });
+			}
+		}
+	});
 </script>
 
 <svelte:head>
@@ -49,48 +63,15 @@
 		{/if}
 		<a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:rounded-md focus:bg-surface-raised focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-text-primary focus:shadow-lg">Skip to main content</a>
 		<header class="flex flex-wrap items-center justify-between gap-3 bg-surface-base border-b border-border-default p-4" aria-label="Site header">
-			<h1 class="text-lg font-semibold tracking-[0.12em] text-text-primary">FORBETRA</h1>
+			<h1 class="text-lg font-semibold tracking-[0.12em] text-text-primary">Forbetra</h1>
 			<nav class="flex items-center gap-3" aria-label="Main navigation">
 				{#if data.dbUser}
 					<div class="flex items-center gap-3">
 						{#if data.dbUser.role === 'INDIVIDUAL' && !isRoleSelection}
-							<a
-								href="/individual"
-								class={navClass(isActive('/individual'))}
-								aria-current={isActive('/individual') ? 'page' : undefined}
-							>
-								Individual Hub
-							</a>
+							<!-- Individual Hub link hidden — sidebar in /individual layout handles navigation -->
 						{/if}
 						{#if data.dbUser.role === 'COACH' && !isRoleSelection}
-							<a
-								href="/coach"
-								class={navClass(isActive('/coach') && !isActive('/coach/roster') && !isActive('/coach/invitations') && !isActive('/coach/analytics'))}
-								aria-current={isActive('/coach') && !isActive('/coach/roster') && !isActive('/coach/invitations') && !isActive('/coach/analytics') ? 'page' : undefined}
-							>
-								Coach Hub
-							</a>
-							<a
-								href="/coach/roster"
-								class={navClass(isActive('/coach/roster'))}
-								aria-current={isActive('/coach/roster') ? 'page' : undefined}
-							>
-								Roster
-							</a>
-							<a
-								href="/coach/invitations"
-								class={navClass(isActive('/coach/invitations'))}
-								aria-current={isActive('/coach/invitations') ? 'page' : undefined}
-							>
-								Invitations
-							</a>
-							<a
-								href="/coach/analytics"
-								class={navClass(isActive('/coach/analytics'))}
-								aria-current={isActive('/coach/analytics') ? 'page' : undefined}
-							>
-								Analytics
-							</a>
+							<!-- Coach nav links hidden — sidebar in /coach layout handles navigation -->
 						{/if}
 						{#if data.dbUser.role === 'ADMIN'}
 							<a
@@ -120,7 +101,7 @@
 		</header>
 	</SignedIn>
 
-	<main id="main-content" class={`min-h-screen bg-surface-base ${data.dbUser ? 'p-4' : ''}`}>
+	<main id="main-content" tabindex="-1" class={`min-h-screen bg-surface-base ${data.dbUser && !$page.url.pathname.startsWith('/individual') && !$page.url.pathname.startsWith('/coach') ? 'p-4' : ''}`}>
 		{#key $page.url.pathname}
 			<div class="animate-fade-in">
 				{@render children()}
@@ -141,6 +122,12 @@
 		}
 		to {
 			opacity: 1;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		:global(.animate-fade-in) {
+			animation: none !important;
 		}
 	}
 </style>

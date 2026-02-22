@@ -10,6 +10,7 @@
 		getScoreLabel
 	} from '$lib/utils/scoreColors';
 	import { addToast } from '$lib/stores/toasts.svelte';
+	import { CircleCheck, Target, ClipboardList, Dumbbell, TrendingUp, PenLine, Send } from 'lucide-svelte';
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
 
@@ -21,6 +22,7 @@
 
 	let effortScore = $state(data.previousEntry?.effortScore ?? 5);
 	let performanceScore = $state(data.previousEntry?.performanceScore ?? 5);
+	let notes = $state(data.previousEntry?.notes ?? '');
 	let isSubmitting = $state(false);
 	let showBehavioralIndicators = $state(false);
 
@@ -40,8 +42,12 @@
 	};
 </script>
 
+<svelte:head>
+	<title>Check-in | Forbetra</title>
+</svelte:head>
+
 <section class="mx-auto flex max-w-4xl flex-col gap-6 p-4 pb-12">
-	<!-- Back to Dashboard Link -->
+	<!-- Back to Today Link -->
 	<div class="flex items-center justify-between">
 		<a
 			href="/individual"
@@ -55,7 +61,7 @@
 			>
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
 			</svg>
-			Back to Dashboard
+			Back to Today
 		</a>
 	</div>
 
@@ -97,7 +103,7 @@
 
 		{#if form?.success}
 			<div class="mx-auto max-w-2xl animate-in fade-in slide-in-from-top-2 rounded-xl border border-success/30 bg-success-muted p-6 text-center">
-				<div class="mb-2 text-4xl">🎉</div>
+				<CircleCheck class="mx-auto mb-2 h-10 w-10 text-success" />
 				<p class="text-lg font-semibold text-success">Check-in saved!</p>
 				{#if form.streak && form.streak >= 3}
 					<p class="mt-1 text-sm font-semibold text-warning">
@@ -110,7 +116,7 @@
 					href="/individual"
 					class="mt-4 inline-flex items-center gap-2 rounded-lg bg-success px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-success/90"
 				>
-					Return to Dashboard
+					Return to Today
 					<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
 					</svg>
@@ -129,7 +135,7 @@
 			<!-- Simple Objective Display -->
 			<div class="rounded-xl border border-border-default bg-surface-subtle px-5 py-4">
 				<div class="flex items-center gap-3 text-base text-text-secondary">
-					<span class="text-xl" role="img" aria-label="target">🎯</span>
+					<Target class="h-5 w-5 text-accent" />
 					<span class="font-medium">Objective:</span>
 					<span class="font-semibold text-lg text-text-primary">{data.objective.title}</span>
 				</div>
@@ -143,7 +149,7 @@
 					class="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-surface-subtle"
 				>
 					<div class="flex items-center gap-2">
-						<span class="text-lg" role="img" aria-label="clipboard">📋</span>
+						<ClipboardList class="h-5 w-5 text-text-secondary" />
 						<span class="text-sm font-medium text-text-secondary">View behavioral indicators</span>
 					</div>
 					<svg
@@ -213,7 +219,7 @@
 			<div class="group rounded-2xl border border-border-default bg-surface-raised p-6 transition-all hover:border-border-strong">
 				<div class="mb-4 flex items-center justify-between">
 					<div class="flex items-center gap-3">
-						<span class="text-2xl" role="img" aria-label="flexed biceps">💪</span>
+						<Dumbbell class="h-6 w-6 text-accent" />
 						<div>
 							<label for="effort-score" class="text-lg font-bold text-text-primary">
 								Focused Effort
@@ -275,7 +281,7 @@
 			<div class="group rounded-2xl border border-border-default bg-surface-raised p-6 transition-all hover:border-border-strong">
 				<div class="mb-4 flex items-center justify-between">
 					<div class="flex items-center gap-3">
-						<span class="text-2xl" role="img" aria-label="chart trending up">📈</span>
+						<TrendingUp class="h-6 w-6 text-accent" />
 						<div>
 							<label for="progress-score" class="text-lg font-bold text-text-primary">
 								Performance
@@ -324,7 +330,7 @@
 							performanceScore, 'performance'
 						)} {getScoreColor(performanceScore, 'performance')}"
 					>
-						{getScoreLabel(performanceScore, 'progress')}
+						{getScoreLabel(performanceScore, 'performance')}
 					</div>
 					<span class="text-xs font-medium text-text-tertiary">Transformative impact</span>
 				</div>
@@ -336,23 +342,27 @@
 			<!-- Notes with Better UX -->
 			<div class="rounded-2xl border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30">
 				<div class="mb-3 flex items-center gap-2">
-					<span class="text-xl" role="img" aria-label="writing hand">✍️</span>
+					<PenLine class="h-5 w-5 text-accent" />
 					<label for="notes" class="text-base font-semibold text-text-primary">
-						Reflection Notes
-						<span class="ml-2 text-xs font-normal text-text-tertiary">(optional)</span>
+						Reflect on your week
 					</label>
 				</div>
 				<textarea
 					name="notes"
 					id="notes"
 					rows="4"
+					maxlength="500"
+					bind:value={notes}
 					disabled={!data.isAvailable || data.isLocked}
 					class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:bg-surface-raised focus:outline-none focus:ring-2 focus:ring-accent/30 disabled:cursor-not-allowed disabled:opacity-60"
-					placeholder="Share a win, an obstacle you overcame, or something you learned this week..."
-				>{data.previousEntry?.notes ?? ''}</textarea>
-				<p class="mt-2 text-xs text-text-tertiary">
-					Tip: Capturing context helps you and your coach see the full picture of your growth.
-				</p>
+					placeholder="What went well? What's challenging? What stood out this week?"
+				></textarea>
+				<div class="mt-2 flex items-center justify-between">
+					<p class="text-xs text-text-tertiary">
+						Your reflections help you and your coach see the full picture of your growth.
+					</p>
+					<p class="text-xs text-text-muted text-right">{notes.length}/500</p>
+				</div>
 			</div>
 
 			<!-- Submit Button with Enhanced Design -->
@@ -375,7 +385,7 @@
 						href="/individual"
 						class="rounded-xl border border-border-default bg-surface-raised px-6 py-3.5 text-sm font-semibold text-text-secondary transition-all hover:border-border-strong hover:bg-surface-subtle"
 					>
-						Back to Dashboard
+						Back to Today
 					</a>
 					<button
 						type="submit"
@@ -387,7 +397,7 @@
 								<span class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
 								Saving...
 							{:else}
-								<span role="img" aria-label="sparkles">✨</span>
+								<Send class="h-4 w-4" />
 								Save Check-in
 							{/if}
 						</span>

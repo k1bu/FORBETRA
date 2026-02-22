@@ -36,11 +36,26 @@ const baseUrl =
 		? `https://${process.env.PUBLIC_APP_URL || process.env.VERCEL_URL}`
 		: 'https://app.forbetra.com';
 
+const emailFooter = (settingsUrl?: string) => {
+	const url = settingsUrl || `${baseUrl}/settings`;
+	return `<div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0; text-align: center;">
+		<p style="font-size: 12px; color: #94a3b8; margin: 0;">Forbetra &mdash; You. And Improved.</p>
+		<p style="font-size: 11px; color: #94a3b8; margin: 8px 0 0 0;">
+			<a href="${url}" style="color: #94a3b8; text-decoration: underline;">Manage notification preferences</a>
+		</p>
+	</div>`;
+};
+
+const textFooter = (settingsUrl?: string) => {
+	const url = settingsUrl || `${baseUrl}/settings`;
+	return `\n---\nForbetra — You. And Improved.\nManage notification preferences: ${url}`;
+};
+
 export const emailTemplates = {
 	welcomeIndividual: (data: EmailTemplateData) => {
 		const name = escapeHtml(data.individualName || 'there');
 		return {
-			subject: 'Welcome to FORBETRA! 🎯',
+			subject: 'Welcome to Forbetra',
 			html: `
 			<!DOCTYPE html>
 			<html>
@@ -49,13 +64,14 @@ export const emailTemplates = {
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 			</head>
 			<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #334155; max-width: 600px; margin: 0 auto; padding: 20px;">
+				<div style="display: none; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #ffffff;">Your development journey starts now</div>
 				<div style="background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
-					<h1 style="color: white; margin: 0; font-size: 28px; font-weight: 600;">Welcome to FORBETRA</h1>
+					<h1 style="color: white; margin: 0; font-size: 28px; font-weight: 600;">Welcome to Forbetra</h1>
 				</div>
 				<div style="background: white; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
 					<p style="font-size: 16px; margin-top: 0;">Hi ${name},</p>
 					<p style="font-size: 16px;">You're all set! Your development journey starts now.</p>
-					<p style="font-size: 16px;">FORBETRA helps you turn development goals into measurable behaviors through structured reflection and stakeholder feedback.</p>
+					<p style="font-size: 16px;">Forbetra helps you turn development goals into measurable behaviors through structured reflection and stakeholder feedback.</p>
 					<div style="background: #f1f5f9; padding: 20px; border-radius: 8px; margin: 24px 0;">
 						<p style="margin: 0; font-size: 14px; color: #64748b;"><strong>What's next?</strong></p>
 						<ul style="margin: 12px 0 0 0; padding-left: 20px; font-size: 14px; color: #64748b;">
@@ -69,10 +85,11 @@ export const emailTemplates = {
 					</div>
 					<p style="font-size: 14px; color: #64748b; margin-top: 30px;">Questions? Just reply to this email.</p>
 				</div>
+			${emailFooter()}
 			</body>
 			</html>
 		`,
-			text: `Welcome to FORBETRA!\n\nHi ${data.individualName || 'there'},\n\nYou're all set! Your development journey starts now.\n\nFORBETRA helps you turn development goals into measurable behaviors through structured reflection and stakeholder feedback.\n\nWhat's next?\n- Complete your onboarding to set up your first objective\n- Add stakeholders who can provide feedback\n- Start your weekly reflection cycle\n\nGet started: ${data.appUrl || baseUrl}\n\nQuestions? Just reply to this email.`
+			text: `Welcome to Forbetra!\n\nHi ${data.individualName || 'there'},\n\nYou're all set! Your development journey starts now.\n\nForbetra helps you turn development goals into measurable behaviors through structured reflection and stakeholder feedback.\n\nWhat's next?\n- Complete your onboarding to set up your first objective\n- Add stakeholders who can provide feedback\n- Start your weekly reflection cycle\n\nGet started: ${data.appUrl || baseUrl}\n\nQuestions? Just reply to this email.${textFooter()}`
 		};
 	},
 
@@ -89,6 +106,7 @@ export const emailTemplates = {
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 			</head>
 			<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #334155; max-width: 600px; margin: 0 auto; padding: 20px;">
+				<div style="display: none; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #ffffff;">Help track development with quick feedback</div>
 				<div style="background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
 					<h1 style="color: white; margin: 0; font-size: 28px; font-weight: 600;">You're Invited</h1>
 				</div>
@@ -107,10 +125,11 @@ export const emailTemplates = {
 					<p style="font-size: 16px;">You'll receive your first feedback request when ${indName} submits their first reflection.</p>
 					<p style="font-size: 14px; color: #64748b; margin-top: 30px;">Thank you for supporting their growth!</p>
 				</div>
+			${emailFooter()}
 			</body>
 			</html>
 		`,
-			text: `You've been invited to support ${data.individualName || 'someone'}'s growth journey\n\nHi ${data.stakeholderName || 'there'},\n\n${data.individualName || 'Someone'} has invited you to be a stakeholder in their development journey.\n\nYour role is simple: twice a week, you'll receive a quick link to share feedback on their progress. It takes less than 60 seconds.\n\nWhat to expect:\n- Brief feedback requests (2 quick questions)\n- No account creation required\n- Your feedback helps them track real progress\n\nYou'll receive your first feedback request when ${data.individualName || 'they'} submits their first reflection.\n\nThank you for supporting their growth!`
+			text: `You've been invited to support ${data.individualName || 'someone'}'s growth journey\n\nHi ${data.stakeholderName || 'there'},\n\n${data.individualName || 'Someone'} has invited you to be a stakeholder in their development journey.\n\nYour role is simple: twice a week, you'll receive a quick link to share feedback on their progress. It takes less than 60 seconds.\n\nWhat to expect:\n- Brief feedback requests (2 quick questions)\n- No account creation required\n- Your feedback helps them track real progress\n\nYou'll receive your first feedback request when ${data.individualName || 'they'} submits their first reflection.\n\nThank you for supporting their growth!${textFooter()}`
 		};
 	},
 
@@ -128,6 +147,7 @@ export const emailTemplates = {
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 			</head>
 			<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #334155; max-width: 600px; margin: 0 auto; padding: 20px;">
+				<div style="display: none; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #ffffff;">Takes less than 60 seconds</div>
 				<div style="background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
 					<h1 style="color: white; margin: 0; font-size: 24px; font-weight: 600;">Quick Feedback Request</h1>
 				</div>
@@ -141,10 +161,11 @@ export const emailTemplates = {
 					</div>
 					<p style="font-size: 12px; color: #94a3b8; text-align: center; margin-top: 20px;">This link expires in 10 days</p>
 				</div>
+			${emailFooter()}
 			</body>
 			</html>
 		`,
-			text: `Quick feedback request for ${data.individualName || 'your participant'}\n\nHi ${data.stakeholderName || 'there'},\n\n${data.individualName || 'Your participant'} just completed a reflection and would love your feedback.\n\n${data.objectiveTitle ? `Objective: ${data.objectiveTitle}\n\n` : ''}This will take less than 60 seconds — just two quick questions about effort and progress.\n\nShare feedback: ${data.feedbackLink}\n\nThis link expires in 10 days`
+			text: `Quick feedback request for ${data.individualName || 'your participant'}\n\nHi ${data.stakeholderName || 'there'},\n\n${data.individualName || 'Your participant'} just completed a reflection and would love your feedback.\n\n${data.objectiveTitle ? `Objective: ${data.objectiveTitle}\n\n` : ''}This will take less than 60 seconds — just two quick questions about effort and progress.\n\nShare feedback: ${data.feedbackLink}\n\nThis link expires in 10 days${textFooter()}`
 		};
 	},
 
@@ -161,6 +182,7 @@ export const emailTemplates = {
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 			</head>
 			<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #334155; max-width: 600px; margin: 0 auto; padding: 20px;">
+				<div style="display: none; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #ffffff;">See how your self-assessment aligns</div>
 				<div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
 					<h1 style="color: white; margin: 0; font-size: 24px; font-weight: 600;">New Feedback Received</h1>
 				</div>
@@ -173,10 +195,11 @@ export const emailTemplates = {
 					</div>
 					<p style="font-size: 14px; color: #64748b; margin-top: 30px;">Keep up the great work!</p>
 				</div>
+			${emailFooter()}
 			</body>
 			</html>
 		`,
-			text: `${data.stakeholderName || 'A stakeholder'} shared feedback on your progress\n\nHi ${data.individualName || 'there'},\n\n${data.stakeholderName || 'A stakeholder'} just shared feedback on your progress.\n\nView your updated insights and see how your self-assessment aligns with their perspective.\n\nView insights: ${data.appUrl || baseUrl}/individual/insights\n\nKeep up the great work!`
+			text: `${data.stakeholderName || 'A stakeholder'} shared feedback on your progress\n\nHi ${data.individualName || 'there'},\n\n${data.stakeholderName || 'A stakeholder'} just shared feedback on your progress.\n\nView your updated insights and see how your self-assessment aligns with their perspective.\n\nView insights: ${data.appUrl || baseUrl}/individual/insights\n\nKeep up the great work!${textFooter()}`
 		};
 	},
 
@@ -199,6 +222,7 @@ export const emailTemplates = {
 					<meta name="viewport" content="width=device-width, initial-scale=1.0">
 				</head>
 				<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #334155; max-width: 600px; margin: 0 auto; padding: 20px;">
+					<div style="display: none; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #ffffff;">A quick reflection on your progress</div>
 					<div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
 						<h1 style="color: white; margin: 0; font-size: 24px; font-weight: 600;">Time for Your Check-in</h1>
 					</div>
@@ -206,17 +230,18 @@ export const emailTemplates = {
 						<p style="font-size: 16px; margin-top: 0;">Hi ${name},</p>
 						<p style="font-size: 16px;">It's ${dayLabel} — time for your weekly check-in!</p>
 						${objTitle ? `<p style="font-size: 14px; color: #64748b; background: #f1f5f9; padding: 12px; border-radius: 6px; margin: 20px 0;"><strong>Objective:</strong> ${objTitle}</p>` : ''}
-						${data.currentStreak && data.currentStreak >= 3 ? `<p style="font-size: 16px; color: #c2410c; font-weight: 600;">🔥 You're on a ${data.currentStreak} check-in streak — keep it going!</p>` : ''}
+						${data.currentStreak && data.currentStreak >= 3 ? `<p style="font-size: 16px; color: #c2410c; font-weight: 600;">You're on a ${data.currentStreak} check-in streak — keep it going!</p>` : ''}
 						<p style="font-size: 16px;">Take a moment to check in on your effort and progress this week.</p>
 						<div style="text-align: center; margin: 30px 0;">
-							<a href="${data.appUrl || baseUrl}${data.reflectionType === 'intention' ? '/prompts/monday' : `/reflections/checkin?type=${(data.reflectionType ?? 'RATING_A').toUpperCase()}`}" style="display: inline-block; background: #f59e0b; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Complete Check-in</a>
+							<a href="${data.appUrl || baseUrl}${data.reflectionType === 'INTENTION' ? '/prompts/monday' : `/reflections/checkin?type=${(data.reflectionType ?? 'RATING_A').toUpperCase()}`}" style="display: inline-block; background: #f59e0b; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Complete Check-in</a>
 						</div>
 						<p style="font-size: 14px; color: #64748b; margin-top: 30px;">Staying consistent helps you track your growth.</p>
 					</div>
+				${emailFooter()}
 				</body>
 				</html>
 			`,
-			text: `Reminder: Time for your ${dayLabel} check-in\n\nHi ${data.individualName || 'there'},\n\nIt's ${dayLabel} — time for your weekly check-in!\n\n${data.currentStreak && data.currentStreak >= 3 ? `🔥 You're on a ${data.currentStreak} check-in streak — keep it going!\n\n` : ''}${data.objectiveTitle ? `Objective: ${data.objectiveTitle}\n\n` : ''}Take a moment to check in on your effort and progress this week.\n\nComplete check-in: ${data.appUrl || baseUrl}${data.reflectionType === 'intention' ? '/prompts/monday' : `/reflections/checkin?type=${(data.reflectionType ?? 'RATING_A').toUpperCase()}`}\n\nThis helps you stay consistent and track your growth.`
+			text: `Reminder: Time for your ${dayLabel} check-in\n\nHi ${data.individualName || 'there'},\n\nIt's ${dayLabel} — time for your weekly check-in!\n\n${data.currentStreak && data.currentStreak >= 3 ? `You're on a ${data.currentStreak} check-in streak — keep it going!\n\n` : ''}${data.objectiveTitle ? `Objective: ${data.objectiveTitle}\n\n` : ''}Take a moment to check in on your effort and progress this week.\n\nComplete check-in: ${data.appUrl || baseUrl}${data.reflectionType === 'INTENTION' ? '/prompts/monday' : `/reflections/checkin?type=${(data.reflectionType ?? 'RATING_A').toUpperCase()}`}\n\nThis helps you stay consistent and track your growth.${textFooter()}`
 		};
 	},
 
@@ -233,12 +258,13 @@ export const emailTemplates = {
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 			</head>
 			<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #334155; max-width: 600px; margin: 0 auto; padding: 20px;">
+				<div style="display: none; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #ffffff;">You have reflections waiting</div>
 				<div style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
 					<h1 style="color: white; margin: 0; font-size: 24px; font-weight: 600;">Overdue Reflections</h1>
 				</div>
 				<div style="background: white; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
 					<p style="font-size: 16px; margin-top: 0;">Hi ${name},</p>
-					${data.currentStreak && data.currentStreak >= 3 ? `<p style="font-size: 16px; color: #c2410c; font-weight: 600;">🔥 You have a ${data.currentStreak} streak on the line — don't break it!</p>` : ''}
+					${data.currentStreak && data.currentStreak >= 3 ? `<p style="font-size: 16px; color: #c2410c; font-weight: 600;">You have a ${data.currentStreak} streak on the line — don't break it!</p>` : ''}
 					<p style="font-size: 16px;">You have some overdue reflections that need your attention.</p>
 					${objTitle ? `<p style="font-size: 14px; color: #64748b; background: #f1f5f9; padding: 12px; border-radius: 6px; margin: 20px 0;"><strong>Objective:</strong> ${objTitle}</p>` : ''}
 					<div style="text-align: center; margin: 30px 0;">
@@ -246,10 +272,11 @@ export const emailTemplates = {
 					</div>
 					<p style="font-size: 14px; color: #64748b; margin-top: 30px;">Catching up helps maintain your progress tracking.</p>
 				</div>
+			${emailFooter()}
 			</body>
 			</html>
 		`,
-			text: `Reminder: You have overdue reflections\n\nHi ${data.individualName || 'there'},\n\n${data.currentStreak && data.currentStreak >= 3 ? `🔥 You have a ${data.currentStreak} streak on the line — don't break it!\n\n` : ''}You have some overdue reflections that need your attention.\n\n${data.objectiveTitle ? `Objective: ${data.objectiveTitle}\n\n` : ''}View dashboard: ${data.appUrl || baseUrl}/individual\n\nCatching up helps maintain your progress tracking.`
+			text: `Reminder: You have overdue reflections\n\nHi ${data.individualName || 'there'},\n\n${data.currentStreak && data.currentStreak >= 3 ? `You have a ${data.currentStreak} streak on the line — don't break it!\n\n` : ''}You have some overdue reflections that need your attention.\n\n${data.objectiveTitle ? `Objective: ${data.objectiveTitle}\n\n` : ''}View dashboard: ${data.appUrl || baseUrl}/individual\n\nCatching up helps maintain your progress tracking.${textFooter()}`
 		};
 	},
 
@@ -267,6 +294,7 @@ export const emailTemplates = {
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 			</head>
 			<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #334155; max-width: 600px; margin: 0 auto; padding: 20px;">
+				<div style="display: none; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #ffffff;">Your growth report is ready</div>
 				<div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
 					<h1 style="color: white; margin: 0; font-size: 28px; font-weight: 600;">Cycle Complete!</h1>
 				</div>
@@ -280,10 +308,11 @@ export const emailTemplates = {
 					</div>
 					<p style="font-size: 14px; color: #64748b; margin-top: 30px;">When you're ready, start a new cycle to keep growing.</p>
 				</div>
+			${emailFooter()}
 			</body>
 			</html>
 		`,
-			text: `Your cycle is complete — your growth report is ready\n\nHi ${data.individualName || 'there'},\n\nCongratulations — you've completed your cycle${data.cycleLabel ? ` "${data.cycleLabel}"` : ''}!\n\n${data.objectiveTitle ? `Objective: ${data.objectiveTitle}\n\n` : ''}Your growth report is ready — it summarizes your progress, key patterns, and areas for continued development.\n\nView your cycle report: ${data.appUrl || baseUrl}/individual/insights\n\nWhen you're ready, start a new cycle to keep growing.`
+			text: `Your cycle is complete — your growth report is ready\n\nHi ${data.individualName || 'there'},\n\nCongratulations — you've completed your cycle${data.cycleLabel ? ` "${data.cycleLabel}"` : ''}!\n\n${data.objectiveTitle ? `Objective: ${data.objectiveTitle}\n\n` : ''}Your growth report is ready — it summarizes your progress, key patterns, and areas for continued development.\n\nView your cycle report: ${data.appUrl || baseUrl}/individual/insights\n\nWhen you're ready, start a new cycle to keep growing.${textFooter()}`
 		};
 	},
 
@@ -300,6 +329,7 @@ export const emailTemplates = {
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 			</head>
 			<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #334155; max-width: 600px; margin: 0 auto; padding: 20px;">
+				<div style="display: none; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #ffffff;">Quick two-question feedback</div>
 				<div style="background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
 					<h1 style="color: white; margin: 0; font-size: 24px; font-weight: 600;">Feedback Reminder</h1>
 				</div>
@@ -312,10 +342,11 @@ export const emailTemplates = {
 					</div>
 					<p style="font-size: 12px; color: #94a3b8; text-align: center; margin-top: 20px;">This link expires soon</p>
 				</div>
+			${emailFooter()}
 			</body>
 			</html>
 		`,
-			text: `Reminder: Feedback request for ${data.individualName || 'your participant'}\n\nHi ${data.stakeholderName || 'there'},\n\nYou have a pending feedback request from ${data.individualName || 'your participant'}.\n\nThis will take less than 60 seconds — just two quick questions.\n\nShare feedback: ${data.feedbackLink}\n\nThis link expires soon`
+			text: `Reminder: Feedback request for ${data.individualName || 'your participant'}\n\nHi ${data.stakeholderName || 'there'},\n\nYou have a pending feedback request from ${data.individualName || 'your participant'}.\n\nThis will take less than 60 seconds — just two quick questions.\n\nShare feedback: ${data.feedbackLink}\n\nThis link expires soon${textFooter()}`
 		};
 	},
 
@@ -332,6 +363,7 @@ export const emailTemplates = {
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 			</head>
 			<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #334155; max-width: 600px; margin: 0 auto; padding: 20px;">
+				<div style="display: none; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #ffffff;">Your perspective makes a difference</div>
 				<div style="background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
 					<h1 style="color: white; margin: 0; font-size: 24px; font-weight: 600;">Thank You!</h1>
 				</div>
@@ -344,10 +376,11 @@ export const emailTemplates = {
 					</div>
 					<p style="font-size: 14px; color: #64748b;">You'll receive the next feedback request when ${indName} completes their next check-in.</p>
 				</div>
+			${emailFooter()}
 			</body>
 			</html>
 		`,
-			text: `Thank you for your feedback on ${data.individualName || 'your participant'}\n\nHi ${data.stakeholderName || 'there'},\n\nYour Week ${data.weekNumber ?? ''} feedback for ${data.individualName || 'your participant'} has been recorded.\n\nYour perspective matters — it helps reveal blind spots and validate progress that might otherwise go unnoticed.\n\nYou'll receive the next feedback request when ${data.individualName || 'they'} completes their next check-in.`
+			text: `Thank you for your feedback on ${data.individualName || 'your participant'}\n\nHi ${data.stakeholderName || 'there'},\n\nYour Week ${data.weekNumber ?? ''} feedback for ${data.individualName || 'your participant'} has been recorded.\n\nYour perspective matters — it helps reveal blind spots and validate progress that might otherwise go unnoticed.\n\nYou'll receive the next feedback request when ${data.individualName || 'they'} completes their next check-in.${textFooter()}`
 		};
 	},
 
@@ -373,22 +406,29 @@ export const emailTemplates = {
 					<meta name="viewport" content="width=device-width, initial-scale=1.0">
 				</head>
 				<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #334155; max-width: 600px; margin: 0 auto; padding: 20px;">
+					<div style="display: none; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #ffffff;">See your contribution this month</div>
 					<div style="background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
 						<h1 style="color: white; margin: 0; font-size: 24px; font-weight: 600;">Your Impact Summary</h1>
 					</div>
 					<div style="background: white; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
 						<p style="font-size: 16px; margin-top: 0;">Hi ${shName},</p>
 						<p style="font-size: 16px;">Here's a snapshot of your contribution to <strong>${indName}'s</strong> development this month.</p>
-						<div style="display: flex; gap: 12px; margin: 24px 0;">
-							<div style="flex: 1; background: #f0fdfa; padding: 16px; border-radius: 8px; text-align: center;">
-								<p style="margin: 0; font-size: 28px; font-weight: 700; color: #0d9488;">${data.weeksContributed}</p>
-								<p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">Weeks contributed</p>
-							</div>
-							<div style="flex: 1; background: #f5f3ff; padding: 16px; border-radius: 8px; text-align: center;">
-								<p style="margin: 0; font-size: 28px; font-weight: 700; color: #7c3aed;">${data.totalFeedbacks}</p>
-								<p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">Total feedbacks</p>
-							</div>
-						</div>
+						<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 24px 0;">
+							<tr>
+								<td width="50%" style="padding-right: 6px;" valign="top">
+									<div style="background: #f0fdfa; padding: 16px; border-radius: 8px; text-align: center;">
+										<p style="margin: 0; font-size: 28px; font-weight: 700; color: #0d9488;">${data.weeksContributed}</p>
+										<p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">Weeks contributed</p>
+									</div>
+								</td>
+								<td width="50%" style="padding-left: 6px;" valign="top">
+									<div style="background: #f5f3ff; padding: 16px; border-radius: 8px; text-align: center;">
+										<p style="margin: 0; font-size: 28px; font-weight: 700; color: #7c3aed;">${data.totalFeedbacks}</p>
+										<p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">Total feedbacks</p>
+									</div>
+								</td>
+							</tr>
+						</table>
 						<div style="background: #f1f5f9; padding: 20px; border-radius: 8px; margin: 24px 0;">
 							<p style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #334155;">Trends (based on your ratings):</p>
 							<p style="margin: 0 0 6px 0; font-size: 14px; color: #64748b;">${trendIcon(data.effortTrend)} Effort: ${trendLabel(data.effortTrend)}</p>
@@ -396,10 +436,11 @@ export const emailTemplates = {
 						</div>
 						<p style="font-size: 14px; color: #64748b;">Your continued feedback helps ${indName} stay accountable and see the full picture of their growth. Thank you!</p>
 					</div>
+				${emailFooter()}
 				</body>
 				</html>
 			`,
-			text: `Your impact on ${data.individualName || 'your participant'}'s growth — monthly summary\n\nHi ${data.stakeholderName || 'there'},\n\nHere's a snapshot of your contribution to ${data.individualName || 'your participant'}'s development this month.\n\nWeeks contributed: ${data.weeksContributed}\nTotal feedbacks: ${data.totalFeedbacks}\n\nTrends (based on your ratings):\n${trendIcon(data.effortTrend)} Effort: ${trendLabel(data.effortTrend)}\n${trendIcon(data.performanceTrend)} Performance: ${trendLabel(data.performanceTrend)}\n\nYour continued feedback helps ${data.individualName || 'them'} stay accountable and see the full picture of their growth. Thank you!`
+			text: `Your impact on ${data.individualName || 'your participant'}'s growth — monthly summary\n\nHi ${data.stakeholderName || 'there'},\n\nHere's a snapshot of your contribution to ${data.individualName || 'your participant'}'s development this month.\n\nWeeks contributed: ${data.weeksContributed}\nTotal feedbacks: ${data.totalFeedbacks}\n\nTrends (based on your ratings):\n${trendIcon(data.effortTrend)} Effort: ${trendLabel(data.effortTrend)}\n${trendIcon(data.performanceTrend)} Performance: ${trendLabel(data.performanceTrend)}\n\nYour continued feedback helps ${data.individualName || 'them'} stay accountable and see the full picture of their growth. Thank you!${textFooter()}`
 		};
 	},
 
@@ -417,6 +458,7 @@ export const emailTemplates = {
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 			</head>
 			<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #334155; max-width: 600px; margin: 0 auto; padding: 20px;">
+				<div style="display: none; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #ffffff;">Join a structured development program</div>
 				<div style="background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
 					<h1 style="color: white; margin: 0; font-size: 28px; font-weight: 600;">You're Invited</h1>
 				</div>
@@ -438,10 +480,11 @@ export const emailTemplates = {
 					</div>
 					<p style="font-size: 12px; color: #94a3b8; text-align: center; margin-top: 20px;">This invitation is valid for 14 days</p>
 				</div>
+			${emailFooter()}
 			</body>
 			</html>
 		`,
-			text: `${data.coachName} invited you to join Forbetra\n\nHi ${data.recipientName || 'there'},\n\n${data.coachName} has invited you to join Forbetra — a platform for structured personal development.\n\n${data.message ? `"${data.message}"\n— ${data.coachName}\n\n` : ''}What to expect:\n- Set a development objective and break it into observable behaviors\n- Track your effort and performance with weekly check-ins\n- Get feedback from stakeholders who see your work\n- Receive AI-powered insights and coaching from ${data.coachName}\n\nAccept invitation: ${data.inviteUrl}\n\nThis invitation is valid for 14 days`
+			text: `${data.coachName} invited you to join Forbetra\n\nHi ${data.recipientName || 'there'},\n\n${data.coachName} has invited you to join Forbetra — a platform for structured personal development.\n\n${data.message ? `"${data.message}"\n— ${data.coachName}\n\n` : ''}What to expect:\n- Set a development objective and break it into observable behaviors\n- Track your effort and performance with weekly check-ins\n- Get feedback from stakeholders who see your work\n- Receive AI-powered insights and coaching from ${data.coachName}\n\nAccept invitation: ${data.inviteUrl}\n\nThis invitation is valid for 14 days${textFooter()}`
 		};
 	},
 
@@ -459,6 +502,7 @@ export const emailTemplates = {
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 			</head>
 			<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #334155; max-width: 600px; margin: 0 auto; padding: 20px;">
+				<div style="display: none; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #ffffff;">A new client has joined your roster</div>
 				<div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
 					<h1 style="color: white; margin: 0; font-size: 24px; font-weight: 600;">New Client Joined</h1>
 				</div>
@@ -470,10 +514,11 @@ export const emailTemplates = {
 						<a href="${data.appUrl || baseUrl}/coach/roster" style="display: inline-block; background: #10b981; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">View Roster</a>
 					</div>
 				</div>
+			${emailFooter()}
 			</body>
 			</html>
 		`,
-			text: `${data.clientName} accepted your Forbetra invitation\n\nHi ${data.coachName},\n\n${data.clientName} (${data.clientEmail}) has accepted your invitation and joined Forbetra.\n\nThey'll now appear in your roster. Once they complete onboarding, you'll be able to view their reflections and generate coaching insights.\n\nView roster: ${data.appUrl || baseUrl}/coach/roster`
+			text: `${data.clientName} accepted your Forbetra invitation\n\nHi ${data.coachName},\n\n${data.clientName} (${data.clientEmail}) has accepted your invitation and joined Forbetra.\n\nThey'll now appear in your roster. Once they complete onboarding, you'll be able to view their reflections and generate coaching insights.\n\nView roster: ${data.appUrl || baseUrl}/coach/roster${textFooter()}`
 		};
 	}
 };

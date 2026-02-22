@@ -55,9 +55,9 @@
 		case 'INTENTION':
 			return 'Monday intention';
 		case 'RATING_A':
-			return 'Wednesday check-in';
+			return 'Check-in';
 		case 'RATING_B':
-			return 'Friday check-in';
+			return 'Check-in';
 			default:
 				return 'Upcoming prompt';
 		}
@@ -90,25 +90,11 @@
 		getScoreColorNullable(score, type);
 </script>
 
-<section class="mx-auto flex max-w-6xl flex-col gap-8 p-4 pb-12">
-	<!-- Back to Hub Link -->
-	<div class="flex items-center justify-between">
-		<a
-			href="/individual"
-			class="group flex items-center gap-2 text-sm font-medium text-text-secondary transition-colors hover:text-text-primary"
-		>
-			<svg
-				class="h-4 w-4 transition-transform group-hover:-translate-x-1"
-				fill="none"
-				stroke="currentColor"
-				viewBox="0 0 24 24"
-			>
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-			</svg>
-			Back to Hub
-		</a>
-	</div>
+<svelte:head>
+	<title>Dashboard | Forbetra</title>
+</svelte:head>
 
+<section class="mx-auto flex max-w-6xl flex-col gap-8 p-4 pb-12">
 	<!-- Page Header -->
 	<header>
 		<nav aria-label="Breadcrumb" class="mb-2">

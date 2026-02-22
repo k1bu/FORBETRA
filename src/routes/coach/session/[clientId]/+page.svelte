@@ -2,6 +2,7 @@
 	import type { ActionData, PageData } from './$types';
 	import PerformanceEffortChart from '$lib/components/PerformanceEffortChart.svelte';
 	import { addToast } from '$lib/stores/toasts.svelte';
+	import { Target, Sparkles, AlertTriangle } from 'lucide-svelte';
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
 
@@ -94,7 +95,7 @@
 			<p class="text-sm text-text-secondary">{data.client.email}</p>
 			{#if data.client.objective}
 				<div class="mt-2 flex items-center gap-2">
-					<span class="text-base" role="img" aria-label="target">&#127919;</span>
+					<Target class="h-4 w-4 text-accent" />
 					<span class="text-sm font-medium text-text-secondary">{data.client.objective.title}</span>
 				</div>
 			{/if}
@@ -110,7 +111,7 @@
 	<div class="rounded-2xl border border-accent/30 bg-accent-muted p-6">
 		<div class="mb-4 flex items-center justify-between">
 			<div class="flex items-center gap-2">
-				<span class="text-xl" role="img" aria-label="sparkles">&#10024;</span>
+				<Sparkles class="h-5 w-5 text-accent" />
 				<div>
 					<h2 class="text-lg font-bold text-text-primary">AI Coaching Insights</h2>
 					<p class="text-xs text-text-tertiary">AI-generated analysis based on your client's reflection and feedback data</p>
@@ -141,12 +142,12 @@
 	{#if data.alerts.length > 0}
 		<div class="rounded-2xl border border-error/50 bg-error-muted p-6">
 			<div class="mb-3 flex items-center gap-2">
-				<span class="text-lg" role="img" aria-label="warning">&#9888;&#65039;</span>
-				<h2 class="text-lg font-bold text-red-900">AI Alerts</h2>
+				<AlertTriangle class="h-5 w-5 text-warning" />
+				<h2 class="text-lg font-bold text-error">AI Alerts</h2>
 			</div>
 			<ul class="space-y-2">
 				{#each data.alerts as alert}
-					<li class="rounded-lg glass px-3 py-2 text-sm text-red-800">
+					<li class="rounded-lg glass px-3 py-2 text-sm text-error">
 						{alert.content}
 					</li>
 				{/each}
@@ -157,13 +158,13 @@
 	{#if data.client.alerts.length > 0}
 		<div class="rounded-2xl border border-border-strong bg-warning-muted p-6">
 			<div class="mb-3 flex items-center gap-2">
-				<span class="text-lg" role="img" aria-label="warning">&#9888;&#65039;</span>
-				<h2 class="text-lg font-bold text-amber-900">Status Alerts</h2>
+				<AlertTriangle class="h-5 w-5 text-warning" />
+				<h2 class="text-lg font-bold text-warning">Status Alerts</h2>
 			</div>
 			<ul class="space-y-2">
 				{#each data.client.alerts as alert}
-					<li class="flex items-start gap-2 rounded-lg glass px-3 py-2 text-sm {alert.severity === 'high' ? 'font-semibold text-error border border-error/50' : 'text-amber-800'}">
-						<span class="mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full {alert.severity === 'high' ? 'bg-red-500' : alert.severity === 'medium' ? 'bg-amber-500' : 'bg-blue-500'}"></span>
+					<li class="flex items-start gap-2 rounded-lg glass px-3 py-2 text-sm {alert.severity === 'high' ? 'font-semibold text-error border border-error/50' : 'text-warning'}">
+						<span class="mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full {alert.severity === 'high' ? 'bg-error' : alert.severity === 'medium' ? 'bg-warning' : 'bg-accent'}"></span>
 						{alert.message}
 					</li>
 				{/each}
@@ -183,7 +184,7 @@
 							{#each reflections as r}
 								<div class="flex items-start gap-3 rounded-lg bg-surface-raised px-3 py-2 text-sm">
 									<span class="shrink-0 rounded bg-accent-muted px-1.5 py-0.5 text-[10px] font-semibold text-accent">
-										{r.reflectionType === 'INTENTION' ? 'Intention' : r.reflectionType === 'RATING_A' ? 'Mid-week' : r.reflectionType === 'RATING_B' ? 'End-week' : r.reflectionType}
+										{r.reflectionType === 'INTENTION' ? 'Intention' : r.reflectionType === 'RATING_A' ? 'Check-in' : r.reflectionType === 'RATING_B' ? 'Check-in' : r.reflectionType}
 									</span>
 									<div class="min-w-0 flex-1">
 										{#if r.effortScore !== null || r.performanceScore !== null}
@@ -192,7 +193,7 @@
 													<span class="text-warning">Effort: <strong>{r.effortScore}</strong></span>
 												{/if}
 												{#if r.performanceScore !== null}
-													<span class="text-indigo-600">Perf: <strong>{r.performanceScore}</strong></span>
+													<span class="text-accent">Perf: <strong>{r.performanceScore}</strong></span>
 												{/if}
 											</div>
 										{/if}
@@ -224,7 +225,7 @@
 						{#if stakeholder.lastFeedback}
 							<div class="mt-2 flex gap-3 text-xs">
 								{#if stakeholder.lastFeedback.effortScore !== null}
-									<span class="text-teal-700">Effort: <strong>{stakeholder.lastFeedback.effortScore}</strong></span>
+									<span class="text-success">Effort: <strong>{stakeholder.lastFeedback.effortScore}</strong></span>
 								{/if}
 								{#if stakeholder.lastFeedback.performanceScore !== null}
 									<span class="text-success">Perf: <strong>{stakeholder.lastFeedback.performanceScore}</strong></span>

@@ -92,7 +92,36 @@
 	let cycleDurationMode: 'preset' | 'custom' = [8, 12, 16].includes(Number(cycleDurationWeeks)) ? 'preset' : 'custom';
 	let customDurationWeeks = cycleDurationMode === 'custom' ? cycleDurationWeeks : '';
 	let reminderDays: 'wednesday_friday' | 'tuesday_thursday' = 'wednesday_friday';
-	let checkInFrequency: '3x' | '2x' | '1x' = (existingData?.checkInFrequency as '3x' | '2x' | '1x') ?? '3x';
+	// Day picker for unified check-ins
+	const allDays: string[] = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+	const dayLabelsMap: Record<string, string> = { mon: 'Mon', tue: 'Tue', wed: 'Wed', thu: 'Thu', fri: 'Fri', sat: 'Sat', sun: 'Sun' };
+
+	function parseExistingDaysOnb(freq: string): string[] {
+		if (freq === '3x') return ['mon', 'wed', 'fri'];
+		if (freq === '2x') return ['tue', 'fri'];
+		if (freq === '1x') return ['fri'];
+		const ds = freq.split(',').map((d: string) => d.trim().toLowerCase()).filter((d: string) => allDays.includes(d));
+		return ds.length > 0 ? ds : ['tue', 'fri'];
+	}
+
+	let selectedDays: string[] = parseExistingDaysOnb((existingData?.checkInFrequency as string) ?? '3x');
+	let checkInFrequency: string = selectedDays.join(',') || 'fri';
+
+	function toggleDayOnb(day: string) {
+		if (selectedDays.includes(day)) {
+			if (selectedDays.length > 1) {
+				selectedDays = selectedDays.filter(d => d !== day);
+			}
+		} else {
+			selectedDays = [...selectedDays, day];
+		}
+		checkInFrequency = selectedDays.join(',');
+	}
+
+	function applyPresetOnb(preset: string[]) {
+		selectedDays = [...preset];
+		checkInFrequency = selectedDays.join(',');
+	}
 	let stakeholderCadence: 'weekly' | 'biweekly' = (existingData?.stakeholderCadence as 'weekly' | 'biweekly') ?? 'weekly';
 	let revealScores = true;
 	let phone = '';
@@ -375,26 +404,20 @@
 		return end.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 	})();
 	$: weekPreviewDays = (() => {
-		const midDay = reminderDays === 'wednesday_friday' ? 'WED' : 'TUE';
-		const endDay = reminderDays === 'wednesday_friday' ? 'FRI' : 'THU';
-		if (checkInFrequency === '3x') {
-			return [
-				{ day: 'MON', label: 'Set your intention', time: '~2 min' },
-				{ day: midDay, label: 'Rate your effort', time: '~30 sec' },
-				{ day: endDay, label: 'Rate your performance', time: '~30 sec' }
-			];
-		} else if (checkInFrequency === '2x') {
-			return [
-				{ day: 'MON', label: 'Set your intention', time: '~2 min' },
-				{ day: endDay, label: 'Rate effort + performance', time: '~1 min' }
-			];
-		} else {
-			return [
-				{ day: endDay, label: 'Weekly reflection', time: '~2 min' }
-			];
+		const items: Array<{ day: string; label: string; time: string }> = [];
+		items.push({ day: 'MON', label: 'Week 1: Set your intention', time: '~2 min' });
+		const sortOrder = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+		const sorted = [...selectedDays].sort((a, b) => sortOrder.indexOf(a) - sortOrder.indexOf(b));
+		for (const day of sorted) {
+			items.push({ day: dayLabelsMap[day] ?? day.toUpperCase(), label: 'Effort + performance + notes', time: '~2 min' });
 		}
+		return items;
 	})();
 </script>
+
+<svelte:head>
+	<title>Onboarding | Forbetra</title>
+</svelte:head>
 
 <div class="min-h-screen bg-surface-base">
 	{#if draftRestored}
@@ -647,7 +670,7 @@
 							<div class="mb-6 space-y-2">
 								<h2 class="text-3xl font-bold text-text-primary">Break it down into behaviors</h2>
 								<p class="text-text-secondary">
-									Define 3 observable subgoals that others can see and provide feedback on. Think: What
+									Define 3 observable sub-objectives that others can see and provide feedback on. Think: What
 									would someone notice if you were succeeding?
 								</p>
 							</div>
@@ -677,7 +700,7 @@
 													{index + 1}
 												</div>
 												<h3 class="font-semibold text-text-primary">
-													Subgoal {index + 1}
+													Sub-objective {index + 1}
 													{#if subgoal.label.trim().length > 0}
 														<span class="ml-2 text-success">✓</span>
 													{/if}
@@ -740,7 +763,7 @@
 								>
 									<p class="font-medium text-accent">Make it observable:</p>
 									<p class="mt-1 text-text-secondary">
-										Good subgoals are things others can see or measure. Instead of "be more strategic," try
+										Good sub-objectives are things others can see or measure. Instead of "be more strategic," try
 										"document strategic implications before major decisions" — stakeholders can observe and
 										confirm this.
 									</p>
@@ -803,7 +826,7 @@
 
 								<!-- Duration Selector: Preset Cards + Custom -->
 								<div class="space-y-3 md:col-span-2">
-									<label class="block text-sm font-semibold text-text-secondary">Duration</label>
+									<p class="block text-sm font-semibold text-text-secondary">Duration</p>
 									<input type="hidden" name="cycleDurationWeeks" value={cycleDurationWeeks} />
 									<div class="grid grid-cols-4 gap-3">
 										{#each [8, 12, 16] as weeks}
@@ -863,98 +886,40 @@
 									{/if}
 								</div>
 
-								<!-- Check-in Frequency Selector -->
+								<!-- Check-in Days Picker -->
 								<div class="space-y-3 md:col-span-2">
-									<label class="block text-sm font-semibold text-text-secondary">Check-in frequency</label>
-									<div class="grid gap-3 md:grid-cols-3">
-										<label
-											class="group relative flex cursor-pointer rounded-xl border p-4 transition-all {checkInFrequency === '3x'
-												? 'border-accent bg-accent-muted'
-												: 'border-border-default bg-surface-raised hover:border-accent/30 hover:bg-surface-subtle'}"
-										>
-											<input
-												type="radio"
-												name="_checkInFrequencyRadio"
-												value="3x"
-												checked={checkInFrequency === '3x'}
-												onchange={() => (checkInFrequency = '3x')}
-												class="sr-only"
-											/>
-											<div class="flex w-full items-start gap-3">
-												<div
-													class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 {checkInFrequency === '3x'
-														? 'border-accent bg-accent'
-														: 'border-border-strong bg-surface-raised'}"
-												>
-													{#if checkInFrequency === '3x'}
-														<div class="h-2 w-2 rounded-full bg-white"></div>
-													{/if}
-												</div>
-												<div class="flex-1">
-													<div class="font-semibold text-text-primary">3x/week</div>
-													<div class="text-xs text-text-tertiary">Monday intention, midweek effort, end-of-week performance</div>
-													<div class="mt-1 text-[10px] font-semibold text-accent">recommended</div>
-												</div>
-											</div>
-										</label>
-										<label
-											class="group relative flex cursor-pointer rounded-xl border p-4 transition-all {checkInFrequency === '2x'
-												? 'border-accent bg-accent-muted'
-												: 'border-border-default bg-surface-raised hover:border-accent/30 hover:bg-surface-subtle'}"
-										>
-											<input
-												type="radio"
-												name="_checkInFrequencyRadio"
-												value="2x"
-												checked={checkInFrequency === '2x'}
-												onchange={() => (checkInFrequency = '2x')}
-												class="sr-only"
-											/>
-											<div class="flex w-full items-start gap-3">
-												<div
-													class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 {checkInFrequency === '2x'
-														? 'border-accent bg-accent'
-														: 'border-border-strong bg-surface-raised'}"
-												>
-													{#if checkInFrequency === '2x'}
-														<div class="h-2 w-2 rounded-full bg-white"></div>
-													{/if}
-												</div>
-												<div class="flex-1">
-													<div class="font-semibold text-text-primary">2x/week</div>
-													<div class="text-xs text-text-tertiary">Monday intention + end-of-week combined rating</div>
-												</div>
-											</div>
-										</label>
-										<label
-											class="group relative flex cursor-pointer rounded-xl border p-4 transition-all {checkInFrequency === '1x'
-												? 'border-accent bg-accent-muted'
-												: 'border-border-default bg-surface-raised hover:border-accent/30 hover:bg-surface-subtle'}"
-										>
-											<input
-												type="radio"
-												name="_checkInFrequencyRadio"
-												value="1x"
-												checked={checkInFrequency === '1x'}
-												onchange={() => (checkInFrequency = '1x')}
-												class="sr-only"
-											/>
-											<div class="flex w-full items-start gap-3">
-												<div
-													class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 {checkInFrequency === '1x'
-														? 'border-accent bg-accent'
-														: 'border-border-strong bg-surface-raised'}"
-												>
-													{#if checkInFrequency === '1x'}
-														<div class="h-2 w-2 rounded-full bg-white"></div>
-													{/if}
-												</div>
-												<div class="flex-1">
-													<div class="font-semibold text-text-primary">1x/week</div>
-													<div class="text-xs text-text-tertiary">Single weekly reflection covering effort and performance</div>
-												</div>
-											</div>
-										</label>
+									<p class="block text-sm font-semibold text-text-secondary">Check-in days</p>
+									<p class="text-xs text-text-tertiary">Select which days you want to check in. Each check-in covers effort + performance + notes.</p>
+
+									<!-- Quick Presets -->
+									<div class="flex flex-wrap gap-2">
+										<button type="button" onclick={() => applyPresetOnb(['tue', 'fri'])}
+											class="rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all {selectedDays.join(',') === 'tue,fri' ? 'border-accent bg-accent-muted text-accent' : 'border-border-default bg-surface-raised text-text-secondary hover:border-accent/30'}">
+											Tue + Fri (recommended)
+										</button>
+										<button type="button" onclick={() => applyPresetOnb(['mon', 'wed', 'fri'])}
+											class="rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all {selectedDays.join(',') === 'mon,wed,fri' ? 'border-accent bg-accent-muted text-accent' : 'border-border-default bg-surface-raised text-text-secondary hover:border-accent/30'}">
+											Mon + Wed + Fri
+										</button>
+										<button type="button" onclick={() => applyPresetOnb(['fri'])}
+											class="rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all {selectedDays.join(',') === 'fri' ? 'border-accent bg-accent-muted text-accent' : 'border-border-default bg-surface-raised text-text-secondary hover:border-accent/30'}">
+											Fri only
+										</button>
+									</div>
+
+									<!-- Day Buttons -->
+									<div class="grid grid-cols-7 gap-2">
+										{#each allDays as day}
+											<button
+												type="button"
+												onclick={() => toggleDayOnb(day)}
+												class="flex flex-col items-center justify-center rounded-xl border py-3 transition-all {selectedDays.includes(day)
+													? 'border-accent bg-accent-muted text-accent font-bold'
+													: 'border-border-default bg-surface-raised text-text-tertiary hover:border-accent/30 hover:bg-surface-subtle'}"
+											>
+												<span class="text-sm">{dayLabelsMap[day]}</span>
+											</button>
+										{/each}
 									</div>
 
 									<!-- Your Week Preview -->
@@ -1102,7 +1067,7 @@
 
 							<!-- Stakeholder Cadence Selector -->
 							<div class="mb-6 space-y-3">
-								<label class="block text-sm font-semibold text-text-secondary">How often should stakeholders rate you?</label>
+								<p class="block text-sm font-semibold text-text-secondary">How often should stakeholders rate you?</p>
 								<div class="grid gap-3 md:grid-cols-2">
 									<label
 										class="group relative flex cursor-pointer rounded-xl border p-4 transition-all {stakeholderCadence === 'weekly'
@@ -1479,10 +1444,10 @@
 										<div class="mt-4 space-y-4 rounded-lg border border-dashed border-border-strong bg-surface-subtle p-4">
 											<div>
 												<p class="mb-2 text-xs font-bold uppercase tracking-wide text-text-tertiary">
-													Behavioral Subgoals
+													Behavioral Sub-objectives
 												</p>
 												<p class="mb-3 text-xs text-text-secondary">
-													Click any subgoal to add it to your form, then customize it to your needs.
+													Click any sub-objective to add it to your form, then customize it to your needs.
 												</p>
 												<div class="space-y-2">
 													{#each objective.subgoals as subgoal}

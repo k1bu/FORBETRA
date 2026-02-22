@@ -49,7 +49,7 @@
 							<a href="/admin/users/{obj.user.id}" class="hover:text-accent">
 								{obj.user.name ?? obj.user.email}
 							</a>
-							<span>{obj._count.subgoals} subgoals</span>
+							<span>{obj._count.subgoals} sub-objectives</span>
 							<span>{obj._count.cycles} cycles</span>
 							<span>{obj._count.stakeholders} stakeholders</span>
 						</div>

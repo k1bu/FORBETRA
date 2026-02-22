@@ -198,12 +198,34 @@ export const load: PageServerLoad = async ({ params, url }) => {
 };
 
 export const actions: Actions = {
-	updatePhone: async ({ request }) => {
+	updatePhone: async ({ params, request }) => {
+		const tokenParam = sanitizeToken(params.token);
+		if (!tokenParam) {
+			return fail(400, { phoneError: 'Invalid token.' });
+		}
+
+		// Verify the token belongs to this stakeholder
+		const token = await prisma.token.findUnique({
+			where: { tokenHash: tokenParam },
+			select: { stakeholderId: true }
+		});
+
 		const formData = await request.formData();
 		const stakeholderId = String(formData.get('stakeholderId') ?? '').trim();
 		const phone = String(formData.get('phone') ?? '').trim();
 
 		if (!stakeholderId || !phone) {
+			return fail(400, { phoneError: 'Please enter a valid phone number.' });
+		}
+
+		// Ensure the stakeholder ID matches the token's stakeholder
+		if (!token || token.stakeholderId !== stakeholderId) {
+			return fail(403, { phoneError: 'Unauthorized.' });
+		}
+
+		// Basic phone validation
+		const cleanPhone = phone.replace(/[\s\-()]/g, '');
+		if (!/^\+?\d{7,15}$/.test(cleanPhone)) {
 			return fail(400, { phoneError: 'Please enter a valid phone number.' });
 		}
 

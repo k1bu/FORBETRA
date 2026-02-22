@@ -1,27 +1,13 @@
 <script lang="ts">
+	import type { PageData } from './$types';
 	import { Users, AlertTriangle, BarChart3, Target, ChevronRight, ClipboardList, Mail } from 'lucide-svelte';
 
-	export let data: {
-		coach: { name: string };
-		rosterSummary: {
-			total: number;
-			active: number;
-			archived: number;
-			pendingInvites: number;
-		};
-		analytics: {
-			totalAlerts: number;
-			highPriorityAlerts: number;
-			avgStability: number | null;
-			avgAlignment: number | null;
-		};
-		recentAlerts: Array<{
-			clientName: string;
-			clientId: string;
-			alert: { type: string; message: string; severity: 'low' | 'medium' | 'high' };
-		}>;
-	};
+	const { data }: { data: PageData } = $props();
 </script>
+
+<svelte:head>
+	<title>Coach Hub | Forbetra</title>
+</svelte:head>
 
 <section class="mx-auto flex max-w-7xl flex-col gap-6 p-4 pb-12">
 	<!-- Page Header -->

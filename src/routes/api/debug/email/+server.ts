@@ -47,12 +47,12 @@ export const POST: RequestHandler = async ({ request }) => {
 	const subject =
 		typeof body.subject === 'string' && body.subject.trim()
 			? body.subject.trim()
-			: 'FORBETRA test email';
+			: 'Forbetra test email';
 
 	const html =
 		typeof body.html === 'string' && body.html.trim()
 			? body.html
-			: `<p>FORBETRA debug test email.</p><p>Mode: ${getEmailMode()}</p><p>Provider: ${getEmailProviderName()}</p>`;
+			: `<p>Forbetra debug test email.</p><p>Mode: ${getEmailMode()}</p><p>Provider: ${getEmailProviderName()}</p>`;
 
 	try {
 		await sendEmail({ to, subject, html });

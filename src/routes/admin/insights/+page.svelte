@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import { ThumbsUp, ThumbsDown } from 'lucide-svelte';
 
 	const { data }: { data: PageData } = $props();
 
@@ -114,9 +115,9 @@
 						<td class="px-4 py-3">{insight.weekNumber ?? '--'}</td>
 						<td class="px-4 py-3">
 							{#if insight.thumbs === 1}
-								<span class="text-success">&#128077;</span>
+								<ThumbsUp class="h-4 w-4 text-success" />
 							{:else if insight.thumbs === -1}
-								<span class="text-error">&#128078;</span>
+								<ThumbsDown class="h-4 w-4 text-error" />
 							{:else}
 								<span class="text-text-muted">--</span>
 							{/if}

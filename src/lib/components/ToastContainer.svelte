@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
 	import { toasts, removeToast } from '$lib/stores/toasts.svelte';
+	import { CircleCheck, CircleX, Info } from 'lucide-svelte';
 </script>
 
 {#if toasts.length > 0}
@@ -17,8 +18,8 @@
 				role="status"
 				aria-live="polite"
 			>
-				<span class="text-lg" aria-hidden="true">
-					{#if toast.type === 'success'}&#10003;{:else if toast.type === 'error'}&#10007;{:else}&#8505;{/if}
+				<span aria-hidden="true">
+					{#if toast.type === 'success'}<CircleCheck class="h-5 w-5" />{:else if toast.type === 'error'}<CircleX class="h-5 w-5" />{:else}<Info class="h-5 w-5" />{/if}
 				</span>
 				<span class="text-sm font-medium">{toast.message}</span>
 				<button

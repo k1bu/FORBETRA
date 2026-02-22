@@ -11,6 +11,7 @@
 	} from '$lib/utils/scoreColors';
 
 	import { onMount } from 'svelte';
+	import { Eye, Gift, AlertTriangle, Hand, Dumbbell, TrendingUp, PenLine, CircleCheck, Target, Lightbulb, Send } from 'lucide-svelte';
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
 
@@ -25,9 +26,9 @@
 			case 'INTENTION':
 				return 'Intention prompt';
 			case 'RATING_A':
-				return 'Wednesday check-in';
+				return 'Check-in';
 			case 'RATING_B':
-				return 'Friday check-in';
+				return 'Check-in';
 			default:
 				return 'Reflection';
 		}
@@ -51,6 +52,14 @@
 		isSubmitting = true;
 		stakeholderScores = { effortScore, performanceScore };
 	};
+
+	// Reset isSubmitting and phoneSaving on form response (success or error)
+	$effect(() => {
+		if (form) {
+			isSubmitting = false;
+			phoneSaving = false;
+		}
+	});
 
 	// Simulate reveal for preview mode
 	const simulateReveal = () => {
@@ -131,10 +140,20 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Feedback for {data.reflection.participantName} | Forbetra</title>
+</svelte:head>
+
 <section class="mx-auto flex min-h-screen max-w-4xl flex-col gap-6 p-4 pb-12">
+	<!-- Forbetra brand header -->
+	<div class="pt-2 pb-1 text-center">
+		<p class="text-text-primary text-lg" style="font-style: italic; font-weight: 700; letter-spacing: 0.02em;">forbetra</p>
+		<p class="text-text-tertiary text-xs">You. And Improved.</p>
+	</div>
+
 	{#if data.isPreview}
 		<div class="fixed top-4 right-4 z-50 max-w-xs rounded-lg border border-accent/30 bg-accent-muted p-3 text-xs text-accent">
-			<p class="font-semibold">👁️ Preview Mode</p>
+			<p class="font-semibold"><Eye class="h-4 w-4 inline" /> Preview Mode</p>
 			<p class="mt-1 text-xs">Submissions are disabled.</p>
 			{#if !showReveal}
 				<button
@@ -142,7 +161,7 @@
 					onclick={simulateReveal}
 					class="mt-2 w-full rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-white transition-all hover:bg-accent-hover"
 				>
-					🎁 Preview Reveal
+					<Gift class="h-4 w-4 inline" /> Preview Reveal
 				</button>
 			{/if}
 		</div>
@@ -166,7 +185,7 @@
 	<div aria-live="polite">
 		{#if form?.error}
 			<div class="mx-auto max-w-2xl rounded-xl border border-error-muted bg-error-muted p-4 text-sm text-error">
-				<p class="font-medium">⚠️ {form.error}</p>
+				<p class="font-medium"><AlertTriangle class="h-4 w-4 inline" /> {form.error}</p>
 			</div>
 		{/if}
 	</div>
@@ -175,8 +194,8 @@
 		<div class="mx-auto max-w-2xl space-y-6">
 			<div class="rounded-2xl border border-accent/30 bg-surface-base p-8">
 				<div class="mb-6 text-center">
-					<div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600">
-						<span class="text-3xl">👋</span>
+					<div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent">
+						<Hand class="h-8 w-8 text-white" />
 					</div>
 					<h2 class="text-2xl font-bold text-text-primary">Welcome, {data.stakeholder.name}</h2>
 					<p class="mt-2 text-base text-text-secondary">
@@ -193,21 +212,21 @@
 					<p class="text-sm font-semibold text-text-primary">What you'll do:</p>
 					<div class="space-y-2">
 						<div class="flex items-start gap-3 rounded-lg bg-surface-raised p-3 border border-border-default">
-							<span class="mt-0.5 text-lg">💪</span>
+							<Dumbbell class="mt-0.5 h-5 w-5 text-accent" />
 							<div>
 								<p class="text-sm font-semibold text-text-primary">Rate their effort</p>
 								<p class="text-xs text-text-secondary">How intentional and consistent their focus has been (0-10)</p>
 							</div>
 						</div>
 						<div class="flex items-start gap-3 rounded-lg bg-surface-raised p-3 border border-border-default">
-							<span class="mt-0.5 text-lg">📈</span>
+							<TrendingUp class="mt-0.5 h-5 w-5 text-accent" />
 							<div>
 								<p class="text-sm font-semibold text-text-primary">Rate their performance</p>
 								<p class="text-xs text-text-secondary">How visible the results are from your perspective (0-10)</p>
 							</div>
 						</div>
 						<div class="flex items-start gap-3 rounded-lg bg-surface-raised p-3 border border-border-default">
-							<span class="mt-0.5 text-lg">✍️</span>
+							<PenLine class="mt-0.5 h-5 w-5 text-accent" />
 							<div>
 								<p class="text-sm font-semibold text-text-primary">Optionally share observations</p>
 								<p class="text-xs text-text-secondary">A sentence or two about what you've noticed</p>
@@ -227,7 +246,7 @@
 					<button
 						type="button"
 						onclick={() => { showWelcome = false; }}
-						class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-3.5 font-semibold text-white transition-all hover:from-blue-700 hover:to-purple-700"
+						class="inline-flex items-center gap-2 rounded-xl bg-accent px-8 py-3.5 font-semibold text-white transition-all hover:bg-accent-hover"
 					>
 						Got it, let's go
 						<span>&#8594;</span>
@@ -239,7 +258,7 @@
 		<div class="mx-auto max-w-2xl space-y-6">
 			<!-- Initial Success Message -->
 			<div aria-live="polite" class="animate-in fade-in slide-in-from-top-2 rounded-xl border border-success-muted bg-success-muted p-6 text-center">
-				<div class="mb-2 text-4xl">🎉</div>
+				<CircleCheck class="mx-auto mb-2 h-10 w-10 text-success" />
 				<p class="text-lg font-semibold text-success">Feedback submitted!</p>
 				<p class="mt-1 text-sm text-success">Thank you for sharing your perspective. Your feedback has been recorded.</p>
 			</div>
@@ -248,7 +267,7 @@
 			{#if showReveal && individualScores && data.revealScores !== false}
 				<div class="slide-in-from-bottom-4 rounded-2xl border border-accent/30 bg-surface-base p-8">
 					<div class="mb-6 text-center">
-						<div class="mb-3 text-5xl">🎁</div>
+						<Gift class="mx-auto mb-3 h-12 w-12 text-accent" />
 						<h2 class="text-2xl font-bold text-text-primary">Here's what {participantName} rated themselves:</h2>
 						<p class="mt-2 text-sm text-text-secondary">Compare your perspective with their self-assessment</p>
 					</div>
@@ -277,7 +296,7 @@
 										</div>
 									</div>
 								</div>
-								<div class="flex items-center justify-between rounded-lg border-2 border-purple-300 bg-accent-muted px-4 py-3">
+								<div class="flex items-center justify-between rounded-lg border-2 border-accent/30 bg-accent-muted px-4 py-3">
 									<span class="text-sm font-medium text-text-secondary">{participantName}'s rating:</span>
 									<div class="flex items-center gap-2">
 										<div
@@ -317,7 +336,7 @@
 										</div>
 									</div>
 								</div>
-								<div class="flex items-center justify-between rounded-lg border-2 border-purple-300 bg-accent-muted px-4 py-3">
+								<div class="flex items-center justify-between rounded-lg border-2 border-accent/30 bg-accent-muted px-4 py-3">
 									<span class="text-sm font-medium text-text-secondary">{participantName}'s rating:</span>
 									<div class="flex items-center gap-2">
 										<div
@@ -391,7 +410,7 @@
 			<!-- Objective Display -->
 			<div class="rounded-xl border border-border-default bg-surface-subtle px-5 py-4">
 				<div class="flex items-center gap-3 text-base text-text-secondary">
-					<span class="text-xl" role="img" aria-label="target">🎯</span>
+					<Target class="h-5 w-5 text-accent" />
 					<span class="font-medium">Objective:</span>
 					<span class="font-semibold text-lg text-text-primary">{data.reflection.objectiveTitle || 'the objective'}</span>
 				</div>
@@ -447,7 +466,7 @@
 			<div class="group rounded-2xl border border-border-default bg-surface-raised p-6 transition-all hover:border-border-strong">
 				<div class="mb-4 flex items-center justify-between">
 					<div class="flex items-center gap-3">
-						<span class="text-2xl" role="img" aria-label="flexed biceps">💪</span>
+						<Dumbbell class="h-6 w-6 text-accent" />
 						<div>
 							<label for="effort-score" class="text-lg font-bold text-text-primary">
 								Focused Effort
@@ -471,7 +490,7 @@
 				</div>
 
 				<!-- Button Grid (Primary Input) -->
-				<div class="mb-4 grid grid-cols-6 gap-2 sm:grid-cols-11">
+				<div class="mb-4 grid grid-cols-6 gap-2 sm:grid-cols-11" role="radiogroup" aria-label="Effort score selection">
 					{#each Array(11) as _, i}
 						{@const isSelected = effortScore === i}
 						{@const buttonColors = getButtonSelectedColors(i, 'effort')}
@@ -480,6 +499,8 @@
 						<button
 							type="button"
 							onclick={() => (effortScore = i)}
+							aria-pressed={isSelected}
+							aria-label="Score {i} out of 10"
 							class="flex h-10 w-full items-center justify-center rounded-lg border-2 text-sm font-semibold transition-all {isSelected
 								? buttonColors
 								: 'border-border-default bg-surface-raised text-text-secondary ' + hoverColors} focus:outline-none focus:ring-2 {focusRing} focus:ring-offset-2"
@@ -509,7 +530,7 @@
 			<div class="group rounded-2xl border border-border-default bg-surface-raised p-6 transition-all hover:border-border-strong">
 				<div class="mb-4 flex items-center justify-between">
 					<div class="flex items-center gap-3">
-						<span class="text-2xl" role="img" aria-label="chart trending up">📈</span>
+						<TrendingUp class="h-6 w-6 text-accent" />
 						<div>
 							<label for="progress-score" class="text-lg font-bold text-text-primary">
 								Performance
@@ -533,7 +554,7 @@
 				</div>
 
 				<!-- Button Grid (Primary Input) -->
-				<div class="mb-4 grid grid-cols-6 gap-2 sm:grid-cols-11">
+				<div class="mb-4 grid grid-cols-6 gap-2 sm:grid-cols-11" role="radiogroup" aria-label="Performance score selection">
 					{#each Array(11) as _, i}
 						{@const isSelected = performanceScore === i}
 						{@const buttonColors = getButtonSelectedColors(i, 'performance')}
@@ -542,6 +563,8 @@
 						<button
 							type="button"
 							onclick={() => (performanceScore = i)}
+							aria-pressed={isSelected}
+							aria-label="Score {i} out of 10"
 							class="flex h-10 w-full items-center justify-center rounded-lg border-2 text-sm font-semibold transition-all {isSelected
 								? buttonColors
 								: 'border-border-default bg-surface-raised text-text-secondary ' + hoverColors} focus:outline-none focus:ring-2 {focusRing} focus:ring-offset-2"
@@ -558,7 +581,7 @@
 							performanceScore, 'performance'
 						)} {getScoreColor(performanceScore, 'performance')}"
 					>
-						{getScoreLabel(performanceScore, 'progress')}
+						{getScoreLabel(performanceScore, 'performance')}
 					</div>
 					<span class="text-xs font-medium text-text-tertiary">Transformative impact</span>
 				</div>
@@ -570,23 +593,26 @@
 			<!-- Notes with Better UX -->
 			<div class="rounded-2xl border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30">
 				<div class="mb-3 flex items-center gap-2">
-					<span class="text-xl" role="img" aria-label="writing hand">✍️</span>
+					<PenLine class="h-5 w-5 text-accent" />
 					<label for="comment" class="text-base font-semibold text-text-primary">
-						Reflection Notes
-						<span class="ml-2 text-xs font-normal text-text-tertiary">(optional)</span>
+						Share your observations
 					</label>
 				</div>
 				<textarea
 					name="comment"
 					id="comment"
 					rows="4"
+					maxlength="500"
 					bind:value={notes}
 					class="w-full rounded-xl border border-border-default bg-surface-subtle px-4 py-3 text-sm text-text-secondary placeholder:text-text-muted focus:border-accent focus:bg-surface-raised focus:outline-none focus:ring-2 focus:ring-accent/30"
-					placeholder="Share what you observed about {data.reflection.participantName}'s progress, any wins you noticed, or encouragement..."
+					placeholder="What have you noticed about {data.reflection.participantName}'s effort or growth?"
 				></textarea>
-				<p class="mt-2 text-xs text-text-tertiary">
-					💡 Tip: Your observations help {data.reflection.participantName} and their coach see the full picture of their growth.
-				</p>
+				<div class="mt-2 flex items-center justify-between">
+					<p class="text-xs text-text-tertiary">
+						<Lightbulb class="h-3.5 w-3.5 inline text-text-tertiary" /> Tip: Your observations help {data.reflection.participantName} and their coach see the full picture of their growth.
+					</p>
+					<span class="text-xs text-text-muted">{notes.length} / 500</span>
+				</div>
 			</div>
 
 			<!-- Submit Button with Enhanced Design -->
@@ -601,18 +627,17 @@
 					<button
 						type="submit"
 						disabled={isSubmitting || data.isPreview}
-						class="group relative overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-3.5 font-semibold text-white transition-all hover:from-blue-700 hover:to-purple-700 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:ring-2 focus-visible:ring-offset-2"
+						class="rounded-xl bg-accent px-8 py-3.5 font-semibold text-white transition-all hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60 focus-visible:ring-2 focus-visible:ring-offset-2"
 					>
-						<span class="relative z-10 flex items-center gap-2">
+						<span class="flex items-center gap-2">
 							{#if isSubmitting}
 								<span class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
 								Submitting...
 							{:else}
-								<span role="img" aria-label="sparkles">✨</span>
+								<Send class="h-4 w-4" />
 								Submit Feedback
 							{/if}
 						</span>
-						<div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 opacity-0 transition-opacity group-hover:opacity-100"></div>
 					</button>
 				</div>
 			</div>
@@ -657,5 +682,12 @@
 
 	.slide-in-from-bottom-4 {
 		animation: fade-in 0.5s ease-out, slide-in-from-bottom-4 0.5s ease-out;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.animate-in,
+		.slide-in-from-bottom-4 {
+			animation: none;
+		}
 	}
 </style>

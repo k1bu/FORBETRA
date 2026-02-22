@@ -5,16 +5,30 @@
 		getScoreBgColor
 	} from '$lib/utils/scoreColors';
 
+	import { FileText, ChevronDown } from 'lucide-svelte';
+
 	const { data }: { data: PageData } = $props();
+
+	let expandedWeeks = $state<Set<number>>(new Set(data.weeks.map((w: { weekNumber: number }) => w.weekNumber)));
+
+	const toggleWeek = (weekNumber: number) => {
+		const next = new Set(expandedWeeks);
+		if (next.has(weekNumber)) {
+			next.delete(weekNumber);
+		} else {
+			next.add(weekNumber);
+		}
+		expandedWeeks = next;
+	};
 
 	const reflectionLabel = (type: string) => {
 		switch (type) {
 			case 'INTENTION':
 				return 'Intention';
 			case 'RATING_A':
-				return 'Mid-week check-in';
+				return 'Check-in';
 			case 'RATING_B':
-				return 'End-of-week check-in';
+				return 'Check-in';
 			default:
 				return 'Reflection';
 		}
@@ -24,19 +38,11 @@
 		new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(new Date(value));
 </script>
 
-<section class="mx-auto flex max-w-4xl flex-col gap-6 p-4 pb-12">
-	<div class="flex items-center justify-between">
-		<a
-			href="/individual"
-			class="inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:text-accent-hover transition-colors"
-		>
-			<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-			</svg>
-			Back
-		</a>
-	</div>
+<svelte:head>
+	<title>History | Forbetra</title>
+</svelte:head>
 
+<section class="mx-auto flex max-w-4xl flex-col gap-6 p-4 pb-12">
 	<div class="text-center">
 		<h1 class="text-2xl font-bold text-text-primary">Reflection History</h1>
 		<p class="mt-1 text-sm text-text-tertiary">
@@ -46,7 +52,7 @@
 
 	{#if data.weeks.length === 0}
 		<div class="rounded-2xl border border-border-default bg-surface-raised p-8 text-center">
-			<div class="mb-3 text-4xl">📝</div>
+			<FileText class="mx-auto mb-3 h-10 w-10 text-text-muted" />
 			<p class="text-lg font-semibold text-text-secondary">No reflections yet</p>
 			<p class="mt-1 text-sm text-text-tertiary">Complete your first check-in to see your history here.</p>
 			<a
@@ -71,9 +77,18 @@
 						</div>
 
 						<div class="rounded-2xl border border-border-default bg-surface-raised p-5">
-							<h2 class="mb-3 text-lg font-bold text-text-primary">Week {week.weekNumber}</h2>
+							<button
+								type="button"
+								onclick={() => toggleWeek(week.weekNumber)}
+								aria-expanded={expandedWeeks.has(week.weekNumber)}
+								class="flex w-full items-center justify-between text-left"
+							>
+								<h2 class="text-lg font-bold text-text-primary">Week {week.weekNumber}</h2>
+								<ChevronDown class="h-5 w-5 text-text-muted transition-transform {expandedWeeks.has(week.weekNumber) ? 'rotate-180' : ''}" />
+							</button>
 
-							<div class="space-y-4">
+							{#if expandedWeeks.has(week.weekNumber)}
+							<div class="mt-3 space-y-4">
 								{#each week.reflections as reflection}
 									<div class="rounded-xl border border-border-default bg-surface-subtle p-4">
 										<div class="mb-2 flex items-center justify-between">
@@ -140,6 +155,7 @@
 									</div>
 								{/each}
 							</div>
+							{/if}
 						</div>
 					</div>
 				{/each}

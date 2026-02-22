@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { ActionData, PageData } from './$types';
+	import { Target, Zap, Handshake, Battery, Dumbbell, Shield, RefreshCw, Sprout, Rocket, Settings, BookOpen, Sparkles, MessageCircle, MessageSquare, CircleCheck, ClipboardList, Brain, Lightbulb, PenLine, Send } from 'lucide-svelte';
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
 
@@ -10,23 +11,21 @@
 	const formatDate = (value: string) =>
 		new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(new Date(value));
 
-	const getPromptEmoji = (heading: string) => {
-		const emojiMap: Record<string, string> = {
-			'Identity anchor': '🎯',
-			'Momentum check': '⚡',
-			'Stakeholder alignment': '🤝',
-			'Energy audit': '🔋',
-			'Skill rep': '💪',
-			'Obstacle planning': '🛡️',
-			'Feedback loop': '🔄',
-			'Well-being reset': '🌱',
-			'Stretch moment': '🚀',
-			'Systems tune-up': '⚙️',
-			'Storytelling': '📖',
-			'Integration': '✨'
-		};
-		return emojiMap[heading] || '💭';
+	const promptIconMap: Record<string, typeof Target> = {
+		'Identity anchor': Target,
+		'Momentum check': Zap,
+		'Stakeholder alignment': Handshake,
+		'Energy audit': Battery,
+		'Skill rep': Dumbbell,
+		'Obstacle planning': Shield,
+		'Feedback loop': RefreshCw,
+		'Well-being reset': Sprout,
+		'Stretch moment': Rocket,
+		'Systems tune-up': Settings,
+		'Storytelling': BookOpen,
+		'Integration': Sparkles
 	};
+	const PromptIcon = $derived(promptIconMap[data.prompt.heading] || MessageCircle);
 
 	const handleSubmit = () => {
 		isSubmitting = true;
@@ -35,8 +34,12 @@
 	const isIdentityAnchor = data.weekNumber === 1 && data.prompt.heading === 'Identity anchor';
 </script>
 
+<svelte:head>
+	<title>Weekly Intention | Forbetra</title>
+</svelte:head>
+
 <section class="mx-auto flex max-w-4xl flex-col gap-6 p-4 pb-12">
-	<!-- Back to Dashboard Link -->
+	<!-- Back to Today Link -->
 	<div class="flex items-center justify-between">
 		<a
 			href="/individual"
@@ -50,7 +53,7 @@
 			>
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
 			</svg>
-			Back to Dashboard
+			Back to Today
 		</a>
 	</div>
 
@@ -62,7 +65,7 @@
 		</div>
 		<div class="space-y-2">
 			<div class="flex items-center justify-center gap-3">
-				<span class="text-4xl" role="img" aria-label={data.prompt.heading}>{getPromptEmoji(data.prompt.heading)}</span>
+				<PromptIcon class="h-9 w-9 text-accent" />
 				<h1 class="text-3xl font-bold text-text-primary">{data.prompt.heading}</h1>
 			</div>
 			{#if isIdentityAnchor}
@@ -79,7 +82,7 @@
 	{#if data.coachNotes && data.coachNotes.length > 0}
 		<section class="mx-auto w-full max-w-2xl space-y-3 rounded-2xl border border-accent/30 bg-accent-muted p-6">
 			<div class="flex items-center gap-2">
-				<span class="text-2xl" role="img" aria-label="speech bubble">💬</span>
+				<MessageSquare class="h-6 w-6 text-accent" />
 				<h2 class="text-base font-semibold text-accent">Message from your coach</h2>
 			</div>
 			{#each data.coachNotes as note (note.id)}
@@ -100,14 +103,14 @@
 
 		{#if form?.success}
 			<div class="mx-auto w-full max-w-2xl animate-in fade-in slide-in-from-top-2 rounded-xl border border-success/30 bg-success-muted p-6 text-center">
-				<div class="mb-2 text-4xl">🎉</div>
+				<CircleCheck class="mx-auto mb-2 h-10 w-10 text-success" />
 				<p class="text-lg font-semibold text-success">Intention saved!</p>
 				<p class="mt-1 text-sm text-success">Your intention has been recorded. You've got this!</p>
 				<a
 					href="/individual"
 					class="mt-4 inline-flex items-center gap-2 rounded-lg bg-success px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-success/90"
 				>
-					Return to Dashboard
+					Return to Today
 					<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
 					</svg>
@@ -123,7 +126,7 @@
 				<div class="mb-4 flex items-start justify-between">
 					<div class="flex-1">
 						<div class="mb-2 inline-flex items-center gap-2 rounded-lg bg-accent-muted px-3 py-1 text-xs font-semibold text-accent">
-							<span role="img" aria-label="target">🎯</span>
+							<Target class="h-4 w-4" />
 							Your Objective
 						</div>
 						<h2 class="mt-3 text-2xl font-bold text-text-primary">{data.objective.title}</h2>
@@ -137,7 +140,7 @@
 				{#if data.subgoals && data.subgoals.length > 0}
 					<div class="mt-6 rounded-xl border border-border-default glass p-5">
 						<div class="mb-3 flex items-center gap-2">
-							<span class="text-lg" role="img" aria-label="clipboard">📋</span>
+							<ClipboardList class="h-5 w-5 text-text-secondary" />
 							<p class="text-sm font-semibold text-text-secondary">Your behavioral indicators</p>
 						</div>
 						<p class="mb-4 text-xs leading-relaxed text-text-secondary">
@@ -169,7 +172,7 @@
 				<!-- Why This Is Effective -->
 				<div class="rounded-2xl border border-accent/30 bg-accent-muted p-6">
 					<div class="mb-3 flex items-center gap-2">
-						<span class="text-2xl" role="img" aria-label="brain">🧠</span>
+						<Brain class="h-6 w-6 text-accent" />
 						<h3 class="text-base font-semibold text-accent">Why This Is Effective</h3>
 					</div>
 					<div class="space-y-2 text-sm leading-relaxed text-text-secondary">
@@ -188,7 +191,7 @@
 				<!-- Example -->
 				<div class="rounded-2xl border border-warning/30 bg-warning-muted p-6">
 					<div class="mb-3 flex items-center gap-2">
-						<span class="text-2xl" role="img" aria-label="light bulb">💡</span>
+						<Lightbulb class="h-6 w-6 text-warning" />
 						<h3 class="text-base font-semibold text-warning">Example Identity Anchor</h3>
 					</div>
 					<p class="mb-3 text-sm leading-relaxed text-text-secondary">
@@ -210,7 +213,7 @@
 		<form method="post" onsubmit={handleSubmit} class="space-y-6">
 			<div class="group rounded-2xl border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30">
 				<div class="mb-4 flex items-center gap-3">
-					<span class="text-2xl" role="img" aria-label="writing hand">✍️</span>
+					<PenLine class="h-6 w-6 text-accent" />
 					<div class="flex-1">
 						<label for="intention" class="text-lg font-bold text-text-primary">
 							{#if isIdentityAnchor}
@@ -298,7 +301,7 @@
 						href="/individual"
 						class="rounded-xl border border-border-default bg-surface-raised px-6 py-3.5 text-sm font-semibold text-text-secondary transition-all hover:border-border-strong hover:bg-surface-subtle"
 					>
-						Back to Dashboard
+						Back to Today
 					</a>
 					<button
 						type="submit"
@@ -310,7 +313,7 @@
 								<span class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
 								Saving...
 							{:else}
-								<span role="img" aria-label="sparkles">✨</span>
+								<Send class="h-4 w-4" />
 								{#if isIdentityAnchor}
 									{data.existing ? 'Update Identity Anchor' : 'Save Identity Anchor'}
 								{:else}

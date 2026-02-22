@@ -31,7 +31,7 @@ export const onboardingSchema = z.object({
 		.int()
 		.min(4, 'Pick at least 4 weeks')
 		.max(26, 'Keep cycles to 26 weeks or fewer'),
-	checkInFrequency: z.enum(['3x', '2x', '1x']).optional().default('3x'),
+	checkInFrequency: z.string().min(1, 'Select at least one check-in day').optional().default('tue,fri'),
 	stakeholderCadence: z.enum(['weekly', 'biweekly']).optional().default('weekly')
 });
 

@@ -1,29 +1,11 @@
 <script lang="ts">
+	import type { ActionData, PageData } from './$types';
 	import type { ClientSummary } from '$lib/server/buildClientSummary';
 	import PerformanceEffortChart from '$lib/components/PerformanceEffortChart.svelte';
 	import { addToast } from '$lib/stores/toasts.svelte';
 	import { Search, AlertTriangle, Target, Sparkles, Inbox, MessageSquare, Save } from 'lucide-svelte';
 
-	export let data: {
-		coach: { name: string };
-		clients: ClientSummary[];
-		coachPrepMap: Record<string, { id: string; content: string | null; createdAt: Date }>;
-		alertMap: Record<string, string[]>;
-	};
-
-	export let form:
-		| {
-				error?: string;
-				success?: boolean;
-				noteError?: string;
-				noteSuccess?: boolean;
-				cadenceSuccess?: boolean;
-				values?: {
-					content?: string;
-					weekNumber?: string;
-				};
-		  }
-		| null;
+	const { data, form }: { data: PageData; form: ActionData } = $props();
 
 	const formatDate = (value: string | null | undefined) => {
 		if (!value) return '—';
@@ -66,14 +48,13 @@
 		return new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(created);
 	};
 
-	let searchTerm = '';
-	let showArchived = false;
-	let filteredClients: ClientSummary[] = data.clients;
-	let noteClientId: string | null = null;
-	let noteFormOpen = false;
-	let noteTextareaEl: HTMLTextAreaElement | undefined;
+	let searchTerm = $state('');
+	let showArchived = $state(false);
+	let noteClientId = $state<string | null>(null);
+	let noteFormOpen = $state(false);
+	let noteTextareaEl = $state<HTMLTextAreaElement | undefined>(undefined);
 
-	let generatingPrepFor: string | null = null;
+	let generatingPrepFor = $state<string | null>(null);
 
 	async function generatePrep(clientId: string) {
 		generatingPrepFor = clientId;
@@ -90,7 +71,6 @@
 					content: result.content,
 					createdAt: new Date(result.createdAt)
 				};
-				data = data;
 				addToast('Coaching insights generated', 'success');
 			} else {
 				addToast('Failed to generate insights', 'error');
@@ -125,26 +105,32 @@
 		}
 	}
 
-	$: if (noteFormOpen) {
-		setTimeout(() => {
-			noteTextareaEl?.focus();
-		}, 0);
-	}
-
-	// Auto-select first non-archived client on load
-	let selectedClientId: string | null = null;
-	$: {
-		const nonArchived = filteredClients.filter((c) => !c.archived);
-		if (selectedClientId === null && nonArchived.length > 0) {
-			selectedClientId = nonArchived[0].id;
+	$effect(() => {
+		if (noteFormOpen) {
+			setTimeout(() => {
+				noteTextareaEl?.focus();
+			}, 0);
 		}
-	}
+	});
+
+	let selectedClientId = $state<string | null>(null);
+	let detailPanelEl = $state<HTMLElement | undefined>(undefined);
 
 	function selectClient(id: string) {
 		selectedClientId = id;
 	}
 
-	$: filteredClients = data.clients.filter((client) => {
+	// Scroll to detail panel on mobile when a client is selected
+	$effect(() => {
+		if (selectedClientId && detailPanelEl && typeof window !== 'undefined' && window.innerWidth < 768) {
+			// Small delay to let the DOM update before scrolling
+			setTimeout(() => {
+				detailPanelEl?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			}, 100);
+		}
+	});
+
+	const filteredClients = $derived(data.clients.filter((client) => {
 		if (!showArchived && client.archived) return false;
 		if (!searchTerm) return true;
 		const query = searchTerm.toLowerCase();
@@ -152,10 +138,22 @@
 			(client.name ?? '').toLowerCase().includes(query) ||
 			client.email.toLowerCase().includes(query)
 		);
+	}));
+
+	// Auto-select first non-archived client
+	$effect(() => {
+		const nonArchived = filteredClients.filter((c) => !c.archived);
+		if (selectedClientId === null && nonArchived.length > 0) {
+			selectedClientId = nonArchived[0].id;
+		}
 	});
 
-	$: selectedClient = filteredClients.find((c) => c.id === selectedClientId) ?? null;
+	const selectedClient = $derived(filteredClients.find((c) => c.id === selectedClientId) ?? null);
 </script>
+
+<svelte:head>
+	<title>Roster | Forbetra</title>
+</svelte:head>
 
 <section class="mx-auto flex max-w-7xl flex-col gap-6 p-4 pb-12">
 	<!-- Header -->
@@ -237,7 +235,7 @@
 			</div>
 
 			<!-- Right Column: Detail Panel -->
-			<div class="flex-1 min-w-0">
+			<div class="flex-1 min-w-0" bind:this={detailPanelEl}>
 				{#if selectedClient}
 					{@const client = selectedClient}
 					<div class="rounded-lg border border-border-default bg-surface-raised p-6 space-y-6">
@@ -283,10 +281,10 @@
 										>
 											<span
 												class="mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full {alert.severity === 'high'
-													? 'bg-red-600'
+													? 'bg-error'
 													: alert.severity === 'medium'
-													? 'bg-amber-500'
-													: 'bg-blue-500'}"
+													? 'bg-warning'
+													: 'bg-accent'}"
 											></span>
 											<span>{alert.message}</span>
 										</li>
@@ -320,7 +318,7 @@
 										</div>
 										<div class="rounded-lg border border-border-default bg-surface-raised p-2">
 											<p class="text-text-tertiary">Progress (4-wk)</p>
-											<p class="text-lg font-bold text-indigo-600">{formatAverage(client.objective.insights.avgProgress)}</p>
+											<p class="text-lg font-bold text-accent">{formatAverage(client.objective.insights.avgProgress)}</p>
 										</div>
 										<div class="rounded-lg border border-border-default bg-surface-raised p-2">
 											<p class="text-text-tertiary">Stability</p>
@@ -421,9 +419,18 @@
 										{/each}
 									</div>
 								{/if}
-								<div class="prose prose-sm max-w-none text-text-secondary">
-									{prep.content ?? 'No insights available.'}
-								</div>
+								{#if generatingPrepFor === client.id}
+									<div class="space-y-3 animate-pulse">
+										<div class="h-4 w-3/4 rounded bg-surface-subtle"></div>
+										<div class="h-4 w-full rounded bg-surface-subtle"></div>
+										<div class="h-4 w-5/6 rounded bg-surface-subtle"></div>
+										<div class="h-4 w-2/3 rounded bg-surface-subtle"></div>
+									</div>
+								{:else}
+									<div class="prose prose-sm max-w-none text-text-secondary">
+										{prep.content ?? 'No insights available.'}
+									</div>
+								{/if}
 							</section>
 						{:else if !client.archived && client.objective?.cycle}
 							<section class="rounded-lg border border-dashed border-border-default bg-surface-raised p-4">
@@ -442,6 +449,14 @@
 										{generatingPrepFor === client.id ? 'Generating...' : 'Generate Insights'}
 									</button>
 								</div>
+								{#if generatingPrepFor === client.id}
+									<div class="mt-4 space-y-3 animate-pulse">
+										<div class="h-4 w-3/4 rounded bg-surface-subtle"></div>
+										<div class="h-4 w-full rounded bg-surface-subtle"></div>
+										<div class="h-4 w-5/6 rounded bg-surface-subtle"></div>
+										<div class="h-4 w-2/3 rounded bg-surface-subtle"></div>
+									</div>
+								{/if}
 							</section>
 						{/if}
 

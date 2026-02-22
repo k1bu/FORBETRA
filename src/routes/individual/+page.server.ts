@@ -4,6 +4,15 @@ import { requireRole } from '$lib/server/auth';
 import { stdDev, computeWeekNumber } from '$lib/server/coachUtils';
 import type { PageServerLoad } from './$types';
 
+// Parse check-in days from frequency string (shared with checkin server)
+function parseCheckInDays(frequency: string): string[] {
+	if (frequency === '3x') return ['mon', 'wed', 'fri'];
+	if (frequency === '2x') return ['tue', 'fri'];
+	if (frequency === '1x') return ['fri'];
+	const days = frequency.split(',').map(d => d.trim().toLowerCase()).filter(d => d.length > 0);
+	return days.length > 0 ? days : ['fri'];
+}
+
 export const load: PageServerLoad = async (event) => {
 	try {
 		const { dbUser } = requireRole(event, 'INDIVIDUAL');
@@ -66,7 +75,9 @@ export const load: PageServerLoad = async (event) => {
 		// Calculate summary metrics
 		// Determine check-in frequency for this cycle
 		const checkInFrequency = cycle?.checkInFrequency ?? '3x';
-		const checksPerWeek = checkInFrequency === '1x' ? 1 : checkInFrequency === '2x' ? 2 : 3;
+		const checkInDays = parseCheckInDays(checkInFrequency);
+		// Week 1 has an extra INTENTION, plus one RATING_A per check-in day
+		const checksPerWeek = checkInDays.length;
 
 		let completionRate: number | null = null;
 		let currentStreak: number = 0;
@@ -81,45 +92,12 @@ export const load: PageServerLoad = async (event) => {
 			completionRate = totalExpected > 0 ? Math.round((totalCompleted / totalExpected) * 100) : 0;
 
 			// Count open and missed experiences for current week
-			const submittedTypes = new Set(
-				cycle.reflections.filter((r) => r.weekNumber === currentWeek).map((r) => r.reflectionType)
-			);
-
-			if (checkInFrequency !== '1x' && !submittedTypes.has('INTENTION')) openExperiences++;
-			if (!submittedTypes.has('RATING_A')) {
-				const fridayDate = new Date(cycle.startDate);
-				const startDayOfWeek = cycle.startDate.getDay();
-				const mondayOffset = startDayOfWeek === 0 ? -6 : 1 - startDayOfWeek;
-				const cycleMonday = new Date(cycle.startDate);
-				cycleMonday.setDate(cycle.startDate.getDate() + mondayOffset);
-				cycleMonday.setHours(0, 0, 0, 0);
-				const targetMonday = new Date(cycleMonday);
-				targetMonday.setDate(cycleMonday.getDate() + (currentWeek - 1) * 7);
-				const friday = new Date(targetMonday);
-				friday.setDate(targetMonday.getDate() + 4);
-				friday.setHours(0, 0, 0, 0);
-
-				if (currentTime >= friday) {
-					missedExperiences++;
-				} else {
-					openExperiences++;
-				}
-			}
-			if (checkInFrequency === '3x' && !submittedTypes.has('RATING_B')) {
-				const nextWeekIntention = await prisma.reflection.findFirst({
-					where: {
-						cycleId: cycle.id,
-						userId: dbUser.id,
-						reflectionType: 'INTENTION',
-						weekNumber: currentWeek + 1
-					}
-				});
-				if (nextWeekIntention) {
-					missedExperiences++;
-				} else {
-					openExperiences++;
-				}
-			}
+			// Unified: each check-in day = one RATING_A expected
+			const currentWeekReflections = cycle.reflections.filter((r) => r.weekNumber === currentWeek);
+			const ratingACount = currentWeekReflections.filter((r) => r.reflectionType === 'RATING_A').length;
+			const expectedCheckIns = checkInDays.length;
+			const pendingCheckIns = Math.max(0, expectedCheckIns - ratingACount);
+			openExperiences = pendingCheckIns;
 
 			// Calculate current streak
 			const typeOrder: Record<string, number> = { INTENTION: 0, RATING_A: 1, RATING_B: 2 };
@@ -137,15 +115,13 @@ export const load: PageServerLoad = async (event) => {
 
 			const expectedSequence: Array<{ week: number; type: string }> = [];
 			for (let week = 1; week <= currentWeek; week++) {
-				if (checkInFrequency === '1x') {
-					expectedSequence.push({ week, type: 'RATING_A' });
-				} else if (checkInFrequency === '2x') {
+				// Week 1 always has an INTENTION
+				if (week === 1) {
 					expectedSequence.push({ week, type: 'INTENTION' });
+				}
+				// Each check-in day = one RATING_A
+				for (let d = 0; d < checkInDays.length; d++) {
 					expectedSequence.push({ week, type: 'RATING_A' });
-				} else {
-					expectedSequence.push({ week, type: 'INTENTION' });
-					expectedSequence.push({ week, type: 'RATING_A' });
-					expectedSequence.push({ week, type: 'RATING_B' });
 				}
 			}
 
@@ -200,80 +176,36 @@ export const load: PageServerLoad = async (event) => {
 		}
 
 		if (cycle && currentWeek && isOnboardingComplete) {
-			// Calculate next action
+			// Calculate next action (unified)
 			const submittedTypes = new Set(
 				cycle.reflections.filter((r) => r.weekNumber === currentWeek).map((r) => r.reflectionType)
 			);
 
-			if (checkInFrequency === '1x') {
-				// 1x: single weekly reflection
-				if (!submittedTypes.has('RATING_A')) {
-					nextAction = {
-						type: 'RATING_A',
-						label: 'Complete your weekly reflection',
-						url: '/reflections/checkin?type=RATING_A',
-						state: 'open'
-					};
-				} else {
-					nextAction = {
-						type: 'RATING_A',
-						label: "Complete next week's reflection",
-						url: '/reflections/checkin?type=RATING_A',
-						state: 'upcoming'
-					};
-				}
-			} else if (checkInFrequency === '2x') {
-				// 2x: intention + combined check-in
-				if (!submittedTypes.has('INTENTION')) {
-					nextAction = {
-						type: 'INTENTION',
-						label: 'Complete your Monday intention reflection',
-						url: '/prompts/monday',
-						state: 'open'
-					};
-				} else if (!submittedTypes.has('RATING_A')) {
-					nextAction = {
-						type: 'RATING_A',
-						label: 'Complete your end-of-week check-in',
-						url: '/reflections/checkin?type=RATING_A',
-						state: 'open'
-					};
-				} else {
-					nextAction = {
-						type: 'INTENTION',
-						label: "Complete next week's Monday intention reflection",
-						url: '/prompts/monday',
-						state: 'upcoming'
-					};
-				}
+			// Week 1 Monday: intention prompt
+			if (currentWeek === 1 && !submittedTypes.has('INTENTION')) {
+				nextAction = {
+					type: 'INTENTION',
+					label: 'Complete your Week 1 intention',
+					url: '/prompts/monday',
+					state: 'open'
+				};
 			} else {
-				// 3x: intention + Wednesday + Friday
-				if (!submittedTypes.has('INTENTION')) {
-					nextAction = {
-						type: 'INTENTION',
-						label: 'Complete your Monday intention reflection',
-						url: '/prompts/monday',
-						state: 'open'
-					};
-				} else if (!submittedTypes.has('RATING_A')) {
+				// Unified: check if there are remaining RATING_A check-ins this week
+				const ratingACount = cycle.reflections.filter(
+					(r) => r.weekNumber === currentWeek && r.reflectionType === 'RATING_A'
+				).length;
+				if (ratingACount < checkInDays.length) {
 					nextAction = {
 						type: 'RATING_A',
-						label: 'Complete your Wednesday check-in',
-						url: '/reflections/checkin?type=RATING_A',
-						state: 'open'
-					};
-				} else if (!submittedTypes.has('RATING_B')) {
-					nextAction = {
-						type: 'RATING_B',
-						label: 'Complete your Friday check-in',
-						url: '/reflections/checkin?type=RATING_B',
+						label: 'Complete your check-in',
+						url: '/reflections/checkin',
 						state: 'open'
 					};
 				} else {
 					nextAction = {
-						type: 'INTENTION',
-						label: "Complete next week's Monday intention reflection",
-						url: '/prompts/monday',
+						type: 'RATING_A',
+						label: 'All check-ins complete this week',
+						url: null,
 						state: 'upcoming'
 					};
 				}
@@ -939,9 +871,82 @@ export const load: PageServerLoad = async (event) => {
 			}
 		}
 
+		// --- Recent Notes: self reflections + stakeholder feedback comments ---
+		let recentNotes: Array<{
+			source: 'self' | 'stakeholder';
+			name: string | null;
+			text: string;
+			weekNumber: number;
+		}> = [];
+
+		if (cycle && isOnboardingComplete) {
+			// Self notes (last 3 with non-null notes)
+			const selfNotes = await prisma.reflection.findMany({
+				where: {
+					cycleId: cycle.id,
+					userId: dbUser.id,
+					notes: { not: null }
+				},
+				orderBy: { submittedAt: 'desc' },
+				take: 3,
+				select: { notes: true, weekNumber: true }
+			});
+			for (const n of selfNotes) {
+				if (n.notes && n.notes.trim().length > 0) {
+					recentNotes.push({
+						source: 'self',
+						name: null,
+						text: n.notes.trim(),
+						weekNumber: n.weekNumber
+					});
+				}
+			}
+
+			// Stakeholder feedback comments (last 3 with non-null comment)
+			const stkComments = await prisma.feedback.findMany({
+				where: {
+					stakeholder: { objectiveId: objective.id },
+					reflection: { cycleId: cycle.id },
+					comment: { not: null }
+				},
+				orderBy: { submittedAt: 'desc' },
+				take: 3,
+				select: {
+					comment: true,
+					stakeholder: { select: { name: true } },
+					reflection: { select: { weekNumber: true } }
+				}
+			});
+			for (const c of stkComments) {
+				if (c.comment && c.comment.trim().length > 0) {
+					recentNotes.push({
+						source: 'stakeholder',
+						name: c.stakeholder.name,
+						text: c.comment.trim(),
+						weekNumber: c.reflection?.weekNumber ?? 0
+					});
+				}
+			}
+
+			// Sort by week desc, take 5 max
+			recentNotes.sort((a, b) => b.weekNumber - a.weekNumber);
+			recentNotes = recentNotes.slice(0, 5);
+		}
+
+		// Compute the next check-in day name for the welcome card
+		const dayNameMap: Record<string, string> = {
+			mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday',
+			thu: 'Thursday', fri: 'Friday', sat: 'Saturday', sun: 'Sunday'
+		};
+		const checkInDayLabels = cycle
+			? parseCheckInDays(cycle.checkInFrequency ?? '3x').map(d => dayNameMap[d] ?? d)
+			: [];
+		const nextCheckInDay = checkInDayLabels.length > 0 ? checkInDayLabels[0] : 'Friday';
+
 		return {
 			isFirstVisit,
 			isOnboardingComplete,
+			nextCheckInDay,
 			objective: objective
 				? {
 						id: objective.id,
@@ -984,7 +989,8 @@ export const load: PageServerLoad = async (event) => {
 			latestInsight,
 			identityAnchor,
 			latestScorecard: isOnboardingComplete ? latestScorecard : [],
-			visualizationData: isOnboardingComplete ? visualizationData : null
+			visualizationData: isOnboardingComplete ? visualizationData : null,
+			recentNotes
 		};
 	} catch (error: any) {
 		console.error('[individual:error] Failed to load individual page', {

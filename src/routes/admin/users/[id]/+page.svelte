@@ -153,7 +153,7 @@
 				<p class="mt-1 text-sm text-text-secondary">{objective.description}</p>
 			{/if}
 			<div class="mt-2 flex gap-4 text-xs text-text-tertiary">
-				<span>{objective.subgoals.length} subgoals</span>
+				<span>{objective.subgoals.length} sub-objectives</span>
 				<span>{objective.cycles.length} cycles</span>
 				<span>{objective.stakeholders.length} stakeholders</span>
 				<span class="font-semibold {objective.active ? 'text-success' : 'text-text-tertiary'}">{objective.active ? 'Active' : 'Inactive'}</span>

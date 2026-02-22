@@ -6,10 +6,11 @@ import type { Actions, PageServerLoad } from './$types';
 import type { ReflectionType } from '@prisma/client';
 import { computeWeekNumber, getDateForWeekday } from '$lib/server/coachUtils';
 
-// Determine which check-in type based on current date
+// Unified check-in: every check-in is RATING_A (effort + performance + notes)
 const getCheckInType = (
 	startDate: Date,
-	weekNumber: number
+	weekNumber: number,
+	checkInFrequency?: string
 ): {
 	type: ReflectionType;
 	label: string;
@@ -19,37 +20,58 @@ const getCheckInType = (
 	const today = new Date();
 	today.setHours(0, 0, 0, 0);
 
-	const wednesdayDate = getDateForWeekday(3, startDate, weekNumber); // Wednesday = 3
-	const fridayDate = getDateForWeekday(5, startDate, weekNumber); // Friday = 5
+	// Parse check-in days from frequency string (e.g. "mon,wed,fri" or legacy "3x"/"2x"/"1x")
+	const days = parseCheckInDays(checkInFrequency ?? '3x');
+	const dayNumbers = days.map(dayNameToNumber);
 
-	// If it's Friday or later, show Friday check-in
-	if (today >= fridayDate) {
-		return {
-			type: 'RATING_B',
-			label: 'Friday check-in',
-			availableDate: fridayDate,
-			isAvailable: true
-		};
+	// Find the next available check-in day for this week
+	const sortedDays = [...dayNumbers].sort((a, b) => a - b);
+
+	// Find the latest day that has passed (or today), or the earliest day if none have passed
+	let bestDay: number | null = null;
+	for (const day of sortedDays) {
+		const dayDate = getDateForWeekday(day, startDate, weekNumber);
+		if (today >= dayDate) {
+			bestDay = day; // Keep updating to get the latest available day
+		}
 	}
 
-	// If it's Wednesday or later (but before Friday), show Wednesday check-in
-	if (today >= wednesdayDate) {
+	if (bestDay !== null) {
+		const dayDate = getDateForWeekday(bestDay, startDate, weekNumber);
 		return {
 			type: 'RATING_A',
-			label: 'Wednesday check-in',
-			availableDate: wednesdayDate,
+			label: 'Check-in',
+			availableDate: dayDate,
 			isAvailable: true
 		};
 	}
 
-	// Before Wednesday, show Wednesday check-in but mark as not available yet
+	// No day has passed yet — show the first upcoming day
+	const firstDay = sortedDays[0] ?? 3; // fallback to Wednesday
+	const dayDate = getDateForWeekday(firstDay, startDate, weekNumber);
 	return {
 		type: 'RATING_A',
-		label: 'Wednesday check-in',
-		availableDate: wednesdayDate,
+		label: 'Check-in',
+		availableDate: dayDate,
 		isAvailable: false
 	};
 };
+
+// Parse check-in days from frequency string
+function parseCheckInDays(frequency: string): string[] {
+	// Legacy support: "3x" = mon,wed,fri; "2x" = tue,fri; "1x" = fri
+	if (frequency === '3x') return ['mon', 'wed', 'fri'];
+	if (frequency === '2x') return ['tue', 'fri'];
+	if (frequency === '1x') return ['fri'];
+	// New format: comma-separated day names
+	const days = frequency.split(',').map(d => d.trim().toLowerCase()).filter(d => d.length > 0);
+	return days.length > 0 ? days : ['fri'];
+}
+
+function dayNameToNumber(day: string): number {
+	const map: Record<string, number> = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
+	return map[day] ?? 3;
+}
 
 // Check if next Monday intention has been submitted (locks editing)
 // 48-hour grace period: even after submitting the next intention, the previous
@@ -118,9 +140,7 @@ export const load: PageServerLoad = async (event) => {
 		}
 	}
 
-	// Check if type is specified in query params
-	const typeParam = event.url.searchParams.get('type');
-
+	// Unified: all check-ins are RATING_A
 	let checkInInfo: {
 		type: ReflectionType;
 		label: string;
@@ -128,57 +148,10 @@ export const load: PageServerLoad = async (event) => {
 		isAvailable: boolean;
 	};
 
-	// For 1x frequency: always show combined effort+performance as RATING_A
-	if (checkInFrequency === '1x') {
-		const fridayDate = getDateForWeekday(5, cycle.startDate, currentWeek);
-		const today = new Date();
-		today.setHours(0, 0, 0, 0);
-		checkInInfo = {
-			type: 'RATING_A',
-			label: 'Weekly reflection',
-			availableDate: fridayDate,
-			isAvailable: isPreview || today >= fridayDate
-		};
-	} else if (checkInFrequency === '2x' && (!typeParam || typeParam === 'RATING_B')) {
-		// For 2x frequency: Mon=intention, other day=combined effort+performance as RATING_A
-		const fridayDate = getDateForWeekday(5, cycle.startDate, currentWeek);
-		const today = new Date();
-		today.setHours(0, 0, 0, 0);
-		checkInInfo = {
-			type: 'RATING_A',
-			label: 'End-of-week check-in',
-			availableDate: fridayDate,
-			isAvailable: isPreview || today >= fridayDate
-		};
-	} else if (typeParam === 'RATING_A' || typeParam === 'RATING_B') {
-		// Use the specified type
-		const tuesdayDate = getDateForWeekday(2, cycle.startDate, currentWeek);
-		const thursdayDate = getDateForWeekday(4, cycle.startDate, currentWeek);
-		const today = new Date();
-		today.setHours(0, 0, 0, 0);
-
-		if (typeParam === 'RATING_A') {
-			checkInInfo = {
-				type: 'RATING_A',
-				label: checkInFrequency === '2x' ? 'End-of-week check-in' : 'Wednesday check-in',
-				availableDate: tuesdayDate,
-				isAvailable: isPreview || today >= tuesdayDate
-			};
-		} else {
-			checkInInfo = {
-				type: 'RATING_B',
-				label: 'Friday check-in',
-				availableDate: thursdayDate,
-				isAvailable: isPreview || today >= thursdayDate
-			};
-		}
-	} else {
-		// Fall back to auto-detection
-		checkInInfo = getCheckInType(cycle.startDate, currentWeek);
-		// Override availability if preview mode
-		if (isPreview) {
-			checkInInfo.isAvailable = true;
-		}
+	// Always use unified check-in (RATING_A with both effort + performance)
+	checkInInfo = getCheckInType(cycle.startDate, currentWeek, checkInFrequency);
+	if (isPreview) {
+		checkInInfo.isAvailable = true;
 	}
 
 	const isLocked = await isNextMondayIntentionSubmitted(cycle.id, dbUser.id, currentWeek);
@@ -342,6 +315,8 @@ export const actions: Actions = {
 			}
 		}
 
+		const actionCheckInFrequency = cycle.checkInFrequency ?? '3x';
+
 		let checkInInfo: {
 			type: ReflectionType;
 			label: string;
@@ -349,33 +324,10 @@ export const actions: Actions = {
 			isAvailable: boolean;
 		};
 
-		// Respect type parameter if provided, otherwise auto-detect
-		if (typeParam === 'RATING_A' || typeParam === 'RATING_B') {
-			const tuesdayDate = getDateForWeekday(2, cycle.startDate, weekNumber);
-			const thursdayDate = getDateForWeekday(4, cycle.startDate, weekNumber);
-			const today = new Date();
-			today.setHours(0, 0, 0, 0);
-
-			if (typeParam === 'RATING_A') {
-				checkInInfo = {
-					type: 'RATING_A',
-					label: 'Wednesday check-in',
-					availableDate: tuesdayDate,
-					isAvailable: isPreview || today >= tuesdayDate
-				};
-			} else {
-				checkInInfo = {
-					type: 'RATING_B',
-					label: 'Friday check-in',
-					availableDate: thursdayDate,
-					isAvailable: isPreview || today >= thursdayDate
-				};
-			}
-		} else {
-			checkInInfo = getCheckInType(cycle.startDate, weekNumber);
-			if (isPreview) {
-				checkInInfo.isAvailable = true;
-			}
+		// Unified: always RATING_A
+		checkInInfo = getCheckInType(cycle.startDate, weekNumber, actionCheckInFrequency);
+		if (isPreview) {
+			checkInInfo.isAvailable = true;
 		}
 
 		// Check if check-in is available (skip in preview mode)
@@ -474,19 +426,18 @@ export const actions: Actions = {
 					allReflections.map((r) => `${r.weekNumber}-${r.reflectionType}`)
 				);
 
-				const checkInFrequency = cycle.checkInFrequency ?? '3x';
+				const streakCheckInFrequency = cycle.checkInFrequency ?? '3x';
+				const streakCheckInDays = parseCheckInDays(streakCheckInFrequency);
 				const currentWeek = computeWeekNumber(cycle.startDate);
 				const expectedSequence: Array<{ week: number; type: string }> = [];
 				for (let w = 1; w <= currentWeek; w++) {
-					if (checkInFrequency === '1x') {
-						expectedSequence.push({ week: w, type: 'RATING_A' });
-					} else if (checkInFrequency === '2x') {
+					// Week 1 always has an INTENTION on Monday
+					if (w === 1) {
 						expectedSequence.push({ week: w, type: 'INTENTION' });
+					}
+					// Each check-in day = one RATING_A
+					for (let d = 0; d < streakCheckInDays.length; d++) {
 						expectedSequence.push({ week: w, type: 'RATING_A' });
-					} else {
-						expectedSequence.push({ week: w, type: 'INTENTION' });
-						expectedSequence.push({ week: w, type: 'RATING_A' });
-						expectedSequence.push({ week: w, type: 'RATING_B' });
 					}
 				}
 

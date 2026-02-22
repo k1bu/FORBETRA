@@ -1,6 +1,8 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 
+	import { MessageSquare } from 'lucide-svelte';
+
 	const { data }: { data: PageData } = $props();
 
 	type Message = { role: 'user' | 'assistant'; content: string };
@@ -18,6 +20,8 @@
 		}
 	};
 
+	let streamingTimeout: ReturnType<typeof setTimeout> | null = null;
+
 	const sendMessage = async () => {
 		const text = input.trim();
 		if (!text || isStreaming) return;
@@ -27,6 +31,14 @@
 		input = '';
 		isStreaming = true;
 		scrollToBottom();
+
+		// Safety timeout: reset isStreaming after 30 seconds if still true
+		if (streamingTimeout) clearTimeout(streamingTimeout);
+		streamingTimeout = setTimeout(() => {
+			if (isStreaming) {
+				isStreaming = false;
+			}
+		}, 30000);
 
 		const assistantMessage: Message = { role: 'assistant', content: '' };
 		messages = [...messages, assistantMessage];
@@ -88,6 +100,10 @@
 			messages[messages.length - 1].content = 'Network error. Please check your connection.';
 			messages = [...messages];
 		} finally {
+			if (streamingTimeout) {
+				clearTimeout(streamingTimeout);
+				streamingTimeout = null;
+			}
 			isStreaming = false;
 			scrollToBottom();
 		}
@@ -108,25 +124,19 @@
 	];
 </script>
 
+<svelte:head>
+	<title>Ask | Forbetra</title>
+</svelte:head>
+
 <section class="mx-auto flex max-w-3xl flex-col h-[calc(100vh-2rem)] p-4">
-	<div class="flex items-center justify-between mb-4">
-		<a
-			href="/individual"
-			class="inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:text-accent-hover transition-colors"
-		>
-			<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-			</svg>
-			Back
-		</a>
-		<h1 class="text-lg font-bold text-text-primary">Ask About Your Data</h1>
-		<div class="w-12"></div>
+	<div class="mb-4">
+		<h1 class="text-lg font-bold text-text-primary text-center">Ask About Your Data</h1>
 	</div>
 
 	{#if !data.hasActiveCycle}
 		<div class="flex-1 flex items-center justify-center">
 			<div class="rounded-2xl border border-border-default bg-surface-raised p-8 text-center max-w-md">
-				<div class="mb-3 text-4xl">💬</div>
+				<MessageSquare class="mx-auto mb-3 h-10 w-10 text-text-muted" />
 				<p class="text-lg font-semibold text-text-secondary">No active cycle</p>
 				<p class="mt-1 text-sm text-text-tertiary">Start a cycle to ask questions about your development data.</p>
 				<a
@@ -145,7 +155,7 @@
 		>
 			{#if messages.length === 0}
 				<div class="flex flex-col items-center justify-center h-full text-center">
-					<div class="mb-4 text-5xl">💬</div>
+					<MessageSquare class="mx-auto mb-4 h-12 w-12 text-accent" />
 					<p class="text-lg font-semibold text-text-secondary">Hi {data.userName}!</p>
 					<p class="mt-1 text-sm text-text-tertiary max-w-sm">
 						Ask me anything about your development data — patterns, trends, comparisons, or recommendations.
@@ -200,6 +210,7 @@
 					type="button"
 					onclick={sendMessage}
 					disabled={!input.trim() || isStreaming}
+					aria-label="Send message"
 					class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent text-white transition-all hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed"
 				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

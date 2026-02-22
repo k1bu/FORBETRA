@@ -10,19 +10,24 @@ import { smsTemplates } from '$lib/notifications/smsTemplates';
 import { Prisma } from '@prisma/client';
 import { stdDev, computeWeekNumber, getDateForWeekday, toIsoDate, weeksBetween, FEEDBACK_TOKEN_EXPIRY_DAYS } from '$lib/server/coachUtils';
 
-type PromptType = 'INTENTION' | 'RATING_A' | 'RATING_B';
+function parseCheckInDays(frequency: string): string[] {
+	if (frequency === '3x') return ['mon', 'wed', 'fri'];
+	if (frequency === '2x') return ['tue', 'fri'];
+	if (frequency === '1x') return ['fri'];
+	const days = frequency.split(',').map(d => d.trim().toLowerCase()).filter(d => d.length > 0);
+	return days.length > 0 ? days : ['fri'];
+}
 
-const promptWeekdays: Record<PromptType, number> = {
-	INTENTION: 1,
-	RATING_A: 3,
-	RATING_B: 5
-};
+function dayNameToNumber(day: string): number {
+	const map: Record<string, number> = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
+	return map[day] ?? 3;
+}
 
 const getNextPrompt = (
 	startDate: Date,
 	currentWeek: number,
 	weeklyExperiences: WeeklyExperience[]
-): { type: PromptType; date: Date } | null => {
+): { type: 'INTENTION' | 'RATING_A'; date: Date } | null => {
 	const today = new Date();
 	today.setHours(0, 0, 0, 0);
 
@@ -32,12 +37,8 @@ const getNextPrompt = (
 	);
 
 	if (nextExperience && nextExperience.availableDate) {
-		// If it's Monday and the intention is open, use today's date
-		if (
-			nextExperience.type === 'INTENTION' &&
-			today.getDay() === 1 &&
-			nextExperience.state === 'open'
-		) {
+		// If it's the available day and the experience is open, use today's date
+		if (nextExperience.state === 'open' && nextExperience.availableDate <= today) {
 			return {
 				type: nextExperience.type,
 				date: today
@@ -49,39 +50,16 @@ const getNextPrompt = (
 		};
 	}
 
-	// If no open/upcoming experiences in current week, find the next week's Monday intention
-	const nextWeekMonday = getDateForWeekday(1, startDate, currentWeek + 1);
-	if (nextWeekMonday >= today) {
+	// If no open/upcoming experiences in current week, point to next week's first check-in day
+	const nextWeekFirstDay = getDateForWeekday(1, startDate, currentWeek + 1);
+	if (nextWeekFirstDay >= today) {
 		return {
-			type: 'INTENTION',
-			date: nextWeekMonday
+			type: currentWeek === 0 ? 'INTENTION' : 'RATING_A',
+			date: nextWeekFirstDay
 		};
 	}
 
-	// Fallback: find next prompt based on today's date
-	const candidates = (Object.keys(promptWeekdays) as PromptType[]).map((type) => {
-		const targetDay = promptWeekdays[type];
-		const candidate = new Date(today);
-
-		while (candidate.getDay() !== targetDay) {
-			candidate.setDate(candidate.getDate() + 1);
-		}
-
-		if (candidate <= today) {
-			candidate.setDate(candidate.getDate() + 7);
-		}
-
-		return { type, date: candidate };
-	});
-
-	candidates.sort((a, b) => a.date.getTime() - b.date.getTime());
-	const next = candidates[0];
-
-	if (next.date < startDate) {
-		return { type: 'INTENTION', date: startDate };
-	}
-
-	return next;
+	return null;
 };
 
 
@@ -89,7 +67,7 @@ const getNextPrompt = (
 type ExperienceState = 'open' | 'completed' | 'missed' | 'upcoming' | 'catchup';
 
 type WeeklyExperience = {
-	type: 'INTENTION' | 'RATING_A' | 'RATING_B';
+	type: 'INTENTION' | 'RATING_A';
 	label: string;
 	state: ExperienceState;
 	availableDate: Date | null;
@@ -103,6 +81,7 @@ const getWeeklyExperiences = async (
 	cycle: {
 		id: string;
 		startDate: Date;
+		checkInFrequency: string;
 		reflections: Array<{ id: string; reflectionType: string; weekNumber: number }>;
 	},
 	userId: string,
@@ -116,32 +95,24 @@ const getWeeklyExperiences = async (
 	const normalizedStartDate = new Date(cycle.startDate);
 	normalizedStartDate.setHours(0, 0, 0, 0);
 
-	const mondayDate = getDateForWeekday(1, normalizedStartDate, currentWeek);
-	const tuesdayDate = getDateForWeekday(2, normalizedStartDate, currentWeek);
-	const wednesdayDate = getDateForWeekday(3, normalizedStartDate, currentWeek);
-	const thursdayDate = getDateForWeekday(4, normalizedStartDate, currentWeek);
-	const fridayDate = getDateForWeekday(5, normalizedStartDate, currentWeek);
+	const checkInDays = parseCheckInDays(cycle.checkInFrequency ?? '3x');
 
-	// Get next Monday date (for deadline calculation)
-	const nextMondayDate = new Date(mondayDate);
-	nextMondayDate.setDate(mondayDate.getDate() + 7);
-
-	// Check if next Monday intention is submitted (locks check-ins after 48h grace)
-	const nextWeekIntention = await prismaClient.reflection.findFirst({
+	// Check if next week's first check-in is submitted (locks current week after 48h grace)
+	const nextWeekFirstReflection = await prismaClient.reflection.findFirst({
 		where: {
 			cycleId: cycle.id,
 			userId,
-			reflectionType: 'INTENTION',
 			weekNumber: currentWeek + 1
 		},
+		orderBy: { submittedAt: 'asc' },
 		select: { submittedAt: true }
 	});
 
 	let isLocked = false;
 	let catchupDeadline: Date | null = null;
-	if (nextWeekIntention) {
+	if (nextWeekFirstReflection) {
 		const gracePeriodMs = 48 * 60 * 60 * 1000;
-		const lockTime = new Date(nextWeekIntention.submittedAt.getTime() + gracePeriodMs);
+		const lockTime = new Date(nextWeekFirstReflection.submittedAt.getTime() + gracePeriodMs);
 		catchupDeadline = lockTime;
 		isLocked = new Date() >= lockTime;
 	}
@@ -149,112 +120,105 @@ const getWeeklyExperiences = async (
 	// Get submitted reflections for current week
 	const submittedReflections = cycle.reflections.filter((r) => r.weekNumber === currentWeek);
 	const hasIntention = submittedReflections.some((r) => r.reflectionType === 'INTENTION');
-	const hasRatingA = submittedReflections.some((r) => r.reflectionType === 'RATING_A');
-	const hasRatingB = submittedReflections.some((r) => r.reflectionType === 'RATING_B');
-
 	const intentionReflection = submittedReflections.find((r) => r.reflectionType === 'INTENTION');
-	const ratingAReflection = submittedReflections.find((r) => r.reflectionType === 'RATING_A');
-	const ratingBReflection = submittedReflections.find((r) => r.reflectionType === 'RATING_B');
+
+	// Count RATING_A reflections submitted this week (each check-in day = one RATING_A)
+	const ratingAReflections = submittedReflections.filter((r) => r.reflectionType === 'RATING_A');
+	const ratingACount = ratingAReflections.length;
 
 	const experiences: WeeklyExperience[] = [];
+	const dayLabels: Record<string, string> = {
+		sun: 'Sunday', mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday',
+		thu: 'Thursday', fri: 'Friday', sat: 'Saturday'
+	};
 
-	// 1. Monday Intention Prompt
-	// Use today's date if it's Monday and the intention is open, otherwise use the calculated Monday date
-	const mondayDisplayDate = today.getDay() === 1 && !hasIntention && !isLocked ? today : mondayDate;
+	let slotIndex = 0;
 
-	let intentionState: ExperienceState;
-	if (hasIntention) {
-		intentionState = 'completed';
-	} else if (today < mondayDate) {
-		intentionState = 'upcoming';
-	} else if (isLocked) {
-		intentionState = 'missed';
-	} else if (nextWeekIntention && !isLocked) {
-		// Within 48h grace period
-		intentionState = 'catchup';
-	} else {
-		intentionState = 'open';
+	for (const dayName of checkInDays) {
+		const dayNumber = dayNameToNumber(dayName);
+		const dayDate = getDateForWeekday(dayNumber, normalizedStartDate, currentWeek);
+		const dayLabel = dayLabels[dayName] ?? dayName;
+
+		// Week 1, first check-in day, and no INTENTION submitted yet: show INTENTION
+		const isIntentionSlot = currentWeek === 1 && slotIndex === 0;
+
+		if (isIntentionSlot) {
+			// INTENTION experience
+			const displayDate = today.getDay() === dayNumber && !hasIntention && !isLocked ? today : dayDate;
+
+			let intentionState: ExperienceState;
+			if (hasIntention) {
+				intentionState = 'completed';
+			} else if (today < dayDate) {
+				intentionState = 'upcoming';
+			} else if (isLocked) {
+				intentionState = 'missed';
+			} else if (nextWeekFirstReflection && !isLocked) {
+				intentionState = 'catchup';
+			} else {
+				intentionState = 'open';
+			}
+
+			experiences.push({
+				type: 'INTENTION',
+				label: `${dayLabel} intention`,
+				state: intentionState,
+				availableDate: displayDate,
+				deadlineDate: isLocked ? dayDate : null,
+				reflectionId: intentionReflection?.id ?? null,
+				url: intentionState === 'open' || intentionState === 'completed'
+					? '/prompts/monday'
+					: intentionState === 'catchup'
+						? `/prompts/monday?week=${currentWeek}`
+						: null,
+				catchupDeadline: intentionState === 'catchup' ? catchupDeadline : null
+			});
+		} else {
+			// RATING_A experience
+			// Determine which RATING_A slot this is (accounting for the intention slot in week 1)
+			const ratingSlotIndex = currentWeek === 1 ? slotIndex - 1 : slotIndex;
+			const isCompleted = ratingSlotIndex < ratingACount;
+			const matchingReflection = isCompleted ? ratingAReflections[ratingSlotIndex] : null;
+
+			// Calculate the next check-in day's date for deadline (or end of week)
+			const nextDayIndex = checkInDays.indexOf(dayName) + 1;
+			const nextDayDate = nextDayIndex < checkInDays.length
+				? getDateForWeekday(dayNameToNumber(checkInDays[nextDayIndex]), normalizedStartDate, currentWeek)
+				: null;
+
+			let ratingState: ExperienceState;
+			if (isCompleted) {
+				ratingState = 'completed';
+			} else if (today < dayDate) {
+				ratingState = 'upcoming';
+			} else if (isLocked) {
+				ratingState = 'missed';
+			} else if (nextWeekFirstReflection && !isLocked) {
+				ratingState = 'catchup';
+			} else {
+				ratingState = 'open';
+			}
+
+			experiences.push({
+				type: 'RATING_A',
+				label: `${dayLabel} check-in`,
+				state: ratingState,
+				availableDate: dayDate,
+				deadlineDate: nextDayDate,
+				reflectionId: matchingReflection?.id ?? null,
+				url:
+					ratingState === 'open' || ratingState === 'completed'
+						? '/reflections/checkin?type=RATING_A'
+						: ratingState === 'catchup'
+							? `/reflections/checkin?type=RATING_A&week=${currentWeek}`
+							: null,
+				catchupDeadline: ratingState === 'catchup' ? catchupDeadline : null
+			});
+		}
+
+		slotIndex++;
 	}
 
-	experiences.push({
-		type: 'INTENTION',
-		label: 'Monday intention',
-		state: intentionState,
-		availableDate: mondayDisplayDate,
-		deadlineDate: isLocked ? nextMondayDate : null,
-		reflectionId: intentionReflection?.id ?? null,
-		url: intentionState === 'open' || intentionState === 'completed'
-			? '/prompts/monday'
-			: intentionState === 'catchup'
-				? `/prompts/monday?week=${currentWeek}`
-				: null,
-		catchupDeadline: intentionState === 'catchup' ? catchupDeadline : null
-	});
-
-	// 2. Wednesday Check-in - Available Wednesday until Friday
-	let ratingAState: ExperienceState;
-	if (hasRatingA) {
-		ratingAState = 'completed';
-	} else if (today < wednesdayDate) {
-		ratingAState = 'upcoming';
-	} else if (isLocked) {
-		ratingAState = 'missed';
-	} else if (nextWeekIntention && !isLocked) {
-		// Next intention submitted but within 48h grace — catch up
-		ratingAState = 'catchup';
-	} else {
-		ratingAState = 'open';
-	}
-
-	experiences.push({
-		type: 'RATING_A',
-		label: 'Wednesday check-in',
-		state: ratingAState,
-		availableDate: wednesdayDate,
-		deadlineDate: fridayDate,
-		reflectionId: ratingAReflection?.id ?? null,
-		url:
-			ratingAState === 'open' || ratingAState === 'completed'
-				? '/reflections/checkin?type=RATING_A'
-				: ratingAState === 'catchup'
-					? `/reflections/checkin?type=RATING_A&week=${currentWeek}`
-					: null,
-		catchupDeadline: ratingAState === 'catchup' ? catchupDeadline : null
-	});
-
-	// 3. Friday Check-in - Available Friday until next Monday intention
-	let ratingBState: ExperienceState;
-	if (hasRatingB) {
-		ratingBState = 'completed';
-	} else if (today < fridayDate) {
-		ratingBState = 'upcoming';
-	} else if (isLocked) {
-		ratingBState = 'missed';
-	} else if (nextWeekIntention && !isLocked) {
-		// Next intention submitted but within 48h grace — catch up
-		ratingBState = 'catchup';
-	} else {
-		ratingBState = 'open';
-	}
-
-	experiences.push({
-		type: 'RATING_B',
-		label: 'Friday check-in',
-		state: ratingBState,
-		availableDate: fridayDate,
-		deadlineDate: isLocked ? nextMondayDate : null,
-		reflectionId: ratingBReflection?.id ?? null,
-		url:
-			ratingBState === 'open' || ratingBState === 'completed'
-				? '/reflections/checkin?type=RATING_B'
-				: ratingBState === 'catchup'
-					? `/reflections/checkin?type=RATING_B&week=${currentWeek}`
-					: null,
-		catchupDeadline: ratingBState === 'catchup' ? catchupDeadline : null
-	});
-
-	// Always return all three experiences for the current week
-	// We want to show Monday, Wednesday, and Friday experiences regardless of state
 	return experiences;
 };
 
@@ -362,7 +326,7 @@ export const load: PageServerLoad = async (event) => {
 			if (reflection.reflectionType === 'INTENTION') {
 				weekEntry.intention = true;
 			}
-			// Both RATING_A and RATING_B check-ins capture both scores
+			// RATING_A check-ins capture both scores (RATING_B kept for legacy data)
 			if (reflection.reflectionType === 'RATING_A' || reflection.reflectionType === 'RATING_B') {
 				if (reflection.effortScore !== null) {
 					weekEntry.effortScores.push(reflection.effortScore);
@@ -396,7 +360,7 @@ export const load: PageServerLoad = async (event) => {
 		cycle && weekToUse ? await getWeeklyExperiences(cycle, dbUser.id, weekToUse, prisma) : [];
 
 	const weeklyExperiences: Array<{
-		type: 'INTENTION' | 'RATING_A' | 'RATING_B';
+		type: 'INTENTION' | 'RATING_A';
 		label: string;
 		state: 'open' | 'completed' | 'missed' | 'upcoming' | 'catchup';
 		availableDate: string | null;
@@ -663,42 +627,43 @@ export const load: PageServerLoad = async (event) => {
 	let totalCompleted: number = 0;
 
 	if (cycle && currentWeek) {
-		// Calculate completion rate
-		totalExpected = currentWeek * 3; // 3 experiences per week
+		// Dynamic check-in days from cycle frequency
+		const engagementDays = parseCheckInDays(cycle.checkInFrequency ?? '3x');
+		const checkInsPerWeek = engagementDays.length;
+
+		// Week 1 has INTENTION (1 slot) + remaining RATING_A slots
+		// All other weeks have only RATING_A slots (one per check-in day)
+		totalExpected = checkInsPerWeek * currentWeek;
 		totalCompleted = cycle.reflections.length;
 		completionRate = totalExpected > 0 ? Math.round((totalCompleted / totalExpected) * 100) : 0;
 
-		// Calculate streaks (consecutive individual check-ins/prompts)
-		// Sort reflections chronologically by week and type order (INTENTION, RATING_A, RATING_B)
-		const typeOrder: Record<string, number> = { INTENTION: 0, RATING_A: 1, RATING_B: 2 };
-		const sortedReflections = [...cycle.reflections].sort((a, b) => {
-			if (a.weekNumber !== b.weekNumber) {
-				return a.weekNumber - b.weekNumber;
-			}
-			return (typeOrder[a.reflectionType] ?? 999) - (typeOrder[b.reflectionType] ?? 999);
-		});
-
-		// Create a set of completed reflections for quick lookup
-		const completedReflections = new Set<string>();
-		sortedReflections.forEach((r) => {
-			completedReflections.add(`${r.weekNumber}-${r.reflectionType}`);
-		});
-
-		// Calculate current streak (from most recent backwards, checking for consecutive sequence)
-		// Build expected sequence: Week 1: INTENTION, RATING_A, RATING_B; Week 2: INTENTION, RATING_A, RATING_B; etc.
-		const expectedSequence: Array<{ week: number; type: string }> = [];
+		// Calculate streaks based on dynamic check-in slots
+		// Build expected sequence: Week 1 has INTENTION + RATING_A slots, subsequent weeks all RATING_A
+		const expectedSequence: Array<{ week: number; slotIndex: number }> = [];
 		for (let week = 1; week <= currentWeek; week++) {
-			expectedSequence.push({ week, type: 'INTENTION' });
-			expectedSequence.push({ week, type: 'RATING_A' });
-			expectedSequence.push({ week, type: 'RATING_B' });
+			for (let slot = 0; slot < checkInsPerWeek; slot++) {
+				expectedSequence.push({ week, slotIndex: slot });
+			}
 		}
 
-		// Count consecutive completed reflections from the end
+		// Count actual reflections per week to compare against expected slots
+		const reflectionCountByWeek = new Map<number, number>();
+		cycle.reflections.forEach((r) => {
+			const count = reflectionCountByWeek.get(r.weekNumber) ?? 0;
+			reflectionCountByWeek.set(r.weekNumber, count + 1);
+		});
+
+		// A slot is "completed" if the number of reflections for that week >= slotIndex + 1
+		const isSlotCompleted = (week: number, slotIndex: number): boolean => {
+			const count = reflectionCountByWeek.get(week) ?? 0;
+			return count > slotIndex;
+		};
+
+		// Count consecutive completed slots from the end
 		let streak = 0;
 		for (let i = expectedSequence.length - 1; i >= 0; i--) {
-			const expected = expectedSequence[i];
-			const key = `${expected.week}-${expected.type}`;
-			if (completedReflections.has(key)) {
+			const { week, slotIndex } = expectedSequence[i];
+			if (isSlotCompleted(week, slotIndex)) {
 				streak++;
 			} else {
 				break;
@@ -710,21 +675,12 @@ export const load: PageServerLoad = async (event) => {
 		let maxStreak = 0;
 		let runningStreak = 0;
 
-		// Check all expected reflections in chronological order
-		for (let week = 1; week <= currentWeek; week++) {
-			const types: Array<'INTENTION' | 'RATING_A' | 'RATING_B'> = [
-				'INTENTION',
-				'RATING_A',
-				'RATING_B'
-			];
-			for (const type of types) {
-				const key = `${week}-${type}`;
-				if (completedReflections.has(key)) {
-					runningStreak++;
-					maxStreak = Math.max(maxStreak, runningStreak);
-				} else {
-					runningStreak = 0;
-				}
+		for (const { week, slotIndex } of expectedSequence) {
+			if (isSlotCompleted(week, slotIndex)) {
+				runningStreak++;
+				maxStreak = Math.max(maxStreak, runningStreak);
+			} else {
+				runningStreak = 0;
 			}
 		}
 		bestStreak = maxStreak;
@@ -894,7 +850,7 @@ export const actions: Actions = {
 				cycleId_weekNumber_reflectionType_subgoalId: {
 					cycleId: cycle.id,
 					weekNumber,
-					reflectionType: 'RATING_B',
+					reflectionType: 'RATING_A',
 					subgoalId: primarySubgoal.id
 				}
 			},
@@ -903,7 +859,7 @@ export const actions: Actions = {
 				cycleId: cycle.id,
 				userId: dbUser.id,
 				subgoalId: primarySubgoal.id,
-				reflectionType: 'RATING_B',
+				reflectionType: 'RATING_A',
 				weekNumber,
 				checkInDate: new Date()
 			}

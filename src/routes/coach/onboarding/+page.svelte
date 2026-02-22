@@ -2,6 +2,7 @@
 	import type { ActionData, PageData } from './$types';
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
+	import { Compass, Target, PenLine, Users, BrainCircuit, Mail, Check } from 'lucide-svelte';
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
 
@@ -40,6 +41,10 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Coach Setup | Forbetra</title>
+</svelte:head>
+
 <section class="mx-auto flex min-h-screen max-w-3xl flex-col items-center justify-center gap-8 p-4 pb-12">
 	<!-- Progress Dots -->
 	<div class="flex items-center gap-3">
@@ -48,9 +53,9 @@
 				type="button"
 				onclick={() => { if (i <= currentStepIndex) currentStep = step; }}
 				class="h-3 w-3 rounded-full transition-all {i === currentStepIndex
-					? 'scale-110 bg-purple-600 shadow-md shadow-purple-300'
+					? 'scale-110 bg-accent shadow-md shadow-accent/30'
 					: i < currentStepIndex
-						? 'bg-purple-400 hover:bg-purple-500'
+						? 'bg-accent/60 hover:bg-accent/70'
 						: 'bg-surface-subtle'}"
 				aria-label="Step {i + 1}"
 			></button>
@@ -61,8 +66,8 @@
 	{#if currentStep === 'welcome'}
 		<div class="w-full space-y-8 text-center">
 			<div class="space-y-4">
-				<div class="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-blue-600 shadow-xl shadow-purple-200">
-					<span class="text-4xl">🧭</span>
+				<div class="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-accent to-accent shadow-xl shadow-accent/20">
+					<Compass class="h-10 w-10 text-white" />
 				</div>
 				<h1 class="text-4xl font-bold text-text-primary">Welcome to Forbetra, {data.coach.name}</h1>
 				<p class="mx-auto max-w-lg text-lg text-text-secondary">
@@ -81,15 +86,15 @@
 					<h3 class="mb-3 text-sm font-semibold uppercase tracking-wide text-accent">What you'll have access to</h3>
 					<ul class="space-y-2 text-sm text-text-secondary">
 						<li class="flex items-start gap-2">
-							<span class="mt-0.5 text-blue-500">&#10003;</span>
+							<Check class="mt-0.5 h-4 w-4 text-accent shrink-0" />
 							Real-time tracking of client effort and performance
 						</li>
 						<li class="flex items-start gap-2">
-							<span class="mt-0.5 text-blue-500">&#10003;</span>
+							<Check class="mt-0.5 h-4 w-4 text-accent shrink-0" />
 							AI-generated insights and coaching prep
 						</li>
 						<li class="flex items-start gap-2">
-							<span class="mt-0.5 text-blue-500">&#10003;</span>
+							<Check class="mt-0.5 h-4 w-4 text-accent shrink-0" />
 							Stakeholder feedback trends and blind-spot alerts
 						</li>
 					</ul>
@@ -119,11 +124,11 @@
 
 			<div class="mx-auto max-w-xl space-y-3">
 				{#each [
-					{ num: 1, icon: '🎯', title: 'Individual sets an objective', desc: 'They define what they want to improve and break it into observable behaviors.' },
-					{ num: 2, icon: '📝', title: 'Weekly check-ins', desc: 'Self-rated effort and performance scores (0-10) with reflection notes.' },
-					{ num: 3, icon: '👥', title: 'Stakeholders rate the same dimensions', desc: 'External perspectives reveal blind spots between self-perception and reality.' },
-					{ num: 4, icon: '🤖', title: 'AI analyzes patterns', desc: 'Weekly synthesis, trend detection, and actionable coaching prep.' },
-					{ num: 5, icon: '🧭', title: 'You see everything', desc: 'Alerts, trends, stakeholder feedback, and AI insights — all in one dashboard.' }
+					{ num: 1, icon: Target, title: 'Individual sets an objective', desc: 'They define what they want to improve and break it into observable behaviors.' },
+					{ num: 2, icon: PenLine, title: 'Weekly check-ins', desc: 'Self-rated effort and performance scores (0-10) with reflection notes.' },
+					{ num: 3, icon: Users, title: 'Stakeholders rate the same dimensions', desc: 'External perspectives reveal blind spots between self-perception and reality.' },
+					{ num: 4, icon: BrainCircuit, title: 'AI analyzes patterns', desc: 'Weekly synthesis, trend detection, and actionable coaching prep.' },
+					{ num: 5, icon: Compass, title: 'You see everything', desc: 'Alerts, trends, stakeholder feedback, and AI insights — all in one dashboard.' }
 				] as card}
 					<div class="flex items-start gap-4 rounded-xl border border-border-default bg-surface-raised p-5 text-left transition-all hover:border-accent/30">
 						<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent-muted text-sm font-bold text-accent">
@@ -131,7 +136,7 @@
 						</div>
 						<div class="flex-1">
 							<div class="flex items-center gap-2">
-								<span class="text-lg">{card.icon}</span>
+								<card.icon class="h-5 w-5 text-accent" />
 								<h3 class="text-sm font-bold text-text-primary">{card.title}</h3>
 							</div>
 							<p class="mt-1 text-xs text-text-secondary leading-relaxed">{card.desc}</p>
@@ -164,8 +169,8 @@
 	{#if currentStep === 'invite'}
 		<div class="w-full space-y-8 text-center">
 			<div class="space-y-3">
-				<div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-blue-600 shadow-lg shadow-purple-200">
-					<span class="text-3xl">✉️</span>
+				<div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-accent to-accent shadow-lg shadow-accent/20">
+					<Mail class="h-8 w-8 text-white" />
 				</div>
 				<h1 class="text-3xl font-bold text-text-primary">Invite Your First Client</h1>
 				<p class="mx-auto max-w-md text-base text-text-secondary">
