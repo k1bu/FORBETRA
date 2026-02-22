@@ -14,7 +14,7 @@
 	export let form: ActionData | null;
 
 	type SubgoalFormValue = { label: string; description: string };
-	type StakeholderFormValue = { name: string; email: string; relationship: string };
+	type StakeholderFormValue = { name: string; email: string; relationship: string; phone: string };
 
 	const DRAFT_KEY = 'forbetra-onboarding-draft';
 	const DRAFT_MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24 hours
@@ -107,7 +107,8 @@
 		(_, index) => ({
 			name: values.stakeholders[index]?.name ?? '',
 			email: values.stakeholders[index]?.email ?? '',
-			relationship: values.stakeholders[index]?.relationship ?? ''
+			relationship: values.stakeholders[index]?.relationship ?? '',
+			phone: values.stakeholders[index]?.phone ?? ''
 		})
 	);
 
@@ -136,7 +137,7 @@
 
 	function updateStakeholderField(
 		index: number,
-		key: 'name' | 'email' | 'relationship',
+		key: 'name' | 'email' | 'relationship' | 'phone',
 		value: string
 	) {
 		stakeholderForms = stakeholderForms.map((stakeholder, stakeIndex) =>
@@ -146,7 +147,7 @@
 
 	function addStakeholderField() {
 		if (stakeholderForms.length >= maxStakeholderFields) return;
-		stakeholderForms = [...stakeholderForms, { name: '', email: '', relationship: '' }];
+		stakeholderForms = [...stakeholderForms, { name: '', email: '', relationship: '', phone: '' }];
 	}
 
 	function resetSubgoals() {
@@ -160,7 +161,8 @@
 		stakeholderForms = Array.from({ length: minStakeholderFields }, () => ({
 			name: '',
 			email: '',
-			relationship: ''
+			relationship: '',
+			phone: ''
 		}));
 	}
 
@@ -1269,6 +1271,29 @@
 														{getError(`stakeholders.${index}.relationship`)}
 													</p>
 												{/if}
+											</div>
+
+											<div class="space-y-2 md:col-span-2">
+												<label
+													class="block text-sm font-medium text-text-secondary"
+													for={`stakeholderPhone${index + 1}`}
+												>
+													Phone <span class="font-normal text-text-muted">(optional)</span>
+												</label>
+												<input
+													id={`stakeholderPhone${index + 1}`}
+													name={`stakeholderPhone${index + 1}`}
+													type="tel"
+													placeholder="+1 (555) 123-4567"
+													class="w-full rounded-lg border border-border-default bg-surface-raised px-4 py-2 text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10"
+													value={stakeholder.phone}
+													oninput={(event) =>
+														updateStakeholderField(
+															index,
+															'phone',
+															event.currentTarget.value
+														)}
+												/>
 											</div>
 										</div>
 									</div>

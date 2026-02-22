@@ -21,7 +21,9 @@ export const load: PageServerLoad = async ({ params, url }) => {
 		return {
 			token: 'preview',
 			stakeholder: {
-				name: 'Sample Stakeholder'
+				id: 'preview',
+				name: 'Sample Stakeholder',
+				phone: null
 			},
 			reflection: {
 				type: 'RATING_B' as const,
@@ -174,7 +176,9 @@ export const load: PageServerLoad = async ({ params, url }) => {
 	return {
 		token: token.tokenHash,
 		stakeholder: {
-			name: token.stakeholder.name
+			id: token.stakeholder.id,
+			name: token.stakeholder.name,
+			phone: token.stakeholder.phone
 		},
 		reflection: {
 			type: token.reflection.reflectionType,
@@ -194,6 +198,22 @@ export const load: PageServerLoad = async ({ params, url }) => {
 };
 
 export const actions: Actions = {
+	updatePhone: async ({ request }) => {
+		const formData = await request.formData();
+		const stakeholderId = String(formData.get('stakeholderId') ?? '').trim();
+		const phone = String(formData.get('phone') ?? '').trim();
+
+		if (!stakeholderId || !phone) {
+			return fail(400, { phoneError: 'Please enter a valid phone number.' });
+		}
+
+		await prisma.stakeholder.update({
+			where: { id: stakeholderId },
+			data: { phone }
+		});
+
+		return { phoneSaved: true };
+	},
 	default: async ({ params, request, url }) => {
 		const isPreview = url.searchParams.get('preview') === 'true';
 

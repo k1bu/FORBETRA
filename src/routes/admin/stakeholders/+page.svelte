@@ -45,6 +45,7 @@
 				<tr>
 					<th class="px-4 py-3">Name</th>
 					<th class="px-4 py-3">Email</th>
+					<th class="px-4 py-3">Phone</th>
 					<th class="px-4 py-3">Relationship</th>
 					<th class="px-4 py-3">Individual</th>
 					<th class="px-4 py-3">Objective</th>
@@ -57,6 +58,7 @@
 					<tr class="hover:bg-surface-subtle">
 						<td class="px-4 py-3 font-medium text-text-primary">{sh.name}</td>
 						<td class="px-4 py-3 text-text-secondary">{sh.email}</td>
+						<td class="px-4 py-3 text-text-secondary">{sh.phone ?? '--'}</td>
 						<td class="px-4 py-3">{sh.relationship ?? '--'}</td>
 						<td class="px-4 py-3">
 							<a href="/admin/users/{sh.individual.id}" class="text-accent hover:underline">

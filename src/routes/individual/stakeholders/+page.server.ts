@@ -290,8 +290,9 @@ export const actions: Actions = {
 			.trim()
 			.toLowerCase();
 		const relationship = String(formData.get('relationship') ?? '').trim();
+		const phone = String(formData.get('phone') ?? '').trim();
 
-		const values = { name, email, relationship };
+		const values = { name, email, relationship, phone };
 
 		if (!name || !email) {
 			return fail(400, {
@@ -323,7 +324,8 @@ export const actions: Actions = {
 					objectiveId: objective.id,
 					name,
 					email,
-					relationship: relationship.length > 0 ? relationship : null
+					relationship: relationship.length > 0 ? relationship : null,
+					phone: phone.length > 0 ? phone : null
 				}
 			});
 		} catch (error) {

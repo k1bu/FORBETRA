@@ -43,6 +43,9 @@
 	let showReveal = $state(false);
 	let stakeholderScores = $state<{ effortScore: number; performanceScore: number } | null>(null);
 	let previewIndividualScores = $state<{ effortScore: number; performanceScore: number; participantName: string } | null>(null);
+	let phoneInput = $state('');
+	let phoneSaved = $state(false);
+	let phoneSaving = $state(false);
 
 	const handleSubmit = () => {
 		isSubmitting = true;
@@ -331,6 +334,47 @@
 							</div>
 						</div>
 					</div>
+				</div>
+			{/if}
+
+			<!-- Phone opt-in (only if stakeholder has no phone on file) -->
+			{#if !data.stakeholder.phone && !data.isPreview}
+				<div class="rounded-2xl border border-border-default bg-surface-raised p-6">
+					{#if phoneSaved || form?.phoneSaved}
+						<div class="rounded-lg border border-success/20 bg-success-muted px-4 py-3 text-sm text-success">
+							Phone saved! You'll get a text next time feedback is requested.
+						</div>
+					{:else}
+						<p class="mb-3 text-sm font-semibold text-text-primary">Get future reminders via text?</p>
+						<p class="mb-4 text-xs text-text-secondary">
+							We'll send a quick SMS when {data.reflection.participantName} requests feedback. No spam, ever.
+						</p>
+						{#if form?.phoneError}
+							<p class="mb-3 text-xs text-error">{form.phoneError}</p>
+						{/if}
+						<form
+							method="post"
+							action="?/updatePhone"
+							onsubmit={() => { phoneSaving = true; }}
+							class="flex items-center gap-3"
+						>
+							<input type="hidden" name="stakeholderId" value={data.stakeholder.id} />
+							<input
+								name="phone"
+								type="tel"
+								placeholder="+1 (555) 123-4567"
+								bind:value={phoneInput}
+								class="flex-1 rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
+							/>
+							<button
+								type="submit"
+								disabled={!phoneInput.trim() || phoneSaving}
+								class="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
+							>
+								{phoneSaving ? 'Saving...' : 'Save'}
+							</button>
+						</form>
+					{/if}
 				</div>
 			{/if}
 		</div>

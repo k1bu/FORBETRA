@@ -8,9 +8,10 @@
 			? {
 					name: form.values.name ?? '',
 					email: form.values.email ?? '',
-					relationship: form.values.relationship ?? ''
+					relationship: form.values.relationship ?? '',
+					phone: form.values.phone ?? ''
 				}
-			: { name: '', email: '', relationship: '' };
+			: { name: '', email: '', relationship: '', phone: '' };
 
 	const stakeholderError =
 		form?.action === 'stakeholder' && form?.error ? form.error : null;
@@ -142,6 +143,13 @@
 						class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
 						placeholder="Relationship (optional)"
 						value={stakeholderFormValues.relationship}
+					/>
+					<input
+						name="phone"
+						type="tel"
+						class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
+						placeholder="Phone (optional)"
+						value={stakeholderFormValues.phone}
 					/>
 					<button
 						type="submit"

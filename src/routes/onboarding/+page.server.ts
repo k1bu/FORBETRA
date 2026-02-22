@@ -172,7 +172,8 @@ export const actions: Actions = {
 			const relationship = (formData.get(`stakeholderRelationship${index + 1}`) ?? '')
 				.toString()
 				.trim();
-			return { name, email, relationship };
+			const phone = (formData.get(`stakeholderPhone${index + 1}`) ?? '').toString().trim();
+			return { name, email, relationship, phone };
 		}).filter((stakeholder) => stakeholder.name && stakeholder.email);
 
 		const submission = {
@@ -260,13 +261,18 @@ export const actions: Actions = {
 
 					if (data.stakeholders && data.stakeholders.length > 0) {
 						for (const stakeholder of data.stakeholders) {
+							const matchedStakeholderInput = stakeholders.find(
+								(s) => s.email.toLowerCase() === stakeholder.email.toLowerCase()
+							);
+							const stakeholderPhone = matchedStakeholderInput?.phone || null;
 							const existingId = existingEmailMap.get(stakeholder.email.toLowerCase());
 							if (existingId) {
 								await tx.stakeholder.update({
 									where: { id: existingId },
 									data: {
 										name: stakeholder.name,
-										relationship: stakeholder.relationship ?? null
+										relationship: stakeholder.relationship ?? null,
+										phone: stakeholderPhone
 									}
 								});
 							} else {
@@ -276,7 +282,8 @@ export const actions: Actions = {
 										objectiveId,
 										name: stakeholder.name,
 										email: stakeholder.email,
-										relationship: stakeholder.relationship ?? null
+										relationship: stakeholder.relationship ?? null,
+										phone: stakeholderPhone
 									}
 								});
 
@@ -357,13 +364,18 @@ export const actions: Actions = {
 
 					if (data.stakeholders && data.stakeholders.length > 0) {
 						for (const stakeholder of data.stakeholders) {
+							const matchedStakeholderInput = stakeholders.find(
+								(s) => s.email.toLowerCase() === stakeholder.email.toLowerCase()
+							);
+							const stakeholderPhone = matchedStakeholderInput?.phone || null;
 							await tx.stakeholder.create({
 								data: {
 									individualId: dbUser.id,
 									objectiveId: objective.id,
 									name: stakeholder.name,
 									email: stakeholder.email,
-									relationship: stakeholder.relationship ?? null
+									relationship: stakeholder.relationship ?? null,
+									phone: stakeholderPhone
 								}
 							});
 
