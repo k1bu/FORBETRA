@@ -82,6 +82,7 @@
 		return 'from-purple-500 to-pink-500';
 	};
 
+	import { Target, Clock, BarChart3, Users, Flame, Calendar, CircleCheck, CircleX, RotateCcw } from 'lucide-svelte';
 	import PerformanceEffortChart from '$lib/components/PerformanceEffortChart.svelte';
 	import { getScoreColorNullable, getStabilityColor } from '$lib/utils/scoreColors';
 
@@ -94,7 +95,7 @@
 	<div class="flex items-center justify-between">
 		<a
 			href="/individual"
-			class="group flex items-center gap-2 text-sm font-medium text-neutral-600 transition-colors hover:text-neutral-900"
+			class="group flex items-center gap-2 text-sm font-medium text-text-secondary transition-colors hover:text-text-primary"
 		>
 			<svg
 				class="h-4 w-4 transition-transform group-hover:-translate-x-1"
@@ -108,70 +109,52 @@
 		</a>
 	</div>
 
-	<!-- Hero Header -->
-	<header class="relative overflow-hidden rounded-3xl border-2 border-neutral-200 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-8 shadow-lg">
-		<div class="absolute right-0 top-0 h-64 w-64 rounded-full bg-gradient-to-br from-blue-200/30 to-purple-200/30 blur-3xl"></div>
-		<div class="relative">
-			<div class="mb-3 inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-1.5 text-xs font-semibold text-blue-700 backdrop-blur-sm">
-				<span class="h-2 w-2 animate-pulse rounded-full bg-blue-500"></span>
-				Active Cycle
+	<!-- Page Header -->
+	<header>
+		<nav aria-label="Breadcrumb" class="mb-2">
+			<ol class="flex items-center gap-1.5 text-sm text-text-tertiary">
+				<li><a href="/individual" class="rounded transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">Hub</a></li>
+				<li aria-hidden="true" class="text-text-muted"><svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg></li>
+				<li><span class="font-medium text-text-primary">Dashboard</span></li>
+			</ol>
+		</nav>
+		<h1 class="text-3xl font-bold text-text-primary">{data.objective.title}</h1>
+		{#if data.objective.description}
+			<p class="mt-1 text-text-secondary">{data.objective.description}</p>
+		{/if}
+		{#if data.subgoals.length}
+			<div class="mt-4 flex flex-wrap gap-2">
+				{#each data.subgoals as subgoal, index (subgoal.id)}
+					<span class="rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-text-secondary">
+						{subgoal.label}
+					</span>
+				{/each}
 			</div>
-			<h1 class="mb-3 text-4xl font-bold text-neutral-900">Your Objective: {data.objective.title}</h1>
-			{#if data.objective.description}
-				<p class="mb-6 text-lg leading-relaxed text-neutral-700">{data.objective.description}</p>
-			{/if}
-			{#if data.subgoals.length}
-				<div class="mt-6 space-y-3">
-					<h2 class="text-sm font-semibold uppercase tracking-wide text-neutral-600">Your Subgoals</h2>
-					<div class="grid gap-3 md:grid-cols-3">
-						{#each data.subgoals as subgoal, index (subgoal.id)}
-							<div class="group rounded-xl border-2 border-neutral-100 bg-white/80 p-4 backdrop-blur-sm transition-all hover:border-blue-200 hover:shadow-md">
-								<div class="mb-2 flex items-start gap-3">
-									<span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">
-										{index + 1}
-									</span>
-									<div class="flex-1">
-										<p class="font-semibold text-neutral-900">{subgoal.label}</p>
-										{#if subgoal.description}
-											<p class="mt-1 text-xs text-neutral-600">{subgoal.description}</p>
-										{/if}
-									</div>
-								</div>
-							</div>
-						{/each}
-					</div>
-				</div>
-			{/if}
+		{/if}
 
-			<!-- Identity Anchor Display -->
-			{#if data.identityAnchor}
-				<div class="mt-6 rounded-xl border-2 border-purple-200/50 bg-white/60 p-5 backdrop-blur-sm">
-					<div class="mb-3 flex items-center gap-2">
-						<span class="text-xl" role="img" aria-label="target">🎯</span>
-						<h2 class="text-sm font-semibold uppercase tracking-wide text-purple-700">Your Identity Anchor</h2>
-					</div>
-					<p class="text-base leading-relaxed text-neutral-800 italic">
-						"{data.identityAnchor}"
-					</p>
-					<p class="mt-2 text-xs text-neutral-600">
-						This anchor reminds you of who you're choosing to become throughout this cycle.
-					</p>
+		<!-- Identity Anchor -->
+		{#if data.identityAnchor}
+			<div class="mt-4 rounded-lg border border-border-default bg-surface-raised p-4">
+				<div class="mb-2 flex items-center gap-2">
+					<Target class="h-4 w-4 text-text-muted" />
+					<h2 class="text-sm font-semibold text-text-primary">Identity Anchor</h2>
 				</div>
-			{/if}
-		</div>
+				<p class="text-sm italic text-text-secondary">"{data.identityAnchor}"</p>
+			</div>
+		{/if}
 	</header>
 
 	{#if form?.action === 'feedback'}
 		{#if form.error}
-			<div class="rounded-xl border-2 border-red-200 bg-red-50 p-4 text-sm text-red-700">
+			<div class="rounded-xl border border-error/20 bg-error-muted p-4 text-sm text-error">
 				{form.error}
 			</div>
 		{:else if form.feedbackLink}
-			<div class="rounded-xl border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100 p-4 text-sm text-emerald-700">
-				<p class="mb-2 font-semibold">✅ Feedback link generated!</p>
+			<div class="rounded-xl border border-success/20 bg-success-muted p-4 text-sm text-success">
+				<p class="mb-2 font-semibold"><CircleCheck class="h-4 w-4 inline text-success" /> Feedback link generated!</p>
 				<p class="mb-2 font-mono break-all text-xs">{form.feedbackLink}</p>
 				{#if form.expiresAt}
-					<p class="text-xs text-emerald-600">Expires {formatDateTime(form.expiresAt)}.</p>
+					<p class="text-xs text-success">Expires {formatDateTime(form.expiresAt)}.</p>
 				{/if}
 			</div>
 		{/if}
@@ -183,17 +166,17 @@
 		<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 			<!-- Next Prompt Card -->
 			{#if data.nextPrompt}
-				<div class="group relative overflow-hidden rounded-2xl border-2 border-neutral-200 bg-gradient-to-br from-blue-50 to-purple-50 p-6 shadow-sm transition-all hover:border-purple-300 hover:shadow-md">
+				<div class="rounded-lg border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30">
 					<div class="mb-3 flex items-center gap-2">
-						<span class="text-2xl" role="img" aria-label="alarm clock">⏰</span>
-						<p class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Next Up</p>
+						<Clock class="h-4 w-4 text-text-muted" />
+						<p class="text-xs font-semibold uppercase tracking-wide text-text-tertiary">Next Up</p>
 					</div>
-					<p class="mb-1 text-lg font-bold text-neutral-900">{formatPromptLabel(data.nextPrompt.type)}</p>
-					<p class="mb-4 text-sm text-neutral-600">{formatDate(data.nextPrompt.date)}</p>
+					<p class="mb-1 text-lg font-bold text-text-primary">{formatPromptLabel(data.nextPrompt.type)}</p>
+					<p class="mb-4 text-sm text-text-secondary">{formatDate(data.nextPrompt.date)}</p>
 					<form method="get" action={promptTarget(data.nextPrompt.type)}>
 						<button
 							type="submit"
-							class="w-full rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:from-blue-700 hover:to-purple-700 hover:shadow-lg hover:scale-105"
+							class="w-full rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-accent-hover"
 						>
 							Open Prompt →
 						</button>
@@ -202,48 +185,46 @@
 			{/if}
 
 			<!-- Cycle Progress Card -->
-			<div class="group relative overflow-hidden rounded-2xl border-2 border-neutral-200 bg-white p-6 shadow-sm transition-all hover:border-blue-300 hover:shadow-md">
+			<div class="rounded-lg border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30">
 				<div class="mb-3 flex items-center justify-between">
 					<div class="flex items-center gap-2">
-						<span class="text-2xl" role="img" aria-label="bar chart">📊</span>
-						<p class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Progress</p>
+						<BarChart3 class="h-4 w-4 text-text-muted" />
+						<p class="text-xs font-semibold uppercase tracking-wide text-text-tertiary">Progress</p>
 					</div>
 				</div>
 				<div class="mb-3">
 					<div class="mb-2 flex items-baseline gap-2">
-						<p class="text-3xl font-bold text-neutral-900">{data.cycle.completion}%</p>
-						<p class="text-sm text-neutral-500">
+						<p class="text-3xl font-bold text-text-primary">{data.cycle.completion}%</p>
+						<p class="text-sm text-text-tertiary">
 							{data.cycle.weeksElapsed}/{data.cycle.totalWeeks} weeks
 						</p>
 					</div>
-					<div class="h-3 w-full overflow-hidden rounded-full bg-neutral-100">
+					<div class="h-3 w-full overflow-hidden rounded-full bg-surface-subtle">
 						<div
-							class="h-full rounded-full bg-gradient-to-r transition-all duration-500 {getProgressColor(
-								data.cycle.completion
-							)}"
+							class="h-full rounded-full bg-accent transition-all duration-500"
 							style={`width: ${data.cycle.completion}%`}
 						></div>
 					</div>
 				</div>
-				<p class="text-xs text-neutral-600">
+				<p class="text-xs text-text-secondary">
 					<span class="font-semibold">{data.cycle.reflectionsRecorded}</span> reflections submitted
 				</p>
 			</div>
 
 			<!-- Feedback Summary Card -->
 			{#if data.feedbackSummary}
-				<div class="group relative overflow-hidden rounded-2xl border-2 border-neutral-200 bg-white p-6 shadow-sm transition-all hover:border-emerald-300 hover:shadow-md">
+				<div class="rounded-lg border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30">
 					<div class="mb-3 flex items-center gap-2">
-						<span class="text-2xl" role="img" aria-label="people">👥</span>
-						<p class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Feedback</p>
+						<Users class="h-4 w-4 text-text-muted" />
+						<p class="text-xs font-semibold uppercase tracking-wide text-text-tertiary">Feedback</p>
 					</div>
 					<div class="mb-2 flex items-baseline gap-2">
-						<p class="text-3xl font-bold text-neutral-900">
+						<p class="text-3xl font-bold text-text-primary">
 							{data.feedbackSummary.responded}/{data.feedbackSummary.totalStakeholders}
 						</p>
-						<p class="text-sm text-neutral-500">responded</p>
+						<p class="text-sm text-text-tertiary">responded</p>
 					</div>
-					<div class="space-y-1 text-xs text-neutral-600">
+					<div class="space-y-1 text-xs text-text-secondary">
 						<p>
 							Effort: <span class="font-semibold {getScoreColor(data.feedbackSummary.avgEffort, 'effort')}">{formatAverage(data.feedbackSummary.avgEffort)}</span>
 						</p>
@@ -256,38 +237,38 @@
 
 			<!-- Engagement Card (Completion Rate & Streaks) -->
 			{#if data.engagement}
-				<div class="group relative overflow-hidden rounded-2xl border-2 border-neutral-200 bg-gradient-to-br from-emerald-50 to-teal-50 p-6 shadow-sm transition-all hover:border-emerald-300 hover:shadow-md">
+				<div class="rounded-lg border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30">
 					<div class="mb-3 flex items-center gap-2">
-						<span class="text-2xl" role="img" aria-label="fire">🔥</span>
-						<p class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Engagement</p>
+						<Flame class="h-4 w-4 text-text-muted" />
+						<p class="text-xs font-semibold uppercase tracking-wide text-text-tertiary">Engagement</p>
 					</div>
 					{#if data.engagement.completionRate !== null}
 						<div class="mb-4">
 							<div class="mb-2 flex items-baseline gap-2">
-								<p class="text-3xl font-bold text-neutral-900">{data.engagement.completionRate}%</p>
-								<p class="text-xs text-neutral-600">complete</p>
+								<p class="text-3xl font-bold text-text-primary">{data.engagement.completionRate}%</p>
+								<p class="text-xs text-text-secondary">complete</p>
 							</div>
-							<div class="h-2 w-full overflow-hidden rounded-full bg-neutral-200">
+							<div class="h-2 w-full overflow-hidden rounded-full bg-surface-subtle">
 								<div
-									class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-500"
+									class="h-full rounded-full bg-accent transition-all duration-500"
 									style={`width: ${data.engagement.completionRate}%`}
 								></div>
 							</div>
-							<p class="mt-1 text-xs text-neutral-600">
+							<p class="mt-1 text-xs text-text-secondary">
 								{data.engagement.totalCompleted} of {data.engagement.totalExpected} check-ins
 							</p>
 						</div>
 					{/if}
 					<div class="flex gap-4 text-xs">
-						<div class="flex-1 rounded-lg bg-white/60 p-3 backdrop-blur-sm">
-							<p class="text-neutral-500">Current Streak</p>
-							<p class="mt-1 text-2xl font-bold text-emerald-700">{data.engagement.currentStreak}</p>
-							<p class="text-neutral-600">check-ins</p>
+						<div class="flex-1 rounded-lg border border-border-default bg-surface-raised p-3">
+							<p class="text-text-tertiary">Current Streak</p>
+							<p class="mt-1 text-2xl font-bold text-success">{data.engagement.currentStreak}</p>
+							<p class="text-text-secondary">check-ins</p>
 						</div>
-						<div class="flex-1 rounded-lg bg-white/60 p-3 backdrop-blur-sm">
-							<p class="text-neutral-500">Best Streak</p>
-							<p class="mt-1 text-2xl font-bold text-teal-700">{data.engagement.bestStreak}</p>
-							<p class="text-neutral-600">check-ins</p>
+						<div class="flex-1 rounded-lg border border-border-default bg-surface-raised p-3">
+							<p class="text-text-tertiary">Best Streak</p>
+							<p class="mt-1 text-2xl font-bold text-accent">{data.engagement.bestStreak}</p>
+							<p class="text-text-secondary">check-ins</p>
 						</div>
 					</div>
 				</div>
@@ -297,13 +278,13 @@
 
 		<!-- Cycle Details -->
 		<div class="space-y-6">
-			<div class="rounded-2xl border-2 border-neutral-200 bg-white p-6 shadow-sm">
+			<div class="rounded-lg border border-border-default bg-surface-raised p-6">
 				<div class="mb-4 flex items-center gap-2">
-					<span class="text-xl" role="img" aria-label="calendar">📅</span>
-					<h2 class="text-lg font-bold text-neutral-900">Cycle Details</h2>
+					<Calendar class="h-4 w-4 text-text-muted" />
+					<h2 class="text-lg font-bold text-text-primary">Cycle Details</h2>
 				</div>
-				<div class="mb-4 flex flex-wrap items-center gap-3 text-sm text-neutral-600">
-					<span class="font-semibold text-neutral-900">{data.cycle.label}</span>
+				<div class="mb-4 flex flex-wrap items-center gap-3 text-sm text-text-secondary">
+					<span class="font-semibold text-text-primary">{data.cycle.label}</span>
 					<span>Start {formatDate(data.cycle.startDate)}</span>
 					{#if data.cycle.endDate}
 						<span>End {formatDate(data.cycle.endDate)}</span>
@@ -311,23 +292,9 @@
 				</div>
 				{#if data.weeklyExperiences.length}
 					<div class="space-y-3">
-						<h3 class="text-sm font-semibold uppercase tracking-wide text-neutral-500">This Week's Check-ins</h3>
+						<h3 class="text-sm font-semibold uppercase tracking-wide text-text-tertiary">This Week's Check-ins</h3>
 						<div class="grid gap-3 md:grid-cols-3">
 							{#each data.weeklyExperiences as experience (experience.type)}
-								{@const stateColors = {
-									open: 'border-blue-300 bg-gradient-to-br from-blue-50 to-blue-100',
-									completed: 'border-emerald-300 bg-gradient-to-br from-emerald-50 to-emerald-100',
-									missed: 'border-amber-300 bg-gradient-to-br from-amber-50 to-amber-100',
-									upcoming: 'border-neutral-300 bg-gradient-to-br from-neutral-50 to-neutral-100',
-									catchup: 'border-orange-300 bg-gradient-to-br from-orange-50 to-amber-100'
-								}}
-								{@const stateIcons = {
-									open: '🔵',
-									completed: '✅',
-									missed: '⏸️',
-									upcoming: '⏳',
-									catchup: '🕐'
-								}}
 								{@const stateLabels = {
 									open: 'Open',
 									completed: 'Completed',
@@ -335,45 +302,55 @@
 									upcoming: 'Upcoming',
 									catchup: 'Catch Up'
 								}}
-								<div class="rounded-xl border-2 {stateColors[experience.state]} p-4 transition-all hover:shadow-md">
+								<div class="rounded-lg border border-border-default bg-surface-raised p-4 transition-all">
 									<div class="mb-2 flex items-center gap-2">
-										<span class="text-lg" role="img" aria-label={stateLabels[experience.state]}>{stateIcons[experience.state]}</span>
-										<span class="text-xs font-semibold uppercase tracking-wide text-neutral-600">{stateLabels[experience.state]}</span>
+										{#if experience.state === 'open'}
+											<span class="h-2 w-2 rounded-full bg-accent"></span>
+										{:else if experience.state === 'completed'}
+											<CircleCheck class="h-4 w-4 text-success" />
+										{:else if experience.state === 'missed'}
+											<CircleX class="h-4 w-4 text-text-muted" />
+										{:else if experience.state === 'upcoming'}
+											<Clock class="h-4 w-4 text-text-muted" />
+										{:else if experience.state === 'catchup'}
+											<RotateCcw class="h-4 w-4 text-warning" />
+										{/if}
+										<span class="text-xs font-semibold uppercase tracking-wide text-text-secondary">{stateLabels[experience.state]}</span>
 									</div>
-									<p class="mb-2 font-semibold text-neutral-900">{experience.label}</p>
+									<p class="mb-2 font-semibold text-text-primary">{experience.label}</p>
 									{#if experience.availableDate}
-										<p class="mb-3 text-xs text-neutral-600">
+										<p class="mb-3 text-xs text-text-secondary">
 											Available: {formatDate(experience.availableDate)}
 										</p>
 									{/if}
 									{#if experience.deadlineDate && experience.state !== 'completed'}
-										<p class="mb-3 text-xs text-neutral-600">
+										<p class="mb-3 text-xs text-text-secondary">
 											Deadline: {formatDate(experience.deadlineDate)}
 										</p>
 									{/if}
 									{#if experience.url && (experience.state === 'open' || experience.state === 'completed')}
 										<a
 											href={experience.url}
-											class="inline-flex items-center gap-1 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 transition-all hover:bg-neutral-50 hover:shadow-sm"
+											class="inline-flex items-center gap-1 rounded-lg bg-surface-raised px-3 py-1.5 text-xs font-semibold text-text-secondary transition-all hover:bg-surface-subtle"
 										>
 											{experience.state === 'open' ? 'Complete →' : 'View →'}
 										</a>
 									{:else if experience.state === 'catchup' && experience.url}
 										<a
 											href={experience.url}
-											class="inline-flex items-center gap-1 rounded-lg bg-orange-100 px-3 py-1.5 text-xs font-semibold text-orange-800 transition-all hover:bg-orange-200 hover:shadow-sm"
+											class="inline-flex items-center gap-1 rounded-lg bg-warning-muted px-3 py-1.5 text-xs font-semibold text-warning transition-all hover:bg-warning-muted/80"
 										>
 											Catch up →
 										</a>
 										{#if experience.catchupDeadline}
-											<p class="mt-2 text-xs text-orange-700">
+											<p class="mt-2 text-xs text-warning">
 												You have until {formatDateTime(experience.catchupDeadline)} to complete this
 											</p>
 										{/if}
 									{:else if experience.state === 'missed'}
-										<p class="text-xs font-medium text-neutral-600">Window closed — keep going this week!</p>
+										<p class="text-xs font-medium text-text-secondary">Window closed — keep going this week!</p>
 									{:else if experience.state === 'upcoming'}
-										<p class="text-xs font-medium text-neutral-500">Closed/Not Yet Available</p>
+										<p class="text-xs font-medium text-text-tertiary">Closed/Not Yet Available</p>
 									{/if}
 								</div>
 							{/each}
@@ -386,7 +363,7 @@
 
 	<!-- Performance/Effort Visualization -->
 	{#if data.cycle && data.visualizationData && data.visualizationData.individual && data.visualizationData.stakeholders && data.visualizationData.stakeholderList}
-		<div class="rounded-2xl border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 p-6 shadow-lg">
+		<div class="rounded-lg border border-border-default bg-surface-raised p-6">
 			<PerformanceEffortChart
 				individualData={data.visualizationData.individual}
 				stakeholderData={data.visualizationData.stakeholders}

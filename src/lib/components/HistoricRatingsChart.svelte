@@ -20,7 +20,7 @@
 <button
 	type="button"
 	onclick={() => (isExpanded = !isExpanded)}
-	class="mt-3 flex items-center gap-1.5 text-xs font-medium text-blue-600 transition-colors hover:text-blue-800"
+	class="mt-3 flex items-center gap-1.5 text-xs font-medium text-accent transition-colors hover:text-accent-hover"
 >
 	<span>{isExpanded ? 'Hide' : 'Click to see'} full historic ratings</span>
 	<svg
@@ -34,37 +34,37 @@
 </button>
 
 {#if isExpanded}
-	<div class="mt-2 overflow-hidden rounded-lg border border-blue-100/50 bg-white">
+	<div class="mt-2 overflow-hidden rounded-lg border border-border-default bg-surface-raised">
 		<table class="w-full">
-			<thead class="bg-blue-50/30">
+			<thead class="bg-surface-subtle">
 				<tr>
-					<th class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-neutral-600">
+					<th class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-text-secondary">
 						Week
 					</th>
-					<th class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-neutral-600">
+					<th class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-text-secondary">
 						Effort
 					</th>
-					<th class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-neutral-600">
+					<th class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-text-secondary">
 						Performance
 					</th>
 				</tr>
 			</thead>
-			<tbody class="divide-y divide-neutral-100">
+			<tbody class="divide-y divide-border-default">
 				{#each sortedRatings as rating (rating.weekNumber)}
-					<tr class="transition-colors hover:bg-neutral-50/50">
-						<td class="px-4 py-2.5 text-sm font-medium text-neutral-900">Week {rating.weekNumber}</td>
-						<td class="px-4 py-2.5 text-sm text-neutral-700">
+					<tr class="transition-colors hover:bg-surface-subtle/50">
+						<td class="px-4 py-2.5 text-sm font-medium text-text-primary">Week {rating.weekNumber}</td>
+						<td class="px-4 py-2.5 text-sm text-text-secondary">
 							{#if rating.effortScore !== null}
 								<span class="font-medium">{rating.effortScore}</span>
 							{:else}
-								<span class="text-neutral-400">—</span>
+								<span class="text-text-muted">—</span>
 							{/if}
 						</td>
-						<td class="px-4 py-2.5 text-sm text-neutral-700">
+						<td class="px-4 py-2.5 text-sm text-text-secondary">
 							{#if rating.performanceScore !== null}
 								<span class="font-medium">{rating.performanceScore}</span>
 							{:else}
-								<span class="text-neutral-400">—</span>
+								<span class="text-text-muted">—</span>
 							{/if}
 						</td>
 					</tr>

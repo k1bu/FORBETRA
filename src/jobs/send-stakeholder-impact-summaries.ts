@@ -1,6 +1,8 @@
 import prisma from '$lib/server/prisma';
 import { sendEmail } from '$lib/notifications/email';
 import { emailTemplates } from '$lib/notifications/emailTemplates';
+import { trySendSms } from '$lib/notifications/sms';
+import { smsTemplates } from '$lib/notifications/smsTemplates';
 
 export const sendStakeholderImpactSummaries = async () => {
 	const thirtyDaysAgo = new Date();
@@ -30,6 +32,7 @@ export const sendStakeholderImpactSummaries = async () => {
 				select: {
 					name: true,
 					email: true,
+					phone: true,
 					individual: {
 						select: {
 							name: true
@@ -49,6 +52,7 @@ export const sendStakeholderImpactSummaries = async () => {
 	const grouped = new Map<string, {
 		stakeholderName: string;
 		stakeholderEmail: string;
+		stakeholderPhone: string | null;
 		individualName: string;
 		feedbacks: Array<{
 			weekNumber: number;
@@ -65,6 +69,7 @@ export const sendStakeholderImpactSummaries = async () => {
 			grouped.set(key, {
 				stakeholderName: fb.stakeholder.name,
 				stakeholderEmail: fb.stakeholder.email,
+				stakeholderPhone: fb.stakeholder.phone,
 				individualName: fb.stakeholder.individual?.name || 'your participant',
 				feedbacks: []
 			});
@@ -78,7 +83,7 @@ export const sendStakeholderImpactSummaries = async () => {
 
 	let sent = 0;
 	for (const [, data] of grouped) {
-		const { feedbacks, stakeholderName, stakeholderEmail, individualName } = data;
+		const { feedbacks, stakeholderName, stakeholderEmail, stakeholderPhone, individualName } = data;
 
 		// Compute stats
 		const uniqueWeeks = new Set(feedbacks.map((f) => f.weekNumber));
@@ -125,6 +130,16 @@ export const sendStakeholderImpactSummaries = async () => {
 				error
 			);
 		}
+
+		// Send SMS impact summary
+		await trySendSms(
+			stakeholderPhone,
+			smsTemplates.stakeholderImpactSummary({
+				individualName,
+				weeksContributed,
+				totalFeedbacks
+			})
+		);
 	}
 
 	console.info(`[job:stakeholder-impact] Sent ${sent} impact summaries`);

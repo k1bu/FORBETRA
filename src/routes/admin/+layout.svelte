@@ -16,30 +16,30 @@
 	];
 </script>
 
-<div class="flex min-h-screen bg-neutral-50">
+<div class="flex min-h-screen bg-surface-base">
 	<!-- Sidebar -->
-	<aside class="hidden w-56 shrink-0 border-r border-neutral-200 bg-white lg:block">
+	<aside class="hidden w-56 shrink-0 border-r border-border-default bg-surface-raised lg:block">
 		<div class="sticky top-0 flex flex-col gap-1 p-4">
 			<div class="mb-4 px-3">
-				<p class="text-xs font-bold uppercase tracking-widest text-neutral-400">Admin</p>
-				<p class="text-lg font-bold text-neutral-900">Forbetra CMS</p>
+				<p class="text-xs font-bold uppercase tracking-widest text-text-tertiary">Admin</p>
+				<p class="text-lg font-bold text-text-primary">Forbetra CMS</p>
 			</div>
 			<nav class="flex flex-col gap-0.5">
 				{#each navItems as item (item.href)}
 					<a
 						href={item.href}
-						class="rounded-lg px-3 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-100 hover:text-neutral-900"
+						class="rounded-lg px-3 py-2 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-subtle hover:text-text-primary"
 					>
 						{item.label}
 					</a>
 				{/each}
 			</nav>
-			<div class="mt-6 border-t border-neutral-200 pt-4">
+			<div class="mt-6 border-t border-border-default pt-4">
 				<a
 					href="/"
 					target="_blank"
 					rel="noopener"
-					class="rounded-lg px-3 py-2 text-xs font-medium text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-700"
+					class="rounded-lg px-3 py-2 text-xs font-medium text-text-tertiary transition-colors hover:bg-surface-subtle hover:text-text-secondary"
 				>
 					Open App &nearr;
 				</a>
@@ -48,11 +48,11 @@
 	</aside>
 
 	<!-- Mobile nav -->
-	<div class="flex flex-wrap gap-2 border-b border-neutral-200 bg-white p-3 lg:hidden">
+	<div class="flex flex-wrap gap-2 border-b border-border-default bg-surface-raised p-3 lg:hidden">
 		{#each navItems as item (item.href)}
 			<a
 				href={item.href}
-				class="rounded-lg border border-neutral-200 px-3 py-1.5 text-xs font-medium text-neutral-700 transition-colors hover:bg-neutral-100"
+				class="rounded-lg border border-border-default px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-subtle"
 			>
 				{item.label}
 			</a>

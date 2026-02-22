@@ -4,7 +4,7 @@
 </script>
 
 <div
-	class="animate-pulse rounded bg-neutral-200 {variant === 'circle' ? 'rounded-full' : ''} {className}"
+	class="animate-pulse rounded bg-surface-subtle {variant === 'circle' ? 'rounded-full' : ''} {className}"
 	role="status"
 	aria-label="Loading"
 ></div>

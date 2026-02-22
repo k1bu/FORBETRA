@@ -45,7 +45,7 @@
 	<div class="flex items-center justify-between">
 		<a
 			href="/individual"
-			class="group flex items-center gap-2 text-sm font-medium text-neutral-600 transition-colors hover:text-neutral-900"
+			class="group flex items-center gap-2 text-sm font-medium text-text-secondary transition-colors hover:text-text-primary"
 		>
 			<svg
 				class="h-4 w-4 transition-transform group-hover:-translate-x-1"
@@ -60,29 +60,29 @@
 	</div>
 
 	{#if data.isPreview}
-		<div class="fixed top-4 right-4 z-50 max-w-xs rounded-lg border border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100 p-3 text-xs text-blue-800 shadow-lg">
-			<p class="font-semibold">👁️ Preview Mode</p>
+		<div class="fixed top-4 right-4 z-50 max-w-xs rounded-lg border border-accent/30 bg-accent-muted p-3 text-xs text-accent">
+			<p class="font-semibold">Preview Mode</p>
 			<p class="mt-1 text-xs">Submissions will be saved normally.</p>
 		</div>
 	{/if}
 	<!-- Header with encouraging messaging -->
 	<header class="space-y-3 text-center">
-		<div class="inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-1.5 text-xs font-medium text-blue-700">
-			<span class="h-2 w-2 rounded-full bg-blue-500"></span>
+		<div class="inline-flex items-center gap-2 rounded-full bg-accent-muted px-4 py-1.5 text-xs font-medium text-accent">
+			<span class="h-2 w-2 rounded-full bg-accent"></span>
 			Week {data.currentWeek} Check-in
 		</div>
-		<h1 class="text-3xl font-bold text-neutral-900">{data.checkInLabel}</h1>
-		<p class="text-base text-neutral-600">
+		<h1 class="text-3xl font-bold text-text-primary">{data.checkInLabel}</h1>
+		<p class="text-base text-text-secondary">
 			Take a moment to reflect on your progress. Every check-in moves you forward.
 		</p>
 		{#if !data.isPreview && !data.isAvailable}
-			<div class="mx-auto max-w-md rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-amber-100 p-4 text-sm text-amber-800">
-				<p class="font-medium">⏰ Coming soon</p>
+			<div class="mx-auto max-w-md rounded-xl border border-warning/30 bg-warning-muted p-4 text-sm text-warning">
+				<p class="font-medium">Coming soon</p>
 				<p class="mt-1">This check-in will be available on {formatDate(data.availableDate)}.</p>
 			</div>
 		{:else if data.isLocked}
-			<div class="mx-auto max-w-md rounded-xl border border-neutral-200 bg-neutral-50 p-4 text-sm text-neutral-700">
-				<p class="font-medium">🔒 Check-in locked</p>
+			<div class="mx-auto max-w-md rounded-xl border border-border-default bg-surface-raised p-4 text-sm text-text-secondary">
+				<p class="font-medium">Check-in locked</p>
 				<p class="mt-1">This check-in can no longer be edited because the next Monday intention has been submitted.</p>
 			</div>
 		{/if}
@@ -90,25 +90,25 @@
 
 	<div aria-live="polite">
 		{#if form?.error}
-			<div class="mx-auto max-w-2xl rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-				<p class="font-medium">⚠️ {form.error}</p>
+			<div class="mx-auto max-w-2xl rounded-xl border border-error/30 bg-error-muted p-4 text-sm text-error">
+				<p class="font-medium">{form.error}</p>
 			</div>
 		{/if}
 
 		{#if form?.success}
-			<div class="mx-auto max-w-2xl animate-in fade-in slide-in-from-top-2 rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 text-center">
+			<div class="mx-auto max-w-2xl animate-in fade-in slide-in-from-top-2 rounded-xl border border-success/30 bg-success-muted p-6 text-center">
 				<div class="mb-2 text-4xl">🎉</div>
-				<p class="text-lg font-semibold text-emerald-900">Check-in saved!</p>
+				<p class="text-lg font-semibold text-success">Check-in saved!</p>
 				{#if form.streak && form.streak >= 3}
-					<p class="mt-1 text-sm font-semibold text-orange-700">
-						🔥 You're on a {form.streak} check-in streak!{#if form.streak >= 12} Incredible consistency!{:else if form.streak >= 9} Outstanding!{:else if form.streak >= 6} Keep it going!{/if}
+					<p class="mt-1 text-sm font-semibold text-warning">
+						You're on a {form.streak} check-in streak!{#if form.streak >= 12} Incredible consistency!{:else if form.streak >= 9} Outstanding!{:else if form.streak >= 6} Keep it going!{/if}
 					</p>
 				{:else}
-					<p class="mt-1 text-sm text-emerald-700">Your reflection has been recorded. Keep up the great work!</p>
+					<p class="mt-1 text-sm text-success">Your reflection has been recorded. Keep up the great work!</p>
 				{/if}
 				<a
 					href="/individual"
-					class="mt-4 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-emerald-700 hover:shadow-lg"
+					class="mt-4 inline-flex items-center gap-2 rounded-lg bg-success px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-success/90"
 				>
 					Return to Dashboard
 					<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -125,29 +125,29 @@
 			<!-- Hidden inputs for form submission -->
 			<input type="hidden" name="effortScore" value={effortScore} />
 			<input type="hidden" name="performanceScore" value={performanceScore} />
-			
+
 			<!-- Simple Objective Display -->
-			<div class="rounded-xl border border-neutral-200 bg-neutral-50/50 px-5 py-4">
-				<div class="flex items-center gap-3 text-base text-neutral-600">
+			<div class="rounded-xl border border-border-default bg-surface-subtle px-5 py-4">
+				<div class="flex items-center gap-3 text-base text-text-secondary">
 					<span class="text-xl" role="img" aria-label="target">🎯</span>
 					<span class="font-medium">Objective:</span>
-					<span class="font-semibold text-lg text-neutral-900">{data.objective.title}</span>
+					<span class="font-semibold text-lg text-text-primary">{data.objective.title}</span>
 				</div>
 			</div>
-			
+
 			<!-- Collapsible Behavioral Indicators -->
-			<div class="rounded-xl border border-neutral-200 bg-white">
+			<div class="rounded-xl border border-border-default bg-surface-raised">
 				<button
 					type="button"
 					onclick={() => (showBehavioralIndicators = !showBehavioralIndicators)}
-					class="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-neutral-50"
+					class="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-surface-subtle"
 				>
 					<div class="flex items-center gap-2">
 						<span class="text-lg" role="img" aria-label="clipboard">📋</span>
-						<span class="text-sm font-medium text-neutral-700">View behavioral indicators</span>
+						<span class="text-sm font-medium text-text-secondary">View behavioral indicators</span>
 					</div>
 					<svg
-						class="h-5 w-5 text-neutral-500 transition-transform {showBehavioralIndicators
+						class="h-5 w-5 text-text-tertiary transition-transform {showBehavioralIndicators
 							? 'rotate-180'
 							: ''}"
 						fill="none"
@@ -158,20 +158,20 @@
 					</svg>
 				</button>
 				{#if showBehavioralIndicators}
-					<div class="border-t border-neutral-200 px-4 py-4">
-						<p class="mb-3 text-xs leading-relaxed text-neutral-600">
+					<div class="border-t border-border-default px-4 py-4">
+						<p class="mb-3 text-xs leading-relaxed text-text-secondary">
 							Use these as reference points when rating your overall effort and progress. They help define what success looks like for your objective.
 						</p>
 						<div class="space-y-2">
 							{#each data.subgoals as subgoal, index (subgoal.id)}
-								<div class="flex items-start gap-3 rounded-lg border border-neutral-100 bg-neutral-50/50 p-3">
-									<span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">
+								<div class="flex items-start gap-3 rounded-lg border border-border-default bg-surface-subtle p-3">
+									<span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent-muted text-xs font-bold text-accent">
 										{index + 1}
 									</span>
 									<div class="flex-1">
-										<p class="font-semibold text-neutral-900">{subgoal.label}</p>
+										<p class="font-semibold text-text-primary">{subgoal.label}</p>
 										{#if subgoal.description}
-											<p class="mt-1 text-xs text-neutral-600">{subgoal.description}</p>
+											<p class="mt-1 text-xs text-text-secondary">{subgoal.description}</p>
 										{/if}
 									</div>
 								</div>
@@ -180,28 +180,28 @@
 					</div>
 				{/if}
 			</div>
-			
+
 			{#if data.currentWeek > 1 && data.previousRatings}
 				{@const historicRatings = data.historicRatings ?? []}
-				<div class="rounded-xl border border-blue-100/50 bg-gradient-to-br from-blue-50/40 to-blue-50/60 p-4">
+				<div class="rounded-xl border border-accent/30 bg-accent-muted p-4">
 					<div class="mb-3">
-						<p class="text-sm font-semibold text-blue-800">Your last ratings:</p>
+						<p class="text-sm font-semibold text-accent">Your last ratings:</p>
 					</div>
 					<div class="flex gap-6 text-sm">
 						<div class="flex items-center gap-2">
-							<span class="text-blue-600">Effort:</span>
-							<span class="font-bold text-lg text-blue-800">
+							<span class="text-accent">Effort:</span>
+							<span class="font-bold text-lg text-accent">
 								{data.previousRatings.effortScore !== null ? data.previousRatings.effortScore : '—'}
 							</span>
 						</div>
 						<div class="flex items-center gap-2">
-							<span class="text-blue-600">Performance:</span>
-							<span class="font-bold text-lg text-blue-800">
+							<span class="text-accent">Performance:</span>
+							<span class="font-bold text-lg text-accent">
 								{data.previousRatings.performanceScore !== null ? data.previousRatings.performanceScore : '—'}
 							</span>
 						</div>
 					</div>
-					<p class="mt-2 text-xs text-blue-600">Use this as context - adjust freely based on this week.</p>
+					<p class="mt-2 text-xs text-accent">Use this as context - adjust freely based on this week.</p>
 					{#if historicRatings.length > 1}
 						<div class="mt-4">
 							<HistoricRatingsChart historicRatings={historicRatings} />
@@ -210,15 +210,15 @@
 				</div>
 			{/if}
 			<!-- Effort Score with Enhanced UI -->
-			<div class="group rounded-2xl border-2 border-neutral-200 bg-white p-6 shadow-sm transition-all hover:border-neutral-400 hover:shadow-md">
+			<div class="group rounded-2xl border border-border-default bg-surface-raised p-6 transition-all hover:border-border-strong">
 				<div class="mb-4 flex items-center justify-between">
 					<div class="flex items-center gap-3">
 						<span class="text-2xl" role="img" aria-label="flexed biceps">💪</span>
 						<div>
-							<label for="effort-score" class="text-lg font-bold text-neutral-900">
+							<label for="effort-score" class="text-lg font-bold text-text-primary">
 								Focused Effort
 							</label>
-							<p class="text-xs text-neutral-500">
+							<p class="text-xs text-text-tertiary">
 								How much attention did you give to your objective: "{data.objective.title}" this week?
 							</p>
 						</div>
@@ -248,7 +248,7 @@
 							aria-label="Score {i} out of 10"
 							class="flex h-10 w-full items-center justify-center rounded-lg border-2 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-60 {isSelected
 								? buttonColors + ' shadow-md'
-								: 'border-neutral-300 bg-white text-neutral-700 ' + hoverColors} focus:outline-none focus:ring-2 {focusRing} focus:ring-offset-2"
+								: 'border-border-default bg-surface-raised text-text-secondary ' + hoverColors} focus:outline-none focus:ring-2 {focusRing} focus:ring-offset-2"
 						>
 							{i}
 						</button>
@@ -256,7 +256,7 @@
 				</div>
 
 				<div class="mb-2 flex items-center justify-between">
-					<span class="text-xs font-medium text-neutral-500">Rarely intentional</span>
+					<span class="text-xs font-medium text-text-tertiary">Rarely intentional</span>
 					<div
 						class="rounded-full px-3 py-1 text-xs font-semibold {getScoreBgColor(
 							effortScore, 'effort'
@@ -264,23 +264,23 @@
 					>
 						{getScoreLabel(effortScore, 'effort')}
 					</div>
-					<span class="text-xs font-medium text-neutral-500">Relentless commitment</span>
+					<span class="text-xs font-medium text-text-tertiary">Relentless commitment</span>
 				</div>
-				<p class="text-xs text-neutral-400 italic">
+				<p class="text-xs text-text-muted italic">
 					Consider attention, preparation, and prioritization toward the objective.
 				</p>
 			</div>
 
 			<!-- Progress Score with Enhanced UI -->
-			<div class="group rounded-2xl border-2 border-neutral-200 bg-white p-6 shadow-sm transition-all hover:border-neutral-400 hover:shadow-md">
+			<div class="group rounded-2xl border border-border-default bg-surface-raised p-6 transition-all hover:border-border-strong">
 				<div class="mb-4 flex items-center justify-between">
 					<div class="flex items-center gap-3">
 						<span class="text-2xl" role="img" aria-label="chart trending up">📈</span>
 						<div>
-							<label for="progress-score" class="text-lg font-bold text-neutral-900">
+							<label for="progress-score" class="text-lg font-bold text-text-primary">
 								Performance
 							</label>
-							<p class="text-xs text-neutral-500">
+							<p class="text-xs text-text-tertiary">
 								How effective was your performance related to your objective: "{data.objective.title}" this week?
 							</p>
 						</div>
@@ -310,7 +310,7 @@
 							aria-label="Score {i} out of 10"
 							class="flex h-10 w-full items-center justify-center rounded-lg border-2 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-60 {isSelected
 								? buttonColors + ' shadow-md'
-								: 'border-neutral-300 bg-white text-neutral-700 ' + hoverColors} focus:outline-none focus:ring-2 {focusRing} focus:ring-offset-2"
+								: 'border-border-default bg-surface-raised text-text-secondary ' + hoverColors} focus:outline-none focus:ring-2 {focusRing} focus:ring-offset-2"
 						>
 							{i}
 						</button>
@@ -318,7 +318,7 @@
 				</div>
 
 				<div class="mb-2 flex items-center justify-between">
-					<span class="text-xs font-medium text-neutral-500">Not yet visible</span>
+					<span class="text-xs font-medium text-text-tertiary">Not yet visible</span>
 					<div
 						class="rounded-full px-3 py-1 text-xs font-semibold {getScoreBgColor(
 							performanceScore, 'performance'
@@ -326,20 +326,20 @@
 					>
 						{getScoreLabel(performanceScore, 'progress')}
 					</div>
-					<span class="text-xs font-medium text-neutral-500">Transformative impact</span>
+					<span class="text-xs font-medium text-text-tertiary">Transformative impact</span>
 				</div>
-				<p class="text-xs text-neutral-400 italic">
+				<p class="text-xs text-text-muted italic">
 					Consider outcomes, behavior change, and visible impact related to the objective.
 				</p>
 			</div>
 
 			<!-- Notes with Better UX -->
-			<div class="rounded-2xl border-2 border-neutral-200 bg-white p-6 shadow-sm transition-all hover:border-purple-300 hover:shadow-md">
+			<div class="rounded-2xl border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30">
 				<div class="mb-3 flex items-center gap-2">
 					<span class="text-xl" role="img" aria-label="writing hand">✍️</span>
-					<label for="notes" class="text-base font-semibold text-neutral-900">
+					<label for="notes" class="text-base font-semibold text-text-primary">
 						Reflection Notes
-						<span class="ml-2 text-xs font-normal text-neutral-500">(optional)</span>
+						<span class="ml-2 text-xs font-normal text-text-tertiary">(optional)</span>
 					</label>
 				</div>
 				<textarea
@@ -347,25 +347,25 @@
 					id="notes"
 					rows="4"
 					disabled={!data.isAvailable || data.isLocked}
-					class="w-full rounded-xl border-2 border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700 placeholder:text-neutral-400 focus:border-purple-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-200 disabled:cursor-not-allowed disabled:opacity-60"
+					class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:bg-surface-raised focus:outline-none focus:ring-2 focus:ring-accent/30 disabled:cursor-not-allowed disabled:opacity-60"
 					placeholder="Share a win, an obstacle you overcame, or something you learned this week..."
 				>{data.previousEntry?.notes ?? ''}</textarea>
-				<p class="mt-2 text-xs text-neutral-500">
-					💡 Tip: Capturing context helps you and your coach see the full picture of your growth.
+				<p class="mt-2 text-xs text-text-tertiary">
+					Tip: Capturing context helps you and your coach see the full picture of your growth.
 				</p>
 			</div>
 
 			<!-- Submit Button with Enhanced Design -->
-			<div class="flex flex-col gap-4 rounded-2xl border-2 border-neutral-200 bg-gradient-to-r from-blue-50 to-purple-50 p-6 sm:flex-row sm:items-center sm:justify-between">
+			<div class="flex flex-col gap-4 rounded-2xl border border-border-default bg-accent-muted p-6 sm:flex-row sm:items-center sm:justify-between">
 				<div class="flex-1">
 					{#if data.isLocked || data.previousEntry}
-						<p class="font-semibold text-neutral-900">Viewing completed check-in</p>
-						<p class="mt-1 text-xs text-neutral-600">
+						<p class="font-semibold text-text-primary">Viewing completed check-in</p>
+						<p class="mt-1 text-xs text-text-secondary">
 							This check-in has been completed and can no longer be edited.
 						</p>
 					{:else}
-						<p class="font-semibold text-neutral-900">Ready to save your check-in?</p>
-						<p class="mt-1 text-xs text-neutral-600">
+						<p class="font-semibold text-text-primary">Ready to save your check-in?</p>
+						<p class="mt-1 text-xs text-text-secondary">
 							Your reflection helps track progress and keeps you accountable.
 						</p>
 					{/if}
@@ -373,14 +373,14 @@
 				<div class="flex items-center gap-3">
 					<a
 						href="/individual"
-						class="rounded-xl border-2 border-neutral-300 bg-white px-6 py-3.5 text-sm font-semibold text-neutral-700 transition-all hover:border-neutral-400 hover:bg-neutral-50"
+						class="rounded-xl border border-border-default bg-surface-raised px-6 py-3.5 text-sm font-semibold text-text-secondary transition-all hover:border-border-strong hover:bg-surface-subtle"
 					>
 						Back to Dashboard
 					</a>
 					<button
 						type="submit"
 						disabled={!data.isAvailable || data.isLocked || isSubmitting}
-						class="group relative overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-3.5 font-semibold text-white shadow-lg transition-all hover:from-blue-700 hover:to-purple-700 hover:shadow-xl hover:scale-105 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100 focus-visible:ring-2 focus-visible:ring-offset-2"
+						class="group relative overflow-hidden rounded-xl bg-accent px-8 py-3.5 font-semibold text-white shadow-lg transition-all hover:bg-accent-hover hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
 					>
 						<span class="relative z-10 flex items-center gap-2">
 							{#if isSubmitting}
@@ -422,4 +422,3 @@
 		animation: fade-in 0.3s ease-out, slide-in-from-top-2 0.3s ease-out;
 	}
 </style>
-

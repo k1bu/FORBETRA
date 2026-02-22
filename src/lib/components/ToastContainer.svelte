@@ -8,12 +8,12 @@
 		{#each toasts as toast (toast.id)}
 			<div
 				transition:fly={{ x: 80, duration: 300 }}
-				class="flex items-center gap-3 rounded-xl border px-4 py-3 shadow-lg backdrop-blur-sm
+				class="glass-raised flex items-center gap-3 rounded-xl px-4 py-3 shadow-lg
 					{toast.type === 'success'
-					? 'border-emerald-200 bg-emerald-50/95 text-emerald-800'
+					? 'border-success/20 bg-success-muted text-success'
 					: toast.type === 'error'
-						? 'border-red-200 bg-red-50/95 text-red-800'
-						: 'border-blue-200 bg-blue-50/95 text-blue-800'}"
+						? 'border-error/20 bg-error-muted text-error'
+						: 'border-accent/20 bg-accent-muted text-accent'}"
 				role="status"
 				aria-live="polite"
 			>

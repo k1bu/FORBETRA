@@ -133,8 +133,8 @@
 
 <section class="mx-auto flex max-w-5xl flex-col gap-6 p-6">
 	<header>
-		<h1 class="text-2xl font-bold text-neutral-900">Preview Panel</h1>
-		<p class="text-sm text-neutral-600">
+		<h1 class="text-2xl font-bold text-text-primary">Preview Panel</h1>
+		<p class="text-sm text-text-secondary">
 			Preview every user-facing flow through the lens of each role. All previews open in a new window.
 		</p>
 	</header>
@@ -144,37 +144,37 @@
 		{#each lenses as lens (lens.id)}
 			<button
 				onclick={() => (activeLens = lens.id)}
-				class="rounded-xl border-2 p-4 text-left transition-all {activeLens === lens.id
+				class="rounded-xl border p-4 text-left transition-all {activeLens === lens.id
 					? lens.id === 'individual'
-						? 'border-blue-400 bg-blue-50 shadow-md'
+						? 'border-accent bg-accent-muted'
 						: lens.id === 'stakeholder'
-							? 'border-emerald-400 bg-emerald-50 shadow-md'
-							: 'border-purple-400 bg-purple-50 shadow-md'
-					: 'border-neutral-200 bg-white hover:border-neutral-300 hover:shadow-sm'}"
+							? 'border-success bg-success-muted'
+							: 'border-accent bg-accent-muted'
+					: 'border-border-default bg-surface-raised hover:border-border-strong'}"
 			>
 				<p class="text-sm font-bold {activeLens === lens.id
 					? lens.id === 'individual'
-						? 'text-blue-700'
+						? 'text-accent'
 						: lens.id === 'stakeholder'
-							? 'text-emerald-700'
-							: 'text-purple-700'
-					: 'text-neutral-900'}">
+							? 'text-success'
+							: 'text-accent'
+					: 'text-text-primary'}">
 					{lens.label}
 				</p>
-				<p class="mt-1 text-xs text-neutral-600">{lens.description}</p>
+				<p class="mt-1 text-xs text-text-secondary">{lens.description}</p>
 			</button>
 		{/each}
 	</div>
 
 	<!-- Individual Lens -->
 	{#if activeLens === 'individual'}
-		<div class="rounded-xl border-2 border-blue-200 bg-white p-5 shadow-sm">
+		<div class="rounded-xl border border-border-default bg-surface-raised p-5">
 			<div class="mb-4 flex flex-wrap items-end gap-3">
 				<label class="flex flex-col gap-1 text-sm">
-					<span class="font-semibold text-blue-700">Preview as Individual</span>
+					<span class="font-semibold text-accent">Preview as Individual</span>
 					<select
 						bind:value={selectedIndividualId}
-						class="rounded-lg border border-blue-200 bg-blue-50/50 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200"
+						class="rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
 					>
 						{#each data.individuals as user (user.id)}
 							<option value={user.id}>
@@ -184,18 +184,18 @@
 					</select>
 				</label>
 				{#if selectedIndividual}
-					<div class="text-xs text-neutral-500">
+					<div class="text-xs text-text-tertiary">
 						{#if selectedIndividual.objectiveTitle}
-							<span class="rounded bg-blue-100 px-2 py-0.5 font-medium text-blue-700">
+							<span class="rounded bg-accent-muted px-2 py-0.5 font-medium text-accent">
 								{selectedIndividual.objectiveTitle}
 							</span>
 							{#if selectedIndividual.cycleStatus}
-								<span class="ml-1 rounded bg-neutral-100 px-2 py-0.5 font-medium uppercase">
+								<span class="ml-1 rounded bg-surface-subtle px-2 py-0.5 font-medium uppercase">
 									{selectedIndividual.cycleStatus}
 								</span>
 							{/if}
 						{:else}
-							<span class="italic text-neutral-400">No objective yet</span>
+							<span class="italic text-text-tertiary">No objective yet</span>
 						{/if}
 					</div>
 				{/if}
@@ -206,10 +206,10 @@
 					<button
 						onclick={flow.action}
 						disabled={flow.disabled}
-						class="group rounded-lg border border-blue-100 bg-blue-50/30 px-4 py-3 text-left transition-all hover:border-blue-300 hover:bg-blue-50 hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-40"
+						class="group rounded-lg border border-border-default bg-surface-subtle px-4 py-3 text-left transition-all hover:border-accent/30 hover:bg-accent-muted disabled:cursor-not-allowed disabled:opacity-40"
 					>
-						<p class="text-sm font-semibold text-neutral-900 group-hover:text-blue-700">{flow.label}</p>
-						<p class="mt-0.5 text-xs text-neutral-500">{flow.description}</p>
+						<p class="text-sm font-semibold text-text-primary group-hover:text-accent">{flow.label}</p>
+						<p class="mt-0.5 text-xs text-text-tertiary">{flow.description}</p>
 					</button>
 				{/each}
 			</div>
@@ -218,13 +218,13 @@
 
 	<!-- Stakeholder Lens -->
 	{#if activeLens === 'stakeholder'}
-		<div class="rounded-xl border-2 border-emerald-200 bg-white p-5 shadow-sm">
+		<div class="rounded-xl border border-border-default bg-surface-raised p-5">
 			<div class="mb-4 flex flex-wrap items-end gap-3">
 				<label class="flex flex-col gap-1 text-sm">
-					<span class="font-semibold text-emerald-700">Preview as Stakeholder</span>
+					<span class="font-semibold text-success">Preview as Stakeholder</span>
 					<select
 						bind:value={selectedStakeholderId}
-						class="rounded-lg border border-emerald-200 bg-emerald-50/50 px-3 py-2 text-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+						class="rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
 					>
 						{#each data.stakeholders as stakeholder (stakeholder.id)}
 							<option value={stakeholder.id}>
@@ -237,11 +237,11 @@
 				{#if selectedStakeholder}
 					<div class="text-xs">
 						{#if selectedStakeholder.tokenHash}
-							<span class="rounded bg-emerald-100 px-2 py-0.5 font-medium text-emerald-700">
+							<span class="rounded bg-success-muted px-2 py-0.5 font-medium text-success">
 								Active token
 							</span>
 						{:else}
-							<span class="rounded bg-amber-100 px-2 py-0.5 font-medium text-amber-700">
+							<span class="rounded bg-warning-muted px-2 py-0.5 font-medium text-warning">
 								No active token
 							</span>
 						{/if}
@@ -250,7 +250,7 @@
 			</div>
 
 			{#if data.stakeholders.length === 0}
-				<div class="rounded-lg border border-dashed border-neutral-300 bg-neutral-50 p-6 text-center text-sm text-neutral-500">
+				<div class="rounded-lg border border-dashed border-border-strong bg-surface-raised p-6 text-center text-sm text-text-tertiary">
 					No stakeholders in the system yet. Create one through an individual's onboarding flow.
 				</div>
 			{:else}
@@ -259,10 +259,10 @@
 						<button
 							onclick={flow.action}
 							disabled={flow.disabled}
-							class="group rounded-lg border border-emerald-100 bg-emerald-50/30 px-4 py-3 text-left transition-all hover:border-emerald-300 hover:bg-emerald-50 hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-40"
+							class="group rounded-lg border border-border-default bg-surface-subtle px-4 py-3 text-left transition-all hover:border-accent/30 hover:bg-success-muted disabled:cursor-not-allowed disabled:opacity-40"
 						>
-							<p class="text-sm font-semibold text-neutral-900 group-hover:text-emerald-700">{flow.label}</p>
-							<p class="mt-0.5 text-xs text-neutral-500">
+							<p class="text-sm font-semibold text-text-primary group-hover:text-success">{flow.label}</p>
+							<p class="mt-0.5 text-xs text-text-tertiary">
 								{flow.disabled ? flow.disabledReason : flow.description}
 							</p>
 						</button>
@@ -274,13 +274,13 @@
 
 	<!-- Coach Lens -->
 	{#if activeLens === 'coach'}
-		<div class="rounded-xl border-2 border-purple-200 bg-white p-5 shadow-sm">
+		<div class="rounded-xl border border-border-default bg-surface-raised p-5">
 			<div class="mb-4 flex flex-wrap items-end gap-3">
 				<label class="flex flex-col gap-1 text-sm">
-					<span class="font-semibold text-purple-700">Preview as Coach</span>
+					<span class="font-semibold text-accent">Preview as Coach</span>
 					<select
 						bind:value={selectedCoachId}
-						class="rounded-lg border border-purple-200 bg-purple-50/50 px-3 py-2 text-sm focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200"
+						class="rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
 					>
 						{#each data.coaches as coach (coach.id)}
 							<option value={coach.id}>
@@ -293,7 +293,7 @@
 			</div>
 
 			{#if data.coaches.length === 0}
-				<div class="rounded-lg border border-dashed border-neutral-300 bg-neutral-50 p-6 text-center text-sm text-neutral-500">
+				<div class="rounded-lg border border-dashed border-border-strong bg-surface-raised p-6 text-center text-sm text-text-tertiary">
 					No coaches in the system yet. Assign the COACH role to a user from the Users page.
 				</div>
 			{:else}
@@ -302,10 +302,10 @@
 						<button
 							onclick={flow.action}
 							disabled={flow.disabled}
-							class="group rounded-lg border border-purple-100 bg-purple-50/30 px-4 py-3 text-left transition-all hover:border-purple-300 hover:bg-purple-50 hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-40"
+							class="group rounded-lg border border-border-default bg-surface-subtle px-4 py-3 text-left transition-all hover:border-accent/30 hover:bg-accent-muted disabled:cursor-not-allowed disabled:opacity-40"
 						>
-							<p class="text-sm font-semibold text-neutral-900 group-hover:text-purple-700">{flow.label}</p>
-							<p class="mt-0.5 text-xs text-neutral-500">{flow.description}</p>
+							<p class="text-sm font-semibold text-text-primary group-hover:text-accent">{flow.label}</p>
+							<p class="mt-0.5 text-xs text-text-tertiary">{flow.description}</p>
 						</button>
 					{/each}
 				</div>
@@ -314,7 +314,7 @@
 	{/if}
 
 	<!-- Helpful note -->
-	<div class="rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3 text-xs text-neutral-500">
+	<div class="rounded-lg border border-border-default bg-surface-raised px-4 py-3 text-xs text-text-tertiary">
 		All previews open in a new browser window. Impersonation is automatically set for individual and coach lenses.
 		Stakeholder previews use token-based access (no impersonation needed). Your admin session stays active here.
 	</div>

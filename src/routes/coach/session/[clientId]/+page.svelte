@@ -82,71 +82,71 @@
 	<header class="flex flex-wrap items-start justify-between gap-3">
 		<div>
 			<nav aria-label="Breadcrumb" class="mb-2">
-				<ol class="flex items-center gap-1.5 text-sm text-neutral-500">
-					<li><a href="/coach" class="rounded transition-colors hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">Coach Hub</a></li>
-					<li aria-hidden="true" class="text-neutral-400"><svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg></li>
-					<li><a href="/coach/roster" class="rounded transition-colors hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">Roster</a></li>
-					<li aria-hidden="true" class="text-neutral-400"><svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg></li>
-					<li><span class="font-medium text-neutral-900">{data.client.name}</span></li>
+				<ol class="flex items-center gap-1.5 text-sm text-text-tertiary">
+					<li><a href="/coach" class="rounded transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">Coach Hub</a></li>
+					<li aria-hidden="true" class="text-text-muted"><svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg></li>
+					<li><a href="/coach/roster" class="rounded transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">Roster</a></li>
+					<li aria-hidden="true" class="text-text-muted"><svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg></li>
+					<li><span class="font-medium text-text-primary">{data.client.name}</span></li>
 				</ol>
 			</nav>
-			<h1 class="text-3xl font-bold text-neutral-900">{data.client.name}</h1>
-			<p class="text-sm text-neutral-600">{data.client.email}</p>
+			<h1 class="text-3xl font-bold text-text-primary">{data.client.name}</h1>
+			<p class="text-sm text-text-secondary">{data.client.email}</p>
 			{#if data.client.objective}
 				<div class="mt-2 flex items-center gap-2">
 					<span class="text-base" role="img" aria-label="target">&#127919;</span>
-					<span class="text-sm font-medium text-neutral-700">{data.client.objective.title}</span>
+					<span class="text-sm font-medium text-text-secondary">{data.client.objective.title}</span>
 				</div>
 			{/if}
 		</div>
 		{#if data.client.objective?.cycle}
-			<span class="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
+			<span class="rounded-full bg-accent-muted px-3 py-1 text-xs font-semibold text-accent">
 				Week {data.client.objective.cycle.currentWeek ?? '—'}
 			</span>
 		{/if}
 	</header>
 
 	<!-- AI Coaching Insights -->
-	<div class="rounded-2xl border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 p-6 shadow-sm">
+	<div class="rounded-2xl border border-accent/30 bg-accent-muted p-6">
 		<div class="mb-4 flex items-center justify-between">
 			<div class="flex items-center gap-2">
 				<span class="text-xl" role="img" aria-label="sparkles">&#10024;</span>
 				<div>
-					<h2 class="text-lg font-bold text-neutral-900">AI Coaching Insights</h2>
-					<p class="text-xs text-neutral-500">AI-generated analysis based on your client's reflection and feedback data</p>
+					<h2 class="text-lg font-bold text-text-primary">AI Coaching Insights</h2>
+					<p class="text-xs text-text-tertiary">AI-generated analysis based on your client's reflection and feedback data</p>
 				</div>
 				{#if prepData}
-					<span class="text-xs text-neutral-500">{formatRelativeDays(prepData.createdAt)}</span>
+					<span class="text-xs text-text-tertiary">{formatRelativeDays(prepData.createdAt)}</span>
 				{/if}
 			</div>
 			<button
 				type="button"
 				disabled={generatingPrep}
 				onclick={generatePrep}
-				class="rounded-lg border-2 border-indigo-300 bg-white px-4 py-2 text-xs font-semibold text-indigo-700 transition-all hover:border-indigo-400 hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-50"
+				class="rounded-lg border border-accent/30 bg-surface-raised px-4 py-2 text-xs font-semibold text-accent transition-all hover:border-accent hover:bg-accent-muted disabled:cursor-not-allowed disabled:opacity-50"
 			>
 				{generatingPrep ? 'Generating...' : prepData ? 'Refresh Insights' : 'Generate Insights'}
 			</button>
 		</div>
 		{#if prepData?.content}
-			<div class="prose prose-sm max-w-none text-neutral-700 whitespace-pre-line">
+			<div class="prose prose-sm max-w-none text-text-secondary whitespace-pre-line">
 				{prepData.content}
 			</div>
 		{:else}
-			<p class="text-sm text-neutral-500">No prep generated yet. Click above to generate.</p>
+			<p class="text-sm text-text-tertiary">No prep generated yet. Click above to generate.</p>
 		{/if}
 	</div>
 
 	<!-- Alerts -->
 	{#if data.alerts.length > 0}
-		<div class="rounded-2xl border-2 border-red-200 bg-gradient-to-br from-red-50 to-orange-50 p-6 shadow-sm">
+		<div class="rounded-2xl border border-error/50 bg-error-muted p-6">
 			<div class="mb-3 flex items-center gap-2">
 				<span class="text-lg" role="img" aria-label="warning">&#9888;&#65039;</span>
 				<h2 class="text-lg font-bold text-red-900">AI Alerts</h2>
 			</div>
 			<ul class="space-y-2">
 				{#each data.alerts as alert}
-					<li class="rounded-lg bg-white/80 px-3 py-2 text-sm text-red-800">
+					<li class="rounded-lg glass px-3 py-2 text-sm text-red-800">
 						{alert.content}
 					</li>
 				{/each}
@@ -155,14 +155,14 @@
 	{/if}
 
 	{#if data.client.alerts.length > 0}
-		<div class="rounded-2xl border-2 border-amber-200 bg-amber-50 p-6 shadow-sm">
+		<div class="rounded-2xl border border-border-strong bg-warning-muted p-6">
 			<div class="mb-3 flex items-center gap-2">
 				<span class="text-lg" role="img" aria-label="warning">&#9888;&#65039;</span>
 				<h2 class="text-lg font-bold text-amber-900">Status Alerts</h2>
 			</div>
 			<ul class="space-y-2">
 				{#each data.client.alerts as alert}
-					<li class="flex items-start gap-2 rounded-lg bg-white/80 px-3 py-2 text-sm {alert.severity === 'high' ? 'font-semibold text-red-700 border border-red-200' : 'text-amber-800'}">
+					<li class="flex items-start gap-2 rounded-lg glass px-3 py-2 text-sm {alert.severity === 'high' ? 'font-semibold text-error border border-error/50' : 'text-amber-800'}">
 						<span class="mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full {alert.severity === 'high' ? 'bg-red-500' : alert.severity === 'medium' ? 'bg-amber-500' : 'bg-blue-500'}"></span>
 						{alert.message}
 					</li>
@@ -173,23 +173,23 @@
 
 	<!-- Reflections Timeline -->
 	{#if reflectionsByWeek.length > 0}
-		<div class="rounded-2xl border-2 border-neutral-200 bg-white p-6 shadow-sm">
-			<h2 class="mb-4 text-lg font-bold text-neutral-900">Reflections Timeline</h2>
+		<div class="rounded-2xl border border-border-default bg-surface-raised p-6">
+			<h2 class="mb-4 text-lg font-bold text-text-primary">Reflections Timeline</h2>
 			<div class="space-y-4">
 				{#each reflectionsByWeek as [weekNumber, reflections]}
-					<div class="rounded-xl border border-neutral-200 bg-neutral-50/50 p-4">
-						<p class="mb-2 text-sm font-bold text-neutral-700">Week {weekNumber}</p>
+					<div class="rounded-xl border border-border-default bg-surface-subtle p-4">
+						<p class="mb-2 text-sm font-bold text-text-secondary">Week {weekNumber}</p>
 						<div class="space-y-2">
 							{#each reflections as r}
-								<div class="flex items-start gap-3 rounded-lg bg-white px-3 py-2 text-sm">
-									<span class="shrink-0 rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700">
+								<div class="flex items-start gap-3 rounded-lg bg-surface-raised px-3 py-2 text-sm">
+									<span class="shrink-0 rounded bg-accent-muted px-1.5 py-0.5 text-[10px] font-semibold text-accent">
 										{r.reflectionType === 'INTENTION' ? 'Intention' : r.reflectionType === 'RATING_A' ? 'Mid-week' : r.reflectionType === 'RATING_B' ? 'End-week' : r.reflectionType}
 									</span>
 									<div class="min-w-0 flex-1">
 										{#if r.effortScore !== null || r.performanceScore !== null}
 											<div class="flex gap-3 text-xs">
 												{#if r.effortScore !== null}
-													<span class="text-amber-600">Effort: <strong>{r.effortScore}</strong></span>
+													<span class="text-warning">Effort: <strong>{r.effortScore}</strong></span>
 												{/if}
 												{#if r.performanceScore !== null}
 													<span class="text-indigo-600">Perf: <strong>{r.performanceScore}</strong></span>
@@ -197,11 +197,11 @@
 											</div>
 										{/if}
 										{#if r.notes}
-											<p class="mt-1 text-xs text-neutral-600">{r.notes}</p>
+											<p class="mt-1 text-xs text-text-secondary">{r.notes}</p>
 										{/if}
 									</div>
 									{#if r.submittedAt}
-										<span class="shrink-0 text-[10px] text-neutral-400">{formatDate(r.submittedAt)}</span>
+										<span class="shrink-0 text-[10px] text-text-muted">{formatDate(r.submittedAt)}</span>
 									{/if}
 								</div>
 							{/each}
@@ -214,28 +214,28 @@
 
 	<!-- Stakeholder Feedback Summary -->
 	{#if data.client.stakeholders.length > 0}
-		<div class="rounded-2xl border-2 border-teal-200 bg-gradient-to-br from-teal-50 to-emerald-50 p-6 shadow-sm">
-			<h2 class="mb-4 text-lg font-bold text-neutral-900">Stakeholder Feedback</h2>
+		<div class="rounded-2xl border border-border-strong bg-success-muted p-6">
+			<h2 class="mb-4 text-lg font-bold text-text-primary">Stakeholder Feedback</h2>
 			<div class="grid gap-3 sm:grid-cols-2">
 				{#each data.client.stakeholders as stakeholder}
-					<div class="rounded-xl border border-teal-200 bg-white/80 p-3">
-						<p class="text-sm font-semibold text-neutral-800">{stakeholder.name}</p>
-						<p class="text-xs text-neutral-500">{stakeholder.email}</p>
+					<div class="rounded-xl border border-border-default glass p-3">
+						<p class="text-sm font-semibold text-text-primary">{stakeholder.name}</p>
+						<p class="text-xs text-text-tertiary">{stakeholder.email}</p>
 						{#if stakeholder.lastFeedback}
 							<div class="mt-2 flex gap-3 text-xs">
 								{#if stakeholder.lastFeedback.effortScore !== null}
 									<span class="text-teal-700">Effort: <strong>{stakeholder.lastFeedback.effortScore}</strong></span>
 								{/if}
 								{#if stakeholder.lastFeedback.performanceScore !== null}
-									<span class="text-emerald-700">Perf: <strong>{stakeholder.lastFeedback.performanceScore}</strong></span>
+									<span class="text-success">Perf: <strong>{stakeholder.lastFeedback.performanceScore}</strong></span>
 								{/if}
 							</div>
-							<p class="mt-1 text-[10px] text-neutral-400">
+							<p class="mt-1 text-[10px] text-text-muted">
 								{stakeholder.lastFeedback.weekNumber ? `Week ${stakeholder.lastFeedback.weekNumber}` : ''}
 								{stakeholder.lastFeedback.submittedAt ? ` · ${formatRelativeDays(stakeholder.lastFeedback.submittedAt)}` : ''}
 							</p>
 						{:else}
-							<p class="mt-2 text-xs text-neutral-400">No feedback yet</p>
+							<p class="mt-2 text-xs text-text-muted">No feedback yet</p>
 						{/if}
 					</div>
 				{/each}
@@ -245,8 +245,8 @@
 
 	<!-- Performance Chart -->
 	{#if data.client.visualizationData && data.client.visualizationData.individual.length > 0}
-		<div class="rounded-2xl border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 p-6 shadow-sm">
-			<h2 class="mb-4 text-lg font-bold text-neutral-900">Performance & Effort Over Time</h2>
+		<div class="rounded-2xl border border-accent/30 bg-accent-muted p-6">
+			<h2 class="mb-4 text-lg font-bold text-text-primary">Performance & Effort Over Time</h2>
 			<PerformanceEffortChart
 				individualData={data.client.visualizationData.individual}
 				stakeholderData={data.client.visualizationData.stakeholders}
@@ -256,16 +256,16 @@
 	{/if}
 
 	<!-- Coach Notes -->
-	<div class="rounded-2xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50 p-6 shadow-sm">
-		<h2 class="mb-4 text-lg font-bold text-neutral-900">Coach Notes</h2>
+	<div class="rounded-2xl border border-accent/30 bg-accent-muted p-6">
+		<h2 class="mb-4 text-lg font-bold text-text-primary">Coach Notes</h2>
 
 		<!-- Inline add note form -->
-		<form method="post" action="?/createNote" class="mb-4 rounded-xl border border-blue-200 bg-white p-4">
+		<form method="post" action="?/createNote" class="mb-4 rounded-xl border border-border-default bg-surface-raised p-4">
 			{#if data.cycleId}
 				<input type="hidden" name="cycleId" value={data.cycleId} />
 			{/if}
 			{#if form?.noteError}
-				<p class="mb-2 text-xs text-red-600">{form.noteError}</p>
+				<p class="mb-2 text-xs text-error">{form.noteError}</p>
 			{/if}
 			<div class="flex gap-3">
 				<div class="min-w-0 flex-1">
@@ -275,7 +275,7 @@
 						required
 						minlength="10"
 						bind:value={noteContent}
-						class="w-full rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm placeholder:text-neutral-400 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-200"
+						class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:bg-surface-raised focus:outline-none focus:ring-1 focus:ring-accent/30"
 						placeholder="Add a note for this client..."
 					></textarea>
 				</div>
@@ -286,12 +286,12 @@
 						min="1"
 						max="12"
 						bind:value={noteWeek}
-						class="w-16 rounded-lg border border-neutral-200 px-2 py-1 text-center text-xs focus:border-blue-400 focus:outline-none"
+						class="w-16 rounded-lg border border-border-default bg-surface-raised px-2 py-1 text-center text-xs text-text-primary focus:border-accent focus:outline-none"
 						placeholder="Wk"
 					/>
 					<button
 						type="submit"
-						class="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition-all hover:bg-blue-700"
+						class="rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white transition-all hover:bg-accent-hover"
 					>
 						Save
 					</button>
@@ -303,11 +303,11 @@
 		{#if data.allCoachNotes.length > 0}
 			<ul class="space-y-2">
 				{#each data.allCoachNotes as note (note.id)}
-					<li class="rounded-lg border border-blue-200 bg-white p-3">
-						<p class="text-sm text-neutral-700">{note.content}</p>
-						<div class="mt-2 flex items-center gap-2 text-xs text-neutral-500">
+					<li class="rounded-lg border border-border-default bg-surface-raised p-3">
+						<p class="text-sm text-text-secondary">{note.content}</p>
+						<div class="mt-2 flex items-center gap-2 text-xs text-text-tertiary">
 							{#if note.weekNumber}
-								<span class="rounded-full bg-blue-100 px-2 py-0.5 font-semibold text-blue-700">
+								<span class="rounded-full bg-accent-muted px-2 py-0.5 font-semibold text-accent">
 									Week {note.weekNumber}
 								</span>
 							{/if}
@@ -317,7 +317,7 @@
 				{/each}
 			</ul>
 		{:else}
-			<p class="text-center text-sm text-neutral-500">No notes yet.</p>
+			<p class="text-center text-sm text-text-tertiary">No notes yet.</p>
 		{/if}
 	</div>
 </section>

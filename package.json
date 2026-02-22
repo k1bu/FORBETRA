@@ -48,9 +48,12 @@
 	},
 	"dependencies": {
 		"@anthropic-ai/sdk": "^0.74.0",
+		"@fontsource/geist-mono": "^5.2.7",
+		"@fontsource/geist-sans": "^5.2.5",
 		"@prisma/client": "^6.19.0",
 		"@sendgrid/mail": "^8.1.6",
 		"chart.js": "^4.4.0",
+		"lucide-svelte": "^0.575.0",
 		"postmark": "^4.0.5",
 		"svelte-clerk": "^0.17.8",
 		"svix": "^1.81.0",

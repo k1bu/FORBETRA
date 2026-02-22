@@ -1,6 +1,8 @@
 import prisma from '$lib/server/prisma';
 import { sendEmail } from '$lib/notifications/email';
 import { emailTemplates } from '$lib/notifications/emailTemplates';
+import { trySendSms } from '$lib/notifications/sms';
+import { smsTemplates } from '$lib/notifications/smsTemplates';
 import { computeWeekNumber } from '$lib/server/coachUtils';
 
 export const remindOverduePrompts = async () => {
@@ -80,15 +82,17 @@ export const remindOverduePrompts = async () => {
 				// Streak computation is non-critical
 			}
 
+			const appUrl =
+				process.env.PUBLIC_APP_URL || process.env.VERCEL_URL
+					? `https://${process.env.PUBLIC_APP_URL || process.env.VERCEL_URL}`
+					: 'https://app.forbetra.com';
+
 			try {
 				const template = emailTemplates.reminderOverdue({
 					individualName: objective.user.name || undefined,
 					objectiveTitle: objective.title,
 					currentStreak,
-					appUrl:
-						process.env.PUBLIC_APP_URL || process.env.VERCEL_URL
-							? `https://${process.env.PUBLIC_APP_URL || process.env.VERCEL_URL}`
-							: 'https://app.forbetra.com'
+					appUrl
 				});
 				await sendEmail({
 					to: objective.user.email,
@@ -102,6 +106,12 @@ export const remindOverduePrompts = async () => {
 					error
 				);
 			}
+
+			// Send SMS reminder
+			await trySendSms(
+				objective.user.phone,
+				smsTemplates.reminderOverdue({ appUrl })
+			);
 		}
 	}
 };

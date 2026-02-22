@@ -29,12 +29,12 @@
 	<!-- Header -->
 	<header class="flex items-center justify-between">
 		<div>
-			<h1 class="text-3xl font-bold text-neutral-900">Stakeholders</h1>
-			<p class="mt-1 text-neutral-600">Manage the people who provide feedback on your progress</p>
+			<h1 class="text-3xl font-bold text-text-primary">Stakeholders</h1>
+			<p class="mt-1 text-text-secondary">Manage the people who provide feedback on your progress</p>
 		</div>
 		<a
 			href="/individual"
-			class="rounded-lg border-2 border-neutral-300 bg-white px-4 py-2 text-sm font-semibold text-neutral-700 transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700"
+			class="rounded-lg border border-border-strong bg-surface-raised px-4 py-2 text-sm font-semibold text-text-secondary transition-all hover:border-accent/30 hover:bg-accent-muted hover:text-accent"
 		>
 			← Back to Hub
 		</a>
@@ -42,15 +42,15 @@
 
 	{#if form?.action === 'feedback'}
 		{#if form.error}
-			<div class="rounded-xl border-2 border-red-200 bg-red-50 p-4 text-sm text-red-700">
+			<div class="rounded-xl border border-error/20 bg-error-muted p-4 text-sm text-error">
 				{form.error}
 			</div>
 		{:else if form.feedbackLink}
-			<div class="rounded-xl border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100 p-4 text-sm text-emerald-700">
+			<div class="rounded-xl border border-success/20 bg-success-muted p-4 text-sm text-success">
 				<p class="mb-2 font-semibold">✅ Feedback link generated!</p>
 				<p class="mb-2 font-mono break-all text-xs">{form.feedbackLink}</p>
 				{#if form.expiresAt}
-					<p class="text-xs text-emerald-600">Expires {formatDateTime(form.expiresAt)}.</p>
+					<p class="text-xs text-success">Expires {formatDateTime(form.expiresAt)}.</p>
 				{/if}
 			</div>
 		{/if}
@@ -59,28 +59,28 @@
 	<div class="grid gap-6 lg:grid-cols-3">
 		<!-- Stakeholders List -->
 		<div class="lg:col-span-2 space-y-4">
-			<h2 class="text-lg font-bold text-neutral-900">Your Stakeholders</h2>
+			<h2 class="text-lg font-bold text-text-primary">Your Stakeholders</h2>
 			{#if data.stakeholders.length}
 				<div class="space-y-4">
 					{#each data.stakeholders as stakeholder (stakeholder.id)}
-						<div class="rounded-2xl border-2 border-neutral-200 bg-white p-6 shadow-sm">
+						<div class="rounded-2xl border border-border-default bg-surface-raised p-6">
 							<div class="mb-4">
-								<p class="text-lg font-semibold text-neutral-900">{stakeholder.name}</p>
-								<p class="text-sm text-neutral-600">{stakeholder.email}</p>
+								<p class="text-lg font-semibold text-text-primary">{stakeholder.name}</p>
+								<p class="text-sm text-text-secondary">{stakeholder.email}</p>
 								{#if stakeholder.relationship}
-									<p class="mt-1 text-xs font-medium uppercase tracking-wide text-neutral-500">
+									<p class="mt-1 text-xs font-medium uppercase tracking-wide text-text-tertiary">
 										{stakeholder.relationship}
 									</p>
 								{/if}
 							</div>
 							{#if stakeholder.lastFeedback}
-								<div class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-xs">
-									<p class="font-semibold text-emerald-900">Last feedback</p>
-									<p class="text-emerald-700">
+								<div class="mb-4 rounded-lg border border-success/20 bg-success-muted p-3 text-xs">
+									<p class="font-semibold text-success">Last feedback</p>
+									<p class="text-success">
 										{formatDateTime(stakeholder.lastFeedback.submittedAt)}
 									</p>
 									{#if stakeholder.lastFeedback.isCurrentWeek}
-										<p class="mt-1 font-semibold text-emerald-700">✅ Responded this week</p>
+										<p class="mt-1 font-semibold text-success">✅ Responded this week</p>
 									{/if}
 								</div>
 							{/if}
@@ -88,7 +88,7 @@
 								<input type="hidden" name="stakeholderId" value={stakeholder.id} />
 								<button
 									type="submit"
-									class="w-full rounded-lg border-2 border-neutral-300 bg-white px-3 py-2 text-xs font-semibold text-neutral-700 transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700"
+									class="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-xs font-semibold text-text-secondary transition-all hover:border-accent/30 hover:bg-accent-muted hover:text-accent"
 								>
 									Generate Feedback Link
 								</button>
@@ -97,25 +97,25 @@
 					{/each}
 				</div>
 			{:else}
-				<div class="rounded-2xl border-2 border-neutral-200 bg-neutral-50 p-8 text-center">
-					<p class="text-neutral-600">No stakeholders yet. Add one below to get started!</p>
+				<div class="rounded-2xl border border-border-default bg-surface-raised p-8 text-center">
+					<p class="text-text-secondary">No stakeholders yet. Add one below to get started!</p>
 				</div>
 			{/if}
 		</div>
 
 		<!-- Add Stakeholder Form -->
 		<div class="space-y-4">
-			<h2 class="text-lg font-bold text-neutral-900">Add a Stakeholder</h2>
-			<div class="rounded-2xl border-2 border-neutral-200 bg-gradient-to-br from-blue-50 to-purple-50 p-6 shadow-sm">
-				<p class="mb-4 text-sm text-neutral-600">
+			<h2 class="text-lg font-bold text-text-primary">Add a Stakeholder</h2>
+			<div class="rounded-2xl border border-border-default bg-surface-raised p-6">
+				<p class="mb-4 text-sm text-text-secondary">
 					Invite 3–5 people who regularly observe your leadership.
 				</p>
 				{#if stakeholderError}
-					<div class="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+					<div class="mb-3 rounded-lg border border-error/20 bg-error-muted px-3 py-2 text-xs text-error">
 						{stakeholderError}
 					</div>
 				{:else if stakeholderSuccess}
-					<div class="mb-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
+					<div class="mb-3 rounded-lg border border-success/20 bg-success-muted px-3 py-2 text-xs text-success">
 						✅ Stakeholder added successfully!
 					</div>
 				{/if}
@@ -123,7 +123,7 @@
 					<input
 						name="name"
 						type="text"
-						class="w-full rounded-lg border-2 border-neutral-300 bg-white px-3 py-2 text-sm focus:border-blue-400 focus:outline-none"
+						class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
 						placeholder="Name"
 						value={stakeholderFormValues.name}
 						required
@@ -131,7 +131,7 @@
 					<input
 						name="email"
 						type="email"
-						class="w-full rounded-lg border-2 border-neutral-300 bg-white px-3 py-2 text-sm focus:border-blue-400 focus:outline-none"
+						class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
 						placeholder="Email"
 						value={stakeholderFormValues.email}
 						required
@@ -139,13 +139,13 @@
 					<input
 						name="relationship"
 						type="text"
-						class="w-full rounded-lg border-2 border-neutral-300 bg-white px-3 py-2 text-sm focus:border-blue-400 focus:outline-none"
+						class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
 						placeholder="Relationship (optional)"
 						value={stakeholderFormValues.relationship}
 					/>
 					<button
 						type="submit"
-						class="w-full rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:from-blue-700 hover:to-purple-700 hover:shadow-lg"
+						class="w-full rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-accent-hover"
 					>
 						Add Stakeholder
 					</button>
@@ -154,4 +154,3 @@
 		</div>
 	</div>
 </section>
-

@@ -28,7 +28,7 @@
 	<div class="flex items-center justify-between">
 		<a
 			href="/individual"
-			class="inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
+			class="inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:text-accent-hover transition-colors"
 		>
 			<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -38,20 +38,20 @@
 	</div>
 
 	<div class="text-center">
-		<h1 class="text-2xl font-bold text-neutral-900">Reflection History</h1>
-		<p class="mt-1 text-sm text-neutral-500">
+		<h1 class="text-2xl font-bold text-text-primary">Reflection History</h1>
+		<p class="mt-1 text-sm text-text-tertiary">
 			{data.cycleLabel} &middot; {data.objectiveTitle}
 		</p>
 	</div>
 
 	{#if data.weeks.length === 0}
-		<div class="rounded-2xl border-2 border-neutral-200 bg-neutral-50 p-8 text-center">
+		<div class="rounded-2xl border border-border-default bg-surface-raised p-8 text-center">
 			<div class="mb-3 text-4xl">📝</div>
-			<p class="text-lg font-semibold text-neutral-700">No reflections yet</p>
-			<p class="mt-1 text-sm text-neutral-500">Complete your first check-in to see your history here.</p>
+			<p class="text-lg font-semibold text-text-secondary">No reflections yet</p>
+			<p class="mt-1 text-sm text-text-tertiary">Complete your first check-in to see your history here.</p>
 			<a
 				href="/individual"
-				class="mt-4 inline-block rounded-lg bg-blue-600 px-6 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
+				class="mt-4 inline-block rounded-lg bg-accent px-6 py-2 text-sm font-semibold text-white hover:bg-accent-hover transition-colors"
 			>
 				Go to Dashboard
 			</a>
@@ -60,34 +60,34 @@
 		<!-- Timeline -->
 		<div class="relative">
 			<!-- Vertical line -->
-			<div class="absolute left-6 top-0 bottom-0 w-0.5 bg-neutral-200"></div>
+			<div class="absolute left-6 top-0 bottom-0 w-0.5 bg-border-default"></div>
 
 			<div class="space-y-6">
 				{#each data.weeks as week}
 					<div class="relative pl-14">
 						<!-- Week marker -->
-						<div class="absolute left-3.5 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white ring-4 ring-white">
+						<div class="absolute left-3.5 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-white ring-4 ring-surface-base">
 							{week.weekNumber}
 						</div>
 
-						<div class="rounded-2xl border-2 border-neutral-200 bg-white p-5 shadow-sm">
-							<h2 class="mb-3 text-lg font-bold text-neutral-900">Week {week.weekNumber}</h2>
+						<div class="rounded-2xl border border-border-default bg-surface-raised p-5">
+							<h2 class="mb-3 text-lg font-bold text-text-primary">Week {week.weekNumber}</h2>
 
 							<div class="space-y-4">
 								{#each week.reflections as reflection}
-									<div class="rounded-xl border border-neutral-200 bg-neutral-50/50 p-4">
+									<div class="rounded-xl border border-border-default bg-surface-subtle p-4">
 										<div class="mb-2 flex items-center justify-between">
-											<span class="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700">
+											<span class="rounded-full bg-accent-muted px-2.5 py-0.5 text-xs font-semibold text-accent">
 												{reflectionLabel(reflection.type)}
 											</span>
-											<span class="text-xs text-neutral-400">{formatDate(reflection.checkInDate)}</span>
+											<span class="text-xs text-text-muted">{formatDate(reflection.checkInDate)}</span>
 										</div>
 
 										{#if reflection.effortScore !== null || reflection.performanceScore !== null}
 											<div class="mb-2 flex gap-4">
 												{#if reflection.effortScore !== null}
 													<div class="flex items-center gap-2">
-														<span class="text-xs text-neutral-500">Effort:</span>
+														<span class="text-xs text-text-tertiary">Effort:</span>
 														<div
 															class="flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold {getScoreBgColor(reflection.effortScore, 'effort')} {getScoreColor(reflection.effortScore, 'effort')}"
 														>
@@ -97,7 +97,7 @@
 												{/if}
 												{#if reflection.performanceScore !== null}
 													<div class="flex items-center gap-2">
-														<span class="text-xs text-neutral-500">Performance:</span>
+														<span class="text-xs text-text-tertiary">Performance:</span>
 														<div
 															class="flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold {getScoreBgColor(reflection.performanceScore, 'performance')} {getScoreColor(reflection.performanceScore, 'performance')}"
 														>
@@ -109,28 +109,28 @@
 										{/if}
 
 										{#if reflection.notes}
-											<p class="text-sm text-neutral-700 leading-relaxed">{reflection.notes}</p>
+											<p class="text-sm text-text-secondary leading-relaxed">{reflection.notes}</p>
 										{/if}
 
 										{#if reflection.feedbacks.length > 0}
-											<div class="mt-3 border-t border-neutral-200 pt-3">
-												<p class="mb-2 text-xs font-semibold uppercase tracking-wider text-neutral-400">Stakeholder Feedback</p>
+											<div class="mt-3 border-t border-border-default pt-3">
+												<p class="mb-2 text-xs font-semibold uppercase tracking-wider text-text-muted">Stakeholder Feedback</p>
 												<div class="space-y-2">
 													{#each reflection.feedbacks as feedback}
-														<div class="rounded-lg border border-neutral-200 bg-white px-3 py-2">
+														<div class="rounded-lg border border-border-default bg-surface-raised px-3 py-2">
 															<div class="flex items-center justify-between">
-																<span class="text-xs font-semibold text-neutral-700">{feedback.stakeholderName}</span>
+																<span class="text-xs font-semibold text-text-secondary">{feedback.stakeholderName}</span>
 																<div class="flex gap-3">
 																	{#if feedback.effortScore !== null}
-																		<span class="text-xs text-neutral-500">E: <span class="font-bold">{feedback.effortScore}</span></span>
+																		<span class="text-xs text-text-tertiary">E: <span class="font-bold">{feedback.effortScore}</span></span>
 																	{/if}
 																	{#if feedback.performanceScore !== null}
-																		<span class="text-xs text-neutral-500">P: <span class="font-bold">{feedback.performanceScore}</span></span>
+																		<span class="text-xs text-text-tertiary">P: <span class="font-bold">{feedback.performanceScore}</span></span>
 																	{/if}
 																</div>
 															</div>
 															{#if feedback.comment}
-																<p class="mt-1 text-xs text-neutral-600">{feedback.comment}</p>
+																<p class="mt-1 text-xs text-text-secondary">{feedback.comment}</p>
 															{/if}
 														</div>
 													{/each}

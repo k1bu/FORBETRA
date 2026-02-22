@@ -3,6 +3,8 @@ import prisma from '$lib/server/prisma';
 import { requireRole } from '$lib/server/auth';
 import { sendEmail } from '$lib/notifications/email';
 import { emailTemplates } from '$lib/notifications/emailTemplates';
+import { trySendSms } from '$lib/notifications/sms';
+import { smsTemplates } from '$lib/notifications/smsTemplates';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
@@ -64,6 +66,15 @@ export const load: PageServerLoad = async (event) => {
 			console.error('[email:error] Failed to send welcome email', error);
 			// Don't fail the request if email fails
 		}
+
+		// Send welcome SMS
+		await trySendSms(
+			dbUser.phone,
+			smsTemplates.welcomeIndividual({
+				individualName: dbUser.name || undefined,
+				appUrl: event.url.origin
+			})
+		);
 	}
 
 	return {

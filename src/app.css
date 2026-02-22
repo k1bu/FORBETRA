@@ -1,3 +1,84 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
+
+/* --- Dark mode (class-based) --- */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* --- Design Tokens --- */
+@theme {
+  /* Typography */
+  --font-sans: 'Geist Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, monospace;
+
+  /* Surface palette (dark-first) */
+  --color-surface-base: #09090b;
+  --color-surface-raised: #131316;
+  --color-surface-overlay: #1c1c20;
+  --color-surface-subtle: #232329;
+
+  /* Border palette */
+  --color-border-default: rgba(255, 255, 255, 0.08);
+  --color-border-strong: rgba(255, 255, 255, 0.15);
+  --color-border-accent: rgba(255, 255, 255, 0.25);
+
+  /* Text palette */
+  --color-text-primary: #f4f5f8;
+  --color-text-secondary: #a1a1aa;
+  --color-text-tertiary: #71717a;
+  --color-text-muted: #52525b;
+
+  /* Brand accent */
+  --color-accent: #6366f1;
+  --color-accent-hover: #818cf8;
+  --color-accent-muted: rgba(99, 102, 241, 0.15);
+
+  /* Data colors */
+  --color-data-effort: #06b6d4;
+  --color-data-effort-muted: rgba(6, 182, 212, 0.15);
+  --color-data-performance: #f59e0b;
+  --color-data-performance-muted: rgba(245, 158, 11, 0.15);
+
+  /* Semantic colors */
+  --color-success: #10b981;
+  --color-success-muted: rgba(16, 185, 129, 0.15);
+  --color-warning: #f59e0b;
+  --color-warning-muted: rgba(245, 158, 11, 0.15);
+  --color-error: #ef4444;
+  --color-error-muted: rgba(239, 68, 68, 0.15);
+  --color-info: #6366f1;
+  --color-info-muted: rgba(99, 102, 241, 0.15);
+}
+
+/* --- Glass utilities --- */
+@layer components {
+  .glass {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .glass-raised {
+    background: rgba(255, 255, 255, 0.07);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+  .glass-strong {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(32px);
+    -webkit-backdrop-filter: blur(32px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+  }
+}
+
+/* --- Base styles --- */
+@layer base {
+  html {
+    background-color: var(--color-surface-base);
+    color: var(--color-text-primary);
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}

@@ -50,7 +50,7 @@
 		if (data.status === 'accepted') return 'This invitation has already been accepted.';
 		return null;
 	};
-	
+
 	const showAcceptForm = () => {
 		if (data.status !== 'valid') return false;
 		if (!data.user) return false;
@@ -62,48 +62,48 @@
 
 <section class="mx-auto flex min-h-[70vh] max-w-3xl flex-col gap-6 px-4 py-12">
 	<header class="space-y-2 text-center">
-		<h1 class="text-3xl font-semibold text-slate-900">Join your coach</h1>
+		<h1 class="text-3xl font-semibold text-text-primary">Join your coach</h1>
 		{#if data.invite}
-			<p class="text-sm text-slate-500">
+			<p class="text-sm text-text-tertiary">
 				{data.invite.coach.name} has invited you to collaborate in FORBETRA.
 			</p>
 		{:else}
-			<p class="text-sm text-slate-500">We couldn’t find this invitation.</p>
+			<p class="text-sm text-text-tertiary">We couldn't find this invitation.</p>
 		{/if}
 	</header>
 
 	{#if ctaMessage()}
-		<div class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+		<div class="rounded-xl border border-border-strong bg-warning-muted px-4 py-3 text-sm text-warning">
 			{ctaMessage()}
 		</div>
 	{/if}
 
 	{#if data.invite}
-		<section class="space-y-4 rounded-2xl border border-slate-200 bg-white/90 p-6 shadow-sm">
+		<section class="space-y-4 rounded-2xl border border-border-default glass-raised p-6">
 			<div class="space-y-2">
-				<p class="text-xs uppercase tracking-[0.35em] text-slate-400">Invitation details</p>
-				<p class="text-sm text-slate-500">
-					Sent to <span class="font-semibold text-slate-700">{data.invite.email}</span> · Expires{' '}
+				<p class="text-xs uppercase tracking-[0.35em] text-text-muted">Invitation details</p>
+				<p class="text-sm text-text-tertiary">
+					Sent to <span class="font-semibold text-text-secondary">{data.invite.email}</span> · Expires{' '}
 					{formatDate(data.invite.expiresAt)}
 				</p>
 				{#if data.invite.message}
-					<div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600">
-						<p class="font-semibold text-slate-700">Message from your coach</p>
-						<p class="text-xs text-slate-500">{data.invite.message}</p>
+					<div class="rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-secondary">
+						<p class="font-semibold text-text-secondary">Message from your coach</p>
+						<p class="text-xs text-text-tertiary">{data.invite.message}</p>
 					</div>
 				{/if}
 			</div>
 
-			<section class="space-y-2 rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
-				<p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Coach</p>
-				<p class="text-lg font-semibold text-slate-900">{data.invite.coach.name}</p>
-				<p class="text-sm text-slate-500">{data.invite.coach.email}</p>
+			<section class="space-y-2 rounded-xl border border-border-default bg-surface-raised px-4 py-3">
+				<p class="text-xs font-semibold uppercase tracking-[0.3em] text-text-tertiary">Coach</p>
+				<p class="text-lg font-semibold text-text-primary">{data.invite.coach.name}</p>
+				<p class="text-sm text-text-tertiary">{data.invite.coach.email}</p>
 			</section>
 
 			{#if !data.user}
-				<div class="space-y-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+				<div class="space-y-3 rounded-xl border border-accent/30 bg-accent-muted px-4 py-3 text-sm text-accent">
 					<div>
-						<p class="font-semibold text-blue-800">Almost there</p>
+						<p class="font-semibold text-accent">Almost there</p>
 						<p>
 							Sign in or create an account to accept this invitation. Use the email above if your coach
 							asked you to.
@@ -112,40 +112,40 @@
 					<div class="flex flex-wrap gap-2">
 						<a
 							href="/sign-in"
-							class="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-blue-700"
+							class="inline-flex items-center justify-center rounded-lg bg-accent px-4 py-2 text-xs font-semibold text-white transition hover:bg-accent-hover"
 						>
 							Sign in
 						</a>
 						<a
 							href="/sign-up"
-							class="inline-flex items-center justify-center rounded-lg border border-blue-500 px-4 py-2 text-xs font-semibold text-blue-700 transition hover:bg-blue-100"
+							class="inline-flex items-center justify-center rounded-lg border border-accent px-4 py-2 text-xs font-semibold text-accent transition hover:bg-accent-muted"
 						>
 							Create account
 						</a>
 					</div>
 				</div>
 			{:else if data.user.role !== 'INDIVIDUAL'}
-				<div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-					<p class="font-semibold text-red-800">Role not supported</p>
+				<div class="rounded-xl border border-error/50 bg-error-muted px-4 py-3 text-sm text-error">
+					<p class="font-semibold text-error">Role not supported</p>
 					<p>
-						This invitation links an individual account with a coach. You’re currently signed in as a
+						This invitation links an individual account with a coach. You're currently signed in as a
 						{data.user.role.toLowerCase()}. Please use an individual account.
 					</p>
 				</div>
 			{/if}
 
 			{#if form?.error}
-				<div class="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+				<div class="rounded-xl border border-error/50 bg-error-muted px-4 py-2 text-sm text-error">
 					{form.error}
 				</div>
 			{/if}
 
 			{#if form?.success}
-				<div class="space-y-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-					<p class="font-semibold text-emerald-800">You’re connected!</p>
+				<div class="space-y-2 rounded-xl border border-success/50 bg-success-muted px-4 py-3 text-sm text-success">
+					<p class="font-semibold text-success">You're connected!</p>
 					<p>
-						We’ve linked your account with {data.invite.coach.name}. Return to your
-						<a href="/individual" class="font-semibold text-emerald-900 underline"> dashboard</a> to keep going.
+						We've linked your account with {data.invite.coach.name}. Return to your
+						<a href="/individual" class="font-semibold text-success underline"> dashboard</a> to keep going.
 					</p>
 				</div>
 			{/if}
@@ -155,16 +155,16 @@
 					<input type="hidden" name="token" value={data.token} />
 					<button
 						type="submit"
-						class="inline-flex w-full items-center justify-center rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700"
+						class="inline-flex w-full items-center justify-center rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-hover"
 					>
 						Accept invitation
 					</button>
-					<p class="text-center text-xs text-slate-400">
+					<p class="text-center text-xs text-text-muted">
 						Need help? Reach out to {data.invite.coach.email}.
 					</p>
 				</form>
 			{:else if data.status === 'valid' && !form?.success}
-				<div class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">
+				<div class="rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-sm text-text-secondary">
 					{#if !data.user}
 						<p>
 							Please sign in first. Use the button in the top-right corner to log in with the email your coach invited.
@@ -179,4 +179,3 @@
 		</section>
 	{/if}
 </section>
-

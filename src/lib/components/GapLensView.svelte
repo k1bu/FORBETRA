@@ -102,6 +102,11 @@
 						display: false
 					},
 					tooltip: {
+						backgroundColor: '#1c1c20',
+						titleColor: '#f4f5f8',
+						bodyColor: '#a1a1aa',
+						borderColor: 'rgba(255,255,255,0.08)',
+						borderWidth: 1,
 						padding: 12,
 						titleFont: {
 							size: 14,
@@ -133,6 +138,7 @@
 						title: {
 							display: true,
 							text: 'Difference (Self - Stakeholders)',
+							color: '#a1a1aa',
 							font: {
 								size: 12,
 								weight: 600
@@ -141,6 +147,7 @@
 						min: -5,
 						max: 5,
 						ticks: {
+							color: '#a1a1aa',
 							stepSize: 1,
 							font: {
 								size: 11
@@ -153,25 +160,27 @@
 							}
 						},
 						grid: {
-							color: 'rgba(0, 0, 0, 0.05)'
+							color: 'rgba(255, 255, 255, 0.06)'
 						}
 					},
 					x: {
 						title: {
 							display: true,
 							text: 'Week',
+							color: '#a1a1aa',
 							font: {
 								size: 12,
 								weight: 600
 							}
 						},
 						ticks: {
+							color: '#a1a1aa',
 							font: {
 								size: 11
 							}
 						},
 						grid: {
-							color: 'rgba(0, 0, 0, 0.05)'
+							color: 'rgba(255, 255, 255, 0.06)'
 						}
 					}
 				}
@@ -223,6 +232,11 @@
 						display: false
 					},
 					tooltip: {
+						backgroundColor: '#1c1c20',
+						titleColor: '#f4f5f8',
+						bodyColor: '#a1a1aa',
+						borderColor: 'rgba(255,255,255,0.08)',
+						borderWidth: 1,
 						padding: 12,
 						titleFont: {
 							size: 14,
@@ -254,6 +268,7 @@
 						title: {
 							display: true,
 							text: 'Difference (Self - Stakeholders)',
+							color: '#a1a1aa',
 							font: {
 								size: 12,
 								weight: 600
@@ -262,6 +277,7 @@
 						min: -5,
 						max: 5,
 						ticks: {
+							color: '#a1a1aa',
 							stepSize: 1,
 							font: {
 								size: 11
@@ -274,25 +290,27 @@
 							}
 						},
 						grid: {
-							color: 'rgba(0, 0, 0, 0.05)'
+							color: 'rgba(255, 255, 255, 0.06)'
 						}
 					},
 					x: {
 						title: {
 							display: true,
 							text: 'Week',
+							color: '#a1a1aa',
 							font: {
 								size: 12,
 								weight: 600
 							}
 						},
 						ticks: {
+							color: '#a1a1aa',
 							font: {
 								size: 11
 							}
 						},
 						grid: {
-							color: 'rgba(0, 0, 0, 0.05)'
+							color: 'rgba(255, 255, 255, 0.06)'
 						}
 					}
 				}
@@ -307,7 +325,7 @@
 	// Initialize charts when canvas elements are ready
 	$effect(() => {
 		if (!isMounted) return;
-		
+
 		// Initialize effort chart
 		if (showEffort && !effortChartInstance && effortChartCanvas && effortChartConfig) {
 			const ctx = effortChartCanvas.getContext('2d');
@@ -328,15 +346,15 @@
 	// Update effort chart when data changes - only after mount
 	$effect(() => {
 		if (!isMounted) return;
-		
+
 		// Access reactive dependencies to track them
 		const effortGapsData = activeEffortGaps;
 		const showEff = showEffort;
 		const selectedStk = selectedStakeholderId;
-		
+
 		const config = effortChartConfig;
 		const instance = effortChartInstance;
-		
+
 		if (instance && config && showEff) {
 			instance.data.labels = config.data.labels;
 			instance.data.datasets = config.data.datasets;
@@ -347,15 +365,15 @@
 	// Update performance chart when data changes - only after mount
 	$effect(() => {
 		if (!isMounted) return;
-		
+
 		// Access reactive dependencies to track them
 		const perfGapsData = activePerformanceGaps;
 		const showPerf = showPerformance;
 		const selectedStk = selectedStakeholderId;
-		
+
 		const config = performanceChartConfig;
 		const instance = performanceChartInstance;
-		
+
 		if (instance && config && showPerf) {
 			instance.data.labels = config.data.labels;
 			instance.data.datasets = config.data.datasets;
@@ -411,39 +429,39 @@
 
 <div class="space-y-4">
 	<div>
-		<h2 class="text-xl font-bold text-neutral-900">Gap Lens</h2>
-		<p class="mt-1 text-sm text-neutral-600">
+		<h2 class="text-xl font-bold text-text-primary">Gap Lens</h2>
+		<p class="mt-1 text-sm text-text-secondary">
 			See the difference between your self-assessment and stakeholder observations. Positive values mean you see yourself higher; negative means stakeholders see you higher. Reveals blind spots.
 		</p>
 	</div>
 
 	<!-- Controls -->
 	<div class="space-y-4">
-		<div class="flex flex-wrap items-center gap-4 rounded-xl border-2 border-neutral-200 bg-white p-4">
-			<span class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Show:</span>
+		<div class="flex flex-wrap items-center gap-4 rounded-xl border border-border-default bg-surface-raised p-4">
+			<span class="text-xs font-semibold uppercase tracking-wide text-text-tertiary">Show:</span>
 			<div class="flex items-center gap-3">
 				<label class="flex items-center gap-2">
 					<input
 						type="checkbox"
 						bind:checked={showEffort}
-						class="h-4 w-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500"
+						class="h-4 w-4 rounded border-border-strong text-accent focus:ring-accent"
 					/>
-					<span class="text-sm font-semibold text-neutral-700">Effort Gap</span>
+					<span class="text-sm font-semibold text-text-secondary">Effort Gap</span>
 				</label>
 				<label class="flex items-center gap-2">
 					<input
 						type="checkbox"
 						bind:checked={showPerformance}
-						class="h-4 w-4 rounded border-neutral-300 text-purple-600 focus:ring-purple-500"
+						class="h-4 w-4 rounded border-border-strong text-accent focus:ring-accent"
 					/>
-					<span class="text-sm font-semibold text-neutral-700">Performance Gap</span>
+					<span class="text-sm font-semibold text-text-secondary">Performance Gap</span>
 				</label>
 			</div>
 		</div>
 
 		{#if stakeholders.length > 0}
-			<div class="flex flex-wrap items-center gap-4 rounded-xl border-2 border-neutral-200 bg-white p-4">
-				<span class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Filter Stakeholder:</span>
+			<div class="flex flex-wrap items-center gap-4 rounded-xl border border-border-default bg-surface-raised p-4">
+				<span class="text-xs font-semibold uppercase tracking-wide text-text-tertiary">Filter Stakeholder:</span>
 				<div class="flex flex-wrap items-center gap-2">
 					<label class="flex cursor-pointer items-center gap-2">
 						<input
@@ -451,9 +469,9 @@
 							name="stakeholder-filter"
 							checked={selectedStakeholderId === null}
 							onchange={() => (selectedStakeholderId = null)}
-							class="h-4 w-4 border-neutral-300 text-blue-600 focus:ring-blue-500"
+							class="h-4 w-4 border-border-strong text-accent focus:ring-accent"
 						/>
-						<span class="text-sm font-medium text-neutral-700">All Stakeholders</span>
+						<span class="text-sm font-medium text-text-secondary">All Stakeholders</span>
 					</label>
 					{#each stakeholders as stakeholder (stakeholder.id)}
 						<label class="flex cursor-pointer items-center gap-2">
@@ -462,9 +480,9 @@
 								name="stakeholder-filter"
 								checked={selectedStakeholderId === stakeholder.id}
 								onchange={() => (selectedStakeholderId = stakeholder.id)}
-								class="h-4 w-4 border-neutral-300 text-blue-600 focus:ring-blue-500"
+								class="h-4 w-4 border-border-strong text-accent focus:ring-accent"
 							/>
-							<span class="text-sm font-medium text-neutral-700">{stakeholder.name}</span>
+							<span class="text-sm font-medium text-text-secondary">{stakeholder.name}</span>
 						</label>
 					{/each}
 				</div>
@@ -474,16 +492,16 @@
 
 	<!-- Current Gap Indicators -->
 	{#if currentEffortGap !== null || currentPerformanceGap !== null}
-		<div class="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
+		<div class="rounded-lg border border-border-default bg-surface-raised p-4">
 			<div class="flex gap-6">
 				{#if currentEffortGap !== null}
 					<div class="flex-1">
-						<div class="text-xs font-semibold text-neutral-500 uppercase tracking-wide">Current Effort Gap</div>
+						<div class="text-xs font-semibold text-text-tertiary uppercase tracking-wide">Current Effort Gap</div>
 						<div class="mt-1 flex items-baseline gap-2">
-							<span class="text-2xl font-bold text-neutral-900">
+							<span class="text-2xl font-bold text-text-primary">
 								{currentEffortGap > 0 ? '+' : ''}{currentEffortGap.toFixed(1)}
 							</span>
-							<span class="text-sm font-medium text-neutral-600">
+							<span class="text-sm font-medium text-text-secondary">
 								{currentEffortGap > 0
 									? '(You see higher)'
 									: currentEffortGap < 0
@@ -494,13 +512,13 @@
 					</div>
 				{/if}
 				{#if currentPerformanceGap !== null}
-					<div class="flex-1 {currentEffortGap !== null ? 'border-l border-neutral-300 pl-6' : ''}">
-						<div class="text-xs font-semibold text-neutral-500 uppercase tracking-wide">Current Performance Gap</div>
+					<div class="flex-1 {currentEffortGap !== null ? 'border-l border-border-strong pl-6' : ''}">
+						<div class="text-xs font-semibold text-text-tertiary uppercase tracking-wide">Current Performance Gap</div>
 						<div class="mt-1 flex items-baseline gap-2">
-							<span class="text-2xl font-bold text-neutral-900">
+							<span class="text-2xl font-bold text-text-primary">
 								{currentPerformanceGap > 0 ? '+' : ''}{currentPerformanceGap.toFixed(1)}
 							</span>
-							<span class="text-sm font-medium text-neutral-600">
+							<span class="text-sm font-medium text-text-secondary">
 								{currentPerformanceGap > 0
 									? '(You see higher)'
 									: currentPerformanceGap < 0
@@ -511,8 +529,8 @@
 					</div>
 				{/if}
 			</div>
-			<div class="mt-3 border-t border-neutral-200 pt-3">
-				<p class="text-xs text-neutral-600">
+			<div class="mt-3 border-t border-border-default pt-3">
+				<p class="text-xs text-text-secondary">
 					<strong>What this means:</strong> Gap shows the difference between your self-assessment and stakeholder observations.
 					Positive values mean you rate yourself higher than stakeholders see you. Negative values mean stakeholders see you higher than you see yourself.
 					Values closer to zero indicate better alignment. Large gaps reveal potential blind spots in self-awareness.
@@ -522,21 +540,21 @@
 	{/if}
 
 	<!-- Custom Legend/Key -->
-	<div class="rounded-lg border border-neutral-200 bg-white p-4">
-		<div class="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-500">Gap Lines</div>
+	<div class="rounded-lg border border-border-default bg-surface-raised p-4">
+		<div class="mb-2 text-xs font-semibold uppercase tracking-wide text-text-tertiary">Gap Lines</div>
 		<div class="flex flex-wrap gap-6">
 			{#if showEffort}
 				<div class="flex items-center gap-2">
-					<div class="h-1 w-8 rounded-full bg-amber-600"></div>
-					<span class="text-sm font-medium text-neutral-700">
+					<div class="h-1 w-8 rounded-full bg-cyan-500"></div>
+					<span class="text-sm font-medium text-text-secondary">
 						Effort Gap {selectedStakeholderId === null ? '(Self - Stakeholders)' : `(Self - ${selectedStakeholderName})`}
 					</span>
 				</div>
 			{/if}
 			{#if showPerformance}
 				<div class="flex items-center gap-2">
-					<div class="h-1 w-8 rounded-full bg-indigo-600"></div>
-					<span class="text-sm font-medium text-neutral-700">
+					<div class="h-1 w-8 rounded-full bg-amber-500"></div>
+					<span class="text-sm font-medium text-text-secondary">
 						Performance Gap {selectedStakeholderId === null ? '(Self - Stakeholders)' : `(Self - ${selectedStakeholderName})`}
 					</span>
 				</div>
@@ -547,18 +565,18 @@
 	<!-- Charts -->
 	<div class="grid gap-6 md:grid-cols-2">
 		{#if showEffort}
-			<div class="rounded-xl border-2 border-neutral-200 bg-white p-6">
-				<h3 class="mb-4 text-lg font-semibold text-neutral-900">Effort Gap</h3>
+			<div class="rounded-xl border border-border-default bg-surface-raised p-6">
+				<h3 class="mb-4 text-lg font-semibold text-text-primary">Effort Gap</h3>
 				<div class="h-[350px] w-full">
 					{#if activeEffortGaps.length >= 2}
 						<canvas bind:this={effortChartCanvas}></canvas>
 					{:else if activeEffortGaps.length === 1}
-						<div class="flex h-full flex-col items-center justify-center gap-2 text-neutral-500">
+						<div class="flex h-full flex-col items-center justify-center gap-2 text-text-tertiary">
 							<p class="text-sm font-medium">Gap analysis requires stakeholder feedback from at least 2 weeks.</p>
 							<p class="text-xs">You have 1 week so far. Keep going!</p>
 						</div>
 					{:else}
-						<div class="flex h-full items-center justify-center text-neutral-500">
+						<div class="flex h-full items-center justify-center text-text-tertiary">
 							<p class="text-sm">Not enough data to display effort gap.</p>
 						</div>
 					{/if}
@@ -567,18 +585,18 @@
 		{/if}
 
 		{#if showPerformance}
-			<div class="rounded-xl border-2 border-neutral-200 bg-white p-6">
-				<h3 class="mb-4 text-lg font-semibold text-neutral-900">Performance Gap</h3>
+			<div class="rounded-xl border border-border-default bg-surface-raised p-6">
+				<h3 class="mb-4 text-lg font-semibold text-text-primary">Performance Gap</h3>
 				<div class="h-[350px] w-full">
 					{#if activePerformanceGaps.length >= 2}
 						<canvas bind:this={performanceChartCanvas}></canvas>
 					{:else if activePerformanceGaps.length === 1}
-						<div class="flex h-full flex-col items-center justify-center gap-2 text-neutral-500">
+						<div class="flex h-full flex-col items-center justify-center gap-2 text-text-tertiary">
 							<p class="text-sm font-medium">Gap analysis requires stakeholder feedback from at least 2 weeks.</p>
 							<p class="text-xs">You have 1 week so far. Keep going!</p>
 						</div>
 					{:else}
-						<div class="flex h-full items-center justify-center text-neutral-500">
+						<div class="flex h-full items-center justify-center text-text-tertiary">
 							<p class="text-sm">Not enough data to display performance gap.</p>
 						</div>
 					{/if}
@@ -588,11 +606,10 @@
 	</div>
 
 	{#if (!showEffort && !showPerformance) || (activeEffortGaps.length === 0 && activePerformanceGaps.length === 0)}
-		<div class="rounded-xl border-2 border-neutral-200 bg-white p-6">
-			<div class="flex h-[200px] items-center justify-center text-neutral-500">
+		<div class="rounded-xl border border-border-default bg-surface-raised p-6">
+			<div class="flex h-[200px] items-center justify-center text-text-tertiary">
 				<p>Select at least one metric to view the gap analysis, or complete more check-ins and stakeholder feedback to see data.</p>
 			</div>
 		</div>
 	{/if}
 </div>
-

@@ -394,15 +394,15 @@
 	})();
 </script>
 
-<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50">
+<div class="min-h-screen bg-surface-base">
 	{#if draftRestored}
-		<div class="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-800 shadow-lg transition-opacity">
+		<div class="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-lg border border-success/30 bg-success-muted px-4 py-2 text-sm font-medium text-success transition-opacity">
 			Draft restored
 		</div>
 	{/if}
 	{#if isPrePopulated}
 		<div class="mx-auto max-w-5xl pt-4 px-4">
-			<div class="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+			<div class="rounded-xl border border-accent/30 bg-accent-muted px-4 py-3 text-sm text-accent">
 				<p class="font-medium">Your coach has pre-filled some details. Feel free to adjust anything below.</p>
 			</div>
 		</div>
@@ -411,13 +411,13 @@
 		<!-- Progress Bar -->
 		{#if currentStep !== 'welcome'}
 			<div class="mb-8">
-				<div class="mb-3 flex items-center justify-between text-sm text-slate-600">
+				<div class="mb-3 flex items-center justify-between text-sm text-text-secondary">
 					<span class="font-medium">Step {allSteps.indexOf(currentStep) + 1} of {allSteps.length}</span>
-					<span class="text-slate-400">{Math.round(stepProgress)}% complete</span>
+					<span class="text-text-muted">{Math.round(stepProgress)}% complete</span>
 				</div>
-				<div class="h-2 overflow-hidden rounded-full bg-slate-200">
+				<div class="h-2 overflow-hidden rounded-full bg-surface-subtle">
 					<div
-						class="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-500 ease-out"
+						class="h-full rounded-full bg-accent transition-all duration-500 ease-out"
 						style="width: {stepProgress}%"
 					></div>
 				</div>
@@ -429,54 +429,54 @@
 			<div class="animate-in fade-in slide-in-from-bottom-4 duration-500">
 				<div class="mx-auto max-w-4xl text-center space-y-8 py-8">
 					<div class="space-y-3">
-						<h1 class="text-4xl md:text-5xl font-bold tracking-tight text-slate-900">
-							Welcome{data.user.name ? `, ${data.user.name}` : ''}! 👋
+						<h1 class="text-4xl md:text-5xl font-bold tracking-tight text-text-primary">
+							Welcome{data.user.name ? `, ${data.user.name}` : ''}!
 						</h1>
-						<p class="text-lg md:text-xl text-slate-600 leading-relaxed max-w-2xl mx-auto">
+						<p class="text-lg md:text-xl text-text-secondary leading-relaxed max-w-2xl mx-auto">
 							Let's set up your first growth cycle. We'll help you define clear objectives, break them into
 							observable behaviors, and gather feedback from people who see you in action.
 						</p>
 					</div>
 
-					<div class="mx-auto max-w-4xl rounded-xl border border-slate-200 bg-white p-6 md:p-8 shadow-lg">
-						<h2 class="mb-4 text-base font-semibold text-slate-700 uppercase tracking-wide">Here's how it works</h2>
+					<div class="mx-auto max-w-4xl rounded-xl border border-border-default bg-surface-raised p-6 md:p-8">
+						<h2 class="mb-4 text-base font-semibold text-text-secondary uppercase tracking-wide">Here's how it works</h2>
 						<div class="grid gap-6 text-left md:grid-cols-3">
 							<div class="group space-y-3">
 								<div class="flex items-center gap-3">
 									<div
-										class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-lg font-bold text-blue-600 transition-transform group-hover:scale-110"
+										class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent-muted text-lg font-bold text-accent transition-transform group-hover:scale-110"
 									>
 										1
 									</div>
-									<h3 class="font-semibold text-slate-900 text-sm md:text-base">Pick your focus</h3>
+									<h3 class="font-semibold text-text-primary text-sm md:text-base">Pick your focus</h3>
 								</div>
-								<p class="text-xs md:text-sm text-slate-600 leading-relaxed pl-[52px]">
+								<p class="text-xs md:text-sm text-text-secondary leading-relaxed pl-[52px]">
 									Choose what you want to develop — from curated templates or your own custom objective.
 								</p>
 							</div>
 							<div class="group space-y-3">
 								<div class="flex items-center gap-3">
 									<div
-										class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-lg font-bold text-indigo-600 transition-transform group-hover:scale-110"
+										class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent-muted text-lg font-bold text-accent transition-transform group-hover:scale-110"
 									>
 										2
 									</div>
-									<h3 class="font-semibold text-slate-900 text-sm md:text-base">Define success</h3>
+									<h3 class="font-semibold text-text-primary text-sm md:text-base">Define success</h3>
 								</div>
-								<p class="text-xs md:text-sm text-slate-600 leading-relaxed pl-[52px]">
+								<p class="text-xs md:text-sm text-text-secondary leading-relaxed pl-[52px]">
 									Break it into 3 behaviors others can observe — the clearer, the better.
 								</p>
 							</div>
 							<div class="group space-y-3">
 								<div class="flex items-center gap-3">
 									<div
-										class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-100 text-lg font-bold text-purple-600 transition-transform group-hover:scale-110"
+										class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent-muted text-lg font-bold text-accent transition-transform group-hover:scale-110"
 									>
 										3
 									</div>
-									<h3 class="font-semibold text-slate-900 text-sm md:text-base">Set the rhythm</h3>
+									<h3 class="font-semibold text-text-primary text-sm md:text-base">Set the rhythm</h3>
 								</div>
-								<p class="text-xs md:text-sm text-slate-600 leading-relaxed pl-[52px]">
+								<p class="text-xs md:text-sm text-text-secondary leading-relaxed pl-[52px]">
 									Choose your timeline and invite the people who'll give you honest feedback.
 								</p>
 							</div>
@@ -486,7 +486,7 @@
 					<button
 						type="button"
 						onclick={() => goToStep('objective')}
-						class="group mx-auto inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-3.5 text-base md:text-lg font-semibold text-white shadow-lg shadow-blue-500/25 transition-all hover:scale-105 hover:shadow-xl hover:shadow-blue-500/30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+						class="group mx-auto inline-flex items-center gap-2 rounded-xl bg-accent px-8 py-3.5 text-base md:text-lg font-semibold text-white transition-all hover:bg-accent-hover focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
 					>
 						Get Started
 						<svg
@@ -513,7 +513,7 @@
 			<form method="post" class="space-y-8">
 				<!-- General form errors -->
 				{#if getError('_general')}
-					<div class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+					<div class="rounded-xl border border-error/30 bg-error-muted p-4 text-sm text-error">
 						<p class="font-medium">{getError('_general')}</p>
 					</div>
 				{/if}
@@ -543,10 +543,10 @@
 				<!-- Objective Step -->
 				{#if currentStep === 'objective'}
 					<div class="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-						<div class="rounded-2xl border border-slate-200 bg-white p-8 shadow-lg">
+						<div class="rounded-2xl border border-border-default bg-surface-raised p-8">
 							<div class="mb-6 space-y-2">
-								<h2 class="text-3xl font-bold text-slate-900">What do you want to develop?</h2>
-								<p class="text-slate-600">
+								<h2 class="text-3xl font-bold text-text-primary">What do you want to develop?</h2>
+								<p class="text-text-secondary">
 									Start with a clear objective that matters to you right now. Choose from our curated
 									templates or create your own.
 								</p>
@@ -555,13 +555,13 @@
 							<div class="space-y-6">
 								<div class="space-y-2">
 									<label
-										class="flex items-center gap-2 text-sm font-semibold text-slate-700"
+										class="flex items-center gap-2 text-sm font-semibold text-text-secondary"
 										for="objectiveTitle"
 									>
 										<span>Objective Title</span>
 										{#if objectiveTitle.trim().length > 0}
 											<span
-												class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-green-100 text-xs text-green-600"
+												class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-success-muted text-xs text-success"
 												title="Great! You've added a title"
 											>
 												✓
@@ -574,29 +574,29 @@
 										type="text"
 										required
 										placeholder="e.g., Enhance strategic thinking"
-										class="w-full rounded-xl border-2 px-4 py-3 text-slate-900 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 {getClientError('objectiveTitle') ? 'border-red-400' : 'border-slate-300'}"
+										class="w-full rounded-xl border px-4 py-3 text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10 {getClientError('objectiveTitle') ? 'border-error' : 'border-border-default bg-surface-raised'}"
 										value={objectiveTitle}
 										oninput={(event) => { objectiveTitle = event.currentTarget.value; if (getClientError('objectiveTitle')) validateField('objectiveTitle'); }}
 										onblur={() => validateField('objectiveTitle')}
 									/>
 									{#if getClientError('objectiveTitle')}
-										<p class="text-sm text-red-600">{getClientError('objectiveTitle')}</p>
+										<p class="text-sm text-error">{getClientError('objectiveTitle')}</p>
 									{:else if getError('objectiveTitle')}
-										<p class="text-sm text-red-600">{getError('objectiveTitle')}</p>
+										<p class="text-sm text-error">{getError('objectiveTitle')}</p>
 									{:else if objectiveTitle.trim().length > 0}
-										<p class="text-sm text-green-600">✓ Looks great!</p>
+										<p class="text-sm text-success">Looks great!</p>
 									{/if}
 								</div>
 
 								<div class="space-y-2">
 									<label
-										class="flex items-center gap-2 text-sm font-semibold text-slate-700"
+										class="flex items-center gap-2 text-sm font-semibold text-text-secondary"
 										for="objectiveDescription"
 									>
 										<span>Description</span>
 										{#if objectiveDescription.trim().length > 20}
 											<span
-												class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-green-100 text-xs text-green-600"
+												class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-success-muted text-xs text-success"
 												title="Excellent description"
 											>
 												✓
@@ -608,27 +608,27 @@
 										name="objectiveDescription"
 										rows="5"
 										placeholder="Describe what this objective means to you and why it matters right now..."
-										class="w-full rounded-xl border-2 border-slate-300 px-4 py-3 text-slate-900 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+										class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10"
 										bind:value={objectiveDescription}
 									></textarea>
 									{#if getError('objectiveDescription')}
-										<p class="text-sm text-red-600">{getError('objectiveDescription')}</p>
+										<p class="text-sm text-error">{getError('objectiveDescription')}</p>
 									{:else if objectiveDescription.trim().length > 20}
-										<p class="text-sm text-green-600">
-											✓ {objectiveDescription.trim().length} characters — well articulated!
+										<p class="text-sm text-success">
+											{objectiveDescription.trim().length} characters — well articulated!
 										</p>
 									{:else if objectiveDescription.trim().length > 0}
-										<p class="text-sm text-slate-500">
+										<p class="text-sm text-text-tertiary">
 											Add a bit more detail to help stakeholders understand your objective ({objectiveDescription.trim().length}/20+)
 										</p>
 									{/if}
 								</div>
 
 								<div
-									class="rounded-xl border border-blue-200 bg-blue-50/50 p-4 text-sm text-slate-700"
+									class="rounded-xl border border-accent/30 bg-accent-muted p-4 text-sm text-text-secondary"
 								>
-									<p class="font-medium text-blue-900">💡 Tip:</p>
-									<p class="mt-1 text-blue-800">
+									<p class="font-medium text-accent">Tip:</p>
+									<p class="mt-1 text-text-secondary">
 										Be specific about the impact you want. Instead of "be a better leader," try "communicate
 										decisions clearly and inspire my team to take ownership."
 									</p>
@@ -641,10 +641,10 @@
 				<!-- Subgoals Step -->
 				{#if currentStep === 'subgoals'}
 					<div class="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-						<div class="rounded-2xl border border-slate-200 bg-white p-8 shadow-lg">
+						<div class="rounded-2xl border border-border-default bg-surface-raised p-8">
 							<div class="mb-6 space-y-2">
-								<h2 class="text-3xl font-bold text-slate-900">Break it down into behaviors</h2>
-								<p class="text-slate-600">
+								<h2 class="text-3xl font-bold text-text-primary">Break it down into behaviors</h2>
+								<p class="text-text-secondary">
 									Define 3 observable subgoals that others can see and provide feedback on. Think: What
 									would someone notice if you were succeeding?
 								</p>
@@ -652,7 +652,7 @@
 
 							{#if getError('subgoals')}
 								<div
-									class="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+									class="mb-6 rounded-xl border border-error/30 bg-error-muted p-4 text-sm text-error"
 								>
 									<p class="font-medium">{getError('subgoals')}</p>
 								</div>
@@ -661,23 +661,23 @@
 							<div class="space-y-6">
 								{#each subgoalForms as subgoal, index}
 									<div
-										class="group relative rounded-xl border-2 p-6 transition-all {subgoal.label.trim().length > 0
-											? 'border-green-200 bg-green-50/30'
-											: 'border-slate-200 bg-slate-50/50'} hover:border-blue-300 hover:shadow-md"
+										class="group relative rounded-xl border p-6 transition-all {subgoal.label.trim().length > 0
+											? 'border-success/30 bg-success-muted/30'
+											: 'border-border-default bg-surface-subtle'} hover:border-accent/30"
 									>
 										<div class="mb-4 flex items-center justify-between">
 											<div class="flex items-center gap-3">
 												<div
 													class="flex h-8 w-8 items-center justify-center rounded-lg {subgoal.label.trim().length > 0
-														? 'bg-green-100 text-green-700'
-														: 'bg-slate-200 text-slate-500'} font-bold transition-colors"
+														? 'bg-success-muted text-success'
+														: 'bg-surface-subtle text-text-tertiary'} font-bold transition-colors"
 												>
 													{index + 1}
 												</div>
-												<h3 class="font-semibold text-slate-900">
+												<h3 class="font-semibold text-text-primary">
 													Subgoal {index + 1}
 													{#if subgoal.label.trim().length > 0}
-														<span class="ml-2 text-green-600">✓</span>
+														<span class="ml-2 text-success">✓</span>
 													{/if}
 												</h3>
 											</div>
@@ -686,7 +686,7 @@
 										<div class="space-y-4">
 											<div class="space-y-2">
 												<label
-													class="block text-sm font-medium text-slate-700"
+													class="block text-sm font-medium text-text-secondary"
 													for={`subgoalLabel${index + 1}`}
 												>
 													What behavior will you demonstrate?
@@ -697,19 +697,19 @@
 													type="text"
 													required={index === 0}
 													placeholder="e.g., Run structured strategic reviews"
-													class="w-full rounded-lg border-2 border-slate-300 px-4 py-3 text-slate-900 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+													class="w-full rounded-lg border border-border-default bg-surface-raised px-4 py-3 text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10"
 													value={subgoal.label}
 													oninput={(event) =>
 														updateSubgoalField(index, 'label', event.currentTarget.value)}
 												/>
 												{#if getError(`subgoals.${index}.label`)}
-													<p class="text-sm text-red-600">{getError(`subgoals.${index}.label`)}</p>
+													<p class="text-sm text-error">{getError(`subgoals.${index}.label`)}</p>
 												{/if}
 											</div>
 
 											<div class="space-y-2">
 												<label
-													class="block text-sm font-medium text-slate-700"
+													class="block text-sm font-medium text-text-secondary"
 													for={`subgoalDescription${index + 1}`}
 												>
 													How will someone know you're succeeding?
@@ -719,12 +719,12 @@
 													name={`subgoalDescription${index + 1}`}
 													rows="3"
 													placeholder="Describe what success looks like — make it observable and measurable..."
-													class="w-full rounded-lg border-2 border-slate-300 px-4 py-3 text-slate-900 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+													class="w-full rounded-lg border border-border-default bg-surface-raised px-4 py-3 text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10"
 													oninput={(event) =>
 														updateSubgoalField(index, 'description', event.currentTarget.value)}
 												>{subgoal.description}</textarea>
 												{#if getError(`subgoals.${index}.description`)}
-													<p class="text-sm text-red-600">
+													<p class="text-sm text-error">
 														{getError(`subgoals.${index}.description`)}
 													</p>
 												{/if}
@@ -734,10 +734,10 @@
 								{/each}
 
 								<div
-									class="rounded-xl border border-indigo-200 bg-indigo-50/50 p-4 text-sm text-slate-700"
+									class="rounded-xl border border-accent/30 bg-accent-muted p-4 text-sm text-text-secondary"
 								>
-									<p class="font-medium text-indigo-900">💡 Make it observable:</p>
-									<p class="mt-1 text-indigo-800">
+									<p class="font-medium text-accent">Make it observable:</p>
+									<p class="mt-1 text-text-secondary">
 										Good subgoals are things others can see or measure. Instead of "be more strategic," try
 										"document strategic implications before major decisions" — stakeholders can observe and
 										confirm this.
@@ -751,17 +751,17 @@
 				<!-- Cycle Planning Step -->
 				{#if currentStep === 'cycle'}
 					<div class="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-						<div class="rounded-2xl border border-slate-200 bg-white p-8 shadow-lg">
+						<div class="rounded-2xl border border-border-default bg-surface-raised p-8">
 							<div class="mb-6 space-y-2">
-								<h2 class="text-3xl font-bold text-slate-900">Set the rhythm</h2>
-								<p class="text-slate-600">
+								<h2 class="text-3xl font-bold text-text-primary">Set the rhythm</h2>
+								<p class="text-text-secondary">
 									Choose your timeline and how often you want to check in. We'll build a schedule around your preferences.
 								</p>
 							</div>
 
 							<div class="grid gap-6 md:grid-cols-2">
 								<div class="space-y-2">
-									<label class="block text-sm font-semibold text-slate-700" for="cycleLabel">
+									<label class="block text-sm font-semibold text-text-secondary" for="cycleLabel">
 										Cycle Name
 									</label>
 									<input
@@ -769,17 +769,17 @@
 										name="cycleLabel"
 										type="text"
 										placeholder="e.g. Q1 2026 Leadership Cycle"
-										class="w-full rounded-xl border-2 border-slate-300 px-4 py-3 text-slate-900 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+										class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10"
 										value={cycleLabel}
 										oninput={(event) => (cycleLabel = event.currentTarget.value)}
 									/>
 									{#if getError('cycleLabel')}
-										<p class="text-sm text-red-600">{getError('cycleLabel')}</p>
+										<p class="text-sm text-error">{getError('cycleLabel')}</p>
 									{/if}
 								</div>
 
 								<div class="space-y-2">
-									<label class="block text-sm font-semibold text-slate-700" for="cycleStartDate">
+									<label class="block text-sm font-semibold text-text-secondary" for="cycleStartDate">
 										Start Date
 									</label>
 									<input
@@ -787,47 +787,47 @@
 										name="cycleStartDate"
 										type="date"
 										required
-										class="w-full rounded-xl border-2 px-4 py-3 text-slate-900 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 {getClientError('cycleStartDate') ? 'border-red-400' : 'border-slate-300'}"
+										class="w-full rounded-xl border px-4 py-3 text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10 {getClientError('cycleStartDate') ? 'border-error' : 'border-border-default bg-surface-raised'}"
 										value={cycleStartDate}
 										oninput={(event) => { cycleStartDate = event.currentTarget.value; validateField('cycleStartDate'); }}
 										onblur={() => validateField('cycleStartDate')}
 									/>
 									{#if getClientError('cycleStartDate')}
-										<p class="text-sm text-red-600">{getClientError('cycleStartDate')}</p>
+										<p class="text-sm text-error">{getClientError('cycleStartDate')}</p>
 									{:else if getError('cycleStartDate')}
-										<p class="text-sm text-red-600">{getError('cycleStartDate')}</p>
+										<p class="text-sm text-error">{getError('cycleStartDate')}</p>
 									{/if}
 								</div>
 
 								<!-- Duration Selector: Preset Cards + Custom -->
 								<div class="space-y-3 md:col-span-2">
-									<label class="block text-sm font-semibold text-slate-700">Duration</label>
+									<label class="block text-sm font-semibold text-text-secondary">Duration</label>
 									<input type="hidden" name="cycleDurationWeeks" value={cycleDurationWeeks} />
 									<div class="grid grid-cols-4 gap-3">
 										{#each [8, 12, 16] as weeks}
 											<button
 												type="button"
 												onclick={() => selectPresetDuration(weeks)}
-												class="relative rounded-xl border-2 px-4 py-3 text-center transition-all {cycleDurationMode === 'preset' && cycleDurationWeeks === String(weeks)
-													? 'border-blue-500 bg-blue-50 shadow-md'
-													: 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50'}"
+												class="relative rounded-xl border px-4 py-3 text-center transition-all {cycleDurationMode === 'preset' && cycleDurationWeeks === String(weeks)
+													? 'border-accent bg-accent-muted'
+													: 'border-border-default bg-surface-raised hover:border-accent/30 hover:bg-surface-subtle'}"
 											>
-												<div class="text-lg font-bold text-slate-900">{weeks}</div>
-												<div class="text-xs text-slate-500">weeks</div>
+												<div class="text-lg font-bold text-text-primary">{weeks}</div>
+												<div class="text-xs text-text-tertiary">weeks</div>
 												{#if weeks === 12}
-													<div class="mt-1 text-[10px] font-semibold text-blue-600">recommended</div>
+													<div class="mt-1 text-[10px] font-semibold text-accent">recommended</div>
 												{/if}
 											</button>
 										{/each}
 										<button
 											type="button"
 											onclick={enableCustomDuration}
-											class="rounded-xl border-2 px-4 py-3 text-center transition-all {cycleDurationMode === 'custom'
-												? 'border-blue-500 bg-blue-50 shadow-md'
-												: 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50'}"
+											class="rounded-xl border px-4 py-3 text-center transition-all {cycleDurationMode === 'custom'
+												? 'border-accent bg-accent-muted'
+												: 'border-border-default bg-surface-raised hover:border-accent/30 hover:bg-surface-subtle'}"
 										>
-											<div class="text-lg font-bold text-slate-900">?</div>
-											<div class="text-xs text-slate-500">Custom</div>
+											<div class="text-lg font-bold text-text-primary">?</div>
+											<div class="text-xs text-text-tertiary">Custom</div>
 										</button>
 									</div>
 									{#if cycleDurationMode === 'custom'}
@@ -837,7 +837,7 @@
 												min="4"
 												max="26"
 												placeholder="4-26"
-												class="w-24 rounded-lg border-2 border-slate-300 px-3 py-2 text-center text-slate-900 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+												class="w-24 rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-center text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10"
 												value={customDurationWeeks}
 												oninput={(event) => {
 													customDurationWeeks = event.currentTarget.value;
@@ -847,28 +847,28 @@
 													}
 												}}
 											/>
-											<span class="text-sm text-slate-600">weeks (4-26)</span>
+											<span class="text-sm text-text-secondary">weeks (4-26)</span>
 										</div>
 									{/if}
 									{#if endDatePreview}
-										<p class="text-sm text-slate-500">
+										<p class="text-sm text-text-tertiary">
 											Your cycle will end on <strong>{endDatePreview}</strong>
 										</p>
 									{/if}
-									<p class="text-xs text-slate-400">{getDurationGuidance(cycleDurationNumber)}</p>
+									<p class="text-xs text-text-muted">{getDurationGuidance(cycleDurationNumber)}</p>
 									{#if getError('cycleDurationWeeks')}
-										<p class="text-sm text-red-600">{getError('cycleDurationWeeks')}</p>
+										<p class="text-sm text-error">{getError('cycleDurationWeeks')}</p>
 									{/if}
 								</div>
 
 								<!-- Check-in Frequency Selector -->
 								<div class="space-y-3 md:col-span-2">
-									<label class="block text-sm font-semibold text-slate-700">Check-in frequency</label>
+									<label class="block text-sm font-semibold text-text-secondary">Check-in frequency</label>
 									<div class="grid gap-3 md:grid-cols-3">
 										<label
-											class="group relative flex cursor-pointer rounded-xl border-2 p-4 transition-all {checkInFrequency === '3x'
-												? 'border-blue-500 bg-blue-50'
-												: 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50'}"
+											class="group relative flex cursor-pointer rounded-xl border p-4 transition-all {checkInFrequency === '3x'
+												? 'border-accent bg-accent-muted'
+												: 'border-border-default bg-surface-raised hover:border-accent/30 hover:bg-surface-subtle'}"
 										>
 											<input
 												type="radio"
@@ -881,24 +881,24 @@
 											<div class="flex w-full items-start gap-3">
 												<div
 													class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 {checkInFrequency === '3x'
-														? 'border-blue-500 bg-blue-500'
-														: 'border-slate-300 bg-white'}"
+														? 'border-accent bg-accent'
+														: 'border-border-strong bg-surface-raised'}"
 												>
 													{#if checkInFrequency === '3x'}
 														<div class="h-2 w-2 rounded-full bg-white"></div>
 													{/if}
 												</div>
 												<div class="flex-1">
-													<div class="font-semibold text-slate-900">3x/week</div>
-													<div class="text-xs text-slate-500">Monday intention, midweek effort, end-of-week performance</div>
-													<div class="mt-1 text-[10px] font-semibold text-blue-600">recommended</div>
+													<div class="font-semibold text-text-primary">3x/week</div>
+													<div class="text-xs text-text-tertiary">Monday intention, midweek effort, end-of-week performance</div>
+													<div class="mt-1 text-[10px] font-semibold text-accent">recommended</div>
 												</div>
 											</div>
 										</label>
 										<label
-											class="group relative flex cursor-pointer rounded-xl border-2 p-4 transition-all {checkInFrequency === '2x'
-												? 'border-blue-500 bg-blue-50'
-												: 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50'}"
+											class="group relative flex cursor-pointer rounded-xl border p-4 transition-all {checkInFrequency === '2x'
+												? 'border-accent bg-accent-muted'
+												: 'border-border-default bg-surface-raised hover:border-accent/30 hover:bg-surface-subtle'}"
 										>
 											<input
 												type="radio"
@@ -911,23 +911,23 @@
 											<div class="flex w-full items-start gap-3">
 												<div
 													class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 {checkInFrequency === '2x'
-														? 'border-blue-500 bg-blue-500'
-														: 'border-slate-300 bg-white'}"
+														? 'border-accent bg-accent'
+														: 'border-border-strong bg-surface-raised'}"
 												>
 													{#if checkInFrequency === '2x'}
 														<div class="h-2 w-2 rounded-full bg-white"></div>
 													{/if}
 												</div>
 												<div class="flex-1">
-													<div class="font-semibold text-slate-900">2x/week</div>
-													<div class="text-xs text-slate-500">Monday intention + end-of-week combined rating</div>
+													<div class="font-semibold text-text-primary">2x/week</div>
+													<div class="text-xs text-text-tertiary">Monday intention + end-of-week combined rating</div>
 												</div>
 											</div>
 										</label>
 										<label
-											class="group relative flex cursor-pointer rounded-xl border-2 p-4 transition-all {checkInFrequency === '1x'
-												? 'border-blue-500 bg-blue-50'
-												: 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50'}"
+											class="group relative flex cursor-pointer rounded-xl border p-4 transition-all {checkInFrequency === '1x'
+												? 'border-accent bg-accent-muted'
+												: 'border-border-default bg-surface-raised hover:border-accent/30 hover:bg-surface-subtle'}"
 										>
 											<input
 												type="radio"
@@ -940,30 +940,30 @@
 											<div class="flex w-full items-start gap-3">
 												<div
 													class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 {checkInFrequency === '1x'
-														? 'border-blue-500 bg-blue-500'
-														: 'border-slate-300 bg-white'}"
+														? 'border-accent bg-accent'
+														: 'border-border-strong bg-surface-raised'}"
 												>
 													{#if checkInFrequency === '1x'}
 														<div class="h-2 w-2 rounded-full bg-white"></div>
 													{/if}
 												</div>
 												<div class="flex-1">
-													<div class="font-semibold text-slate-900">1x/week</div>
-													<div class="text-xs text-slate-500">Single weekly reflection covering effort and performance</div>
+													<div class="font-semibold text-text-primary">1x/week</div>
+													<div class="text-xs text-text-tertiary">Single weekly reflection covering effort and performance</div>
 												</div>
 											</div>
 										</label>
 									</div>
 
 									<!-- Your Week Preview -->
-									<div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-										<p class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400">Your Week</p>
+									<div class="rounded-xl border border-border-default bg-surface-subtle p-4">
+										<p class="mb-3 text-xs font-semibold uppercase tracking-wider text-text-muted">Your Week</p>
 										<div class="space-y-2">
 											{#each weekPreviewDays as item}
-												<div class="flex items-center gap-3 rounded-lg bg-white px-3 py-2 text-sm">
-													<span class="w-10 shrink-0 font-semibold text-blue-700">{item.day}</span>
-													<span class="flex-1 text-slate-700">{item.label}</span>
-													<span class="text-xs text-slate-400">{item.time}</span>
+												<div class="flex items-center gap-3 rounded-lg bg-surface-raised px-3 py-2 text-sm">
+													<span class="w-10 shrink-0 font-semibold text-accent">{item.day}</span>
+													<span class="flex-1 text-text-secondary">{item.label}</span>
+													<span class="text-xs text-text-muted">{item.time}</span>
 												</div>
 											{/each}
 										</div>
@@ -972,17 +972,17 @@
 
 								<!-- Reminder Days Selector -->
 								<div class="space-y-2 md:col-span-2">
-									<label class="block text-sm font-semibold text-slate-700" for="reminderDays">
+									<label class="block text-sm font-semibold text-text-secondary" for="reminderDays">
 										Feedback Reminder Days
 									</label>
-									<p class="mb-3 text-sm text-slate-600">
+									<p class="mb-3 text-sm text-text-secondary">
 										Choose when you'd like to receive reminders to submit your reflections and when stakeholders will be prompted for feedback.
 									</p>
 									<div class="grid gap-4 md:grid-cols-2">
 										<label
-											class="group relative flex cursor-pointer rounded-xl border-2 p-4 transition-all {reminderDays === 'wednesday_friday'
-												? 'border-blue-500 bg-blue-50'
-												: 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50'}"
+											class="group relative flex cursor-pointer rounded-xl border p-4 transition-all {reminderDays === 'wednesday_friday'
+												? 'border-accent bg-accent-muted'
+												: 'border-border-default bg-surface-raised hover:border-accent/30 hover:bg-surface-subtle'}"
 										>
 											<input
 												type="radio"
@@ -995,23 +995,23 @@
 											<div class="flex w-full items-center gap-3">
 												<div
 													class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 {reminderDays === 'wednesday_friday'
-														? 'border-blue-500 bg-blue-500'
-														: 'border-slate-300 bg-white'}"
+														? 'border-accent bg-accent'
+														: 'border-border-strong bg-surface-raised'}"
 												>
 													{#if reminderDays === 'wednesday_friday'}
 														<div class="h-2 w-2 rounded-full bg-white"></div>
 													{/if}
 												</div>
 												<div class="flex-1">
-													<div class="font-semibold text-slate-900">Wednesday & Friday</div>
-													<div class="text-xs text-slate-600">Default option</div>
+													<div class="font-semibold text-text-primary">Wednesday & Friday</div>
+													<div class="text-xs text-text-secondary">Default option</div>
 												</div>
 											</div>
 										</label>
 										<label
-											class="group relative flex cursor-pointer rounded-xl border-2 p-4 transition-all {reminderDays === 'tuesday_thursday'
-												? 'border-blue-500 bg-blue-50'
-												: 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50'}"
+											class="group relative flex cursor-pointer rounded-xl border p-4 transition-all {reminderDays === 'tuesday_thursday'
+												? 'border-accent bg-accent-muted'
+												: 'border-border-default bg-surface-raised hover:border-accent/30 hover:bg-surface-subtle'}"
 										>
 											<input
 												type="radio"
@@ -1024,16 +1024,16 @@
 											<div class="flex w-full items-center gap-3">
 												<div
 													class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 {reminderDays === 'tuesday_thursday'
-														? 'border-blue-500 bg-blue-500'
-														: 'border-slate-300 bg-white'}"
+														? 'border-accent bg-accent'
+														: 'border-border-strong bg-surface-raised'}"
 												>
 													{#if reminderDays === 'tuesday_thursday'}
 														<div class="h-2 w-2 rounded-full bg-white"></div>
 													{/if}
 												</div>
 												<div class="flex-1">
-													<div class="font-semibold text-slate-900">Tuesday & Thursday</div>
-													<div class="text-xs text-slate-600">Alternative option</div>
+													<div class="font-semibold text-text-primary">Tuesday & Thursday</div>
+													<div class="text-xs text-text-secondary">Alternative option</div>
 												</div>
 											</div>
 										</label>
@@ -1041,11 +1041,11 @@
 								</div>
 
 								<!-- Phone for SMS reminders -->
-								<div class="mt-6 pt-6 border-t border-slate-200">
-									<label class="block text-sm font-semibold text-slate-700" for="phone">
-										Phone for SMS reminders <span class="font-normal text-slate-400">(optional)</span>
+								<div class="mt-6 pt-6 border-t border-border-default">
+									<label class="block text-sm font-semibold text-text-secondary" for="phone">
+										Phone for SMS reminders <span class="font-normal text-text-muted">(optional)</span>
 									</label>
-									<p class="mt-1 text-xs text-slate-500 mb-3">
+									<p class="mt-1 text-xs text-text-tertiary mb-3">
 										Get a quick text reminder when it's time for your check-in. We'll never share your number.
 									</p>
 									<input
@@ -1054,7 +1054,7 @@
 										name="phone"
 										bind:value={phone}
 										placeholder="+1 (555) 123-4567"
-										class="w-full rounded-xl border-2 border-slate-300 px-4 py-3 text-base text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all"
+										class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-base text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 transition-all"
 									/>
 								</div>
 							</div>
@@ -1065,19 +1065,19 @@
 				<!-- Stakeholders Step -->
 				{#if currentStep === 'stakeholders'}
 					<div class="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-						<div class="rounded-2xl border border-slate-200 bg-white p-8 shadow-lg">
+						<div class="rounded-2xl border border-border-default bg-surface-raised p-8">
 							<div class="mb-6 space-y-2">
-								<h2 class="text-3xl font-bold text-slate-900">Invite your stakeholders</h2>
-								<p class="text-slate-600">
+								<h2 class="text-3xl font-bold text-text-primary">Invite your stakeholders</h2>
+								<p class="text-text-secondary">
 									Add 3-5 people who regularly observe you in action. They'll provide feedback on your
 									progress throughout the cycle. This step is optional — you can add them later.
 								</p>
 							</div>
 
 							<!-- Stakeholder feedback context -->
-							<div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50/50 p-4 text-sm text-slate-700">
-								<p class="font-medium text-emerald-900">Why stakeholder feedback?</p>
-								<p class="mt-1 text-emerald-800">
+							<div class="mb-6 rounded-xl border border-success/30 bg-success-muted p-4 text-sm text-text-secondary">
+								<p class="font-medium text-success">Why stakeholder feedback?</p>
+								<p class="mt-1 text-text-secondary">
 									The people around you see things you can't. Their quick ratings (&lt; 60 sec) reveal blind spots and validate progress.
 								</p>
 							</div>
@@ -1089,23 +1089,23 @@
 										type="checkbox"
 										checked={revealScores}
 										onchange={() => (revealScores = !revealScores)}
-										class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+										class="h-4 w-4 rounded border-border-default text-accent focus:ring-accent"
 									/>
 									<div>
-										<span class="text-sm font-semibold text-slate-700">Allow stakeholders to see my self-scores after they submit feedback</span>
-										<p class="text-xs text-slate-500">When enabled, stakeholders see how you rated yourself so they can compare perspectives.</p>
+										<span class="text-sm font-semibold text-text-secondary">Allow stakeholders to see my self-scores after they submit feedback</span>
+										<p class="text-xs text-text-tertiary">When enabled, stakeholders see how you rated yourself so they can compare perspectives.</p>
 									</div>
 								</label>
 							</div>
 
 							<!-- Stakeholder Cadence Selector -->
 							<div class="mb-6 space-y-3">
-								<label class="block text-sm font-semibold text-slate-700">How often should stakeholders rate you?</label>
+								<label class="block text-sm font-semibold text-text-secondary">How often should stakeholders rate you?</label>
 								<div class="grid gap-3 md:grid-cols-2">
 									<label
-										class="group relative flex cursor-pointer rounded-xl border-2 p-4 transition-all {stakeholderCadence === 'weekly'
-											? 'border-blue-500 bg-blue-50'
-											: 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50'}"
+										class="group relative flex cursor-pointer rounded-xl border p-4 transition-all {stakeholderCadence === 'weekly'
+											? 'border-accent bg-accent-muted'
+											: 'border-border-default bg-surface-raised hover:border-accent/30 hover:bg-surface-subtle'}"
 									>
 										<input
 											type="radio"
@@ -1118,24 +1118,24 @@
 										<div class="flex w-full items-start gap-3">
 											<div
 												class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 {stakeholderCadence === 'weekly'
-													? 'border-blue-500 bg-blue-500'
-													: 'border-slate-300 bg-white'}"
+													? 'border-accent bg-accent'
+													: 'border-border-strong bg-surface-raised'}"
 											>
 												{#if stakeholderCadence === 'weekly'}
 													<div class="h-2 w-2 rounded-full bg-white"></div>
 												{/if}
 											</div>
 											<div class="flex-1">
-												<div class="font-semibold text-slate-900">Weekly</div>
-												<div class="text-xs text-slate-500">Stakeholders rate you every week — most data for insights</div>
-												<div class="mt-1 text-[10px] font-semibold text-blue-600">recommended</div>
+												<div class="font-semibold text-text-primary">Weekly</div>
+												<div class="text-xs text-text-tertiary">Stakeholders rate you every week — most data for insights</div>
+												<div class="mt-1 text-[10px] font-semibold text-accent">recommended</div>
 											</div>
 										</div>
 									</label>
 									<label
-										class="group relative flex cursor-pointer rounded-xl border-2 p-4 transition-all {stakeholderCadence === 'biweekly'
-											? 'border-blue-500 bg-blue-50'
-											: 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50'}"
+										class="group relative flex cursor-pointer rounded-xl border p-4 transition-all {stakeholderCadence === 'biweekly'
+											? 'border-accent bg-accent-muted'
+											: 'border-border-default bg-surface-raised hover:border-accent/30 hover:bg-surface-subtle'}"
 									>
 										<input
 											type="radio"
@@ -1148,16 +1148,16 @@
 										<div class="flex w-full items-start gap-3">
 											<div
 												class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 {stakeholderCadence === 'biweekly'
-													? 'border-blue-500 bg-blue-500'
-													: 'border-slate-300 bg-white'}"
+													? 'border-accent bg-accent'
+													: 'border-border-strong bg-surface-raised'}"
 											>
 												{#if stakeholderCadence === 'biweekly'}
 													<div class="h-2 w-2 rounded-full bg-white"></div>
 												{/if}
 											</div>
 											<div class="flex-1">
-												<div class="font-semibold text-slate-900">Biweekly</div>
-												<div class="text-xs text-slate-500">Every two weeks — less burden on stakeholders</div>
+												<div class="font-semibold text-text-primary">Biweekly</div>
+												<div class="text-xs text-text-tertiary">Every two weeks — less burden on stakeholders</div>
 											</div>
 										</div>
 									</label>
@@ -1166,14 +1166,14 @@
 
 							{#if getError('stakeholders')}
 								<div
-									class="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+									class="mb-6 rounded-xl border border-error/30 bg-error-muted p-4 text-sm text-error"
 								>
 									<p class="font-medium">{getError('stakeholders')}</p>
 								</div>
 							{/if}
 							{#if getError('_general')}
 								<div
-									class="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+									class="mb-6 rounded-xl border border-error/30 bg-error-muted p-4 text-sm text-error"
 								>
 									<p class="font-medium">{getError('_general')}</p>
 								</div>
@@ -1182,21 +1182,21 @@
 							<div class="space-y-5">
 								{#each stakeholderForms as stakeholder, index}
 									<div
-										class="group rounded-xl border-2 border-slate-200 bg-slate-50/50 p-6 transition-all hover:border-blue-300 hover:shadow-md"
+										class="group rounded-xl border border-border-default bg-surface-subtle p-6 transition-all hover:border-accent/30"
 									>
 										<div class="mb-4 flex items-center gap-3">
 											<div
-												class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-700 font-semibold"
+												class="flex h-8 w-8 items-center justify-center rounded-full bg-accent-muted text-accent font-semibold"
 											>
 												{index + 1}
 											</div>
-											<h3 class="font-semibold text-slate-900">Stakeholder {index + 1}</h3>
+											<h3 class="font-semibold text-text-primary">Stakeholder {index + 1}</h3>
 										</div>
 
 										<div class="grid gap-4 md:grid-cols-2">
 											<div class="space-y-2">
 												<label
-													class="block text-sm font-medium text-slate-700"
+													class="block text-sm font-medium text-text-secondary"
 													for={`stakeholderName${index + 1}`}
 												>
 													Name
@@ -1206,19 +1206,19 @@
 													name={`stakeholderName${index + 1}`}
 													type="text"
 													placeholder="John Smith"
-													class="w-full rounded-lg border-2 border-slate-300 px-4 py-2 text-slate-900 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+													class="w-full rounded-lg border border-border-default bg-surface-raised px-4 py-2 text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10"
 													value={stakeholder.name}
 													oninput={(event) =>
 														updateStakeholderField(index, 'name', event.currentTarget.value)}
 												/>
 												{#if getError(`stakeholders.${index}.name`)}
-													<p class="text-sm text-red-600">{getError(`stakeholders.${index}.name`)}</p>
+													<p class="text-sm text-error">{getError(`stakeholders.${index}.name`)}</p>
 												{/if}
 											</div>
 
 											<div class="space-y-2">
 												<label
-													class="block text-sm font-medium text-slate-700"
+													class="block text-sm font-medium text-text-secondary"
 													for={`stakeholderEmail${index + 1}`}
 												>
 													Email
@@ -1228,7 +1228,7 @@
 													name={`stakeholderEmail${index + 1}`}
 													type="email"
 													placeholder="john@example.com"
-													class="w-full rounded-lg border-2 px-4 py-2 text-slate-900 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 {getClientError(`stakeholderEmail${index + 1}`) ? 'border-red-400' : 'border-slate-300'}"
+													class="w-full rounded-lg border px-4 py-2 text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10 {getClientError(`stakeholderEmail${index + 1}`) ? 'border-error' : 'border-border-default bg-surface-raised'}"
 													value={stakeholder.email}
 													oninput={(event) => {
 														updateStakeholderField(index, 'email', event.currentTarget.value);
@@ -1237,15 +1237,15 @@
 													onblur={() => validateField(`stakeholderEmail${index + 1}`)}
 												/>
 												{#if getClientError(`stakeholderEmail${index + 1}`)}
-													<p class="text-sm text-red-600">{getClientError(`stakeholderEmail${index + 1}`)}</p>
+													<p class="text-sm text-error">{getClientError(`stakeholderEmail${index + 1}`)}</p>
 												{:else if getError(`stakeholders.${index}.email`)}
-													<p class="text-sm text-red-600">{getError(`stakeholders.${index}.email`)}</p>
+													<p class="text-sm text-error">{getError(`stakeholders.${index}.email`)}</p>
 												{/if}
 											</div>
 
 											<div class="space-y-2 md:col-span-2">
 												<label
-													class="block text-sm font-medium text-slate-700"
+													class="block text-sm font-medium text-text-secondary"
 													for={`stakeholderRelationship${index + 1}`}
 												>
 													Relationship
@@ -1255,7 +1255,7 @@
 													name={`stakeholderRelationship${index + 1}`}
 													type="text"
 													placeholder="e.g. direct manager, peer, direct report"
-													class="w-full rounded-lg border-2 border-slate-300 px-4 py-2 text-slate-900 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+													class="w-full rounded-lg border border-border-default bg-surface-raised px-4 py-2 text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10"
 													value={stakeholder.relationship}
 													oninput={(event) =>
 														updateStakeholderField(
@@ -1265,7 +1265,7 @@
 														)}
 												/>
 												{#if getError(`stakeholders.${index}.relationship`)}
-													<p class="text-sm text-red-600">
+													<p class="text-sm text-error">
 														{getError(`stakeholders.${index}.relationship`)}
 													</p>
 												{/if}
@@ -1278,7 +1278,7 @@
 									<button
 										type="button"
 										onclick={addStakeholderField}
-										class="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 transition-all hover:border-blue-400 hover:bg-blue-50"
+										class="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-border-strong bg-surface-subtle px-4 py-3 text-sm font-medium text-text-secondary transition-all hover:border-accent hover:bg-accent-muted"
 									>
 										<svg
 											class="h-5 w-5"
@@ -1298,10 +1298,10 @@
 								{/if}
 
 								<div
-									class="rounded-xl border border-purple-200 bg-purple-50/50 p-4 text-sm text-slate-700"
+									class="rounded-xl border border-accent/30 bg-accent-muted p-4 text-sm text-text-secondary"
 								>
-									<p class="font-medium text-purple-900">💡 Choosing stakeholders:</p>
-									<p class="mt-1 text-purple-800">
+									<p class="font-medium text-accent">Choosing stakeholders:</p>
+									<p class="mt-1 text-text-secondary">
 										Pick people who regularly see the behaviors you're working on. This could include your
 										manager, peers, direct reports, or mentors. They'll receive periodic requests for
 										feedback throughout your cycle.
@@ -1318,7 +1318,7 @@
 							type="button"
 							onclick={prevStep}
 							disabled={currentStep === 'objective'}
-							class="inline-flex items-center gap-2 rounded-xl border-2 border-slate-300 bg-white px-6 py-3 font-medium text-slate-700 transition-all disabled:cursor-not-allowed disabled:opacity-60 hover:border-slate-400 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+							class="inline-flex items-center gap-2 rounded-xl border border-border-default bg-surface-raised px-6 py-3 font-medium text-text-secondary transition-all disabled:cursor-not-allowed disabled:opacity-60 hover:border-border-strong hover:bg-surface-subtle focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
 						>
 							<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path
@@ -1334,7 +1334,7 @@
 						{#if currentStep === 'stakeholders'}
 							<button
 								type="submit"
-								class="group inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-3 font-semibold text-white shadow-lg shadow-blue-500/25 transition-all hover:scale-105 hover:shadow-xl hover:shadow-blue-500/30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+								class="group inline-flex items-center gap-2 rounded-xl bg-accent px-8 py-3 font-semibold text-white transition-all hover:bg-accent-hover focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
 							>
 								{isEditing ? 'Save Changes' : 'Complete Setup'}
 								<svg
@@ -1356,7 +1356,7 @@
 								type="button"
 								onclick={nextStep}
 								disabled={!canAdvance}
-								class="group inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-3 font-semibold text-white shadow-lg shadow-blue-500/25 transition-all disabled:cursor-not-allowed disabled:opacity-60 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+								class="group inline-flex items-center gap-2 rounded-xl bg-accent px-8 py-3 font-semibold text-white transition-all disabled:cursor-not-allowed disabled:opacity-60 hover:bg-accent-hover focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
 							>
 								Continue
 								<svg
@@ -1379,19 +1379,19 @@
 
 				<!-- Preloaded Objectives Sidebar -->
 				{#if currentStep === 'objective'}
-					<aside class="sticky top-8 h-fit space-y-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-lg">
+					<aside class="sticky top-8 h-fit space-y-6 rounded-2xl border border-border-default bg-surface-raised p-6">
 					<div class="space-y-4">
 						<div class="flex items-center justify-between">
-							<h2 class="text-xl font-bold text-slate-900">Browse Templates</h2>
+							<h2 class="text-xl font-bold text-text-primary">Browse Templates</h2>
 							<button
 								type="button"
 								onclick={startCustomBuild}
-								class="text-sm font-medium text-blue-600 underline-offset-4 hover:text-blue-700 hover:underline"
+								class="text-sm font-medium text-accent underline-offset-4 hover:text-accent-hover hover:underline"
 							>
 								Start from scratch
 							</button>
 						</div>
-						<p class="text-sm text-slate-600">
+						<p class="text-sm text-text-secondary">
 							Choose a context to explore curated objectives. Click "Use this objective" to automatically fill
 							the form, then customize it to match your goals.
 						</p>
@@ -1400,10 +1400,10 @@
 							{#each contexts as context}
 								<button
 									type="button"
-									class={`rounded-full border-2 px-4 py-2 text-sm font-semibold transition-all ${
+									class={`rounded-full border px-4 py-2 text-sm font-semibold transition-all ${
 										selectedContextId === context.id
-											? 'border-blue-500 bg-blue-500 text-white shadow-md'
-											: 'border-slate-300 bg-white text-slate-700 hover:border-blue-300 hover:bg-blue-50'
+											? 'border-accent bg-accent text-white'
+											: 'border-border-strong bg-surface-raised text-text-secondary hover:border-accent/30 hover:bg-accent-muted'
 									}`}
 									onclick={() => selectContext(context.id)}
 								>
@@ -1417,24 +1417,24 @@
 						<div class="space-y-4">
 							{#each selectedContext.objectives as objective}
 								<article
-									class={`group rounded-xl border-2 p-5 shadow-sm transition-all ${
+									class={`group rounded-xl border p-5 transition-all ${
 										appliedObjectiveId === objective.id
-											? 'border-green-500 bg-green-50 shadow-md'
-											: 'border-slate-200 bg-white hover:border-blue-300 hover:shadow-md'
+											? 'border-success/30 bg-success-muted'
+											: 'border-border-default bg-surface-raised hover:border-accent/30'
 									}`}
 								>
 									<div class="space-y-3">
 										<div class="space-y-2">
-											<h3 class="font-bold text-slate-900">{objective.title}</h3>
-											<p class="text-sm text-slate-600 leading-relaxed">{objective.description}</p>
+											<h3 class="font-bold text-text-primary">{objective.title}</h3>
+											<p class="text-sm text-text-secondary leading-relaxed">{objective.description}</p>
 										</div>
 										<div class="flex flex-wrap gap-2">
 											<button
 												type="button"
 												class={`rounded-lg px-4 py-2 text-sm font-semibold transition-all ${
 													appliedObjectiveId === objective.id
-														? 'bg-green-600 text-white'
-														: 'bg-blue-600 text-white hover:bg-blue-700'
+														? 'bg-success text-white'
+														: 'bg-accent text-white hover:bg-accent-hover'
 												}`}
 												onclick={() => selectedContext && applyObjective(selectedContext.id, objective)}
 											>
@@ -1442,7 +1442,7 @@
 											</button>
 											<button
 												type="button"
-												class="rounded-lg border-2 border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition-all hover:border-blue-400 hover:bg-blue-50"
+												class="rounded-lg border border-border-default bg-surface-raised px-4 py-2 text-sm font-semibold text-text-secondary transition-all hover:border-accent/30 hover:bg-accent-muted"
 												onclick={() => selectedContext && toggleObjective(selectedContext.id, objective.id)}
 											>
 												{expandedObjectiveId === objective.id ? 'Hide details' : 'View details'}
@@ -1451,12 +1451,12 @@
 									</div>
 
 									{#if expandedObjectiveId === objective.id}
-										<div class="mt-4 space-y-4 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4">
+										<div class="mt-4 space-y-4 rounded-lg border border-dashed border-border-strong bg-surface-subtle p-4">
 											<div>
-												<p class="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">
+												<p class="mb-2 text-xs font-bold uppercase tracking-wide text-text-tertiary">
 													Behavioral Subgoals
 												</p>
-												<p class="mb-3 text-xs text-slate-600">
+												<p class="mb-3 text-xs text-text-secondary">
 													Click any subgoal to add it to your form, then customize it to your needs.
 												</p>
 												<div class="space-y-2">
@@ -1464,23 +1464,23 @@
 														<button
 															type="button"
 															onclick={() => addSubgoalToForm(subgoal)}
-															class="group w-full rounded-lg border-2 border-slate-200 bg-white p-3 text-left transition-all hover:border-blue-400 hover:bg-blue-50 hover:shadow-sm"
+															class="group w-full rounded-lg border border-border-default bg-surface-raised p-3 text-left transition-all hover:border-accent/30 hover:bg-accent-muted"
 														>
-															<p class="font-semibold text-slate-900 group-hover:text-blue-700">
+															<p class="font-semibold text-text-primary group-hover:text-accent">
 																{subgoal.label}
 															</p>
-															<p class="mt-1 text-xs text-slate-600">{subgoal.description}</p>
+															<p class="mt-1 text-xs text-text-secondary">{subgoal.description}</p>
 														</button>
 													{/each}
 												</div>
 											</div>
-											<div class="rounded-lg border border-blue-200 bg-blue-50/50 p-3 text-xs">
-												<p class="font-semibold text-blue-900">Stakeholder Guidance</p>
-												<p class="mt-2 text-blue-800">{objective.stakeholderGuidance.whyItMatters}</p>
-												<p class="mt-2 text-blue-800">{objective.stakeholderGuidance.recommendedApproach}</p>
+											<div class="rounded-lg border border-accent/30 bg-accent-muted p-3 text-xs">
+												<p class="font-semibold text-accent">Stakeholder Guidance</p>
+												<p class="mt-2 text-text-secondary">{objective.stakeholderGuidance.whyItMatters}</p>
+												<p class="mt-2 text-text-secondary">{objective.stakeholderGuidance.recommendedApproach}</p>
 												<div class="mt-3 space-y-2">
-													<p class="font-semibold text-blue-900">Recommended roles:</p>
-													<ul class="list-disc space-y-1 pl-4 text-blue-800">
+													<p class="font-semibold text-accent">Recommended roles:</p>
+													<ul class="list-disc space-y-1 pl-4 text-text-secondary">
 														{#each objective.stakeholderGuidance.recommendedRoles as role}
 															<li>{role}</li>
 														{/each}

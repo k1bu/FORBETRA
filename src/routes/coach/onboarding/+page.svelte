@@ -51,7 +51,7 @@
 					? 'scale-110 bg-purple-600 shadow-md shadow-purple-300'
 					: i < currentStepIndex
 						? 'bg-purple-400 hover:bg-purple-500'
-						: 'bg-neutral-300'}"
+						: 'bg-surface-subtle'}"
 				aria-label="Step {i + 1}"
 			></button>
 		{/each}
@@ -64,22 +64,22 @@
 				<div class="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-blue-600 shadow-xl shadow-purple-200">
 					<span class="text-4xl">🧭</span>
 				</div>
-				<h1 class="text-4xl font-bold text-neutral-900">Welcome to Forbetra, {data.coach.name}</h1>
-				<p class="mx-auto max-w-lg text-lg text-neutral-600">
+				<h1 class="text-4xl font-bold text-text-primary">Welcome to Forbetra, {data.coach.name}</h1>
+				<p class="mx-auto max-w-lg text-lg text-text-secondary">
 					Your coaching hub for guiding individuals through structured development cycles.
 				</p>
 			</div>
 
 			<div class="mx-auto max-w-xl space-y-4">
-				<div class="rounded-2xl border-2 border-neutral-200 bg-gradient-to-br from-white to-purple-50/30 p-6 text-left shadow-sm">
-					<h3 class="mb-3 text-sm font-semibold uppercase tracking-wide text-purple-700">Your role</h3>
-					<p class="text-sm text-neutral-700 leading-relaxed">
+				<div class="rounded-2xl border border-border-default bg-surface-raised p-6 text-left">
+					<h3 class="mb-3 text-sm font-semibold uppercase tracking-wide text-accent">Your role</h3>
+					<p class="text-sm text-text-secondary leading-relaxed">
 						Guide individuals through development cycles, review their progress data, and provide targeted feedback that helps them grow.
 					</p>
 				</div>
-				<div class="rounded-2xl border-2 border-neutral-200 bg-gradient-to-br from-white to-blue-50/30 p-6 text-left shadow-sm">
-					<h3 class="mb-3 text-sm font-semibold uppercase tracking-wide text-blue-700">What you'll have access to</h3>
-					<ul class="space-y-2 text-sm text-neutral-700">
+				<div class="rounded-2xl border border-border-default bg-surface-raised p-6 text-left">
+					<h3 class="mb-3 text-sm font-semibold uppercase tracking-wide text-accent">What you'll have access to</h3>
+					<ul class="space-y-2 text-sm text-text-secondary">
 						<li class="flex items-start gap-2">
 							<span class="mt-0.5 text-blue-500">&#10003;</span>
 							Real-time tracking of client effort and performance
@@ -99,7 +99,7 @@
 			<button
 				type="button"
 				onclick={goNext}
-				class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 px-8 py-3.5 font-semibold text-white shadow-lg transition-all hover:from-purple-700 hover:to-blue-700 hover:shadow-xl hover:scale-105"
+				class="inline-flex items-center gap-2 rounded-xl bg-accent px-8 py-3.5 font-semibold text-white transition-all hover:bg-accent-hover"
 			>
 				See How It Works
 				<span>&#8594;</span>
@@ -111,8 +111,8 @@
 	{#if currentStep === 'how-it-works'}
 		<div class="w-full space-y-8 text-center">
 			<div class="space-y-3">
-				<h1 class="text-3xl font-bold text-neutral-900">How Forbetra Works</h1>
-				<p class="mx-auto max-w-md text-base text-neutral-600">
+				<h1 class="text-3xl font-bold text-text-primary">How Forbetra Works</h1>
+				<p class="mx-auto max-w-md text-base text-text-secondary">
 					A continuous cycle of reflection, feedback, and insight — powered by the people around your client.
 				</p>
 			</div>
@@ -125,16 +125,16 @@
 					{ num: 4, icon: '🤖', title: 'AI analyzes patterns', desc: 'Weekly synthesis, trend detection, and actionable coaching prep.' },
 					{ num: 5, icon: '🧭', title: 'You see everything', desc: 'Alerts, trends, stakeholder feedback, and AI insights — all in one dashboard.' }
 				] as card}
-					<div class="flex items-start gap-4 rounded-xl border-2 border-neutral-200 bg-white p-5 text-left shadow-sm transition-all hover:border-purple-200 hover:shadow-md">
-						<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-purple-100 to-blue-100 text-sm font-bold text-purple-700">
+					<div class="flex items-start gap-4 rounded-xl border border-border-default bg-surface-raised p-5 text-left transition-all hover:border-accent/30">
+						<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent-muted text-sm font-bold text-accent">
 							{card.num}
 						</div>
 						<div class="flex-1">
 							<div class="flex items-center gap-2">
 								<span class="text-lg">{card.icon}</span>
-								<h3 class="text-sm font-bold text-neutral-900">{card.title}</h3>
+								<h3 class="text-sm font-bold text-text-primary">{card.title}</h3>
 							</div>
-							<p class="mt-1 text-xs text-neutral-600 leading-relaxed">{card.desc}</p>
+							<p class="mt-1 text-xs text-text-secondary leading-relaxed">{card.desc}</p>
 						</div>
 					</div>
 				{/each}
@@ -144,14 +144,14 @@
 				<button
 					type="button"
 					onclick={goBack}
-					class="rounded-xl border-2 border-neutral-300 px-6 py-3 text-sm font-semibold text-neutral-700 transition-all hover:border-neutral-400 hover:bg-neutral-50"
+					class="rounded-xl border border-border-default px-6 py-3 text-sm font-semibold text-text-secondary transition-all hover:border-border-strong hover:bg-surface-subtle"
 				>
 					&#8592; Back
 				</button>
 				<button
 					type="button"
 					onclick={goNext}
-					class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 px-8 py-3.5 font-semibold text-white shadow-lg transition-all hover:from-purple-700 hover:to-blue-700 hover:shadow-xl hover:scale-105"
+					class="inline-flex items-center gap-2 rounded-xl bg-accent px-8 py-3.5 font-semibold text-white transition-all hover:bg-accent-hover"
 				>
 					Invite Your First Client
 					<span>&#8594;</span>
@@ -167,14 +167,14 @@
 				<div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-blue-600 shadow-lg shadow-purple-200">
 					<span class="text-3xl">✉️</span>
 				</div>
-				<h1 class="text-3xl font-bold text-neutral-900">Invite Your First Client</h1>
-				<p class="mx-auto max-w-md text-base text-neutral-600">
+				<h1 class="text-3xl font-bold text-text-primary">Invite Your First Client</h1>
+				<p class="mx-auto max-w-md text-base text-text-secondary">
 					Send an invitation to an individual you'd like to coach. They'll set up their own objective and stakeholders.
 				</p>
 			</div>
 
 			{#if form?.error}
-				<div class="mx-auto max-w-md rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+				<div class="mx-auto max-w-md rounded-xl border border-error/50 bg-error-muted p-4 text-sm text-error">
 					<p class="font-medium">{form.error}</p>
 				</div>
 			{/if}
@@ -192,8 +192,8 @@
 				class="mx-auto max-w-md space-y-5 text-left"
 			>
 				<div>
-					<label for="email" class="mb-1.5 block text-sm font-semibold text-neutral-800">
-						Email address <span class="text-red-500">*</span>
+					<label for="email" class="mb-1.5 block text-sm font-semibold text-text-primary">
+						Email address <span class="text-error">*</span>
 					</label>
 					<input
 						type="email"
@@ -202,13 +202,13 @@
 						bind:value={email}
 						required
 						placeholder="client@example.com"
-						class="w-full rounded-xl border-2 border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-700 placeholder:text-neutral-400 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200"
+						class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
 					/>
 				</div>
 
 				<div>
-					<label for="name" class="mb-1.5 block text-sm font-semibold text-neutral-800">
-						Name <span class="text-xs font-normal text-neutral-500">(optional)</span>
+					<label for="name" class="mb-1.5 block text-sm font-semibold text-text-primary">
+						Name <span class="text-xs font-normal text-text-tertiary">(optional)</span>
 					</label>
 					<input
 						type="text"
@@ -216,20 +216,20 @@
 						name="name"
 						bind:value={name}
 						placeholder="Their name"
-						class="w-full rounded-xl border-2 border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-700 placeholder:text-neutral-400 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200"
+						class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
 					/>
 				</div>
 
 				<div>
-					<label for="message" class="mb-1.5 block text-sm font-semibold text-neutral-800">
-						Personal message <span class="text-xs font-normal text-neutral-500">(optional)</span>
+					<label for="message" class="mb-1.5 block text-sm font-semibold text-text-primary">
+						Personal message <span class="text-xs font-normal text-text-tertiary">(optional)</span>
 					</label>
 					<textarea
 						id="message"
 						name="message"
 						bind:value={message}
 						rows="4"
-						class="w-full rounded-xl border-2 border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-700 placeholder:text-neutral-400 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200"
+						class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
 						placeholder="Add a personal note to your invitation..."
 					></textarea>
 				</div>
@@ -238,7 +238,7 @@
 					<button
 						type="submit"
 						disabled={isSubmitting || !email}
-						class="w-full rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 px-8 py-3.5 font-semibold text-white shadow-lg transition-all hover:from-purple-700 hover:to-blue-700 hover:shadow-xl hover:scale-105 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100"
+						class="w-full rounded-xl bg-accent px-8 py-3.5 font-semibold text-white transition-all hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
 					>
 						{#if isSubmitting}
 							<span class="inline-flex items-center gap-2">
@@ -256,7 +256,7 @@
 				<button
 					type="button"
 					onclick={goBack}
-					class="rounded-xl border-2 border-neutral-300 px-6 py-3 text-sm font-semibold text-neutral-700 transition-all hover:border-neutral-400 hover:bg-neutral-50"
+					class="rounded-xl border border-border-default px-6 py-3 text-sm font-semibold text-text-secondary transition-all hover:border-border-strong hover:bg-surface-subtle"
 				>
 					&#8592; Back
 				</button>
@@ -271,7 +271,7 @@
 				>
 					<button
 						type="submit"
-						class="text-sm font-medium text-neutral-500 underline decoration-neutral-400 underline-offset-4 transition-colors hover:text-neutral-700 hover:decoration-neutral-600"
+						class="text-sm font-medium text-text-tertiary underline decoration-text-muted underline-offset-4 transition-colors hover:text-text-secondary hover:decoration-text-tertiary"
 					>
 						Skip for now
 					</button>

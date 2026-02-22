@@ -1,6 +1,8 @@
 import prisma from '$lib/server/prisma';
 import { sendEmail } from '$lib/notifications/email';
 import { emailTemplates } from '$lib/notifications/emailTemplates';
+import { trySendSms } from '$lib/notifications/sms';
+import { smsTemplates } from '$lib/notifications/smsTemplates';
 import { computeWeekNumber } from '$lib/server/coachUtils';
 
 export const remindStakeholderFeedback = async () => {
@@ -79,5 +81,14 @@ export const remindStakeholderFeedback = async () => {
 				error
 			);
 		}
+
+		// Send SMS reminder to stakeholder
+		await trySendSms(
+			stakeholder.phone,
+			smsTemplates.reminderStakeholderFeedback({
+				individualName: stakeholder.individual.name || undefined,
+				feedbackLink
+			})
+		);
 	}
 };

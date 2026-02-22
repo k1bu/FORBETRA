@@ -5,6 +5,8 @@ import type { Actions, PageServerLoad } from './$types';
 import { randomBytes } from 'node:crypto';
 import { sendEmail } from '$lib/notifications/email';
 import { emailTemplates } from '$lib/notifications/emailTemplates';
+import { trySendSms } from '$lib/notifications/sms';
+import { smsTemplates } from '$lib/notifications/smsTemplates';
 import { Prisma } from '@prisma/client';
 import { stdDev, computeWeekNumber, getDateForWeekday, toIsoDate, weeksBetween, FEEDBACK_TOKEN_EXPIRY_DAYS } from '$lib/server/coachUtils';
 
@@ -948,6 +950,15 @@ export const actions: Actions = {
 			console.error('[email:error] Failed to send feedback invite', error);
 			// Don't fail the request if email fails
 		}
+
+		// Send feedback invite SMS to stakeholder
+		await trySendSms(
+			stakeholder.phone,
+			smsTemplates.feedbackInvite({
+				individualName: dbUser.name || undefined,
+				feedbackLink
+			})
+		);
 
 		return {
 			action: 'feedback',

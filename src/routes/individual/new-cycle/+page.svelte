@@ -62,34 +62,34 @@
 	})());
 </script>
 
-<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50">
+<div class="min-h-screen bg-surface-base">
 	<section class="mx-auto max-w-3xl space-y-8 pb-12 pt-8 px-4">
 		<!-- Header -->
 		<div class="space-y-2">
-			<a href="/individual" class="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 transition-colors">
+			<a href="/individual" class="inline-flex items-center gap-1 text-sm text-text-tertiary hover:text-text-secondary transition-colors">
 				<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
 				</svg>
 				Back to hub
 			</a>
-			<h1 class="text-3xl font-bold text-slate-900">Start a New Cycle</h1>
-			<p class="text-slate-600">Continue working on your objective with a fresh cycle and updated settings.</p>
+			<h1 class="text-3xl font-bold text-text-primary">Start a New Cycle</h1>
+			<p class="text-text-secondary">Continue working on your objective with a fresh cycle and updated settings.</p>
 		</div>
 
 		<!-- Objective Context (read-only) -->
-		<div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-			<p class="mb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400">Your Objective</p>
-			<h2 class="text-xl font-bold text-slate-900">{data.objective.title}</h2>
+		<div class="rounded-2xl border border-border-default bg-surface-raised p-6">
+			<p class="mb-1 text-[10px] font-semibold uppercase tracking-wider text-text-muted">Your Objective</p>
+			<h2 class="text-xl font-bold text-text-primary">{data.objective.title}</h2>
 			{#if data.objective.description}
-				<p class="mt-1 text-sm text-slate-600">{data.objective.description}</p>
+				<p class="mt-1 text-sm text-text-secondary">{data.objective.description}</p>
 			{/if}
 			{#if data.subgoals.length > 0}
 				<div class="mt-4">
-					<p class="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Sub-objectives</p>
+					<p class="mb-2 text-xs font-semibold uppercase tracking-wider text-text-muted">Sub-objectives</p>
 					<ul class="space-y-1">
 						{#each data.subgoals as subgoal}
-							<li class="flex items-start gap-2 text-sm text-slate-600">
-								<span class="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-400"></span>
+							<li class="flex items-start gap-2 text-sm text-text-secondary">
+								<span class="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-accent"></span>
 								{subgoal.label}
 							</li>
 						{/each}
@@ -97,7 +97,7 @@
 				</div>
 			{/if}
 			{#if data.lastCycle}
-				<div class="mt-4 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500">
+				<div class="mt-4 rounded-lg bg-surface-subtle px-3 py-2 text-xs text-text-tertiary">
 					Previous cycle: <strong>{data.lastCycle.label ?? 'Cycle'}</strong>
 				</div>
 			{/if}
@@ -105,7 +105,7 @@
 
 		<!-- Form errors -->
 		{#if form?.error}
-			<div class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+			<div class="rounded-xl border border-error/20 bg-error-muted p-4 text-sm text-error">
 				<p class="font-medium">{form.error}</p>
 			</div>
 		{/if}
@@ -118,35 +118,35 @@
 			<input type="hidden" name="cycleDurationWeeks" value={cycleDurationWeeks} />
 			<input type="hidden" name="revealScores" value={revealScores ? 'true' : 'false'} />
 
-			<div class="rounded-2xl border border-slate-200 bg-white p-8 shadow-lg space-y-6">
+			<div class="rounded-2xl border border-border-default bg-surface-raised p-8 space-y-6">
 				<div class="space-y-2">
-					<h2 class="text-2xl font-bold text-slate-900">Cycle Settings</h2>
-					<p class="text-slate-600">Configure your new cycle. Defaults are carried over from your last cycle.</p>
+					<h2 class="text-2xl font-bold text-text-primary">Cycle Settings</h2>
+					<p class="text-text-secondary">Configure your new cycle. Defaults are carried over from your last cycle.</p>
 				</div>
 
 				<div class="grid gap-6 md:grid-cols-2">
 					<div class="space-y-2">
-						<label class="block text-sm font-semibold text-slate-700" for="cycleLabel">Cycle Name</label>
+						<label class="block text-sm font-semibold text-text-secondary" for="cycleLabel">Cycle Name</label>
 						<input
 							id="cycleLabel"
 							name="cycleLabel"
 							type="text"
 							required
 							placeholder="e.g. Q2 2026 Leadership Cycle"
-							class="w-full rounded-xl border-2 border-slate-300 px-4 py-3 text-slate-900 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+							class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10"
 							value={cycleLabel}
 							oninput={(e) => (cycleLabel = e.currentTarget.value)}
 						/>
 					</div>
 
 					<div class="space-y-2">
-						<label class="block text-sm font-semibold text-slate-700" for="cycleStartDate">Start Date</label>
+						<label class="block text-sm font-semibold text-text-secondary" for="cycleStartDate">Start Date</label>
 						<input
 							id="cycleStartDate"
 							name="cycleStartDate"
 							type="date"
 							required
-							class="w-full rounded-xl border-2 border-slate-300 px-4 py-3 text-slate-900 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+							class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10"
 							value={cycleStartDate}
 							oninput={(e) => (cycleStartDate = e.currentTarget.value)}
 						/>
@@ -154,32 +154,32 @@
 
 					<!-- Duration -->
 					<div class="space-y-3 md:col-span-2">
-						<label class="block text-sm font-semibold text-slate-700">Duration</label>
+						<label class="block text-sm font-semibold text-text-secondary">Duration</label>
 						<div class="grid grid-cols-4 gap-3">
 							{#each [8, 12, 16] as weeks}
 								<button
 									type="button"
 									onclick={() => selectPresetDuration(weeks)}
-									class="relative rounded-xl border-2 px-4 py-3 text-center transition-all {cycleDurationMode === 'preset' && cycleDurationWeeks === String(weeks)
-										? 'border-blue-500 bg-blue-50 shadow-md'
-										: 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50'}"
+									class="relative rounded-xl border px-4 py-3 text-center transition-all {cycleDurationMode === 'preset' && cycleDurationWeeks === String(weeks)
+										? 'border-accent bg-accent-muted'
+										: 'border-border-default bg-surface-raised hover:border-accent/30 hover:bg-surface-subtle'}"
 								>
-									<div class="text-lg font-bold text-slate-900">{weeks}</div>
-									<div class="text-xs text-slate-500">weeks</div>
+									<div class="text-lg font-bold text-text-primary">{weeks}</div>
+									<div class="text-xs text-text-tertiary">weeks</div>
 									{#if weeks === 12}
-										<div class="mt-1 text-[10px] font-semibold text-blue-600">recommended</div>
+										<div class="mt-1 text-[10px] font-semibold text-accent">recommended</div>
 									{/if}
 								</button>
 							{/each}
 							<button
 								type="button"
 								onclick={enableCustomDuration}
-								class="rounded-xl border-2 px-4 py-3 text-center transition-all {cycleDurationMode === 'custom'
-									? 'border-blue-500 bg-blue-50 shadow-md'
-									: 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50'}"
+								class="rounded-xl border px-4 py-3 text-center transition-all {cycleDurationMode === 'custom'
+									? 'border-accent bg-accent-muted'
+									: 'border-border-default bg-surface-raised hover:border-accent/30 hover:bg-surface-subtle'}"
 							>
-								<div class="text-lg font-bold text-slate-900">?</div>
-								<div class="text-xs text-slate-500">Custom</div>
+								<div class="text-lg font-bold text-text-primary">?</div>
+								<div class="text-xs text-text-tertiary">Custom</div>
 							</button>
 						</div>
 						{#if cycleDurationMode === 'custom'}
@@ -189,7 +189,7 @@
 									min="4"
 									max="26"
 									placeholder="4-26"
-									class="w-24 rounded-lg border-2 border-slate-300 px-3 py-2 text-center text-slate-900 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+									class="w-24 rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-center text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10"
 									value={customDurationWeeks}
 									oninput={(e) => {
 										customDurationWeeks = e.currentTarget.value;
@@ -199,20 +199,20 @@
 										}
 									}}
 								/>
-								<span class="text-sm text-slate-600">weeks (4-26)</span>
+								<span class="text-sm text-text-secondary">weeks (4-26)</span>
 							</div>
 						{/if}
 						{#if endDatePreview}
-							<p class="text-sm text-slate-500">
+							<p class="text-sm text-text-tertiary">
 								Your cycle will end on <strong>{endDatePreview}</strong>
 							</p>
 						{/if}
-						<p class="text-xs text-slate-400">{getDurationGuidance(cycleDurationNumber)}</p>
+						<p class="text-xs text-text-muted">{getDurationGuidance(cycleDurationNumber)}</p>
 					</div>
 
 					<!-- Check-in Frequency -->
 					<div class="space-y-3 md:col-span-2">
-						<label class="block text-sm font-semibold text-slate-700">Check-in frequency</label>
+						<label class="block text-sm font-semibold text-text-secondary">Check-in frequency</label>
 						<div class="grid gap-3 md:grid-cols-3">
 							{#each [
 								{ value: '3x', label: '3x/week', desc: 'Monday intention, midweek effort, end-of-week performance', rec: true },
@@ -220,9 +220,9 @@
 								{ value: '1x', label: '1x/week', desc: 'Single weekly reflection covering effort and performance', rec: false }
 							] as opt}
 								<label
-									class="group relative flex cursor-pointer rounded-xl border-2 p-4 transition-all {checkInFrequency === opt.value
-										? 'border-blue-500 bg-blue-50'
-										: 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50'}"
+									class="group relative flex cursor-pointer rounded-xl border p-4 transition-all {checkInFrequency === opt.value
+										? 'border-accent bg-accent-muted'
+										: 'border-border-default bg-surface-raised hover:border-accent/30 hover:bg-surface-subtle'}"
 								>
 									<input
 										type="radio"
@@ -233,16 +233,16 @@
 										class="sr-only"
 									/>
 									<div class="flex w-full items-start gap-3">
-										<div class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 {checkInFrequency === opt.value ? 'border-blue-500 bg-blue-500' : 'border-slate-300 bg-white'}">
+										<div class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 {checkInFrequency === opt.value ? 'border-accent bg-accent' : 'border-border-strong bg-surface-raised'}">
 											{#if checkInFrequency === opt.value}
 												<div class="h-2 w-2 rounded-full bg-white"></div>
 											{/if}
 										</div>
 										<div class="flex-1">
-											<div class="font-semibold text-slate-900">{opt.label}</div>
-											<div class="text-xs text-slate-500">{opt.desc}</div>
+											<div class="font-semibold text-text-primary">{opt.label}</div>
+											<div class="text-xs text-text-tertiary">{opt.desc}</div>
 											{#if opt.rec}
-												<div class="mt-1 text-[10px] font-semibold text-blue-600">recommended</div>
+												<div class="mt-1 text-[10px] font-semibold text-accent">recommended</div>
 											{/if}
 										</div>
 									</div>
@@ -251,14 +251,14 @@
 						</div>
 
 						<!-- Your Week Preview -->
-						<div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-							<p class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400">Your Week</p>
+						<div class="rounded-xl border border-border-default bg-surface-subtle p-4">
+							<p class="mb-3 text-xs font-semibold uppercase tracking-wider text-text-muted">Your Week</p>
 							<div class="space-y-2">
 								{#each weekPreviewDays as item}
-									<div class="flex items-center gap-3 rounded-lg bg-white px-3 py-2 text-sm">
-										<span class="w-10 shrink-0 font-semibold text-blue-700">{item.day}</span>
-										<span class="flex-1 text-slate-700">{item.label}</span>
-										<span class="text-xs text-slate-400">{item.time}</span>
+									<div class="flex items-center gap-3 rounded-lg bg-surface-raised px-3 py-2 text-sm">
+										<span class="w-10 shrink-0 font-semibold text-accent">{item.day}</span>
+										<span class="flex-1 text-text-secondary">{item.label}</span>
+										<span class="text-xs text-text-muted">{item.time}</span>
 									</div>
 								{/each}
 							</div>
@@ -267,16 +267,16 @@
 
 					<!-- Reminder Days -->
 					<div class="space-y-2 md:col-span-2">
-						<label class="block text-sm font-semibold text-slate-700">Feedback Reminder Days</label>
+						<label class="block text-sm font-semibold text-text-secondary">Feedback Reminder Days</label>
 						<div class="grid gap-4 md:grid-cols-2">
 							{#each [
 								{ value: 'wednesday_friday', label: 'Wednesday & Friday', desc: 'Default option' },
 								{ value: 'tuesday_thursday', label: 'Tuesday & Thursday', desc: 'Alternative option' }
 							] as opt}
 								<label
-									class="group relative flex cursor-pointer rounded-xl border-2 p-4 transition-all {reminderDays === opt.value
-										? 'border-blue-500 bg-blue-50'
-										: 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50'}"
+									class="group relative flex cursor-pointer rounded-xl border p-4 transition-all {reminderDays === opt.value
+										? 'border-accent bg-accent-muted'
+										: 'border-border-default bg-surface-raised hover:border-accent/30 hover:bg-surface-subtle'}"
 								>
 									<input
 										type="radio"
@@ -287,14 +287,14 @@
 										class="sr-only"
 									/>
 									<div class="flex w-full items-center gap-3">
-										<div class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 {reminderDays === opt.value ? 'border-blue-500 bg-blue-500' : 'border-slate-300 bg-white'}">
+										<div class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 {reminderDays === opt.value ? 'border-accent bg-accent' : 'border-border-strong bg-surface-raised'}">
 											{#if reminderDays === opt.value}
 												<div class="h-2 w-2 rounded-full bg-white"></div>
 											{/if}
 										</div>
 										<div class="flex-1">
-											<div class="font-semibold text-slate-900">{opt.label}</div>
-											<div class="text-xs text-slate-600">{opt.desc}</div>
+											<div class="font-semibold text-text-primary">{opt.label}</div>
+											<div class="text-xs text-text-secondary">{opt.desc}</div>
 										</div>
 									</div>
 								</label>
@@ -309,27 +309,27 @@
 								type="checkbox"
 								checked={revealScores}
 								onchange={() => (revealScores = !revealScores)}
-								class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+								class="h-4 w-4 rounded border-border-default text-accent focus:ring-accent"
 							/>
 							<div>
-								<span class="text-sm font-semibold text-slate-700">Allow stakeholders to see my self-scores after they submit feedback</span>
-								<p class="text-xs text-slate-500">When enabled, stakeholders see how you rated yourself so they can compare perspectives.</p>
+								<span class="text-sm font-semibold text-text-secondary">Allow stakeholders to see my self-scores after they submit feedback</span>
+								<p class="text-xs text-text-tertiary">When enabled, stakeholders see how you rated yourself so they can compare perspectives.</p>
 							</div>
 						</label>
 					</div>
 
 					<!-- Stakeholder Cadence -->
 					<div class="space-y-3 md:col-span-2">
-						<label class="block text-sm font-semibold text-slate-700">Stakeholder feedback cadence</label>
+						<label class="block text-sm font-semibold text-text-secondary">Stakeholder feedback cadence</label>
 						<div class="grid gap-3 md:grid-cols-2">
 							{#each [
 								{ value: 'weekly', label: 'Weekly', desc: 'Stakeholders rate you every week', rec: true },
 								{ value: 'biweekly', label: 'Biweekly', desc: 'Every two weeks — less burden on stakeholders', rec: false }
 							] as opt}
 								<label
-									class="group relative flex cursor-pointer rounded-xl border-2 p-4 transition-all {stakeholderCadence === opt.value
-										? 'border-blue-500 bg-blue-50'
-										: 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50'}"
+									class="group relative flex cursor-pointer rounded-xl border p-4 transition-all {stakeholderCadence === opt.value
+										? 'border-accent bg-accent-muted'
+										: 'border-border-default bg-surface-raised hover:border-accent/30 hover:bg-surface-subtle'}"
 								>
 									<input
 										type="radio"
@@ -340,16 +340,16 @@
 										class="sr-only"
 									/>
 									<div class="flex w-full items-start gap-3">
-										<div class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 {stakeholderCadence === opt.value ? 'border-blue-500 bg-blue-500' : 'border-slate-300 bg-white'}">
+										<div class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 {stakeholderCadence === opt.value ? 'border-accent bg-accent' : 'border-border-strong bg-surface-raised'}">
 											{#if stakeholderCadence === opt.value}
 												<div class="h-2 w-2 rounded-full bg-white"></div>
 											{/if}
 										</div>
 										<div class="flex-1">
-											<div class="font-semibold text-slate-900">{opt.label}</div>
-											<div class="text-xs text-slate-500">{opt.desc}</div>
+											<div class="font-semibold text-text-primary">{opt.label}</div>
+											<div class="text-xs text-text-tertiary">{opt.desc}</div>
 											{#if opt.rec}
-												<div class="mt-1 text-[10px] font-semibold text-blue-600">recommended</div>
+												<div class="mt-1 text-[10px] font-semibold text-accent">recommended</div>
 											{/if}
 										</div>
 									</div>
@@ -364,13 +364,13 @@
 			<div class="flex items-center justify-between gap-4">
 				<a
 					href="/individual"
-					class="inline-flex items-center gap-2 rounded-xl border-2 border-slate-300 bg-white px-6 py-3 font-medium text-slate-700 transition-all hover:border-slate-400 hover:bg-slate-50"
+					class="inline-flex items-center gap-2 rounded-xl border border-border-strong bg-surface-raised px-6 py-3 font-medium text-text-secondary transition-all hover:border-border-default hover:bg-surface-subtle"
 				>
 					Cancel
 				</a>
 				<button
 					type="submit"
-					class="group inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-3 font-semibold text-white shadow-lg shadow-blue-500/25 transition-all hover:scale-105 hover:shadow-xl hover:shadow-blue-500/30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+					class="group inline-flex items-center gap-2 rounded-xl bg-accent px-8 py-3 font-semibold text-white transition-all hover:bg-accent-hover focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
 				>
 					Start Cycle
 					<svg class="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

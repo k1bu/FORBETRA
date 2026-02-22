@@ -2,7 +2,7 @@ import prisma from '$lib/server/prisma';
 import { requireRole } from '$lib/server/auth';
 import { fail } from '@sveltejs/kit';
 import { randomBytes, createHash } from 'crypto';
-import { sendEmail } from '$lib/notifications/email';
+import { sendEmail, getEmailMode } from '$lib/notifications/email';
 import { emailTemplates } from '$lib/notifications/emailTemplates';
 import type { Actions, PageServerLoad } from './$types';
 import { Prisma } from '@prisma/client';
@@ -12,35 +12,39 @@ const generateTokenHash = (token: string) => createHash('sha256').update(token).
 
 const createInviteToken = () => randomBytes(32).toString('hex');
 
+const INVITE_SELECT = {
+	id: true,
+	email: true,
+	name: true,
+	message: true,
+	expiresAt: true,
+	acceptedAt: true,
+	cancelledAt: true,
+	updatedAt: true,
+	individual: {
+		select: {
+			id: true,
+			name: true,
+			email: true
+		}
+	},
+	createdAt: true
+} as const;
+
 export const load: PageServerLoad = async (event) => {
 	const { dbUser } = requireRole(event, 'COACH');
 
 	const invitations = await prisma.coachInvite.findMany({
 		where: { coachId: dbUser.id },
 		orderBy: { createdAt: 'desc' },
-		select: {
-			id: true,
-			email: true,
-			name: true,
-			message: true,
-			expiresAt: true,
-			acceptedAt: true,
-			cancelledAt: true,
-			individual: {
-				select: {
-					id: true,
-					name: true,
-					email: true
-				}
-			},
-			createdAt: true
-		}
+		select: INVITE_SELECT
 	});
 
 	return {
 		coach: {
 			name: dbUser.name ?? 'Coach'
 		},
+		emailMode: getEmailMode(),
 		invitations: invitations.map((invite) => ({
 			id: invite.id,
 			email: invite.email,
@@ -49,6 +53,7 @@ export const load: PageServerLoad = async (event) => {
 			expiresAt: invite.expiresAt.toISOString(),
 			acceptedAt: invite.acceptedAt?.toISOString() ?? null,
 			cancelledAt: invite.cancelledAt?.toISOString() ?? null,
+			updatedAt: invite.updatedAt.toISOString(),
 			individual: invite.individual
 				? {
 						id: invite.individual.id,
@@ -95,6 +100,7 @@ export const actions: Actions = {
 
 		if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
 			return fail(400, {
+				action: 'createInvite' as const,
 				error: 'Please provide a valid email address.',
 				values: { email, name, message }
 			});
@@ -108,16 +114,25 @@ export const actions: Actions = {
 		});
 
 		if (existingInvite && !existingInvite.cancelledAt && !existingInvite.acceptedAt) {
-			return fail(400, {
-				error: 'An active invitation already exists for this email.',
-				inviteId: existingInvite.id,
-				values: { email, name, message }
-			});
+			// Soft duplicate — let the UI offer Resend / Cancel
+			return {
+				action: 'createInvite' as const,
+				duplicate: true,
+				existingInvite: {
+					id: existingInvite.id,
+					email: existingInvite.email,
+					status: 'pending' as const,
+					createdAt: existingInvite.createdAt.toISOString(),
+					expiresAt: existingInvite.expiresAt.toISOString(),
+					cancelledAt: null,
+					acceptedAt: null
+				}
+			};
 		}
 
 		const tokenRaw = createInviteToken();
 		const tokenHash = generateTokenHash(tokenRaw);
-		const expiresAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+		const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
 		try {
 			const invite = await prisma.$transaction(async (tx) => {
@@ -202,6 +217,8 @@ export const actions: Actions = {
 
 			return {
 				success: true,
+				action: 'createInvite' as const,
+				email,
 				inviteId: invite.id,
 				inviteUrl,
 				emailFailed
@@ -209,6 +226,7 @@ export const actions: Actions = {
 		} catch (error) {
 			if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
 				return fail(400, {
+					action: 'createInvite' as const,
 					error: 'An invitation already exists for this email. Cancel or reuse the existing invite.',
 					values: { email, name, message }
 				});
@@ -224,7 +242,7 @@ export const actions: Actions = {
 		const inviteId = String(formData.get('inviteId') ?? '');
 
 		if (!inviteId) {
-			return fail(400, { error: 'Missing invitation identifier.' });
+			return fail(400, { action: 'cancelInvite' as const, error: 'Missing invitation identifier.' });
 		}
 
 		const invite = await prisma.coachInvite.findUnique({
@@ -232,15 +250,15 @@ export const actions: Actions = {
 		});
 
 		if (!invite || invite.coachId !== dbUser.id) {
-			return fail(404, { error: 'Invitation not found.' });
+			return fail(404, { action: 'cancelInvite' as const, error: 'Invitation not found.' });
 		}
 
 		if (invite.acceptedAt) {
-			return fail(400, { error: 'Invitation has already been accepted.' });
+			return fail(400, { action: 'cancelInvite' as const, error: 'Invitation has already been accepted.' });
 		}
 
 		if (invite.cancelledAt) {
-			return { success: true };
+			return { success: true, action: 'cancelInvite' as const };
 		}
 
 		await prisma.$transaction(async (tx) => {
@@ -259,7 +277,88 @@ export const actions: Actions = {
 			});
 		});
 
-		return { success: true };
+		return { success: true, action: 'cancelInvite' as const };
+	},
+	resendInvite: async (event) => {
+		const { dbUser } = requireRole(event, 'COACH');
+		const formData = await event.request.formData();
+		const inviteId = String(formData.get('inviteId') ?? '');
+
+		if (!inviteId) {
+			return fail(400, { action: 'resendInvite' as const, error: 'Missing invitation identifier.' });
+		}
+
+		const invite = await prisma.coachInvite.findUnique({
+			where: { id: inviteId }
+		});
+
+		if (!invite || invite.coachId !== dbUser.id) {
+			return fail(404, { action: 'resendInvite' as const, error: 'Invitation not found.' });
+		}
+
+		if (invite.acceptedAt) {
+			return fail(400, { action: 'resendInvite' as const, error: 'Invitation has already been accepted.' });
+		}
+
+		const tokenRaw = createInviteToken();
+		const tokenHash = generateTokenHash(tokenRaw);
+		const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+		await prisma.$transaction(async (tx) => {
+			// Remove old token
+			await tx.token.deleteMany({
+				where: {
+					tokenHash: invite.tokenHash,
+					type: 'COACH_INVITE'
+				}
+			});
+
+			// Update invite with new token, reset expiry, clear cancelledAt
+			await tx.coachInvite.update({
+				where: { id: inviteId },
+				data: {
+					tokenHash,
+					expiresAt,
+					cancelledAt: null
+				}
+			});
+
+			// Create new token row
+			await tx.token.create({
+				data: {
+					type: 'COACH_INVITE' satisfies TokenType,
+					tokenHash,
+					userId: dbUser.id,
+					expiresAt
+				}
+			});
+		});
+
+		const inviteUrl = new URL(`/coach/invite/${tokenRaw}`, event.url.origin).toString();
+
+		let emailFailed = false;
+		try {
+			const coachName = dbUser.name ?? 'Your coach';
+			const template = emailTemplates.coachInvitation({
+				coachName,
+				recipientName: invite.name || undefined,
+				message: invite.message || undefined,
+				inviteUrl
+			});
+			await sendEmail({
+				to: invite.email,
+				...template
+			});
+		} catch (error) {
+			emailFailed = true;
+			console.error('[email:error] Failed to resend coach invitation email', error);
+		}
+
+		return {
+			success: true,
+			action: 'resendInvite' as const,
+			email: invite.email,
+			emailFailed
+		};
 	}
 };
-

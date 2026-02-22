@@ -5,6 +5,15 @@ export type SmsPayload = {
 	body: string;
 };
 
+export type SmsMode = 'send' | 'mock';
+
+export function getSmsMode(): SmsMode {
+	const raw = process.env.SMS_MODE?.toLowerCase();
+	if (raw === 'send' || raw === 'mock') return raw;
+
+	return process.env.NODE_ENV === 'development' ? 'mock' : 'send';
+}
+
 let client: ReturnType<typeof twilio> | null = null;
 
 const getClient = () => {
@@ -20,7 +29,8 @@ const getClient = () => {
 };
 
 export const sendSms = async (payload: SmsPayload) => {
-	if (process.env.NODE_ENV === 'development') {
+	const mode = getSmsMode();
+	if (mode === 'mock') {
 		console.info('[sms:mock]', payload);
 		return;
 	}
@@ -38,4 +48,16 @@ export const sendSms = async (payload: SmsPayload) => {
 	});
 
 	console.info(`[sms:sent] SMS sent to ${payload.to}`);
+};
+
+/**
+ * Non-blocking SMS helper. Sends SMS if phone exists, catches errors silently.
+ */
+export const trySendSms = async (phone: string | null | undefined, body: string) => {
+	if (!phone) return;
+	try {
+		await sendSms({ to: phone, body });
+	} catch (error) {
+		console.error('[sms:error]', error);
+	}
 };

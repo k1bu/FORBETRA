@@ -3,6 +3,8 @@ import prisma from '$lib/server/prisma';
 import { stakeholderFeedbackSchema } from '$lib/validation/feedback';
 import { sendEmail } from '$lib/notifications/email';
 import { emailTemplates } from '$lib/notifications/emailTemplates';
+import { trySendSms } from '$lib/notifications/sms';
+import { smsTemplates } from '$lib/notifications/smsTemplates';
 import type { Actions, PageServerLoad } from './$types';
 
 const sanitizeToken = (value: string | undefined) => {
@@ -243,7 +245,7 @@ export const actions: Actions = {
 		// Fetch stakeholder and reflection details for notification
 		const stakeholder = await prisma.stakeholder.findUnique({
 			where: { id: token.stakeholderId! },
-			select: { name: true, email: true, individual: { select: { id: true, name: true, email: true } } }
+			select: { name: true, email: true, phone: true, individual: { select: { id: true, name: true, email: true, phone: true } } }
 		});
 
 		const reflection = await prisma.reflection.findUnique({
@@ -316,6 +318,15 @@ export const actions: Actions = {
 				console.error('[email:error] Failed to send stakeholder feedback notification', error);
 				// Don't fail the request if email fails
 			}
+
+			// Send SMS to individual
+			await trySendSms(
+				stakeholder.individual.phone,
+				smsTemplates.stakeholderFeedbackReceived({
+					stakeholderName: stakeholder.name || undefined,
+					appUrl: url.origin
+				})
+			);
 		}
 
 		// Send thank-you email to stakeholder
@@ -333,6 +344,15 @@ export const actions: Actions = {
 			} catch (error) {
 				console.error('[email:error] Failed to send stakeholder thank-you email', error);
 			}
+
+			// Send thank-you SMS to stakeholder
+			await trySendSms(
+				stakeholder.phone,
+				smsTemplates.stakeholderThankYou({
+					individualName: reflection.user.name || undefined,
+					weekNumber: reflection.weekNumber
+				})
+			);
 		}
 
 		return {

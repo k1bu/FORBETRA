@@ -30,17 +30,17 @@
 	let showEffort = $state(true);
 	let showPerformance = $state(true);
 	let showIndividualStakeholdersInTable = $state(false);
-	
+
 	// Smart defaults: show individual lines for 1-2 stakeholders, average only for 3+
 	const stakeholdersWithData = $derived(
 		stakeholders.filter((s) => stakeholderData.some((d) => d.stakeholderId === s.id))
 	);
-	
+
 	// Initialize with smart default based on number of stakeholders (1-2 = show, 3+ = hide)
 	// User can toggle this preference via the checkbox
 	let showIndividualLines = $state(false);
 	let hasInitializedDefault = $state(false);
-	
+
 	// Set smart default once on mount based on stakeholder count
 	$effect(() => {
 		if (!hasInitializedDefault && stakeholdersWithData.length > 0) {
@@ -159,7 +159,7 @@
 		// Check for Week 0 first (initial rating)
 		const week0 = allWeeks.find((w) => w === 0);
 		const baselineWeek = week0 ?? allWeeks[0];
-		
+
 		if (!baselineWeek) return { individualEffort: null, individualProgress: null, stakeholderEffort: null, stakeholderProgress: null };
 
 		const baselineIndividual = individualData.find((d) => d.weekNumber === baselineWeek);
@@ -178,28 +178,28 @@
 		if (allWeeks.length === 0) {
 			return { individualEffort: null, individualProgress: null, stakeholderEffort: null, stakeholderProgress: null };
 		}
-		
+
 		// For individual effort, find the latest week with effort data
 		const individualEffortWeeks = individualData
 			.filter((d) => d.effortScore !== null)
 			.map((d) => d.weekNumber)
 			.sort((a, b) => b - a);
 		const latestIndividualEffort = individualEffortWeeks[0] ? individualData.find((d) => d.weekNumber === individualEffortWeeks[0]) : null;
-		
+
 		// For individual performance, find the latest week with performance data
 		const individualProgressWeeks = individualData
 			.filter((d) => d.performanceScore !== null)
 			.map((d) => d.weekNumber)
 			.sort((a, b) => b - a);
 		const latestIndividualProgress = individualProgressWeeks[0] ? individualData.find((d) => d.weekNumber === individualProgressWeeks[0]) : null;
-		
+
 		// For stakeholder effort, find the latest week with effort data
 		const stakeholderEffortWeeks = stakeholderAveragesByWeek
 			.filter((d) => d.avgEffort !== null)
 			.map((d) => d.weekNumber)
 			.sort((a, b) => b - a);
 		const latestStakeholderEffort = stakeholderEffortWeeks[0] ? stakeholderAveragesByWeek.find((d) => d.weekNumber === stakeholderEffortWeeks[0]) : null;
-		
+
 		// For stakeholder performance, find the latest week with performance data
 		const stakeholderProgressWeeks = stakeholderAveragesByWeek
 			.filter((d) => d.avgProgress !== null)
@@ -252,12 +252,12 @@
 	// Calculate individual stakeholder values for summary table
 	const stakeholderSummaryData = $derived((() => {
 		if (allWeeks.length === 0) return [];
-		
+
 		// Prefer Week 0 (initial rating) if available, otherwise use first week
 		const week0 = allWeeks.find((w) => w === 0);
 		const baselineWeek = week0 ?? allWeeks[0];
 		if (!baselineWeek) return [];
-		
+
 		// Find the latest week with actual stakeholder data
 		const stakeholderDataWeeks = new Set<number>();
 		stakeholderData.forEach((d) => {
@@ -295,18 +295,18 @@
 
 		uniqueStakeholders.forEach((name, id) => {
 			const stakeholderWeekData = stakeholderData.filter((d) => d.stakeholderId === id);
-			
+
 			const week1Data = stakeholderWeekData.find((d) => d.weekNumber === baselineWeek);
-			
+
 			// Find latest week with effort data for this stakeholder
 			const effortWeeks = stakeholderWeekData
 				.filter((d) => d.effortScore !== null)
 				.map((d) => d.weekNumber)
 				.sort((a, b) => b - a);
-			const latestEffortData = effortWeeks[0] 
+			const latestEffortData = effortWeeks[0]
 				? stakeholderWeekData.find((d) => d.weekNumber === effortWeeks[0])
 				: null;
-			
+
 			// Find latest week with performance data for this stakeholder
 			const performanceWeeks = stakeholderWeekData
 				.filter((d) => d.performanceScore !== null)
@@ -422,6 +422,7 @@
 					legend: {
 						position: 'top',
 						labels: {
+							color: '#a1a1aa',
 							usePointStyle: true,
 							padding: 15,
 							font: {
@@ -431,6 +432,11 @@
 						}
 					},
 					tooltip: {
+						backgroundColor: '#1c1c20',
+						titleColor: '#f4f5f8',
+						bodyColor: '#a1a1aa',
+						borderColor: 'rgba(255,255,255,0.08)',
+						borderWidth: 1,
 						padding: 12,
 						titleFont: {
 							size: 14,
@@ -462,6 +468,7 @@
 						title: {
 							display: true,
 							text: 'Effort Score',
+							color: '#a1a1aa',
 							font: {
 								size: 12,
 								weight: 600
@@ -470,31 +477,34 @@
 						min: 0,
 						max: 10,
 						ticks: {
+							color: '#a1a1aa',
 							stepSize: 2,
 							font: {
 								size: 11
 							}
 						},
 						grid: {
-							color: 'rgba(0, 0, 0, 0.05)'
+							color: 'rgba(255, 255, 255, 0.06)'
 						}
 					},
 					x: {
 						title: {
 							display: true,
 							text: 'Week',
+							color: '#a1a1aa',
 							font: {
 								size: 12,
 								weight: 600
 							}
 						},
 						ticks: {
+							color: '#a1a1aa',
 							font: {
 								size: 11
 							}
 						},
 						grid: {
-							color: 'rgba(0, 0, 0, 0.05)'
+							color: 'rgba(255, 255, 255, 0.06)'
 						}
 					}
 				}
@@ -582,6 +592,7 @@
 					legend: {
 						position: 'top',
 						labels: {
+							color: '#a1a1aa',
 							usePointStyle: true,
 							padding: 15,
 							font: {
@@ -591,6 +602,11 @@
 						}
 					},
 					tooltip: {
+						backgroundColor: '#1c1c20',
+						titleColor: '#f4f5f8',
+						bodyColor: '#a1a1aa',
+						borderColor: 'rgba(255,255,255,0.08)',
+						borderWidth: 1,
 						padding: 12,
 						titleFont: {
 							size: 14,
@@ -622,6 +638,7 @@
 						title: {
 							display: true,
 							text: 'Performance Score',
+							color: '#a1a1aa',
 							font: {
 								size: 12,
 								weight: 600
@@ -630,31 +647,34 @@
 						min: 0,
 						max: 10,
 						ticks: {
+							color: '#a1a1aa',
 							stepSize: 2,
 							font: {
 								size: 11
 							}
 						},
 						grid: {
-							color: 'rgba(0, 0, 0, 0.05)'
+							color: 'rgba(255, 255, 255, 0.06)'
 						}
 					},
 					x: {
 						title: {
 							display: true,
 							text: 'Week',
+							color: '#a1a1aa',
 							font: {
 								size: 12,
 								weight: 600
 							}
 						},
 						ticks: {
+							color: '#a1a1aa',
 							font: {
 								size: 11
 							}
 						},
 						grid: {
-							color: 'rgba(0, 0, 0, 0.05)'
+							color: 'rgba(255, 255, 255, 0.06)'
 						}
 					}
 				}
@@ -668,7 +688,7 @@
 		const config = effortChartConfig;
 		const instance = effortChartInstance;
 		const canvas = effortChartCanvas;
-		
+
 		if (instance && canvas && config) {
 			instance.data.labels = config.data.labels;
 			instance.data.datasets = config.data.datasets;
@@ -682,7 +702,7 @@
 		const config = performanceChartConfig;
 		const instance = performanceChartInstance;
 		const canvas = performanceChartCanvas;
-		
+
 		if (instance && canvas && config) {
 			instance.data.labels = config.data.labels;
 			instance.data.datasets = config.data.datasets;
@@ -762,31 +782,31 @@
 <div class="space-y-4">
 	<!-- Title and Subtitle -->
 	<div class="mb-2">
-		<h3 class="text-lg font-bold text-neutral-900">Effort and Performance Over Time</h3>
-		<p class="text-sm text-neutral-600">Compare your self-assessments with stakeholder observations</p>
+		<h3 class="text-lg font-bold text-text-primary">Effort and Performance Over Time</h3>
+		<p class="text-sm text-text-secondary">Compare your self-assessments with stakeholder observations</p>
 	</div>
 
 	<!-- Controls -->
-	<div class="rounded-xl border-2 border-neutral-200 bg-white p-4">
+	<div class="rounded-xl border border-border-default bg-surface-raised p-4">
 		<!-- Row 1: Metrics Selection -->
-		<div class="flex flex-wrap items-center gap-4 border-b border-neutral-200 pb-3">
-			<span class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Metrics:</span>
+		<div class="flex flex-wrap items-center gap-4 border-b border-border-default pb-3">
+			<span class="text-xs font-semibold uppercase tracking-wide text-text-tertiary">Metrics:</span>
 			<div class="flex items-center gap-3">
 				<label class="flex items-center gap-2">
 					<input
 						type="checkbox"
 						bind:checked={showEffort}
-						class="h-4 w-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500"
+						class="h-4 w-4 rounded border-border-strong text-accent focus:ring-accent"
 					/>
-					<span class="text-sm font-semibold text-neutral-700">Effort</span>
+					<span class="text-sm font-semibold text-text-secondary">Effort</span>
 				</label>
 				<label class="flex items-center gap-2">
 					<input
 						type="checkbox"
 						bind:checked={showPerformance}
-						class="h-4 w-4 rounded border-neutral-300 text-purple-600 focus:ring-purple-500"
+						class="h-4 w-4 rounded border-border-strong text-accent focus:ring-accent"
 					/>
-					<span class="text-sm font-semibold text-neutral-700">Performance</span>
+					<span class="text-sm font-semibold text-text-secondary">Performance</span>
 				</label>
 			</div>
 		</div>
@@ -795,7 +815,7 @@
 		{#if stakeholders.length > 0 && stakeholdersWithData.length > 0}
 			<div class="flex flex-wrap items-center gap-6 pt-3">
 				<div class="flex items-center gap-4">
-					<span class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Filter Stakeholders:</span>
+					<span class="text-xs font-semibold uppercase tracking-wide text-text-tertiary">Filter Stakeholders:</span>
 					<div class="flex flex-wrap gap-2">
 						{#each stakeholders as stakeholder (stakeholder.id)}
 							{@const hasData = stakeholderData.some((d) => d.stakeholderId === stakeholder.id)}
@@ -803,11 +823,11 @@
 								<button
 									type="button"
 									onclick={() => toggleStakeholder(stakeholder.id)}
-									class="rounded-lg border-2 px-3 py-1 text-xs font-semibold transition-all {selectedStakeholderIds.has(
+									class="rounded-lg border px-3 py-1 text-xs font-semibold transition-all {selectedStakeholderIds.has(
 										stakeholder.id
 									) || selectedStakeholderIds.size === 0
-										? 'border-blue-500 bg-blue-100 text-blue-700'
-										: 'border-neutral-300 bg-white text-neutral-600 hover:border-blue-300 hover:bg-blue-50'}"
+										? 'border-accent bg-accent-muted text-accent'
+										: 'border-border-strong bg-surface-raised text-text-secondary hover:border-accent/50 hover:bg-accent-muted'}"
 								>
 									{stakeholder.name}
 									{#if selectedStakeholderIds.has(stakeholder.id)}
@@ -820,14 +840,14 @@
 							<button
 								type="button"
 								onclick={selectAllStakeholders}
-								class="rounded-lg border-2 border-neutral-300 bg-white px-3 py-1 text-xs font-semibold text-neutral-600 transition-all hover:border-blue-300 hover:bg-blue-50"
+								class="rounded-lg border border-border-strong bg-surface-raised px-3 py-1 text-xs font-semibold text-text-secondary transition-all hover:border-accent/50 hover:bg-accent-muted"
 							>
 								All
 							</button>
 							<button
 								type="button"
 								onclick={clearStakeholderFilter}
-								class="rounded-lg border-2 border-neutral-300 bg-white px-3 py-1 text-xs font-semibold text-neutral-600 transition-all hover:border-red-300 hover:bg-red-50"
+								class="rounded-lg border border-border-strong bg-surface-raised px-3 py-1 text-xs font-semibold text-text-secondary transition-all hover:border-error/50 hover:bg-error-muted"
 							>
 								Clear
 							</button>
@@ -836,14 +856,14 @@
 				</div>
 
 				<div class="flex items-center gap-4">
-					<span class="text-xs font-semibold uppercase tracking-wide text-neutral-500">View:</span>
+					<span class="text-xs font-semibold uppercase tracking-wide text-text-tertiary">View:</span>
 					<label class="flex items-center gap-2">
 						<input
 							type="checkbox"
 							bind:checked={showIndividualLines}
-							class="h-4 w-4 rounded border-neutral-300 text-purple-600 focus:ring-purple-500"
+							class="h-4 w-4 rounded border-border-strong text-accent focus:ring-accent"
 						/>
-						<span class="text-sm font-semibold text-neutral-700">Show individual stakeholders</span>
+						<span class="text-sm font-semibold text-text-secondary">Show individual stakeholders</span>
 					</label>
 				</div>
 			</div>
@@ -851,17 +871,17 @@
 	</div>
 
 	<!-- Chart Container -->
-	<div class="rounded-xl border-2 border-neutral-200 bg-white p-6">
+	<div class="rounded-xl border border-border-default bg-surface-raised p-6">
 		{#if showEffort || showPerformance}
 			<div class="grid gap-6 {showEffort && showPerformance ? 'md:grid-cols-2' : 'grid-cols-1'}">
 				{#if showEffort}
 					<div>
-						<h4 class="mb-2 text-sm font-semibold text-neutral-700">Effort</h4>
+						<h4 class="mb-2 text-sm font-semibold text-text-secondary">Effort</h4>
 						<div class="h-[350px] w-full">
 							{#if effortChartConfig && effortChartConfig.data.labels && effortChartConfig.data.labels.length > 0}
 								<canvas bind:this={effortChartCanvas}></canvas>
 							{:else}
-								<div class="flex h-full items-center justify-center text-neutral-500">
+								<div class="flex h-full items-center justify-center text-text-tertiary">
 									<p class="text-sm">No effort data available</p>
 								</div>
 							{/if}
@@ -871,12 +891,12 @@
 
 				{#if showPerformance}
 					<div>
-						<h4 class="mb-2 text-sm font-semibold text-neutral-700">Performance</h4>
+						<h4 class="mb-2 text-sm font-semibold text-text-secondary">Performance</h4>
 						<div class="h-[350px] w-full">
 							{#if performanceChartConfig && performanceChartConfig.data.labels && performanceChartConfig.data.labels.length > 0}
 								<canvas bind:this={performanceChartCanvas}></canvas>
 							{:else}
-								<div class="flex h-full items-center justify-center text-neutral-500">
+								<div class="flex h-full items-center justify-center text-text-tertiary">
 									<p class="text-sm">No performance data available</p>
 								</div>
 							{/if}
@@ -885,12 +905,12 @@
 				{/if}
 			</div>
 		{:else}
-			<div class="flex h-[350px] items-center justify-center text-neutral-500">
+			<div class="flex h-[350px] items-center justify-center text-text-tertiary">
 				<p class="text-sm">Select at least one metric (Effort or Performance) to view</p>
 			</div>
 		{/if}
 		{#if hasLimitedData}
-			<p class="mt-3 text-center text-sm text-neutral-500">
+			<p class="mt-3 text-center text-sm text-text-tertiary">
 				Trends become clearer after week 4. Keep going!
 			</p>
 		{/if}
@@ -900,50 +920,50 @@
 	{#if baseline.individualEffort !== null || baseline.individualProgress !== null}
 			<div class="mt-8">
 				<div class="mb-3 flex items-center justify-between">
-					<h3 class="text-base font-bold text-neutral-900">Summary</h3>
+					<h3 class="text-base font-bold text-text-primary">Summary</h3>
 					{#if stakeholderSummaryData.length > 0}
 						<label class="flex cursor-pointer items-center gap-2">
 							<input
 								type="checkbox"
 								bind:checked={showIndividualStakeholdersInTable}
-								class="h-4 w-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500"
+								class="h-4 w-4 rounded border-border-strong text-accent focus:ring-accent"
 							/>
-							<span class="text-xs font-medium text-neutral-600">Show individual stakeholders</span>
+							<span class="text-xs font-medium text-text-secondary">Show individual stakeholders</span>
 						</label>
 					{/if}
 				</div>
-				<div class="overflow-x-auto rounded-xl border-2 border-neutral-200 bg-white shadow-sm">
+				<div class="overflow-x-auto rounded-xl border border-border-default bg-surface-raised">
 					<table class="w-full text-sm">
-						<thead class="bg-neutral-50">
+						<thead class="bg-surface-raised">
 							<tr>
-								<th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-neutral-600">Metric</th>
-								<th class="px-5 py-3 text-center text-xs font-semibold uppercase tracking-wide text-neutral-600">
+								<th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-text-secondary">Metric</th>
+								<th class="px-5 py-3 text-center text-xs font-semibold uppercase tracking-wide text-text-secondary">
 									{baseline.individualEffort !== null || baseline.individualProgress !== null
 										? (allWeeks.find((w) => w === 0) !== undefined ? 'Initial' : 'Week 1')
 										: 'Week 1'}
 								</th>
-								<th class="px-5 py-3 text-center text-xs font-semibold uppercase tracking-wide text-neutral-600">Current</th>
-								<th class="px-5 py-3 text-center text-xs font-semibold uppercase tracking-wide text-neutral-600">Change</th>
-								<th class="px-5 py-3 text-center text-xs font-semibold uppercase tracking-wide text-neutral-600">% Change</th>
+								<th class="px-5 py-3 text-center text-xs font-semibold uppercase tracking-wide text-text-secondary">Current</th>
+								<th class="px-5 py-3 text-center text-xs font-semibold uppercase tracking-wide text-text-secondary">Change</th>
+								<th class="px-5 py-3 text-center text-xs font-semibold uppercase tracking-wide text-text-secondary">% Change</th>
 							</tr>
 						</thead>
-						<tbody class="divide-y divide-neutral-200">
+						<tbody class="divide-y divide-border-default">
 						{#if showEffort}
 							<!-- My Effort -->
-							<tr class="bg-amber-50/30">
-								<td class="px-5 py-3 font-semibold text-neutral-900">My Effort Rating</td>
-								<td class="px-5 py-3 text-center font-medium text-neutral-700">
+							<tr class="bg-accent-muted/30">
+								<td class="px-5 py-3 font-semibold text-text-primary">My Effort Rating</td>
+								<td class="px-5 py-3 text-center font-medium text-text-secondary">
 									{baseline.individualEffort?.toFixed(1) ?? '—'}
 								</td>
-								<td class="px-5 py-3 text-center font-medium text-neutral-700">
+								<td class="px-5 py-3 text-center font-medium text-text-secondary">
 									{currentValues.individualEffort?.toFixed(1) ?? '—'}
 								</td>
-								<td class="px-5 py-3 text-center font-semibold {summaryData.individualEffort.delta !== null && summaryData.individualEffort.delta >= 0 ? 'text-green-600' : 'text-red-600'}">
+								<td class="px-5 py-3 text-center font-semibold {summaryData.individualEffort.delta !== null && summaryData.individualEffort.delta >= 0 ? 'text-success' : 'text-error'}">
 									{summaryData.individualEffort.delta !== null
 										? `${summaryData.individualEffort.delta > 0 ? '+' : ''}${summaryData.individualEffort.delta.toFixed(1)}`
 										: '—'}
 								</td>
-								<td class="px-5 py-3 text-center font-semibold {summaryData.individualEffort.percentChange !== null && summaryData.individualEffort.percentChange >= 0 ? 'text-green-600' : 'text-red-600'}">
+								<td class="px-5 py-3 text-center font-semibold {summaryData.individualEffort.percentChange !== null && summaryData.individualEffort.percentChange >= 0 ? 'text-success' : 'text-error'}">
 									{summaryData.individualEffort.percentChange !== null
 										? `${summaryData.individualEffort.percentChange > 0 ? '+' : ''}${summaryData.individualEffort.percentChange.toFixed(1)}%`
 										: '—'}
@@ -951,20 +971,20 @@
 							</tr>
 							{#if stakeholderAveragesByWeek.length > 0}
 								<!-- Stakeholder Average Effort -->
-								<tr class="bg-neutral-50/50">
-									<td class="px-5 py-3 font-medium text-neutral-800">Stakeholders Effort Rating (Avg)</td>
-									<td class="px-5 py-3 text-center text-neutral-700">
+								<tr class="bg-surface-subtle/50">
+									<td class="px-5 py-3 font-medium text-text-primary">Stakeholders Effort Rating (Avg)</td>
+									<td class="px-5 py-3 text-center text-text-secondary">
 										{baseline.stakeholderEffort?.toFixed(1) ?? '—'}
 									</td>
-									<td class="px-5 py-3 text-center text-neutral-700">
+									<td class="px-5 py-3 text-center text-text-secondary">
 										{currentValues.stakeholderEffort?.toFixed(1) ?? '—'}
 									</td>
-									<td class="px-5 py-3 text-center font-semibold {summaryData.stakeholderEffort.delta !== null && summaryData.stakeholderEffort.delta >= 0 ? 'text-green-600' : 'text-red-600'}">
+									<td class="px-5 py-3 text-center font-semibold {summaryData.stakeholderEffort.delta !== null && summaryData.stakeholderEffort.delta >= 0 ? 'text-success' : 'text-error'}">
 										{summaryData.stakeholderEffort.delta !== null
 											? `${summaryData.stakeholderEffort.delta > 0 ? '+' : ''}${summaryData.stakeholderEffort.delta.toFixed(1)}`
 											: '—'}
 									</td>
-									<td class="px-5 py-3 text-center font-semibold {summaryData.stakeholderEffort.percentChange !== null && summaryData.stakeholderEffort.percentChange >= 0 ? 'text-green-600' : 'text-red-600'}">
+									<td class="px-5 py-3 text-center font-semibold {summaryData.stakeholderEffort.percentChange !== null && summaryData.stakeholderEffort.percentChange >= 0 ? 'text-success' : 'text-error'}">
 										{summaryData.stakeholderEffort.percentChange !== null
 											? `${summaryData.stakeholderEffort.percentChange > 0 ? '+' : ''}${summaryData.stakeholderEffort.percentChange.toFixed(1)}%`
 											: '—'}
@@ -974,23 +994,23 @@
 								{#if showIndividualStakeholdersInTable}
 									{#each stakeholderSummaryData as stakeholder (stakeholder.stakeholderId)}
 										{#if stakeholder.effort.week1 !== null || stakeholder.effort.current !== null}
-											<tr class="bg-white/50">
-												<td class="px-5 py-2.5 pl-8 text-sm text-neutral-600">
+											<tr class="bg-surface-raised/50">
+												<td class="px-5 py-2.5 pl-8 text-sm text-text-secondary">
 													<span class="font-medium">{stakeholder.stakeholderName}</span>
-													<span class="ml-1 text-xs text-neutral-500">(Effort)</span>
+													<span class="ml-1 text-xs text-text-tertiary">(Effort)</span>
 												</td>
-												<td class="px-5 py-2.5 text-center text-sm text-neutral-600">
+												<td class="px-5 py-2.5 text-center text-sm text-text-secondary">
 													{stakeholder.effort.week1?.toFixed(1) ?? '—'}
 												</td>
-												<td class="px-5 py-2.5 text-center text-sm text-neutral-600">
+												<td class="px-5 py-2.5 text-center text-sm text-text-secondary">
 													{stakeholder.effort.current?.toFixed(1) ?? '—'}
 												</td>
-												<td class="px-5 py-2.5 text-center text-sm font-medium {stakeholder.effort.delta !== null && stakeholder.effort.delta >= 0 ? 'text-green-600' : 'text-red-600'}">
+												<td class="px-5 py-2.5 text-center text-sm font-medium {stakeholder.effort.delta !== null && stakeholder.effort.delta >= 0 ? 'text-success' : 'text-error'}">
 													{stakeholder.effort.delta !== null
 														? `${stakeholder.effort.delta > 0 ? '+' : ''}${stakeholder.effort.delta.toFixed(1)}`
 														: '—'}
 												</td>
-												<td class="px-5 py-2.5 text-center text-sm font-medium {stakeholder.effort.percentChange !== null && stakeholder.effort.percentChange >= 0 ? 'text-green-600' : 'text-red-600'}">
+												<td class="px-5 py-2.5 text-center text-sm font-medium {stakeholder.effort.percentChange !== null && stakeholder.effort.percentChange >= 0 ? 'text-success' : 'text-error'}">
 													{stakeholder.effort.percentChange !== null
 														? `${stakeholder.effort.percentChange > 0 ? '+' : ''}${stakeholder.effort.percentChange.toFixed(1)}%`
 														: '—'}
@@ -1003,20 +1023,20 @@
 						{/if}
 						{#if showPerformance}
 							<!-- My Performance -->
-							<tr class="bg-indigo-50/30">
-								<td class="px-5 py-3 font-semibold text-neutral-900">My Performance Rating</td>
-								<td class="px-5 py-3 text-center font-medium text-neutral-700">
+							<tr class="bg-warning-muted/30">
+								<td class="px-5 py-3 font-semibold text-text-primary">My Performance Rating</td>
+								<td class="px-5 py-3 text-center font-medium text-text-secondary">
 									{baseline.individualProgress?.toFixed(1) ?? '—'}
 								</td>
-								<td class="px-5 py-3 text-center font-medium text-neutral-700">
+								<td class="px-5 py-3 text-center font-medium text-text-secondary">
 									{currentValues.individualProgress?.toFixed(1) ?? '—'}
 								</td>
-								<td class="px-5 py-3 text-center font-semibold {summaryData.individualProgress.delta !== null && summaryData.individualProgress.delta >= 0 ? 'text-green-600' : 'text-red-600'}">
+								<td class="px-5 py-3 text-center font-semibold {summaryData.individualProgress.delta !== null && summaryData.individualProgress.delta >= 0 ? 'text-success' : 'text-error'}">
 									{summaryData.individualProgress.delta !== null
 										? `${summaryData.individualProgress.delta > 0 ? '+' : ''}${summaryData.individualProgress.delta.toFixed(1)}`
 										: '—'}
 								</td>
-								<td class="px-5 py-3 text-center font-semibold {summaryData.individualProgress.percentChange !== null && summaryData.individualProgress.percentChange >= 0 ? 'text-green-600' : 'text-red-600'}">
+								<td class="px-5 py-3 text-center font-semibold {summaryData.individualProgress.percentChange !== null && summaryData.individualProgress.percentChange >= 0 ? 'text-success' : 'text-error'}">
 									{summaryData.individualProgress.percentChange !== null
 										? `${summaryData.individualProgress.percentChange > 0 ? '+' : ''}${summaryData.individualProgress.percentChange.toFixed(1)}%`
 										: '—'}
@@ -1024,20 +1044,20 @@
 							</tr>
 							{#if stakeholderAveragesByWeek.length > 0}
 								<!-- Stakeholder Average Performance -->
-								<tr class="bg-neutral-50/50">
-									<td class="px-5 py-3 font-medium text-neutral-800">Stakeholders Performance Rating (Avg)</td>
-									<td class="px-5 py-3 text-center text-neutral-700">
+								<tr class="bg-surface-subtle/50">
+									<td class="px-5 py-3 font-medium text-text-primary">Stakeholders Performance Rating (Avg)</td>
+									<td class="px-5 py-3 text-center text-text-secondary">
 										{baseline.stakeholderProgress?.toFixed(1) ?? '—'}
 									</td>
-									<td class="px-5 py-3 text-center text-neutral-700">
+									<td class="px-5 py-3 text-center text-text-secondary">
 										{currentValues.stakeholderProgress?.toFixed(1) ?? '—'}
 									</td>
-									<td class="px-5 py-3 text-center font-semibold {summaryData.stakeholderProgress.delta !== null && summaryData.stakeholderProgress.delta >= 0 ? 'text-green-600' : 'text-red-600'}">
+									<td class="px-5 py-3 text-center font-semibold {summaryData.stakeholderProgress.delta !== null && summaryData.stakeholderProgress.delta >= 0 ? 'text-success' : 'text-error'}">
 										{summaryData.stakeholderProgress.delta !== null
 											? `${summaryData.stakeholderProgress.delta > 0 ? '+' : ''}${summaryData.stakeholderProgress.delta.toFixed(1)}`
 											: '—'}
 									</td>
-									<td class="px-5 py-3 text-center font-semibold {summaryData.stakeholderProgress.percentChange !== null && summaryData.stakeholderProgress.percentChange >= 0 ? 'text-green-600' : 'text-red-600'}">
+									<td class="px-5 py-3 text-center font-semibold {summaryData.stakeholderProgress.percentChange !== null && summaryData.stakeholderProgress.percentChange >= 0 ? 'text-success' : 'text-error'}">
 										{summaryData.stakeholderProgress.percentChange !== null
 											? `${summaryData.stakeholderProgress.percentChange > 0 ? '+' : ''}${summaryData.stakeholderProgress.percentChange.toFixed(1)}%`
 											: '—'}
@@ -1047,23 +1067,23 @@
 								{#if showIndividualStakeholdersInTable}
 									{#each stakeholderSummaryData as stakeholder (stakeholder.stakeholderId)}
 										{#if stakeholder.performance.week1 !== null || stakeholder.performance.current !== null}
-											<tr class="bg-white/50">
-												<td class="px-5 py-2.5 pl-8 text-sm text-neutral-600">
+											<tr class="bg-surface-raised/50">
+												<td class="px-5 py-2.5 pl-8 text-sm text-text-secondary">
 													<span class="font-medium">{stakeholder.stakeholderName}</span>
-													<span class="ml-1 text-xs text-neutral-500">(Performance)</span>
+													<span class="ml-1 text-xs text-text-tertiary">(Performance)</span>
 												</td>
-												<td class="px-5 py-2.5 text-center text-sm text-neutral-600">
+												<td class="px-5 py-2.5 text-center text-sm text-text-secondary">
 													{stakeholder.performance.week1?.toFixed(1) ?? '—'}
 												</td>
-												<td class="px-5 py-2.5 text-center text-sm text-neutral-600">
+												<td class="px-5 py-2.5 text-center text-sm text-text-secondary">
 													{stakeholder.performance.current?.toFixed(1) ?? '—'}
 												</td>
-												<td class="px-5 py-2.5 text-center text-sm font-medium {stakeholder.performance.delta !== null && stakeholder.performance.delta >= 0 ? 'text-green-600' : 'text-red-600'}">
+												<td class="px-5 py-2.5 text-center text-sm font-medium {stakeholder.performance.delta !== null && stakeholder.performance.delta >= 0 ? 'text-success' : 'text-error'}">
 													{stakeholder.performance.delta !== null
 														? `${stakeholder.performance.delta > 0 ? '+' : ''}${stakeholder.performance.delta.toFixed(1)}`
 														: '—'}
 												</td>
-												<td class="px-5 py-2.5 text-center text-sm font-medium {stakeholder.performance.percentChange !== null && stakeholder.performance.percentChange >= 0 ? 'text-green-600' : 'text-red-600'}">
+												<td class="px-5 py-2.5 text-center text-sm font-medium {stakeholder.performance.percentChange !== null && stakeholder.performance.percentChange >= 0 ? 'text-success' : 'text-error'}">
 													{stakeholder.performance.percentChange !== null
 														? `${stakeholder.performance.percentChange > 0 ? '+' : ''}${stakeholder.performance.percentChange.toFixed(1)}%`
 														: '—'}

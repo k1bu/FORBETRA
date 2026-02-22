@@ -2,6 +2,7 @@
 	import type { PageData } from './$types';
 	import CorrelationView from '$lib/components/CorrelationView.svelte';
 	import GapLensView from '$lib/components/GapLensView.svelte';
+	import { FileText, TrendingUp, Sparkles, ThumbsUp, ThumbsDown } from 'lucide-svelte';
 
 	const { data }: { data: PageData } = $props();
 
@@ -166,7 +167,7 @@
 		for (const [key, color] of Object.entries(sectionColors)) {
 			if (title.toLowerCase().includes(key.toLowerCase())) return color;
 		}
-		return 'border-l-neutral-300';
+		return 'border-l-border-strong';
 	}
 
 	async function submitReportFeedback(thumbs: number) {
@@ -184,26 +185,26 @@
 	<!-- Header -->
 	<header class="flex items-center justify-between">
 		<div>
-			<h1 class="text-3xl font-bold text-neutral-900">Insights</h1>
-			<p class="mt-1 text-neutral-600">Track your progress and stability over time</p>
+			<h1 class="text-3xl font-bold text-text-primary">Insights</h1>
+			<p class="mt-1 text-text-secondary">Track your progress and stability over time</p>
 		</div>
 		<a
 			href="/individual"
-			class="rounded-lg border-2 border-neutral-300 bg-white px-4 py-2 text-sm font-semibold text-neutral-700 transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700"
+			class="rounded-lg border border-border-strong bg-surface-raised px-4 py-2 text-sm font-semibold text-text-secondary transition-all hover:border-accent/30 hover:bg-accent-muted hover:text-accent"
 		>
 			← Back to Hub
 		</a>
 	</header>
 
 	<!-- AI Performance Report -->
-	<div class="rounded-2xl border-2 border-purple-200 bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 p-6 shadow-sm">
+	<div class="rounded-lg border border-border-default bg-surface-raised p-6">
 		<div class="mb-4 flex items-center justify-between">
 			<div class="flex items-center gap-2">
-				<span class="text-xl" role="img" aria-label="clipboard">&#128203;</span>
-				<h2 class="text-lg font-bold text-neutral-900">AI Performance Report</h2>
+				<FileText class="h-4 w-4 text-text-muted" />
+				<h2 class="text-lg font-bold text-text-primary">AI Performance Report</h2>
 			</div>
 			{#if reportDate}
-				<span class="text-xs text-neutral-500">
+				<span class="text-xs text-text-tertiary">
 					{new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(reportDate)}
 				</span>
 			{/if}
@@ -214,13 +215,13 @@
 				<!-- Streaming: show sections as they arrive -->
 				<div class="space-y-3">
 					{#each reportSections as section}
-						<div class="rounded-lg border-l-4 bg-white/80 p-4 {getSectionColor(section.title)} animate-in fade-in">
-							<h3 class="mb-2 text-sm font-bold text-neutral-900">{section.title}</h3>
-							<div class="whitespace-pre-line text-sm leading-relaxed text-neutral-700">{section.body}</div>
+						<div class="rounded-lg border-l-4 bg-surface-subtle p-4 {getSectionColor(section.title)} animate-in fade-in">
+							<h3 class="mb-2 text-sm font-bold text-text-primary">{section.title}</h3>
+							<div class="whitespace-pre-line text-sm leading-relaxed text-text-secondary">{section.body}</div>
 						</div>
 					{/each}
 				</div>
-				<div class="mt-3 flex items-center gap-2 text-xs text-purple-600">
+				<div class="mt-3 flex items-center gap-2 text-xs text-accent">
 					<svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
 						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
 						<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
@@ -229,20 +230,20 @@
 				</div>
 			{:else}
 				<div class="flex flex-col items-center justify-center py-12">
-					<svg class="mb-3 h-8 w-8 animate-spin text-purple-500" fill="none" viewBox="0 0 24 24">
+					<svg class="mb-3 h-8 w-8 animate-spin text-accent" fill="none" viewBox="0 0 24 24">
 						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
 						<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
 					</svg>
-					<p class="text-sm font-medium text-purple-700">Analyzing your full cycle data...</p>
-					<p class="mt-1 text-xs text-neutral-500">Sections will appear as they're generated</p>
+					<p class="text-sm font-medium text-accent">Analyzing your full cycle data...</p>
+					<p class="mt-1 text-xs text-text-tertiary">Sections will appear as they're generated</p>
 				</div>
 			{/if}
 		{:else if reportSections.length > 0}
 			<div class="space-y-3">
 				{#each reportSections as section}
-					<div class="rounded-lg border-l-4 bg-white/80 p-4 {getSectionColor(section.title)}">
-						<h3 class="mb-2 text-sm font-bold text-neutral-900">{section.title}</h3>
-						<div class="whitespace-pre-line text-sm leading-relaxed text-neutral-700">{section.body}</div>
+					<div class="rounded-lg border-l-4 bg-surface-subtle p-4 {getSectionColor(section.title)}">
+						<h3 class="mb-2 text-sm font-bold text-text-primary">{section.title}</h3>
+						<div class="whitespace-pre-line text-sm leading-relaxed text-text-secondary">{section.body}</div>
 					</div>
 				{/each}
 			</div>
@@ -251,21 +252,21 @@
 			<div class="mt-4 flex items-center justify-between">
 				<div class="flex gap-1">
 					<button
-						class="rounded px-2 py-1 text-xs transition-colors {reportThumbs === 1 ? 'bg-emerald-100 text-emerald-700' : 'text-neutral-400 hover:bg-neutral-100'}"
+						class="flex items-center gap-1 rounded px-2 py-1 text-xs transition-colors {reportThumbs === 1 ? 'bg-success-muted text-success' : 'text-text-muted hover:bg-surface-subtle'}"
 						onclick={() => submitReportFeedback(1)}
 					>
-						&#128077; Helpful
+						<ThumbsUp class="h-3.5 w-3.5" /> Helpful
 					</button>
 					<button
-						class="rounded px-2 py-1 text-xs transition-colors {reportThumbs === -1 ? 'bg-red-100 text-red-700' : 'text-neutral-400 hover:bg-neutral-100'}"
+						class="flex items-center gap-1 rounded px-2 py-1 text-xs transition-colors {reportThumbs === -1 ? 'bg-error-muted text-error' : 'text-text-muted hover:bg-surface-subtle'}"
 						onclick={() => submitReportFeedback(-1)}
 					>
-						&#128078; Not helpful
+						<ThumbsDown class="h-3.5 w-3.5" /> Not helpful
 					</button>
 				</div>
 				<button
 					onclick={generateReport}
-					class="inline-flex items-center gap-1.5 rounded-lg border border-purple-300 bg-white px-3 py-1.5 text-xs font-semibold text-purple-700 transition-all hover:bg-purple-50"
+					class="inline-flex items-center gap-1.5 rounded-lg border border-accent/30 bg-surface-raised px-3 py-1.5 text-xs font-semibold text-accent transition-all hover:bg-accent-muted"
 				>
 					Regenerate Report
 				</button>
@@ -273,15 +274,15 @@
 		{:else}
 			<!-- Empty state -->
 			<div class="py-8 text-center">
-				<p class="mb-2 text-sm text-neutral-600">
+				<p class="mb-2 text-sm text-text-secondary">
 					Get a comprehensive AI analysis of your full cycle — progress trajectory, perception gaps, strengths, and actionable recommendations.
 				</p>
 				{#if generateError}
-					<p class="mb-3 text-xs text-red-600">{generateError}</p>
+					<p class="mb-3 text-xs text-error">{generateError}</p>
 				{/if}
 				<button
 					onclick={generateReport}
-					class="inline-flex items-center gap-2 rounded-xl bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-purple-700 hover:shadow-lg"
+					class="inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-accent-hover"
 				>
 					Generate AI Report
 				</button>
@@ -291,33 +292,33 @@
 
 	<!-- Reflection Trend -->
 	{#if data.reflectionTrend.weeks.length}
-		<div class="rounded-2xl border-2 border-neutral-200 bg-white p-6 shadow-sm">
+		<div class="rounded-lg border border-border-default bg-surface-raised p-6">
 			<div class="mb-4 flex items-center gap-2">
-				<span class="text-xl" role="img" aria-label="chart trending up">📈</span>
-				<h2 class="text-lg font-bold text-neutral-900">Reflection Trend (Last 4 Weeks)</h2>
+				<TrendingUp class="h-4 w-4 text-text-muted" />
+				<h2 class="text-lg font-bold text-text-primary">Reflection Trend (Last 4 Weeks)</h2>
 			</div>
 			<div class="overflow-x-auto">
 				<table class="min-w-full text-sm">
 					<thead>
-						<tr class="border-b-2 border-neutral-200">
-							<th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-neutral-500">Week</th>
-							<th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-neutral-500">Intention</th>
-							<th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-neutral-500">Effort</th>
-							<th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-neutral-500">Progress</th>
+						<tr class="border-b-2 border-border-default">
+							<th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-text-tertiary">Week</th>
+							<th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-text-tertiary">Intention</th>
+							<th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-text-tertiary">Effort</th>
+							<th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-text-tertiary">Progress</th>
 						</tr>
 					</thead>
 					<tbody>
 						{#each data.reflectionTrend.weeks as week (week.weekNumber)}
-							<tr class="border-b border-neutral-100 transition-colors hover:bg-neutral-50">
-								<td class="px-4 py-3 font-bold text-neutral-900">Week {week.weekNumber}</td>
+							<tr class="border-b border-border-default transition-colors hover:bg-surface-subtle">
+								<td class="px-4 py-3 font-bold text-text-primary">Week {week.weekNumber}</td>
 								<td class="px-4 py-3">
 									{#if week.intentionSubmitted}
-										<span class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+										<span class="inline-flex items-center gap-1 rounded-full bg-success-muted px-3 py-1 text-xs font-semibold text-success">
 											<span>✓</span>
 											Submitted
 										</span>
 									{:else}
-										<span class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
+										<span class="inline-flex items-center gap-1 rounded-full bg-warning-muted px-3 py-1 text-xs font-semibold text-warning">
 											Missing
 										</span>
 									{/if}
@@ -333,13 +334,13 @@
 					</tbody>
 				</table>
 			</div>
-			<div class="mt-4 flex gap-6 rounded-lg bg-neutral-50 px-4 py-3 text-sm">
+			<div class="mt-4 flex gap-6 rounded-lg bg-surface-subtle px-4 py-3 text-sm">
 				<div>
-					<span class="text-neutral-500">Effort avg:</span>
+					<span class="text-text-tertiary">Effort avg:</span>
 					<span class="ml-2 font-bold {getScoreColor(data.reflectionTrend.avgEffort, 'effort')}">{formatAverage(data.reflectionTrend.avgEffort)}</span>
 				</div>
 				<div>
-					<span class="text-neutral-500">Progress avg:</span>
+					<span class="text-text-tertiary">Progress avg:</span>
 					<span class="ml-2 font-bold {getScoreColor(data.reflectionTrend.avgProgress, 'performance')}">{formatAverage(data.reflectionTrend.avgProgress)}</span>
 				</div>
 			</div>
@@ -348,27 +349,27 @@
 
 	<!-- Weekly Insights -->
 	{#if data.insights}
-		<div class="rounded-2xl border-2 border-neutral-200 bg-gradient-to-br from-purple-50 to-pink-50 p-6 shadow-sm">
+		<div class="rounded-lg border border-border-default bg-surface-raised p-6">
 			<div class="mb-4 flex items-center gap-2">
-				<span class="text-xl" role="img" aria-label="sparkles">✨</span>
-				<h2 class="text-lg font-bold text-neutral-900">Weekly Insights</h2>
+				<Sparkles class="h-4 w-4 text-text-muted" />
+				<h2 class="text-lg font-bold text-text-primary">Weekly Insights</h2>
 			</div>
 			<div class="grid gap-4 md:grid-cols-2">
-				<div class="rounded-xl border border-purple-200 bg-white/80 p-4 backdrop-blur-sm">
-					<p class="mb-1 text-xs font-semibold uppercase tracking-wide text-neutral-500">Avg. Effort (4-week)</p>
+				<div class="rounded-lg border border-border-default bg-surface-subtle p-4">
+					<p class="mb-1 text-xs font-semibold uppercase tracking-wide text-text-tertiary">Avg. Effort (4-week)</p>
 					<p class="text-2xl font-bold {getScoreColor(data.insights.avgEffort, 'effort')}">{formatAverage(data.insights.avgEffort)}</p>
 				</div>
-				<div class="rounded-xl border border-purple-200 bg-white/80 p-4 backdrop-blur-sm">
-					<p class="mb-1 text-xs font-semibold uppercase tracking-wide text-neutral-500">Avg. Progress (4-week)</p>
+				<div class="rounded-lg border border-border-default bg-surface-subtle p-4">
+					<p class="mb-1 text-xs font-semibold uppercase tracking-wide text-text-tertiary">Avg. Progress (4-week)</p>
 					<p class="text-2xl font-bold {getScoreColor(data.insights.avgProgress, 'performance')}">{formatAverage(data.insights.avgProgress)}</p>
 				</div>
-				<div class="rounded-xl border border-purple-200 bg-white/80 p-4 backdrop-blur-sm">
-					<p class="mb-1 text-xs font-semibold uppercase tracking-wide text-neutral-500">Stability</p>
+				<div class="rounded-lg border border-border-default bg-surface-subtle p-4">
+					<p class="mb-1 text-xs font-semibold uppercase tracking-wide text-text-tertiary">Stability</p>
 					<p class="text-2xl font-bold {getStabilityColor(data.insights.stabilityScore)}">{formatScore(data.insights.stabilityScore)}</p>
 				</div>
-				<div class="rounded-xl border border-purple-200 bg-white/80 p-4 backdrop-blur-sm">
-					<p class="mb-1 text-xs font-semibold uppercase tracking-wide text-neutral-500">Trajectory</p>
-					<p class="text-2xl font-bold {data.insights.trajectoryScore !== null && data.insights.trajectoryScore !== undefined ? (data.insights.trajectoryScore > 10 ? 'text-emerald-600' : data.insights.trajectoryScore < -10 ? 'text-red-600' : 'text-blue-600') : 'text-neutral-400'}">
+				<div class="rounded-lg border border-border-default bg-surface-subtle p-4">
+					<p class="mb-1 text-xs font-semibold uppercase tracking-wide text-text-tertiary">Trajectory</p>
+					<p class="text-2xl font-bold {data.insights.trajectoryScore !== null && data.insights.trajectoryScore !== undefined ? (data.insights.trajectoryScore > 10 ? 'text-success' : data.insights.trajectoryScore < -10 ? 'text-error' : 'text-accent') : 'text-text-muted'}">
 						{#if data.insights.trajectoryScore !== null && data.insights.trajectoryScore !== undefined}
 							{#if data.insights.trajectoryScore > 10}↑{:else if data.insights.trajectoryScore < -10}↓{:else}→{/if}
 							{data.insights.trajectoryScore > 0 ? '+' : ''}{data.insights.trajectoryScore}
@@ -377,9 +378,9 @@
 						{/if}
 					</p>
 				</div>
-				<div class="rounded-xl border border-purple-200 bg-white/80 p-4 backdrop-blur-sm">
-					<p class="mb-1 text-xs font-semibold uppercase tracking-wide text-neutral-500">Stakeholder Alignment</p>
-					<p class="text-2xl font-bold text-emerald-600">{formatPercent(data.insights.alignmentRatio)}</p>
+				<div class="rounded-lg border border-border-default bg-surface-subtle p-4">
+					<p class="mb-1 text-xs font-semibold uppercase tracking-wide text-text-tertiary">Stakeholder Alignment</p>
+					<p class="text-2xl font-bold text-success">{formatPercent(data.insights.alignmentRatio)}</p>
 				</div>
 			</div>
 		</div>
@@ -387,7 +388,7 @@
 
 	<!-- Correlation View -->
 	{#if data.correlationData && (data.correlationData.individual.length > 0 || data.correlationData.stakeholders.length > 0)}
-		<div class="rounded-2xl border-2 border-neutral-200 bg-white p-6 shadow-sm">
+		<div class="rounded-lg border border-border-default bg-surface-raised p-6">
 			<CorrelationView
 				individualData={data.correlationData.individual}
 				stakeholderData={data.correlationData.stakeholders}
@@ -397,7 +398,7 @@
 
 	<!-- Gap Lens View -->
 	{#if data.gapLensData && (data.gapLensData.effort.length > 0 || data.gapLensData.performance.length > 0)}
-		<div class="rounded-2xl border-2 border-neutral-200 bg-white p-6 shadow-sm">
+		<div class="rounded-lg border border-border-default bg-surface-raised p-6">
 			<GapLensView
 				effortGaps={data.gapLensData.effort}
 				performanceGaps={data.gapLensData.performance}
@@ -406,4 +407,3 @@
 		</div>
 	{/if}
 </section>
-

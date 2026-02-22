@@ -4,6 +4,8 @@ import { fail, redirect } from '@sveltejs/kit';
 import { createHash } from 'crypto';
 import { sendEmail } from '$lib/notifications/email';
 import { emailTemplates } from '$lib/notifications/emailTemplates';
+import { trySendSms } from '$lib/notifications/sms';
+import { smsTemplates } from '$lib/notifications/smsTemplates';
 import type { Actions, PageServerLoad } from './$types';
 
 const hashToken = (token: string) => createHash('sha256').update(token).digest('hex');
@@ -215,7 +217,7 @@ export const actions: Actions = {
 		try {
 			const coach = await prisma.user.findUnique({
 				where: { id: invite.coachId },
-				select: { email: true, name: true }
+				select: { email: true, name: true, phone: true }
 			});
 
 			if (coach) {
@@ -230,6 +232,14 @@ export const actions: Actions = {
 					html: template.html,
 					text: template.text
 				});
+
+				// Send SMS to coach
+				await trySendSms(
+					coach.phone,
+					smsTemplates.coachClientAccepted({
+						clientName: dbUser.name ?? dbUser.email
+					})
+				);
 			}
 		} catch (error) {
 			console.warn('Failed to send coach notification email', error);

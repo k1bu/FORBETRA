@@ -10,6 +10,8 @@ import prisma from '$lib/server/prisma';
 import { generateCycleReport } from '$lib/server/ai/generateInsight';
 import { sendEmail } from '$lib/notifications/email';
 import { emailTemplates } from '$lib/notifications/emailTemplates';
+import { trySendSms } from '$lib/notifications/sms';
+import { smsTemplates } from '$lib/notifications/smsTemplates';
 
 export async function completeExpiredCycles(): Promise<{
 	completed: number;
@@ -30,7 +32,7 @@ export async function completeExpiredCycles(): Promise<{
 		},
 		include: {
 			user: {
-				select: { id: true, email: true, name: true }
+				select: { id: true, email: true, name: true, phone: true }
 			},
 			objective: {
 				select: { title: true }
@@ -91,6 +93,15 @@ export async function completeExpiredCycles(): Promise<{
 			} catch (emailError) {
 				console.error(`[cycles:complete] Failed to send email for cycle ${cycle.id}`, emailError);
 			}
+
+			// Send SMS notification
+			await trySendSms(
+				cycle.user.phone,
+				smsTemplates.cycleCompleted({
+					objectiveTitle: cycle.objective.title,
+					appUrl: baseUrl
+				})
+			);
 
 			completed++;
 		} catch (error) {

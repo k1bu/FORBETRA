@@ -247,7 +247,7 @@
 			// Calculate slope and intercept from correlation line
 			const dx = individualCorrelationLine[1].x - individualCorrelationLine[0].x;
 			const dy = individualCorrelationLine[1].y - individualCorrelationLine[0].y;
-			
+
 			if (Math.abs(dx) > 0.0001) {
 				const slope = dy / dx;
 				const intercept = individualCorrelationLine[0].y - slope * individualCorrelationLine[0].x;
@@ -329,7 +329,7 @@
 			if (stakeholderCorrelation !== null && stakeholderCorrelationLine && stakeholderCorrelationLine.length === 2) {
 				const dx = stakeholderCorrelationLine[1].x - stakeholderCorrelationLine[0].x;
 				const dy = stakeholderCorrelationLine[1].y - stakeholderCorrelationLine[0].y;
-				
+
 				if (Math.abs(dx) > 0.0001) {
 					const slope = dy / dx;
 					const intercept = stakeholderCorrelationLine[0].y - slope * stakeholderCorrelationLine[0].x;
@@ -381,7 +381,7 @@
 				let colorIndex = 0;
 				stakeholderGroups.forEach((points, stakeholderName) => {
 					const color = colors[colorIndex % colors.length];
-					
+
 					// Effort line for this stakeholder
 					datasets.push({
 						label: `${stakeholderName} (Effort)`,
@@ -436,6 +436,11 @@
 						display: false
 					},
 					tooltip: {
+						backgroundColor: '#1c1c20',
+						titleColor: '#f4f5f8',
+						bodyColor: '#a1a1aa',
+						borderColor: 'rgba(255,255,255,0.08)',
+						borderWidth: 1,
 						padding: 12,
 						titleFont: {
 							size: 14,
@@ -465,18 +470,20 @@
 						title: {
 							display: true,
 							text: 'Week',
+							color: '#a1a1aa',
 							font: {
 								size: 12,
 								weight: 600
 							}
 						},
 						ticks: {
+							color: '#a1a1aa',
 							font: {
 								size: 11
 							}
 						},
 						grid: {
-							color: 'rgba(0, 0, 0, 0.05)'
+							color: 'rgba(255, 255, 255, 0.06)'
 						}
 					},
 					y: {
@@ -485,6 +492,7 @@
 						title: {
 							display: true,
 							text: 'Score',
+							color: '#a1a1aa',
 							font: {
 								size: 12,
 								weight: 600
@@ -493,13 +501,14 @@
 						min: 0,
 						max: 10,
 						ticks: {
+							color: '#a1a1aa',
 							stepSize: 2,
 							font: {
 								size: 11
 							}
 						},
 						grid: {
-							color: 'rgba(0, 0, 0, 0.05)'
+							color: 'rgba(255, 255, 255, 0.06)'
 						}
 					}
 				}
@@ -567,8 +576,8 @@
 <div class="space-y-4">
 	<div class="flex items-center justify-between">
 		<div>
-			<h2 class="text-xl font-bold text-neutral-900">Correlation View</h2>
-			<p class="mt-1 text-sm text-neutral-600">
+			<h2 class="text-xl font-bold text-text-primary">Correlation View</h2>
+			<p class="mt-1 text-sm text-text-secondary">
 				See if increases in effort actually drive observable progress over time. When lines move together, there's correlation.
 			</p>
 		</div>
@@ -578,18 +587,18 @@
 					<input
 						type="checkbox"
 						bind:checked={showStakeholders}
-						class="h-4 w-4 rounded border-neutral-300 text-purple-600 focus:ring-purple-500"
+						class="h-4 w-4 rounded border-border-strong text-accent focus:ring-accent"
 					/>
-					<span class="text-sm font-semibold text-neutral-700">Show Stakeholders</span>
+					<span class="text-sm font-semibold text-text-secondary">Show Stakeholders</span>
 				</label>
 				{#if showStakeholders}
 					<label class="flex items-center gap-2">
 						<input
 							type="checkbox"
 							bind:checked={showIndividualStakeholders}
-							class="h-4 w-4 rounded border-neutral-300 text-emerald-600 focus:ring-emerald-500"
+							class="h-4 w-4 rounded border-border-strong text-success focus:ring-success"
 						/>
-						<span class="text-xs font-semibold text-neutral-600">Show Individual Lines</span>
+						<span class="text-xs font-semibold text-text-secondary">Show Individual Lines</span>
 					</label>
 				{/if}
 			</div>
@@ -598,35 +607,35 @@
 
 	<!-- Correlation indicators -->
 	{#if individualCorrelation !== null}
-		<div class="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
+		<div class="rounded-lg border border-border-default bg-surface-raised p-4">
 			<div class="flex gap-6">
 				<div class="flex-1">
-					<div class="text-xs font-semibold text-neutral-500 uppercase tracking-wide">My Correlation</div>
+					<div class="text-xs font-semibold text-text-tertiary uppercase tracking-wide">My Correlation</div>
 					<div class="mt-1 flex items-baseline gap-2">
-						<span class="text-2xl font-bold text-neutral-900">
+						<span class="text-2xl font-bold text-text-primary">
 							{individualCorrelation.toFixed(2)}
 						</span>
-						<span class="text-sm font-medium text-neutral-600">
+						<span class="text-sm font-medium text-text-secondary">
 							({getCorrelationInterpretation(individualCorrelation)} {getCorrelationDirection(individualCorrelation)})
 						</span>
 					</div>
 				</div>
 				{#if stakeholderCorrelation !== null}
-					<div class="flex-1 border-l border-neutral-300 pl-6">
-						<div class="text-xs font-semibold text-neutral-500 uppercase tracking-wide">Stakeholders Correlation</div>
+					<div class="flex-1 border-l border-border-strong pl-6">
+						<div class="text-xs font-semibold text-text-tertiary uppercase tracking-wide">Stakeholders Correlation</div>
 						<div class="mt-1 flex items-baseline gap-2">
-							<span class="text-2xl font-bold text-neutral-900">
+							<span class="text-2xl font-bold text-text-primary">
 								{stakeholderCorrelation.toFixed(2)}
 							</span>
-							<span class="text-sm font-medium text-neutral-600">
+							<span class="text-sm font-medium text-text-secondary">
 								({getCorrelationInterpretation(stakeholderCorrelation)} {getCorrelationDirection(stakeholderCorrelation)})
 							</span>
 						</div>
 					</div>
 				{/if}
 			</div>
-			<div class="mt-3 border-t border-neutral-200 pt-3">
-				<p class="text-xs text-neutral-600">
+			<div class="mt-3 border-t border-border-default pt-3">
+				<p class="text-xs text-text-secondary">
 					<strong>What this means:</strong> Correlation measures how effort and performance move together.
 					Values range from -1 to +1. Close to +1 means they move in sync (when effort rises, performance rises).
 					Close to -1 means they move opposite. Near 0 means little relationship. The solid lines on the chart show the correlation trend.
@@ -636,61 +645,61 @@
 	{/if}
 
 	<!-- Custom Legend/Key -->
-	<div class="grid grid-cols-2 gap-4 rounded-lg border border-neutral-200 bg-white p-4">
+	<div class="grid grid-cols-2 gap-4 rounded-lg border border-border-default bg-surface-raised p-4">
 		<div>
-			<div class="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-500">Correlation Lines</div>
+			<div class="mb-2 text-xs font-semibold uppercase tracking-wide text-text-tertiary">Correlation Lines</div>
 			<div class="space-y-2">
 				<div class="flex items-center gap-2">
-					<div class="h-1 w-8 rounded-full bg-amber-600"></div>
-					<span class="text-sm font-medium text-neutral-700">My Correlation</span>
+					<div class="h-1 w-8 rounded-full bg-cyan-500"></div>
+					<span class="text-sm font-medium text-text-secondary">My Correlation</span>
 					{#if individualCorrelation !== null}
-						<span class="text-xs text-neutral-500">(r={individualCorrelation.toFixed(2)})</span>
+						<span class="text-xs text-text-tertiary">(r={individualCorrelation.toFixed(2)})</span>
 					{/if}
 				</div>
 				{#if showStakeholders && stakeholderCorrelation !== null}
 					<div class="flex items-center gap-2">
 						<div class="h-1 w-8 rounded-full bg-emerald-600"></div>
-						<span class="text-sm font-medium text-neutral-700">Stakeholders Correlation</span>
-						<span class="text-xs text-neutral-500">(r={stakeholderCorrelation.toFixed(2)})</span>
+						<span class="text-sm font-medium text-text-secondary">Stakeholders Correlation</span>
+						<span class="text-xs text-text-tertiary">(r={stakeholderCorrelation.toFixed(2)})</span>
 					</div>
 				{/if}
 			</div>
 		</div>
 		<div>
-			<div class="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-500">Individual Lines</div>
+			<div class="mb-2 text-xs font-semibold uppercase tracking-wide text-text-tertiary">Individual Lines</div>
 			<div class="space-y-2">
 				<div class="flex items-center gap-2">
-					<div class="h-0.5 w-8 border-t-2 border-dashed border-amber-600/50"></div>
-					<span class="text-sm text-neutral-600">My Effort</span>
+					<div class="h-0.5 w-8 border-t-2 border-dashed border-cyan-500/50"></div>
+					<span class="text-sm text-text-secondary">My Effort</span>
 				</div>
 				<div class="flex items-center gap-2">
-					<div class="h-0.5 w-8 border-t-2 border-dashed border-indigo-600/50"></div>
-					<span class="text-sm text-neutral-600">My Performance</span>
+					<div class="h-0.5 w-8 border-t-2 border-dashed border-amber-500/50"></div>
+					<span class="text-sm text-text-secondary">My Performance</span>
 				</div>
 				{#if showStakeholders}
 					<div class="flex items-center gap-2">
 						<div class="h-0.5 w-8 border-t-2 border-dashed border-emerald-600/50"></div>
-						<span class="text-sm text-neutral-600">Stakeholders Effort (Avg)</span>
+						<span class="text-sm text-text-secondary">Stakeholders Effort (Avg)</span>
 					</div>
 					<div class="flex items-center gap-2">
 						<div class="h-0.5 w-8 border-t-2 border-dashed border-red-600/50"></div>
-						<span class="text-sm text-neutral-600">Stakeholders Performance (Avg)</span>
+						<span class="text-sm text-text-secondary">Stakeholders Performance (Avg)</span>
 					</div>
 				{/if}
 			</div>
 		</div>
 	</div>
 
-	<div class="h-[400px] w-full rounded-xl border-2 border-neutral-200 bg-white p-6">
+	<div class="h-[400px] w-full rounded-xl border border-border-default bg-surface-raised p-6">
 		{#if individualData.length >= 3 || stakeholderData.length >= 3}
 			<canvas bind:this={chartCanvas}></canvas>
 		{:else if individualData.length > 0 || stakeholderData.length > 0}
-			<div class="flex h-full flex-col items-center justify-center gap-2 text-neutral-500">
+			<div class="flex h-full flex-col items-center justify-center gap-2 text-text-tertiary">
 				<p class="text-sm font-medium">Correlation patterns need at least 3 weeks of data.</p>
 				<p class="text-xs">You're on week {Math.max(...individualData.map(d => d.weekNumber), ...stakeholderData.map(d => d.weekNumber), 1)}. Keep going!</p>
 			</div>
 		{:else}
-			<div class="flex h-full items-center justify-center text-neutral-500">
+			<div class="flex h-full items-center justify-center text-text-tertiary">
 				<p>Not enough data to display correlation view. Complete more check-ins to see the relationship between effort and performance over time.</p>
 			</div>
 		{/if}
