@@ -59,7 +59,7 @@
 		</a>
 		<a
 			href="/coach/analytics"
-			class="group relative overflow-hidden rounded-2xl border-2 border-neutral-200 bg-gradient-to-br from-red-50 to-orange-50 p-6 shadow-sm transition-all hover:border-red-300 hover:shadow-md"
+			class="group relative overflow-hidden rounded-2xl border-2 border-neutral-200 bg-gradient-to-br from-amber-50 to-amber-50/50 p-6 shadow-sm transition-all hover:border-amber-300 hover:shadow-md"
 		>
 			<div class="mb-3 flex items-center gap-2">
 				<span class="text-2xl" role="img" aria-label="warning">⚠️</span>
@@ -67,13 +67,13 @@
 			</div>
 			<p class="text-4xl font-bold text-neutral-900">{data.analytics.totalAlerts}</p>
 			{#if data.analytics.highPriorityAlerts > 0}
-				<p class="mt-2 text-xs font-semibold text-red-700">
+				<p class="mt-2 inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700">
 					{data.analytics.highPriorityAlerts} high priority
 				</p>
 			{:else if data.analytics.totalAlerts === 0}
-				<p class="mt-2 text-xs text-emerald-600">All clear! 🎉</p>
+				<p class="mt-2 text-xs text-emerald-600">All clear!</p>
 			{/if}
-			<div class="mt-3 text-xs font-semibold text-red-700 opacity-0 transition-opacity group-hover:opacity-100">
+			<div class="mt-3 text-xs font-semibold text-amber-700 opacity-0 transition-opacity group-hover:opacity-100">
 				View analytics →
 			</div>
 		</a>
@@ -97,7 +97,7 @@
 		</a>
 		<a
 			href="/coach/analytics"
-			class="group relative overflow-hidden rounded-2xl border-2 border-neutral-200 bg-gradient-to-br from-purple-50 to-pink-50 p-6 shadow-sm transition-all hover:border-purple-300 hover:shadow-md"
+			class="group relative overflow-hidden rounded-2xl border-2 border-neutral-200 bg-gradient-to-br from-blue-50 to-blue-50/50 p-6 shadow-sm transition-all hover:border-blue-300 hover:shadow-md"
 		>
 			<div class="mb-3 flex items-center gap-2">
 				<span class="text-2xl" role="img" aria-label="target">🎯</span>
@@ -107,9 +107,9 @@
 				{data.analytics.avgAlignment !== null ? `${data.analytics.avgAlignment}%` : '—'}
 			</p>
 			{#if data.analytics.avgAlignment !== null && data.analytics.avgAlignment >= 80}
-				<p class="mt-2 text-xs text-emerald-600">Strong alignment! 🎉</p>
+				<p class="mt-2 text-xs text-emerald-600">Strong alignment!</p>
 			{/if}
-			<div class="mt-3 text-xs font-semibold text-purple-700 opacity-0 transition-opacity group-hover:opacity-100">
+			<div class="mt-3 text-xs font-semibold text-blue-700 opacity-0 transition-opacity group-hover:opacity-100">
 				View analytics →
 			</div>
 		</a>
@@ -117,7 +117,7 @@
 
 	<!-- Recent Alerts Preview -->
 	{#if data.recentAlerts.length > 0}
-		<section class="rounded-2xl border-2 border-red-200 bg-gradient-to-br from-red-50 to-orange-50 p-6 shadow-sm">
+		<section class="rounded-2xl border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-amber-50/30 p-6 shadow-sm">
 			<div class="mb-4 flex items-center justify-between">
 				<div class="flex items-center gap-2">
 					<span class="text-2xl" role="img" aria-label="warning">⚠️</span>
@@ -163,7 +163,7 @@
 			class="group relative overflow-hidden rounded-2xl border-2 border-neutral-200 bg-gradient-to-br from-white to-blue-50/30 p-8 shadow-sm transition-all hover:border-blue-300 hover:shadow-lg"
 		>
 			<div class="mb-4 flex items-center gap-3">
-				<div class="rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 p-3">
+				<div class="rounded-xl bg-blue-100 p-3">
 					<span class="text-2xl" role="img" aria-label="bar chart">📊</span>
 				</div>
 				<h2 class="text-xl font-bold text-neutral-900">Analytics</h2>
@@ -179,22 +179,22 @@
 
 		<a
 			href="/coach/invitations"
-			class="group relative overflow-hidden rounded-2xl border-2 border-neutral-200 bg-gradient-to-br from-white to-purple-50/30 p-8 shadow-sm transition-all hover:border-purple-300 hover:shadow-lg"
+			class="group relative overflow-hidden rounded-2xl border-2 border-neutral-200 bg-gradient-to-br from-white to-slate-50/30 p-8 shadow-sm transition-all hover:border-slate-300 hover:shadow-lg"
 		>
 			<div class="mb-4 flex items-center gap-3">
-				<div class="rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 p-3">
+				<div class="rounded-xl bg-slate-100 p-3">
 					<span class="text-2xl" role="img" aria-label="envelope">✉️</span>
 				</div>
 				<h2 class="text-xl font-bold text-neutral-900">Invitations</h2>
 			</div>
 			<p class="mb-4 text-sm text-neutral-600">
 				Send invitations to new clients and manage active invites. {#if data.rosterSummary.pendingInvites > 0}
-					<span class="font-semibold text-purple-700"
+					<span class="font-semibold text-blue-700"
 						>{data.rosterSummary.pendingInvites} pending</span
 					>.
 				{/if}
 			</p>
-			<div class="flex items-center gap-2 text-sm font-semibold text-purple-700 transition-transform group-hover:translate-x-1">
+			<div class="flex items-center gap-2 text-sm font-semibold text-slate-700 transition-transform group-hover:translate-x-1">
 				Manage Invitations
 				<span>→</span>
 			</div>
@@ -205,7 +205,7 @@
 			class="group relative overflow-hidden rounded-2xl border-2 border-neutral-200 bg-gradient-to-br from-white to-emerald-50/30 p-8 shadow-sm transition-all hover:border-emerald-300 hover:shadow-lg"
 		>
 			<div class="mb-4 flex items-center gap-3">
-				<div class="rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 p-3">
+				<div class="rounded-xl bg-emerald-100 p-3">
 					<span class="text-2xl" role="img" aria-label="clipboard">📋</span>
 				</div>
 				<h2 class="text-xl font-bold text-neutral-900">Client Roster</h2>

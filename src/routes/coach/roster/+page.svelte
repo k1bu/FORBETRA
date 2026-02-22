@@ -90,13 +90,13 @@
 					createdAt: new Date(result.createdAt)
 				};
 				data = data;
-				addToast('Coach prep generated', 'success');
+				addToast('Coaching insights generated', 'success');
 			} else {
-				addToast('Failed to generate prep', 'error');
+				addToast('Failed to generate insights', 'error');
 			}
 		} catch (err) {
-			console.error('Failed to generate coach prep', err);
-			addToast('Failed to generate prep', 'error');
+			console.error('Failed to generate coaching insights', err);
+			addToast('Failed to generate insights', 'error');
 		} finally {
 			generatingPrepFor = null;
 		}
@@ -160,12 +160,13 @@
 	<!-- Header -->
 	<header class="flex items-center justify-between">
 		<div>
-			<a
-				href="/coach"
-				class="mb-2 inline-flex items-center gap-2 text-sm font-semibold text-neutral-600 hover:text-neutral-900"
-			>
-				← Back to Hub
-			</a>
+			<nav aria-label="Breadcrumb" class="mb-2">
+				<ol class="flex items-center gap-1.5 text-sm text-neutral-500">
+					<li><a href="/coach" class="rounded transition-colors hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">Coach Hub</a></li>
+					<li aria-hidden="true" class="text-neutral-400"><svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg></li>
+					<li><span class="font-medium text-neutral-900">Roster</span></li>
+				</ol>
+			</nav>
 			<h1 class="text-3xl font-bold text-neutral-900">Client Roster</h1>
 			<p class="mt-2 text-neutral-600">Review active and archived individuals linked to your practice</p>
 		</div>
@@ -394,14 +395,14 @@
 							{/if}
 						{/if}
 
-						<!-- AI Coach Prep -->
+						<!-- AI Coaching Insights -->
 						{#if !client.archived && data.coachPrepMap[client.id]}
 							{@const prep = data.coachPrepMap[client.id]}
 							<section class="rounded-xl border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 p-4">
 								<div class="mb-3 flex items-center justify-between">
 									<div class="flex items-center gap-2">
 										<span class="text-lg" role="img" aria-label="sparkles">&#10024;</span>
-										<h3 class="text-sm font-bold text-neutral-900">AI Coach Prep</h3>
+										<h3 class="text-sm font-bold text-neutral-900">AI Coaching Insights</h3>
 										<span class="text-xs text-neutral-500">{formatRelativeDays(prep.createdAt?.toString())}</span>
 									</div>
 									<button
@@ -410,7 +411,7 @@
 										onclick={() => generatePrep(client.id)}
 										class="rounded-lg border-2 border-indigo-300 bg-white px-3 py-1.5 text-xs font-semibold text-indigo-700 transition-all hover:border-indigo-400 hover:bg-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed"
 									>
-										{generatingPrepFor === client.id ? 'Generating...' : 'Refresh Prep'}
+										{generatingPrepFor === client.id ? 'Generating...' : 'Refresh Insights'}
 									</button>
 								</div>
 								{#if data.alertMap[client.id]?.length}
@@ -422,7 +423,7 @@
 									</div>
 								{/if}
 								<div class="prose prose-sm max-w-none text-neutral-700">
-									{prep.content ?? 'No prep available.'}
+									{prep.content ?? 'No insights available.'}
 								</div>
 							</section>
 						{:else if !client.archived && client.objective?.cycle}
@@ -430,7 +431,7 @@
 								<div class="flex items-center justify-between">
 									<div class="flex items-center gap-2">
 										<span class="text-lg" role="img" aria-label="sparkles">&#10024;</span>
-										<h3 class="text-sm font-bold text-neutral-900">AI Coach Prep</h3>
+										<h3 class="text-sm font-bold text-neutral-900">AI Coaching Insights</h3>
 										<span class="text-xs text-neutral-500">Not yet generated</span>
 									</div>
 									<button
@@ -439,7 +440,7 @@
 										onclick={() => generatePrep(client.id)}
 										class="rounded-lg border-2 border-indigo-300 bg-white px-3 py-1.5 text-xs font-semibold text-indigo-700 transition-all hover:border-indigo-400 hover:bg-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed"
 									>
-										{generatingPrepFor === client.id ? 'Generating...' : 'Generate Prep'}
+										{generatingPrepFor === client.id ? 'Generating...' : 'Generate Insights'}
 									</button>
 								</div>
 							</section>

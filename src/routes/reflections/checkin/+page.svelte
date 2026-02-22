@@ -227,13 +227,14 @@
 						class="flex h-16 w-16 items-center justify-center rounded-full border-2 transition-all {getScoreBgColor(
 							effortScore, 'effort'
 						)}"
+						aria-valuetext="Effort score: {effortScore} out of 10"
 					>
 						<span class="text-2xl font-bold {getScoreColor(effortScore, 'effort')}">{effortScore}</span>
 					</div>
 				</div>
 
 				<!-- Button Grid (Primary Input) -->
-				<div class="mb-4 grid grid-cols-6 gap-2 sm:grid-cols-11">
+				<div class="mb-4 grid grid-cols-6 gap-2 sm:grid-cols-11" role="radiogroup" aria-label="Effort score selection">
 					{#each Array(11) as _, i}
 						{@const isSelected = effortScore === i}
 						{@const buttonColors = getButtonSelectedColors(i, 'effort')}
@@ -243,6 +244,8 @@
 							type="button"
 							onclick={() => (effortScore = i)}
 							disabled={!data.isAvailable || data.isLocked}
+							aria-pressed={isSelected}
+							aria-label="Score {i} out of 10"
 							class="flex h-10 w-full items-center justify-center rounded-lg border-2 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-60 {isSelected
 								? buttonColors + ' shadow-md'
 								: 'border-neutral-300 bg-white text-neutral-700 ' + hoverColors} focus:outline-none focus:ring-2 {focusRing} focus:ring-offset-2"
@@ -286,13 +289,14 @@
 						class="flex h-16 w-16 items-center justify-center rounded-full border-2 transition-all {getScoreBgColor(
 							performanceScore, 'performance'
 						)}"
+						aria-valuetext="Performance score: {performanceScore} out of 10"
 					>
 						<span class="text-2xl font-bold {getScoreColor(performanceScore, 'performance')}">{performanceScore}</span>
 					</div>
 				</div>
 
 				<!-- Button Grid (Primary Input) -->
-				<div class="mb-4 grid grid-cols-6 gap-2 sm:grid-cols-11">
+				<div class="mb-4 grid grid-cols-6 gap-2 sm:grid-cols-11" role="radiogroup" aria-label="Performance score selection">
 					{#each Array(11) as _, i}
 						{@const isSelected = performanceScore === i}
 						{@const buttonColors = getButtonSelectedColors(i, 'performance')}
@@ -302,6 +306,8 @@
 							type="button"
 							onclick={() => (performanceScore = i)}
 							disabled={!data.isAvailable || data.isLocked}
+							aria-pressed={isSelected}
+							aria-label="Score {i} out of 10"
 							class="flex h-10 w-full items-center justify-center rounded-lg border-2 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-60 {isSelected
 								? buttonColors + ' shadow-md'
 								: 'border-neutral-300 bg-white text-neutral-700 ' + hoverColors} focus:outline-none focus:ring-2 {focusRing} focus:ring-offset-2"

@@ -446,7 +446,7 @@
 				</div>
 
 				<div class="mb-2 flex items-center justify-between">
-					<span class="text-xs font-medium text-neutral-500">Minimal</span>
+					<span class="text-xs font-medium text-neutral-500">Rarely intentional</span>
 					<div
 						class="rounded-full px-3 py-1 text-xs font-semibold {getScoreBgColor(
 							effortScore, 'effort'
@@ -454,7 +454,7 @@
 					>
 						{getScoreLabel(effortScore, 'effort')}
 					</div>
-					<span class="text-xs font-medium text-neutral-500">Exceptional</span>
+					<span class="text-xs font-medium text-neutral-500">Relentless commitment</span>
 				</div>
 				<p class="text-xs text-neutral-400 italic">
 					Consider attention, preparation, and prioritization toward the objective.
@@ -508,7 +508,7 @@
 				</div>
 
 				<div class="mb-2 flex items-center justify-between">
-					<span class="text-xs font-medium text-neutral-500">Limited</span>
+					<span class="text-xs font-medium text-neutral-500">Not yet visible</span>
 					<div
 						class="rounded-full px-3 py-1 text-xs font-semibold {getScoreBgColor(
 							performanceScore, 'performance'
@@ -516,7 +516,7 @@
 					>
 						{getScoreLabel(performanceScore, 'progress')}
 					</div>
-					<span class="text-xs font-medium text-neutral-500">Exceptional</span>
+					<span class="text-xs font-medium text-neutral-500">Transformative impact</span>
 				</div>
 				<p class="text-xs text-neutral-400 italic">
 					Consider outcomes, behavior change, and visible impact related to the objective.

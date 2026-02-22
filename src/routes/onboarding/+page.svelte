@@ -308,6 +308,38 @@
 
 	const getError = (path: string) => errors[path]?.[0];
 
+	// Client-side validation state
+	let clientErrors: Record<string, string> = {};
+	const validateField = (field: string) => {
+		switch (field) {
+			case 'objectiveTitle':
+				if (objectiveTitle.trim().length === 0) clientErrors = { ...clientErrors, objectiveTitle: 'Objective title is required.' };
+				else if (objectiveTitle.trim().length < 3) clientErrors = { ...clientErrors, objectiveTitle: 'Title must be at least 3 characters.' };
+				else { const { objectiveTitle: _, ...rest } = clientErrors; clientErrors = rest; }
+				break;
+			case 'cycleStartDate':
+				if (cycleStartDate) {
+					const today = new Date(); today.setHours(0, 0, 0, 0);
+					const start = new Date(cycleStartDate + 'T00:00:00');
+					if (start < today) clientErrors = { ...clientErrors, cycleStartDate: 'Start date cannot be in the past.' };
+					else { const { cycleStartDate: _, ...rest } = clientErrors; clientErrors = rest; }
+				}
+				break;
+			default:
+				if (field.startsWith('stakeholderEmail')) {
+					const idx = Number(field.replace('stakeholderEmail', '')) - 1;
+					const email = stakeholderForms[idx]?.email ?? '';
+					if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+						clientErrors = { ...clientErrors, [field]: 'Please enter a valid email address.' };
+					} else {
+						const { [field]: _, ...rest } = clientErrors;
+						clientErrors = rest;
+					}
+				}
+		}
+	};
+	const getClientError = (field: string) => clientErrors[field] ?? null;
+
 	$: selectedContext =
 		selectedContextId !== null
 			? contexts.find((context) => context.id === selectedContextId) ?? null
@@ -542,11 +574,14 @@
 										type="text"
 										required
 										placeholder="e.g., Enhance strategic thinking"
-										class="w-full rounded-xl border-2 border-slate-300 px-4 py-3 text-slate-900 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+										class="w-full rounded-xl border-2 px-4 py-3 text-slate-900 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 {getClientError('objectiveTitle') ? 'border-red-400' : 'border-slate-300'}"
 										value={objectiveTitle}
-										oninput={(event) => (objectiveTitle = event.currentTarget.value)}
+										oninput={(event) => { objectiveTitle = event.currentTarget.value; if (getClientError('objectiveTitle')) validateField('objectiveTitle'); }}
+										onblur={() => validateField('objectiveTitle')}
 									/>
-									{#if getError('objectiveTitle')}
+									{#if getClientError('objectiveTitle')}
+										<p class="text-sm text-red-600">{getClientError('objectiveTitle')}</p>
+									{:else if getError('objectiveTitle')}
 										<p class="text-sm text-red-600">{getError('objectiveTitle')}</p>
 									{:else if objectiveTitle.trim().length > 0}
 										<p class="text-sm text-green-600">✓ Looks great!</p>
@@ -752,11 +787,14 @@
 										name="cycleStartDate"
 										type="date"
 										required
-										class="w-full rounded-xl border-2 border-slate-300 px-4 py-3 text-slate-900 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+										class="w-full rounded-xl border-2 px-4 py-3 text-slate-900 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 {getClientError('cycleStartDate') ? 'border-red-400' : 'border-slate-300'}"
 										value={cycleStartDate}
-										oninput={(event) => (cycleStartDate = event.currentTarget.value)}
+										oninput={(event) => { cycleStartDate = event.currentTarget.value; validateField('cycleStartDate'); }}
+										onblur={() => validateField('cycleStartDate')}
 									/>
-									{#if getError('cycleStartDate')}
+									{#if getClientError('cycleStartDate')}
+										<p class="text-sm text-red-600">{getClientError('cycleStartDate')}</p>
+									{:else if getError('cycleStartDate')}
 										<p class="text-sm text-red-600">{getError('cycleStartDate')}</p>
 									{/if}
 								</div>
@@ -1190,12 +1228,17 @@
 													name={`stakeholderEmail${index + 1}`}
 													type="email"
 													placeholder="john@example.com"
-													class="w-full rounded-lg border-2 border-slate-300 px-4 py-2 text-slate-900 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+													class="w-full rounded-lg border-2 px-4 py-2 text-slate-900 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 {getClientError(`stakeholderEmail${index + 1}`) ? 'border-red-400' : 'border-slate-300'}"
 													value={stakeholder.email}
-													oninput={(event) =>
-														updateStakeholderField(index, 'email', event.currentTarget.value)}
+													oninput={(event) => {
+														updateStakeholderField(index, 'email', event.currentTarget.value);
+														if (getClientError(`stakeholderEmail${index + 1}`)) validateField(`stakeholderEmail${index + 1}`);
+													}}
+													onblur={() => validateField(`stakeholderEmail${index + 1}`)}
 												/>
-												{#if getError(`stakeholders.${index}.email`)}
+												{#if getClientError(`stakeholderEmail${index + 1}`)}
+													<p class="text-sm text-red-600">{getClientError(`stakeholderEmail${index + 1}`)}</p>
+												{:else if getError(`stakeholders.${index}.email`)}
 													<p class="text-sm text-red-600">{getError(`stakeholders.${index}.email`)}</p>
 												{/if}
 											</div>

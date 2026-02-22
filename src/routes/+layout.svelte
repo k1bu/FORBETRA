@@ -51,19 +51,58 @@
 						{#if data.dbUser.role === 'INDIVIDUAL' && !isRoleSelection}
 							<a
 								href="/individual"
-								class="text-sm transition-colors hover:text-black {isActive('/individual') ? 'font-semibold text-black' : 'text-neutral-600'}"
+								class="rounded text-sm transition-colors hover:text-black focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 {isActive('/individual') ? 'font-semibold text-black' : 'text-neutral-600'}"
 								aria-current={isActive('/individual') ? 'page' : undefined}
 							>
 								Individual Hub
 							</a>
 						{/if}
+						{#if data.dbUser.role === 'COACH' && !isRoleSelection}
+							<a
+								href="/coach"
+								class="rounded text-sm transition-colors hover:text-black focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 {isActive('/coach') && !isActive('/coach/roster') && !isActive('/coach/invitations') && !isActive('/coach/analytics') ? 'font-semibold text-black' : 'text-neutral-600'}"
+								aria-current={isActive('/coach') && !isActive('/coach/roster') && !isActive('/coach/invitations') && !isActive('/coach/analytics') ? 'page' : undefined}
+							>
+								Coach Hub
+							</a>
+							<a
+								href="/coach/roster"
+								class="rounded text-sm transition-colors hover:text-black focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 {isActive('/coach/roster') ? 'font-semibold text-black' : 'text-neutral-600'}"
+								aria-current={isActive('/coach/roster') ? 'page' : undefined}
+							>
+								Roster
+							</a>
+							<a
+								href="/coach/invitations"
+								class="rounded text-sm transition-colors hover:text-black focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 {isActive('/coach/invitations') ? 'font-semibold text-black' : 'text-neutral-600'}"
+								aria-current={isActive('/coach/invitations') ? 'page' : undefined}
+							>
+								Invitations
+							</a>
+							<a
+								href="/coach/analytics"
+								class="rounded text-sm transition-colors hover:text-black focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 {isActive('/coach/analytics') ? 'font-semibold text-black' : 'text-neutral-600'}"
+								aria-current={isActive('/coach/analytics') ? 'page' : undefined}
+							>
+								Analytics
+							</a>
+						{/if}
 						{#if data.dbUser.role === 'ADMIN'}
 							<a
 								href="/admin/users"
-								class="text-sm transition-colors hover:text-black {isActive('/admin') ? 'font-semibold text-black' : 'text-neutral-600'}"
+								class="rounded text-sm transition-colors hover:text-black focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 {isActive('/admin') ? 'font-semibold text-black' : 'text-neutral-600'}"
 								aria-current={isActive('/admin') ? 'page' : undefined}
 							>
 								Admin Console
+							</a>
+						{/if}
+						{#if !isRoleSelection}
+							<a
+								href="/settings"
+								class="rounded text-sm transition-colors hover:text-black focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 {isActive('/settings') ? 'font-semibold text-black' : 'text-neutral-600'}"
+								aria-current={isActive('/settings') ? 'page' : undefined}
+							>
+								Settings
 							</a>
 						{/if}
 						{#if displayRole}
@@ -77,7 +116,26 @@
 	</SignedIn>
 
 	<main id="main-content" class={`min-h-screen ${data.dbUser ? 'p-4' : ''}`}>
-		{@render children()}
+		{#key $page.url.pathname}
+			<div class="animate-fade-in">
+				{@render children()}
+			</div>
+		{/key}
 	</main>
 	<ToastContainer />
 </ClerkProvider>
+
+<style>
+	.animate-fade-in {
+		animation: fadeIn 0.15s ease-out;
+	}
+
+	@keyframes fadeIn {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+</style>

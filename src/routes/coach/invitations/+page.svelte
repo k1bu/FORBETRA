@@ -74,6 +74,15 @@
 		}).format(new Date(value));
 	};
 
+	let emailError = '';
+	const validateEmail = (email: string) => {
+		if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+			emailError = 'Please enter a valid email address.';
+		} else {
+			emailError = '';
+		}
+	};
+
 	const formatTimeFromNow = (value: string | null | undefined) => {
 		if (!value) return '—';
 		const diff = new Date(value).getTime() - Date.now();
@@ -88,12 +97,13 @@
 	<!-- Header -->
 	<header class="flex items-center justify-between">
 		<div>
-			<a
-				href="/coach"
-				class="mb-2 inline-flex items-center gap-2 text-sm font-semibold text-neutral-600 hover:text-neutral-900"
-			>
-				← Back to Hub
-			</a>
+			<nav aria-label="Breadcrumb" class="mb-2">
+				<ol class="flex items-center gap-1.5 text-sm text-neutral-500">
+					<li><a href="/coach" class="rounded transition-colors hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">Coach Hub</a></li>
+					<li aria-hidden="true" class="text-neutral-400"><svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg></li>
+					<li><span class="font-medium text-neutral-900">Invitations</span></li>
+				</ol>
+			</nav>
 			<h1 class="text-3xl font-bold text-neutral-900">Manage Invitations</h1>
 			<p class="mt-2 text-neutral-600">Send invitations to new clients and track active invites</p>
 		</div>
@@ -146,11 +156,16 @@
 						<input
 							type="email"
 							name="email"
-							class="w-full rounded-xl border-2 border-neutral-300 bg-white px-4 py-2.5 text-sm transition-all focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200"
+							class="w-full rounded-xl border-2 bg-white px-4 py-2.5 text-sm transition-all focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200 {emailError ? 'border-red-400' : 'border-neutral-300'}"
 							placeholder="alex@example.com"
 							required
 							value={form?.values?.email}
+							on:blur={(e) => validateEmail(e.currentTarget.value)}
+							on:input={(e) => { if (emailError) validateEmail(e.currentTarget.value); }}
 						/>
+						{#if emailError}
+							<p class="text-xs text-red-600">{emailError}</p>
+						{/if}
 					</label>
 					<label class="space-y-1 text-sm">
 						<span class="font-semibold text-neutral-700">Name (optional)</span>

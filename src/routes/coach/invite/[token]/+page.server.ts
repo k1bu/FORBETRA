@@ -2,6 +2,8 @@ import prisma from '$lib/server/prisma';
 import { getOptionalAuth } from '$lib/server/auth';
 import { fail, redirect } from '@sveltejs/kit';
 import { createHash } from 'crypto';
+import { sendEmail } from '$lib/notifications/email';
+import { emailTemplates } from '$lib/notifications/emailTemplates';
 import type { Actions, PageServerLoad } from './$types';
 
 const hashToken = (token: string) => createHash('sha256').update(token).digest('hex');
@@ -208,6 +210,30 @@ export const actions: Actions = {
 				}
 			});
 		});
+
+		// Notify the coach that their invite was accepted
+		try {
+			const coach = await prisma.user.findUnique({
+				where: { id: invite.coachId },
+				select: { email: true, name: true }
+			});
+
+			if (coach) {
+				const template = emailTemplates.coachClientAccepted({
+					coachName: coach.name ?? 'Coach',
+					clientName: dbUser.name ?? dbUser.email,
+					clientEmail: dbUser.email
+				});
+				await sendEmail({
+					to: coach.email,
+					subject: template.subject,
+					html: template.html,
+					text: template.text
+				});
+			}
+		} catch (error) {
+			console.warn('Failed to send coach notification email', error);
+		}
 
 		return {
 			success: true

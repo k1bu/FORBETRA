@@ -62,16 +62,62 @@
 		<span class="text-xs text-neutral-500">{filteredUsers.length} shown</span>
 	</div>
 
-	<div class="overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm">
+	<!-- Mobile: Card layout (below sm) -->
+	<div class="space-y-3 sm:hidden">
+		{#each filteredUsers as user (user.id)}
+			<div class="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm">
+				<div class="mb-2 flex items-start justify-between gap-2">
+					<div class="min-w-0">
+						<a href="/admin/users/{user.id}" class="font-medium text-neutral-900 hover:text-blue-700 hover:underline">
+							{user.name ?? 'Unnamed user'}
+						</a>
+						<p class="truncate text-xs text-neutral-500">{user.email}</p>
+					</div>
+					<span class="shrink-0 rounded bg-neutral-100 px-2 py-1 text-xs font-semibold text-neutral-600 uppercase">
+						{user.role}
+					</span>
+				</div>
+				<p class="mb-3 text-xs text-neutral-400">
+					Created {new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(new Date(user.createdAt))}
+				</p>
+				<div class="flex flex-wrap items-center gap-2">
+					<a href="/admin/users/{user.id}" class="rounded border border-blue-200 px-3 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50">Details</a>
+					<button onclick={() => viewAsUser(user.id)} class="rounded border border-amber-200 px-3 py-1 text-xs font-medium text-amber-700 hover:bg-amber-50">View as</button>
+					<form method="post" class="inline">
+						<input type="hidden" name="intent" value="update" />
+						<input type="hidden" name="userId" value={user.id} />
+						<select name="role" class="rounded border border-neutral-300 px-2 py-1 text-xs">
+							{#each data.roles as role (role)}
+								<option value={role} selected={user.role === role}>{role}</option>
+							{/each}
+						</select>
+						<button type="submit" class="rounded bg-black px-2 py-1 text-xs font-medium text-white">Update</button>
+					</form>
+					<form method="post" class="inline">
+						<input type="hidden" name="intent" value="delete" />
+						<input type="hidden" name="userId" value={user.id} />
+						<button
+							type="submit"
+							class="rounded border border-red-200 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
+							onclick={(event) => { if (!confirm(`Delete ${user.email}? This will remove their account and related data.`)) event.preventDefault(); }}
+						>Delete</button>
+					</form>
+				</div>
+			</div>
+		{/each}
+	</div>
+
+	<!-- Desktop: Table layout (sm and above) -->
+	<div class="hidden overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm sm:block">
 		<table class="min-w-full divide-y divide-neutral-200 text-sm">
 			<thead
 				class="bg-neutral-50 text-left text-xs font-semibold tracking-wide text-neutral-500 uppercase"
 			>
 				<tr>
-					<th class="px-4 py-3">Name</th>
-					<th class="px-4 py-3">Email</th>
-					<th class="px-4 py-3">Current role</th>
-					<th class="px-4 py-3">Actions</th>
+					<th scope="col" class="px-4 py-3">Name</th>
+					<th scope="col" class="px-4 py-3">Email</th>
+					<th scope="col" class="px-4 py-3">Current role</th>
+					<th scope="col" class="px-4 py-3">Actions</th>
 				</tr>
 			</thead>
 			<tbody class="divide-y divide-neutral-200">

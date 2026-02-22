@@ -46,12 +46,12 @@
 					content: result.content,
 					createdAt: result.createdAt
 				};
-				addToast('Coach prep generated', 'success');
+				addToast('Coaching insights generated', 'success');
 			} else {
-				addToast('Failed to generate prep', 'error');
+				addToast('Failed to generate insights', 'error');
 			}
 		} catch {
-			addToast('Failed to generate prep', 'error');
+			addToast('Failed to generate insights', 'error');
 		} finally {
 			generatingPrep = false;
 		}
@@ -81,12 +81,15 @@
 	<!-- Header -->
 	<header class="flex flex-wrap items-start justify-between gap-3">
 		<div>
-			<a
-				href="/coach/roster"
-				class="mb-2 inline-flex items-center gap-2 text-sm font-semibold text-neutral-600 hover:text-neutral-900"
-			>
-				&#8592; Back to Roster
-			</a>
+			<nav aria-label="Breadcrumb" class="mb-2">
+				<ol class="flex items-center gap-1.5 text-sm text-neutral-500">
+					<li><a href="/coach" class="rounded transition-colors hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">Coach Hub</a></li>
+					<li aria-hidden="true" class="text-neutral-400"><svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg></li>
+					<li><a href="/coach/roster" class="rounded transition-colors hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">Roster</a></li>
+					<li aria-hidden="true" class="text-neutral-400"><svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg></li>
+					<li><span class="font-medium text-neutral-900">{data.client.name}</span></li>
+				</ol>
+			</nav>
 			<h1 class="text-3xl font-bold text-neutral-900">{data.client.name}</h1>
 			<p class="text-sm text-neutral-600">{data.client.email}</p>
 			{#if data.client.objective}
@@ -103,12 +106,15 @@
 		{/if}
 	</header>
 
-	<!-- AI Coach Prep -->
+	<!-- AI Coaching Insights -->
 	<div class="rounded-2xl border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 p-6 shadow-sm">
 		<div class="mb-4 flex items-center justify-between">
 			<div class="flex items-center gap-2">
 				<span class="text-xl" role="img" aria-label="sparkles">&#10024;</span>
-				<h2 class="text-lg font-bold text-neutral-900">AI Coach Prep</h2>
+				<div>
+					<h2 class="text-lg font-bold text-neutral-900">AI Coaching Insights</h2>
+					<p class="text-xs text-neutral-500">AI-generated analysis based on your client's reflection and feedback data</p>
+				</div>
 				{#if prepData}
 					<span class="text-xs text-neutral-500">{formatRelativeDays(prepData.createdAt)}</span>
 				{/if}
@@ -119,7 +125,7 @@
 				onclick={generatePrep}
 				class="rounded-lg border-2 border-indigo-300 bg-white px-4 py-2 text-xs font-semibold text-indigo-700 transition-all hover:border-indigo-400 hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-50"
 			>
-				{generatingPrep ? 'Generating...' : prepData ? 'Refresh Prep' : 'Generate Prep'}
+				{generatingPrep ? 'Generating...' : prepData ? 'Refresh Insights' : 'Generate Insights'}
 			</button>
 		</div>
 		{#if prepData?.content}

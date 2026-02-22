@@ -560,9 +560,9 @@
 						<table class="w-full border-collapse">
 							<thead>
 								<tr>
-									<th class="w-24 pb-2 pr-2 text-right text-xs font-medium text-neutral-400">Week</th>
+									<th scope="col" class="w-24 pb-2 pr-2 text-right text-xs font-medium text-neutral-400">Week</th>
 									{#each data.heatMapWeeks as week}
-										<th class="pb-2 text-center text-xs font-bold {week.weekNumber === data.currentWeek ? 'text-blue-700' : 'text-neutral-500'}" style="min-width: 2.75rem;">
+										<th scope="col" class="pb-2 text-center text-xs font-bold {week.weekNumber === data.currentWeek ? 'text-blue-700' : 'text-neutral-500'}" style="min-width: 2.75rem;">
 											{week.weekNumber}
 											{#if week.weekNumber === data.currentWeek}
 												<div class="mx-auto mt-0.5 h-0.5 w-4 rounded bg-blue-500"></div>
@@ -715,9 +715,9 @@
 											<table class="w-full border-collapse">
 												<thead>
 													<tr>
-														<th class="w-24 pb-1 pr-2 text-right text-xs font-medium text-neutral-400">Week</th>
+														<th scope="col" class="w-24 pb-1 pr-2 text-right text-xs font-medium text-neutral-400">Week</th>
 														{#each stakeholder.weeks as week}
-															<th class="pb-1 text-center text-xs {week.weekNumber === data.currentWeek ? 'font-bold text-blue-700' : 'text-neutral-500'}" style="min-width: 2.75rem;">
+															<th scope="col" class="pb-1 text-center text-xs {week.weekNumber === data.currentWeek ? 'font-bold text-blue-700' : 'text-neutral-500'}" style="min-width: 2.75rem;">
 																{week.weekNumber}
 															</th>
 														{/each}

@@ -82,12 +82,13 @@
 	<!-- Header -->
 	<header class="flex items-center justify-between">
 		<div>
-			<a
-				href="/coach"
-				class="mb-2 inline-flex items-center gap-2 text-sm font-semibold text-neutral-600 hover:text-neutral-900"
-			>
-				← Back to Hub
-			</a>
+			<nav aria-label="Breadcrumb" class="mb-2">
+				<ol class="flex items-center gap-1.5 text-sm text-neutral-500">
+					<li><a href="/coach" class="rounded transition-colors hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">Coach Hub</a></li>
+					<li aria-hidden="true" class="text-neutral-400"><svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg></li>
+					<li><span class="font-medium text-neutral-900">Analytics</span></li>
+				</ol>
+			</nav>
 			<h1 class="text-3xl font-bold text-neutral-900">Analytics Dashboard</h1>
 			<p class="mt-2 text-neutral-600">Comprehensive metrics and insights across all clients</p>
 		</div>
