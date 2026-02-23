@@ -31,6 +31,14 @@ export const smsTemplates = {
 		return `Forbetra: You have overdue reflections. Catch up now: ${data.appUrl || baseUrl}/individual`;
 	},
 
+	welcomeStakeholder: (data: {
+		individualName?: string;
+		appUrl?: string;
+	}) => {
+		const name = data.individualName || 'someone';
+		return `Forbetra: ${name} added you as a stakeholder. You'll occasionally be asked to rate their progress — takes <60 seconds.`;
+	},
+
 	feedbackInvite: (data: {
 		individualName?: string;
 		feedbackLink: string;
@@ -78,6 +86,14 @@ export const smsTemplates = {
 	}) => {
 		const obj = data.objectiveTitle ? ` for "${data.objectiveTitle}"` : '';
 		return `Forbetra: Your cycle${obj} is complete! View your growth report: ${data.appUrl || baseUrl}/individual/insights`;
+	},
+
+	coachInvitation: (data: {
+		coachName?: string;
+		inviteUrl: string;
+	}) => {
+		const coach = data.coachName || 'Your coach';
+		return `Forbetra: ${coach} invited you to join their development program. Get started: ${data.inviteUrl}`;
 	},
 
 	coachClientAccepted: (data: {

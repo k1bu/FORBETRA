@@ -4,6 +4,9 @@ import { fail, redirect } from '@sveltejs/kit';
 import { randomBytes, createHash } from 'crypto';
 import { sendEmail } from '$lib/notifications/email';
 import { emailTemplates } from '$lib/notifications/emailTemplates';
+import { trySendSms } from '$lib/notifications/sms';
+import { smsTemplates } from '$lib/notifications/smsTemplates';
+import { validatePhone, normalizePhone } from '$lib/utils/phone';
 import type { Actions, PageServerLoad } from './$types';
 import type { TokenType } from '@prisma/client';
 
@@ -47,14 +50,24 @@ export const actions: Actions = {
 		const formData = await event.request.formData();
 		const email = String(formData.get('email') ?? '').trim().toLowerCase();
 		const name = String(formData.get('name') ?? '').trim();
+		const phone = String(formData.get('phone') ?? '').trim();
 		const message = String(formData.get('message') ?? '').trim();
 
 		if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
 			return fail(400, {
 				error: 'Please provide a valid email address.',
-				values: { email, name, message }
+				values: { email, name, phone, message }
 			});
 		}
+
+		if (phone && !validatePhone(phone)) {
+			return fail(400, {
+				error: 'Enter a valid phone number (7\u201315 digits, e.g. +1 555 123 4567).',
+				values: { email, name, phone, message }
+			});
+		}
+
+		const normalizedPhone = phone ? normalizePhone(phone) : null;
 
 		// Check for existing invite from this coach to this email
 		const existingInvite = await prisma.coachInvite.findFirst({
@@ -89,6 +102,7 @@ export const actions: Actions = {
 						where: { id: existingInvite.id },
 						data: {
 							name: name.length > 0 ? name : existingInvite.name,
+							phone: normalizedPhone ?? existingInvite.phone,
 							message: message.length > 0 ? message : existingInvite.message,
 							tokenHash,
 							expiresAt,
@@ -112,6 +126,7 @@ export const actions: Actions = {
 							coachId: dbUser.id,
 							email,
 							name: name.length > 0 ? name : null,
+							phone: normalizedPhone,
 							message: message.length > 0 ? message : null,
 							tokenHash,
 							expiresAt
@@ -155,6 +170,15 @@ export const actions: Actions = {
 				emailFailed = true;
 				console.error('[email:error] Failed to send coach invitation email', error);
 			}
+
+			// Send invitation SMS
+			await trySendSms(
+				normalizedPhone,
+				smsTemplates.coachInvitation({
+					coachName: dbUser.name || undefined,
+					inviteUrl
+				})
+			);
 
 			return {
 				success: true,

@@ -2,10 +2,12 @@
 	import type { ActionData, PageData } from './$types';
 	import { enhance } from '$app/forms';
 
-	import { CheckCircle, Copy, Check } from 'lucide-svelte';
+	import { CheckCircle, Copy, Check, Smartphone } from 'lucide-svelte';
 
 	let copiedLink = $state<string | null>(null);
 	let submittingStakeholderId = $state<string | null>(null);
+	let phonelessStakeholderId = $state<string | null>(null);
+	let phonePromptValue = $state('');
 
 	const copyToClipboard = async (url: string) => {
 		try {
@@ -53,14 +55,14 @@
 		<p class="mt-1 text-text-secondary">Manage the people who provide feedback on your progress</p>
 	</header>
 
-	{#if form?.action === 'feedback'}
+	{#if form?.action === 'feedback' && !form?.phonePromptFor}
 		{#if form.error}
 			<div class="rounded-xl border border-error/20 bg-error-muted p-4 text-sm text-error">
 				{form.error}
 			</div>
 		{:else if form.feedbackLink}
 			<div class="rounded-xl border border-success/20 bg-success-muted p-4 text-sm text-success">
-				<p class="mb-2 font-semibold flex items-center gap-1.5"><CheckCircle class="h-4 w-4" /> Feedback link generated!</p>
+				<p class="mb-2 font-semibold flex items-center gap-1.5"><CheckCircle class="h-4 w-4" /> Feedback link generated!{#if form.smsSent} <span class="font-normal text-xs">(SMS sent too)</span>{/if}</p>
 				<div class="mb-2 flex items-center gap-2">
 				<p class="font-mono break-all text-xs flex-1">{form.feedbackLink}</p>
 				<button
@@ -114,34 +116,136 @@
 									{/if}
 								</div>
 							{/if}
-							<form
-								method="post"
-								action="?/generateFeedback"
-								class="mt-3"
-								use:enhance={() => {
-									submittingStakeholderId = stakeholder.id;
-									return async ({ update }) => {
-										await update();
-										submittingStakeholderId = null;
-									};
-								}}
-							>
-								<input type="hidden" name="stakeholderId" value={stakeholder.id} />
-								<button
-									type="submit"
-									disabled={submittingStakeholderId === stakeholder.id}
-									class="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-xs font-semibold text-text-secondary transition-all hover:border-accent/30 hover:bg-accent-muted hover:text-accent disabled:cursor-not-allowed disabled:opacity-60"
-								>
-									{#if submittingStakeholderId === stakeholder.id}
-										<span class="inline-flex items-center gap-2">
-											<span class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-text-secondary border-t-transparent"></span>
-											Generating...
-										</span>
-									{:else}
-										Generate Feedback Link
+
+							{#if phonelessStakeholderId === stakeholder.id}
+								<!-- Inline phone prompt for stakeholders without a phone -->
+								<div class="mt-3 rounded-xl border border-border-default bg-surface-raised p-4">
+									<p class="mb-3 text-xs text-text-secondary flex items-center gap-1.5">
+										<Smartphone class="h-3.5 w-3.5 shrink-0" />
+										Add {stakeholder.name}'s phone to also send an SMS invite (98% open rate vs 20% for email)
+									</p>
+									{#if form?.action === 'feedback' && form?.error && form?.phonePromptFor === stakeholder.id}
+										<div class="mb-3 rounded-lg border border-error/20 bg-error-muted px-3 py-2 text-xs text-error">
+											{form.error}
+										</div>
 									{/if}
+									<form
+										method="post"
+										action="?/addPhoneAndGenerateFeedback"
+										class="space-y-3"
+										use:enhance={() => {
+											submittingStakeholderId = stakeholder.id;
+											return async ({ update, result }) => {
+												await update();
+												submittingStakeholderId = null;
+												if (result.type === 'success') {
+													phonelessStakeholderId = null;
+													phonePromptValue = '';
+												}
+											};
+										}}
+									>
+										<input type="hidden" name="stakeholderId" value={stakeholder.id} />
+										<div>
+											<label for="phone-prompt-{stakeholder.id}" class="mb-1 block text-xs font-medium text-text-primary">Phone number</label>
+											<input
+												id="phone-prompt-{stakeholder.id}"
+												name="phone"
+												type="tel"
+												placeholder="+1 555 123 4567"
+												bind:value={phonePromptValue}
+												class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
+											/>
+										</div>
+										<div class="flex gap-2">
+											<button
+												type="submit"
+												disabled={submittingStakeholderId === stakeholder.id}
+												class="flex-1 rounded-lg bg-accent px-3 py-2 text-xs font-semibold text-white transition-all hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
+											>
+												{#if submittingStakeholderId === stakeholder.id}
+													<span class="inline-flex items-center justify-center gap-2">
+														<span class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+														Sending...
+													</span>
+												{:else}
+													Send with SMS
+												{/if}
+											</button>
+										</div>
+									</form>
+									<form
+										method="post"
+										action="?/generateFeedback"
+										class="mt-2"
+										use:enhance={() => {
+											submittingStakeholderId = stakeholder.id;
+											return async ({ update }) => {
+												await update();
+												submittingStakeholderId = null;
+												phonelessStakeholderId = null;
+												phonePromptValue = '';
+											};
+										}}
+									>
+										<input type="hidden" name="stakeholderId" value={stakeholder.id} />
+										<button
+											type="submit"
+											disabled={submittingStakeholderId === stakeholder.id}
+											class="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-xs font-semibold text-text-secondary transition-all hover:border-border-strong hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-60"
+										>
+											{#if submittingStakeholderId === stakeholder.id}
+												<span class="inline-flex items-center justify-center gap-2">
+													<span class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-text-secondary border-t-transparent"></span>
+													Sending...
+												</span>
+											{:else}
+												Skip, email only
+											{/if}
+										</button>
+									</form>
+								</div>
+							{:else if stakeholder.phone}
+								<!-- Stakeholder has phone: submit directly -->
+								<form
+									method="post"
+									action="?/generateFeedback"
+									class="mt-3"
+									use:enhance={() => {
+										submittingStakeholderId = stakeholder.id;
+										return async ({ update }) => {
+											await update();
+											submittingStakeholderId = null;
+										};
+									}}
+								>
+									<input type="hidden" name="stakeholderId" value={stakeholder.id} />
+									<button
+										type="submit"
+										disabled={submittingStakeholderId === stakeholder.id}
+										class="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-xs font-semibold text-text-secondary transition-all hover:border-accent/30 hover:bg-accent-muted hover:text-accent disabled:cursor-not-allowed disabled:opacity-60"
+									>
+										{#if submittingStakeholderId === stakeholder.id}
+											<span class="inline-flex items-center gap-2">
+												<span class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-text-secondary border-t-transparent"></span>
+												Generating...
+											</span>
+										{:else}
+											Generate Feedback Link
+										{/if}
+									</button>
+								</form>
+							{:else}
+								<!-- Stakeholder has no phone: show prompt on click -->
+								<button
+									type="button"
+									onclick={() => { phonelessStakeholderId = stakeholder.id; phonePromptValue = ''; }}
+									disabled={submittingStakeholderId === stakeholder.id}
+									class="mt-3 w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-xs font-semibold text-text-secondary transition-all hover:border-accent/30 hover:bg-accent-muted hover:text-accent disabled:cursor-not-allowed disabled:opacity-60"
+								>
+									Generate Feedback Link
 								</button>
-							</form>
+							{/if}
 						</div>
 					{/each}
 				</div>
@@ -157,7 +261,7 @@
 			<h2 class="text-lg font-bold text-text-primary">Add a Stakeholder</h2>
 			<div class="rounded-2xl border border-border-default bg-surface-raised p-6">
 				<p class="mb-4 text-sm text-text-secondary">
-					Invite 3\u20135 people who regularly observe your development.
+					Invite 3&#8211;5 people who regularly observe your development.
 				</p>
 				{#if stakeholderError}
 					<div class="mb-3 rounded-lg border border-error/20 bg-error-muted px-3 py-2 text-xs text-error">

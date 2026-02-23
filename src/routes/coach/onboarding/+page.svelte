@@ -2,7 +2,7 @@
 	import type { ActionData, PageData } from './$types';
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import { Compass, Target, PenLine, Users, BrainCircuit, Mail, Check } from 'lucide-svelte';
+	import { Compass, Target, PenLine, Users, BrainCircuit, Mail, Check, Smartphone } from 'lucide-svelte';
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
 
@@ -25,6 +25,7 @@
 	// Form state for invite step
 	let email = $state('');
 	let name = $state('');
+	let phone = $state('');
 	let message = $state(
 		"I'd like to invite you to join Forbetra so I can support your development journey. You'll set your own objective, track weekly progress, and get feedback from the people around you — and I'll be here to guide you through it."
 	);
@@ -221,6 +222,21 @@
 						name="name"
 						bind:value={name}
 						placeholder="Their name"
+						class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
+					/>
+				</div>
+
+				<div>
+					<label for="phone" class="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-text-primary">
+						<Smartphone class="h-3.5 w-3.5" />
+						Phone <span class="text-xs font-normal text-text-tertiary">(optional — enables SMS invite)</span>
+					</label>
+					<input
+						type="tel"
+						id="phone"
+						name="phone"
+						bind:value={phone}
+						placeholder="+1 555 123 4567"
 						class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
 					/>
 				</div>

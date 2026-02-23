@@ -9,6 +9,7 @@ import { trySendSms } from '$lib/notifications/sms';
 import { smsTemplates } from '$lib/notifications/smsTemplates';
 import { Prisma } from '@prisma/client';
 import { FEEDBACK_TOKEN_EXPIRY_DAYS } from '$lib/server/coachUtils';
+import { validatePhone, normalizePhone } from '$lib/utils/phone';
 
 export const load: PageServerLoad = async (event) => {
 	const { dbUser } = requireRole(event, 'INDIVIDUAL');
@@ -72,6 +73,7 @@ export const load: PageServerLoad = async (event) => {
 			id: stakeholder.id,
 			name: stakeholder.name,
 			email: stakeholder.email,
+			phone: stakeholder.phone,
 			relationship: stakeholder.relationship,
 			pendingFeedbackLink: pendingToken
 				? `${baseUrl}/stakeholder/feedback/${pendingToken.tokenHash}`
@@ -98,6 +100,172 @@ export const load: PageServerLoad = async (event) => {
 	};
 };
 
+/** Shared helper: validates stakeholder, checks gating, creates token, sends email + SMS. */
+async function createFeedbackToken(
+	dbUser: { id: string; name: string | null },
+	stakeholderId: string,
+	origin: string
+): Promise<
+	| { ok: true; feedbackLink: string; expiresAt: string; smsSent: boolean }
+	| { ok: false; status: number; error: string }
+> {
+	const stakeholder = await prisma.stakeholder.findFirst({
+		where: { id: stakeholderId, individualId: dbUser.id }
+	});
+
+	if (!stakeholder) {
+		return { ok: false, status: 404, error: 'Stakeholder not found.' };
+	}
+
+	const objective = await prisma.objective.findFirst({
+		where: { userId: dbUser.id, active: true },
+		orderBy: { createdAt: 'desc' },
+		include: {
+			subgoals: { orderBy: { createdAt: 'asc' } },
+			cycles: { orderBy: { startDate: 'desc' }, take: 1 }
+		}
+	});
+
+	if (!objective) {
+		return { ok: false, status: 400, error: 'No active objective available.' };
+	}
+
+	const primarySubgoal = objective.subgoals[0];
+	if (!primarySubgoal) {
+		return { ok: false, status: 400, error: 'Add a subgoal before requesting feedback.' };
+	}
+
+	const cycle = objective.cycles[0];
+	if (!cycle) {
+		return { ok: false, status: 400, error: 'No active cycle found.' };
+	}
+
+	const weekNumber = Math.max(
+		1,
+		Math.floor((new Date().getTime() - cycle.startDate.getTime()) / (7 * 24 * 60 * 60 * 1000))
+	);
+
+	// Cadence gating
+	const cadence = cycle.stakeholderCadence ?? 'weekly';
+	if (cadence !== 'every_checkin') {
+		let windowStart: Date;
+		if (cadence === 'monthly') {
+			windowStart = new Date();
+			windowStart.setDate(1);
+			windowStart.setHours(0, 0, 0, 0);
+		} else {
+			windowStart = new Date();
+			const dayOfWeek = windowStart.getDay();
+			const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+			windowStart.setDate(windowStart.getDate() + mondayOffset);
+			windowStart.setHours(0, 0, 0, 0);
+		}
+
+		const existingToken = await prisma.token.findFirst({
+			where: {
+				type: 'FEEDBACK_INVITE',
+				stakeholderId: stakeholder.id,
+				createdAt: { gte: windowStart }
+			}
+		});
+
+		if (existingToken) {
+			const period = cadence === 'monthly' ? 'this month' : 'this week';
+			return {
+				ok: false,
+				status: 400,
+				error: `Feedback already requested from ${stakeholder.name} ${period}. Your coach set the cadence to ${cadence === 'monthly' ? 'monthly' : 'weekly'}.`
+			};
+		}
+	}
+
+	// Auto-throttle
+	if (cycle.autoThrottle) {
+		const activeRequestCount = await prisma.token.count({
+			where: {
+				type: 'FEEDBACK_INVITE',
+				stakeholderId: stakeholder.id,
+				usedAt: null,
+				expiresAt: { gt: new Date() }
+			}
+		});
+
+		if (activeRequestCount >= 3) {
+			return {
+				ok: false,
+				status: 400,
+				error: `${stakeholder.name} already has ${activeRequestCount} pending feedback requests. Auto-throttle is limiting new requests to prevent survey fatigue.`
+			};
+		}
+	}
+
+	const reflection = await prisma.reflection.upsert({
+		where: {
+			cycleId_weekNumber_reflectionType_subgoalId: {
+				cycleId: cycle.id,
+				weekNumber,
+				reflectionType: 'RATING_B',
+				subgoalId: primarySubgoal.id
+			}
+		},
+		update: {},
+		create: {
+			cycleId: cycle.id,
+			userId: dbUser.id,
+			subgoalId: primarySubgoal.id,
+			reflectionType: 'RATING_B',
+			weekNumber,
+			checkInDate: new Date()
+		}
+	});
+
+	const tokenValue = randomBytes(32).toString('hex');
+	const expiresAt = new Date();
+	expiresAt.setDate(expiresAt.getDate() + FEEDBACK_TOKEN_EXPIRY_DAYS);
+
+	await prisma.token.create({
+		data: {
+			tokenHash: tokenValue,
+			type: 'FEEDBACK_INVITE',
+			expiresAt,
+			stakeholderId: stakeholder.id,
+			reflectionId: reflection.id,
+			userId: dbUser.id,
+			metadata: { generatedBy: dbUser.id }
+		}
+	});
+
+	const feedbackLink = `${origin}/stakeholder/feedback/${tokenValue}`;
+
+	// Send feedback invite email
+	try {
+		const template = emailTemplates.feedbackInvite({
+			individualName: dbUser.name || undefined,
+			stakeholderName: stakeholder.name || undefined,
+			objectiveTitle: objective.title || undefined,
+			feedbackLink
+		});
+		await sendEmail({ to: stakeholder.email, ...template });
+	} catch (error) {
+		console.error('[email:error] Failed to send feedback invite', error);
+	}
+
+	// Send feedback invite SMS to stakeholder
+	let smsSent = false;
+	if (stakeholder.phone) {
+		await trySendSms(
+			stakeholder.phone,
+			smsTemplates.feedbackInvite({
+				individualName: dbUser.name || undefined,
+				feedbackLink
+			})
+		);
+		smsSent = true;
+	}
+
+	return { ok: true, feedbackLink, expiresAt: expiresAt.toISOString(), smsSent };
+}
+
 export const actions: Actions = {
 	generateFeedback: async (event) => {
 		const { dbUser } = requireRole(event, 'INDIVIDUAL');
@@ -109,176 +277,58 @@ export const actions: Actions = {
 			return fail(400, { action: 'feedback', error: 'Missing stakeholder selection.' });
 		}
 
-		const stakeholder = await prisma.stakeholder.findFirst({
-			where: {
-				id: stakeholderId,
-				individualId: dbUser.id
-			}
-		});
+		const result = await createFeedbackToken(dbUser, stakeholderId, event.url.origin);
 
-		if (!stakeholder) {
-			return fail(404, { action: 'feedback', error: 'Stakeholder not found.' });
+		if (!result.ok) {
+			return fail(result.status as 400 | 404, { action: 'feedback', error: result.error });
 		}
-
-		const objective = await prisma.objective.findFirst({
-			where: { userId: dbUser.id, active: true },
-			orderBy: { createdAt: 'desc' },
-			include: {
-				subgoals: { orderBy: { createdAt: 'asc' } },
-				cycles: { orderBy: { startDate: 'desc' }, take: 1 }
-			}
-		});
-
-		if (!objective) {
-			return fail(400, { action: 'feedback', error: 'No active objective available.' });
-		}
-
-		const primarySubgoal = objective.subgoals[0];
-
-		if (!primarySubgoal) {
-			return fail(400, { action: 'feedback', error: 'Add a subgoal before requesting feedback.' });
-		}
-
-		const cycle = objective.cycles[0];
-
-		if (!cycle) {
-			return fail(400, { action: 'feedback', error: 'No active cycle found.' });
-		}
-
-		const weekNumber = Math.max(
-			1,
-			Math.floor((new Date().getTime() - cycle.startDate.getTime()) / (7 * 24 * 60 * 60 * 1000))
-		);
-
-		// Cadence gating: check if feedback request is allowed this period
-		const cadence = cycle.stakeholderCadence ?? 'weekly';
-		if (cadence !== 'every_checkin') {
-			let windowStart: Date;
-			if (cadence === 'monthly') {
-				windowStart = new Date();
-				windowStart.setDate(1);
-				windowStart.setHours(0, 0, 0, 0);
-			} else {
-				// weekly: start of current week (Monday)
-				windowStart = new Date();
-				const dayOfWeek = windowStart.getDay();
-				const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-				windowStart.setDate(windowStart.getDate() + mondayOffset);
-				windowStart.setHours(0, 0, 0, 0);
-			}
-
-			const existingToken = await prisma.token.findFirst({
-				where: {
-					type: 'FEEDBACK_INVITE',
-					stakeholderId: stakeholder.id,
-					createdAt: { gte: windowStart }
-				}
-			});
-
-			if (existingToken) {
-				const period = cadence === 'monthly' ? 'this month' : 'this week';
-				return fail(400, {
-					action: 'feedback',
-					error: `Feedback already requested from ${stakeholder.name} ${period}. Your coach set the cadence to ${cadence === 'monthly' ? 'monthly' : 'weekly'}.`
-				});
-			}
-		}
-
-		// Auto-throttle: skip if stakeholder has too many pending requests
-		if (cycle.autoThrottle) {
-			const activeRequestCount = await prisma.token.count({
-				where: {
-					type: 'FEEDBACK_INVITE',
-					stakeholderId: stakeholder.id,
-					usedAt: null,
-					expiresAt: { gt: new Date() }
-				}
-			});
-
-			if (activeRequestCount >= 3) {
-				return fail(400, {
-					action: 'feedback',
-					error: `${stakeholder.name} already has ${activeRequestCount} pending feedback requests. Auto-throttle is limiting new requests to prevent survey fatigue.`
-				});
-			}
-		}
-
-		const reflection = await prisma.reflection.upsert({
-			where: {
-				cycleId_weekNumber_reflectionType_subgoalId: {
-					cycleId: cycle.id,
-					weekNumber,
-					reflectionType: 'RATING_B',
-					subgoalId: primarySubgoal.id
-				}
-			},
-			update: {},
-			create: {
-				cycleId: cycle.id,
-				userId: dbUser.id,
-				subgoalId: primarySubgoal.id,
-				reflectionType: 'RATING_B',
-				weekNumber,
-				checkInDate: new Date()
-			}
-		});
-
-		const tokenValue = randomBytes(32).toString('hex');
-		const expiresAt = new Date();
-		expiresAt.setDate(expiresAt.getDate() + FEEDBACK_TOKEN_EXPIRY_DAYS);
-
-		await prisma.token.create({
-			data: {
-				tokenHash: tokenValue,
-				type: 'FEEDBACK_INVITE',
-				expiresAt,
-				stakeholderId: stakeholder.id,
-				reflectionId: reflection.id,
-				userId: dbUser.id,
-				metadata: {
-					generatedBy: dbUser.id
-				}
-			}
-		});
-
-		const feedbackLink = `${event.url.origin}/stakeholder/feedback/${tokenValue}`;
-
-		// Send feedback invite email
-		try {
-			const objective = await prisma.objective.findFirst({
-				where: { userId: dbUser.id, active: true },
-				select: { title: true }
-			});
-
-			const template = emailTemplates.feedbackInvite({
-				individualName: dbUser.name || undefined,
-				stakeholderName: stakeholder.name || undefined,
-				objectiveTitle: objective?.title || undefined,
-				feedbackLink
-			});
-			await sendEmail({
-				to: stakeholder.email,
-				...template
-			});
-		} catch (error) {
-			console.error('[email:error] Failed to send feedback invite', error);
-			// Don't fail the request if email fails
-		}
-
-		// Send feedback invite SMS to stakeholder
-		await trySendSms(
-			stakeholder.phone,
-			smsTemplates.feedbackInvite({
-				individualName: dbUser.name || undefined,
-				feedbackLink
-			})
-		);
 
 		return {
 			action: 'feedback',
 			success: true,
-			feedbackLink,
-			expiresAt: expiresAt.toISOString()
+			feedbackLink: result.feedbackLink,
+			expiresAt: result.expiresAt,
+			smsSent: result.smsSent
+		};
+	},
+
+	addPhoneAndGenerateFeedback: async (event) => {
+		const { dbUser } = requireRole(event, 'INDIVIDUAL');
+
+		const formData = await event.request.formData();
+		const stakeholderId = formData.get('stakeholderId');
+		const phone = String(formData.get('phone') ?? '').trim();
+
+		if (typeof stakeholderId !== 'string' || stakeholderId.length === 0) {
+			return fail(400, { action: 'feedback', error: 'Missing stakeholder selection.' });
+		}
+
+		if (!phone || !validatePhone(phone)) {
+			return fail(400, {
+				action: 'feedback',
+				error: 'Enter a valid phone number (7\u201315 digits, e.g. +1 555 123 4567).',
+				phonePromptFor: stakeholderId
+			});
+		}
+
+		// Save the normalized phone to the stakeholder
+		await prisma.stakeholder.update({
+			where: { id: stakeholderId },
+			data: { phone: normalizePhone(phone) }
+		});
+
+		const result = await createFeedbackToken(dbUser, stakeholderId, event.url.origin);
+
+		if (!result.ok) {
+			return fail(result.status as 400 | 404, { action: 'feedback', error: result.error });
+		}
+
+		return {
+			action: 'feedback',
+			success: true,
+			feedbackLink: result.feedbackLink,
+			expiresAt: result.expiresAt,
+			smsSent: result.smsSent
 		};
 	},
 	addStakeholder: async (event) => {
@@ -298,6 +348,14 @@ export const actions: Actions = {
 			return fail(400, {
 				action: 'stakeholder',
 				error: 'Add a name and valid email to invite a stakeholder.',
+				values
+			});
+		}
+
+		if (phone && !validatePhone(phone)) {
+			return fail(400, {
+				action: 'stakeholder',
+				error: 'Enter a valid phone number (7\u201315 digits, e.g. +1 555 123 4567).',
 				values
 			});
 		}
@@ -325,7 +383,7 @@ export const actions: Actions = {
 					name,
 					email,
 					relationship: relationship.length > 0 ? relationship : null,
-					phone: phone.length > 0 ? phone : null
+					phone: phone.length > 0 ? normalizePhone(phone) : null
 				}
 			});
 		} catch (error) {
@@ -358,6 +416,17 @@ export const actions: Actions = {
 		} catch (error) {
 			console.error('[email:error] Failed to send stakeholder welcome email', error);
 			// Don't fail the request if email fails
+		}
+
+		// Send welcome SMS if phone provided
+		if (stakeholder.phone) {
+			await trySendSms(
+				stakeholder.phone,
+				smsTemplates.welcomeStakeholder({
+					individualName: dbUser.name || undefined,
+					appUrl: event.url.origin
+				})
+			);
 		}
 
 		return {

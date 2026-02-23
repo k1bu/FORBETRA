@@ -302,6 +302,7 @@ model CoachInvite {
   coachId       String
   email         String
   name          String?
+  phone         String?
   message       String?
   payload       Json?
   tokenHash     String   @unique

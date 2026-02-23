@@ -4,6 +4,9 @@ import { fail } from '@sveltejs/kit';
 import { randomBytes, createHash } from 'crypto';
 import { sendEmail, getEmailMode } from '$lib/notifications/email';
 import { emailTemplates } from '$lib/notifications/emailTemplates';
+import { trySendSms } from '$lib/notifications/sms';
+import { smsTemplates } from '$lib/notifications/smsTemplates';
+import { validatePhone, normalizePhone } from '$lib/utils/phone';
 import type { Actions, PageServerLoad } from './$types';
 import { Prisma } from '@prisma/client';
 import type { TokenType } from '@prisma/client';
@@ -16,6 +19,7 @@ const INVITE_SELECT = {
 	id: true,
 	email: true,
 	name: true,
+	phone: true,
 	message: true,
 	expiresAt: true,
 	acceptedAt: true,
@@ -49,6 +53,7 @@ export const load: PageServerLoad = async (event) => {
 			id: invite.id,
 			email: invite.email,
 			name: invite.name,
+			phone: invite.phone,
 			message: invite.message,
 			expiresAt: invite.expiresAt.toISOString(),
 			acceptedAt: invite.acceptedAt?.toISOString() ?? null,
@@ -73,6 +78,7 @@ export const actions: Actions = {
 		const formData = await event.request.formData();
 		const email = String(formData.get('email') ?? '').trim().toLowerCase();
 		const name = String(formData.get('name') ?? '').trim();
+		const phone = String(formData.get('phone') ?? '').trim();
 		const message = String(formData.get('message') ?? '').trim();
 
 		// Parse optional pre-fill payload
@@ -102,9 +108,19 @@ export const actions: Actions = {
 			return fail(400, {
 				action: 'createInvite' as const,
 				error: 'Please provide a valid email address.',
-				values: { email, name, message }
+				values: { email, name, phone, message }
 			});
 		}
+
+		if (phone && !validatePhone(phone)) {
+			return fail(400, {
+				action: 'createInvite' as const,
+				error: 'Enter a valid phone number (7\u201315 digits, e.g. +1 555 123 4567).',
+				values: { email, name, phone, message }
+			});
+		}
+
+		const normalizedPhone = phone ? normalizePhone(phone) : null;
 
 		const existingInvite = await prisma.coachInvite.findFirst({
 			where: {
@@ -148,6 +164,7 @@ export const actions: Actions = {
 						where: { id: existingInvite.id },
 						data: {
 							name: name.length > 0 ? name : existingInvite.name,
+							phone: normalizedPhone ?? existingInvite.phone,
 							message: message.length > 0 ? message : existingInvite.message,
 							payload: payload ?? undefined,
 							tokenHash,
@@ -175,6 +192,7 @@ export const actions: Actions = {
 						coachId: dbUser.id,
 						email,
 						name: name.length > 0 ? name : null,
+						phone: normalizedPhone,
 						message: message.length > 0 ? message : null,
 						payload: payload ?? undefined,
 						tokenHash,
@@ -215,13 +233,27 @@ export const actions: Actions = {
 				console.error('[email:error] Failed to send coach invitation email', error);
 			}
 
+			// Send invitation SMS
+			let smsSent = false;
+			if (invite.phone) {
+				await trySendSms(
+					invite.phone,
+					smsTemplates.coachInvitation({
+						coachName: dbUser.name || undefined,
+						inviteUrl
+					})
+				);
+				smsSent = true;
+			}
+
 			return {
 				success: true,
 				action: 'createInvite' as const,
 				email,
 				inviteId: invite.id,
 				inviteUrl,
-				emailFailed
+				emailFailed,
+				smsSent
 			};
 		} catch (error) {
 			if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
@@ -353,6 +385,15 @@ export const actions: Actions = {
 			emailFailed = true;
 			console.error('[email:error] Failed to resend coach invitation email', error);
 		}
+
+		// Resend SMS if phone on file
+		await trySendSms(
+			invite.phone,
+			smsTemplates.coachInvitation({
+				coachName: dbUser.name || undefined,
+				inviteUrl
+			})
+		);
 
 		return {
 			success: true,

@@ -3,6 +3,7 @@ import prisma from '$lib/server/prisma';
 import { requireAuth } from '$lib/server/auth';
 import { clerkClient } from 'svelte-clerk/server';
 import type { Actions, PageServerLoad } from './$types';
+import { validatePhone, normalizePhone } from '$lib/utils/phone';
 
 export const load: PageServerLoad = async (event) => {
 	const { dbUser } = requireAuth(event);
@@ -13,7 +14,8 @@ export const load: PageServerLoad = async (event) => {
 			email: dbUser.email,
 			phone: dbUser.phone ?? '',
 			timezone: dbUser.timezone ?? '',
-			reminderDays: dbUser.reminderDays ?? 'wednesday_friday'
+			reminderDays: dbUser.reminderDays ?? 'wednesday_friday',
+			role: dbUser.role
 		}
 	};
 };
@@ -26,7 +28,7 @@ export const actions: Actions = {
 		const name = formData.get('name')?.toString().trim() ?? '';
 		const phone = formData.get('phone')?.toString().trim() ?? '';
 		const timezone = formData.get('timezone')?.toString().trim() ?? '';
-		const reminderDays = formData.get('reminderDays')?.toString().trim() ?? 'wednesday_friday';
+		const reminderDaysRaw = formData.get('reminderDays')?.toString().trim();
 
 		if (!name) {
 			return fail(400, { error: 'Display name is required.' });
@@ -36,6 +38,12 @@ export const actions: Actions = {
 			return fail(400, { error: 'Display name must be 100 characters or fewer.' });
 		}
 
+		if (phone && !validatePhone(phone)) {
+			return fail(400, { error: 'Enter a valid phone number (7\u201315 digits, e.g. +1 555 123 4567).' });
+		}
+
+		// Only validate reminderDays if submitted (Individual role only)
+		const reminderDays = reminderDaysRaw || dbUser.reminderDays || 'wednesday_friday';
 		if (reminderDays !== 'wednesday_friday' && reminderDays !== 'tuesday_thursday') {
 			return fail(400, { error: 'Invalid reminder schedule.' });
 		}
@@ -45,7 +53,7 @@ export const actions: Actions = {
 				where: { id: dbUser.id },
 				data: {
 					name: name || null,
-					phone: phone || null,
+					phone: phone ? normalizePhone(phone) : null,
 					timezone: timezone || null,
 					reminderDays
 				}

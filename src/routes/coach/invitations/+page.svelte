@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { addToast } from '$lib/stores/toasts.svelte';
-	import { Mail, AlertTriangle, CircleCheck, Clock, Lightbulb, Inbox, Send, Copy, Check } from 'lucide-svelte';
+	import { Mail, AlertTriangle, CircleCheck, Clock, Lightbulb, Inbox, Send, Copy, Check, Smartphone } from 'lucide-svelte';
 	import type { PageData, ActionData } from './$types';
 
 	type PrefillSubgoal = { label: string; description: string };
@@ -237,7 +237,7 @@
 				<div class="space-y-3 rounded-xl border border-success/50 bg-success-muted px-4 py-3 text-sm text-success">
 					<div class="flex items-center gap-2">
 						<CircleCheck class="h-4 w-4 text-success" />
-						<p class="font-semibold">Invitation sent to {form.email}!</p>
+						<p class="font-semibold">Invitation sent to {form.email}!{#if form.smsSent} <span class="font-normal text-xs">(SMS sent too)</span>{/if}</p>
 					</div>
 					{#if form.emailFailed}
 						<div class="rounded-lg border border-border-strong bg-warning-muted px-4 py-2 text-xs text-warning">
@@ -312,6 +312,19 @@
 						/>
 					</label>
 				</div>
+				<label class="space-y-1 text-sm">
+					<span class="font-semibold text-text-secondary flex items-center gap-1.5">
+						<Smartphone class="h-3.5 w-3.5" />
+						Phone (optional — enables SMS invite, 98% open rate)
+					</span>
+					<input
+						type="tel"
+						name="phone"
+						class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
+						placeholder="+1 555 123 4567"
+						value={form?.values?.phone ?? ''}
+					/>
+				</label>
 				<label class="space-y-1 text-sm">
 					<span class="font-semibold text-text-secondary">Message (optional)</span>
 					<textarea
