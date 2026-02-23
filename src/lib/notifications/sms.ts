@@ -35,16 +35,19 @@ export const sendSms = async (payload: SmsPayload) => {
 		return;
 	}
 
+	const messagingServiceSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
 	const fromNumber = process.env.TWILIO_FROM_NUMBER;
-	if (!fromNumber) {
-		throw new Error('Missing TWILIO_FROM_NUMBER');
+	if (!messagingServiceSid && !fromNumber) {
+		throw new Error('Missing TWILIO_MESSAGING_SERVICE_SID or TWILIO_FROM_NUMBER');
 	}
 
 	const twilioClient = getClient();
 	await twilioClient.messages.create({
 		body: payload.body,
 		to: payload.to,
-		from: fromNumber
+		...(messagingServiceSid
+			? { messagingServiceSid }
+			: { from: fromNumber })
 	});
 
 	console.info(`[sms:sent] SMS sent to ${payload.to}`);
