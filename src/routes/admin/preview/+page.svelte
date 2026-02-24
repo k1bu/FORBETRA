@@ -15,11 +15,15 @@
 	const selectedStakeholder = $derived(data.stakeholders.find((s) => s.id === selectedStakeholderId));
 
 	const impersonateAndOpen = async (userId: string, path: string) => {
-		await fetch('/api/admin/impersonate', {
+		const res = await fetch('/api/admin/impersonate', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ userId })
 		});
+		if (!res.ok) {
+			alert('Failed to start impersonation. Please try again.');
+			return;
+		}
 		window.open(path, '_blank');
 	};
 
@@ -92,12 +96,12 @@
 			label: 'Feedback Form',
 			description: 'Rate effort and performance for an individual',
 			action: () => {
-				const token = selectedStakeholder?.tokenHash;
-				if (token) {
-					window.open(`/stakeholder/feedback/${token}`, '_blank');
+				const url = selectedStakeholder?.feedbackUrl;
+				if (url) {
+					window.open(url, '_blank');
 				}
 			},
-			disabled: !selectedStakeholder?.tokenHash,
+			disabled: !selectedStakeholder?.feedbackUrl,
 			disabledReason: 'No active feedback token — generate one from the individual\'s cycle first'
 		},
 		{
@@ -130,6 +134,10 @@
 		}
 	]);
 </script>
+
+<svelte:head>
+	<title>Preview Flows | Forbetra Admin</title>
+</svelte:head>
 
 <section class="mx-auto flex max-w-5xl flex-col gap-6 p-6">
 	<header>
@@ -236,7 +244,7 @@
 				</label>
 				{#if selectedStakeholder}
 					<div class="text-xs">
-						{#if selectedStakeholder.tokenHash}
+						{#if selectedStakeholder.feedbackUrl}
 							<span class="rounded bg-success-muted px-2 py-0.5 font-medium text-success">
 								Active token
 							</span>

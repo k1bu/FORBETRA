@@ -1,7 +1,14 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import { page } from '$app/stores';
 
 	const { children }: { children: Snippet } = $props();
+
+	const isActive = (href: string): boolean => {
+		const pathname = $page.url.pathname;
+		if (href === '/admin') return pathname === '/admin';
+		return pathname.startsWith(href);
+	};
 
 	const navItems = [
 		{ href: '/admin', label: 'Dashboard', icon: 'grid' },
@@ -28,7 +35,10 @@
 				{#each navItems as item (item.href)}
 					<a
 						href={item.href}
-						class="rounded-lg px-3 py-2 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-subtle hover:text-text-primary"
+						class="rounded-lg px-3 py-2 text-sm transition-colors {isActive(item.href)
+						? 'bg-surface-subtle text-text-primary font-semibold'
+						: 'font-medium text-text-secondary hover:bg-surface-subtle hover:text-text-primary'}"
+						aria-current={isActive(item.href) ? 'page' : undefined}
 					>
 						{item.label}
 					</a>
@@ -38,7 +48,7 @@
 				<a
 					href="/"
 					target="_blank"
-					rel="noopener"
+					rel="noopener noreferrer"
 					class="rounded-lg px-3 py-2 text-xs font-medium text-text-tertiary transition-colors hover:bg-surface-subtle hover:text-text-secondary"
 				>
 					Open App &nearr;
@@ -52,7 +62,10 @@
 		{#each navItems as item (item.href)}
 			<a
 				href={item.href}
-				class="rounded-lg border border-border-default px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-subtle"
+				class="rounded-lg border border-border-default px-3 py-1.5 text-xs transition-colors {isActive(item.href)
+					? 'bg-surface-subtle text-text-primary font-semibold'
+					: 'font-medium text-text-secondary hover:bg-surface-subtle'}"
+				aria-current={isActive(item.href) ? 'page' : undefined}
 			>
 				{item.label}
 			</a>

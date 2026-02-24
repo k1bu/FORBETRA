@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
 const subgoalSchema = z.object({
-	label: z.string().trim().min(3, 'Subgoal label must be at least 3 characters').max(200, 'Keep the subgoal label concise'),
-	description: z.string().trim().max(500, 'Keep the subgoal details under 500 characters').optional()
+	label: z.string().trim().min(3, 'Sub-objective label must be at least 3 characters').max(200, 'Keep the sub-objective label concise'),
+	description: z.string().trim().max(500, 'Keep the sub-objective details under 500 characters').optional()
 });
 
 const stakeholderSchema = z.object({
@@ -18,7 +18,7 @@ export const onboardingSchema = z.object({
 		.min(3, 'Objective title must be at least 3 characters')
 		.max(200, 'Keep the objective title concise'),
 	objectiveDescription: z.string().trim().max(1000, 'Keep the description under 1000 characters').optional(),
-	subgoals: z.array(subgoalSchema).min(1, 'Add at least one subgoal').max(5, 'Keep it to five subgoals or fewer'),
+	subgoals: z.array(subgoalSchema).min(1, 'Add at least one sub-objective').max(5, 'Keep it to five sub-objectives or fewer'),
 	stakeholders: z.array(stakeholderSchema).max(5, 'Add up to five stakeholders').optional().default([]),
 	cycleLabel: z.string().trim().max(80, 'Cycle label is too long').optional(),
 	cycleStartDate: z

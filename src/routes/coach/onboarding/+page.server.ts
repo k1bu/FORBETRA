@@ -86,7 +86,7 @@ export const actions: Actions = {
 
 		const tokenRaw = createInviteToken();
 		const tokenHash = generateTokenHash(tokenRaw);
-		const expiresAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+		const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
 		try {
 			await prisma.$transaction(async (tx) => {

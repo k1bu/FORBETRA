@@ -101,7 +101,7 @@
 
 	<!-- Actions -->
 	<div class="flex w-full flex-col items-center gap-3 border-t border-border-default pt-6 sm:flex-row sm:justify-between">
-		<p class="text-sm text-text-tertiary">Next up: track your weekly check-ins to stay accountable.</p>
+		<p class="text-sm text-text-tertiary">Next: complete your first check-in to set your baseline. Then you're fully live!</p>
 		<div class="flex gap-3">
 			<a
 				href="/onboarding"

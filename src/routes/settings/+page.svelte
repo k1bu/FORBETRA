@@ -1,11 +1,14 @@
 <script lang="ts">
 	import type { ActionData, PageData } from './$types';
 	import { enhance } from '$app/forms';
-	import { Settings2, User, Globe, Bell } from 'lucide-svelte';
+	import { Settings2, User, Globe, Bell, ArrowLeft } from 'lucide-svelte';
 
 	const { data, form }: { data: PageData; form: ActionData } = $props();
 
 	let isSaving = $state(false);
+
+	const isCoach = data.user.role === 'COACH';
+	const backHref = isCoach ? '/coach' : '/individual';
 
 	const timezones = [
 		'America/New_York',
@@ -30,6 +33,14 @@
 </svelte:head>
 
 <section class="mx-auto flex max-w-2xl flex-col gap-6 p-4 pb-12">
+	<a
+		href={backHref}
+		class="group inline-flex items-center gap-2 text-sm font-medium text-text-secondary transition-colors hover:text-text-primary"
+	>
+		<ArrowLeft class="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+		Back to {isCoach ? 'Coach Dashboard' : 'Today'}
+	</a>
+
 	<header>
 		<div class="flex items-center gap-2">
 			<Settings2 class="h-5 w-5 text-accent" />
@@ -126,43 +137,51 @@
 			</div>
 		</div>
 
-		<!-- Reminders Section -->
-		<div class="rounded-2xl border border-border-default bg-surface-raised p-6">
-			<div class="mb-4 flex items-center gap-2">
-				<Bell class="h-4 w-4 text-accent" />
-				<h2 class="text-sm font-semibold uppercase tracking-wide text-text-tertiary">Reminders</h2>
-			</div>
-			<fieldset>
-				<legend class="sr-only">Reminder Schedule</legend>
-				<div class="space-y-2">
-					<label class="flex items-center gap-3 rounded-xl border border-border-default bg-surface-subtle px-4 py-3 text-sm transition-colors hover:border-border-strong cursor-pointer">
-						<input
-							type="radio"
-							name="reminderDays"
-							value="wednesday_friday"
-							checked={data.user.reminderDays !== 'tuesday_thursday'}
-							class="text-accent focus:ring-accent"
-						/>
-						<div>
-							<span class="font-medium text-text-primary">Wednesday & Friday</span>
-							<span class="ml-1 text-text-muted">(default)</span>
-						</div>
-					</label>
-					<label class="flex items-center gap-3 rounded-xl border border-border-default bg-surface-subtle px-4 py-3 text-sm transition-colors hover:border-border-strong cursor-pointer">
-						<input
-							type="radio"
-							name="reminderDays"
-							value="tuesday_thursday"
-							checked={data.user.reminderDays === 'tuesday_thursday'}
-							class="text-accent focus:ring-accent"
-						/>
-						<span class="font-medium text-text-primary">Tuesday & Thursday</span>
-					</label>
+		<!-- Reminders Section (Individual only) -->
+		{#if !isCoach}
+			<div class="rounded-2xl border border-border-default bg-surface-raised p-6">
+				<div class="mb-4 flex items-center gap-2">
+					<Bell class="h-4 w-4 text-accent" />
+					<h2 class="text-sm font-semibold uppercase tracking-wide text-text-tertiary">Reminders</h2>
 				</div>
-			</fieldset>
-		</div>
+				<fieldset>
+					<legend class="sr-only">Reminder Schedule</legend>
+					<div class="space-y-2">
+						<label class="flex items-center gap-3 rounded-xl border border-border-default bg-surface-subtle px-4 py-3 text-sm transition-colors hover:border-border-strong cursor-pointer">
+							<input
+								type="radio"
+								name="reminderDays"
+								value="wednesday_friday"
+								checked={data.user.reminderDays !== 'tuesday_thursday'}
+								class="text-accent focus:ring-accent"
+							/>
+							<div>
+								<span class="font-medium text-text-primary">Wednesday & Friday</span>
+								<span class="ml-1 text-text-muted">(default)</span>
+							</div>
+						</label>
+						<label class="flex items-center gap-3 rounded-xl border border-border-default bg-surface-subtle px-4 py-3 text-sm transition-colors hover:border-border-strong cursor-pointer">
+							<input
+								type="radio"
+								name="reminderDays"
+								value="tuesday_thursday"
+								checked={data.user.reminderDays === 'tuesday_thursday'}
+								class="text-accent focus:ring-accent"
+							/>
+							<span class="font-medium text-text-primary">Tuesday & Thursday</span>
+						</label>
+					</div>
+				</fieldset>
+			</div>
+		{/if}
 
-		<div class="flex justify-end">
+		<div class="flex justify-end gap-3">
+			<a
+				href={backHref}
+				class="rounded-xl border border-border-default bg-surface-raised px-6 py-2.5 text-sm font-semibold text-text-secondary transition-colors hover:border-border-strong hover:bg-surface-subtle"
+			>
+				Cancel
+			</a>
 			<button
 				type="submit"
 				disabled={isSaving}

@@ -5,6 +5,8 @@ import prisma from '$lib/server/prisma';
 import { onboardingSchema } from '$lib/validation/onboarding';
 import { sendEmail } from '$lib/notifications/email';
 import { emailTemplates } from '$lib/notifications/emailTemplates';
+import { trySendSms } from '$lib/notifications/sms';
+import { smsTemplates } from '$lib/notifications/smsTemplates';
 import type { Actions, PageServerLoad } from './$types';
 import type { ZodIssue } from 'zod';
 
@@ -304,6 +306,16 @@ export const actions: Actions = {
 								} catch (error) {
 									console.error('[email:error] Failed to send stakeholder welcome email', error);
 								}
+
+								// Send welcome SMS to new stakeholder
+								await trySendSms(
+									stakeholderPhone,
+									smsTemplates.welcomeStakeholder({
+										stakeholderName: stakeholder.name || undefined,
+										individualName: dbUser.name || undefined,
+										appUrl: event.url.origin
+									})
+								);
 							}
 						}
 					}
@@ -343,6 +355,7 @@ export const actions: Actions = {
 				throw redirect(303, '/onboarding/complete');
 			} else {
 				// --- CREATE MODE: original logic ---
+				const acceptedCoachIds: string[] = [];
 				await prisma.$transaction(async (tx) => {
 					const objective = await tx.objective.create({
 						data: {
@@ -395,6 +408,16 @@ export const actions: Actions = {
 							} catch (error) {
 								console.error('[email:error] Failed to send stakeholder welcome email', error);
 							}
+
+							// Send welcome SMS to stakeholder
+							await trySendSms(
+								stakeholderPhone,
+								smsTemplates.welcomeStakeholder({
+									stakeholderName: stakeholder.name || undefined,
+									individualName: dbUser.name || undefined,
+									appUrl: event.url.origin
+								})
+							);
 						}
 					}
 
@@ -478,8 +501,44 @@ export const actions: Actions = {
 								usedAt: new Date()
 							}
 						});
+
+						acceptedCoachIds.push(invite.coachId);
 					}
 				});
+
+				// Notify coaches whose invites were auto-accepted during onboarding
+				for (const coachId of acceptedCoachIds) {
+					try {
+						const coach = await prisma.user.findUnique({
+							where: { id: coachId },
+							select: { email: true, name: true, phone: true }
+						});
+
+						if (coach) {
+							const template = emailTemplates.coachClientAccepted({
+								coachName: coach.name ?? 'Coach',
+								clientName: dbUser.name ?? dbUser.email,
+								clientEmail: dbUser.email
+							});
+							await sendEmail({
+								to: coach.email,
+								subject: template.subject,
+								html: template.html,
+								text: template.text
+							});
+
+							// Send SMS to coach
+							await trySendSms(
+								coach.phone,
+								smsTemplates.coachClientAccepted({
+									clientName: dbUser.name ?? dbUser.email
+								})
+							);
+						}
+					} catch (error) {
+						console.warn('[onboarding:coach-notify] Failed to send coach notification', error);
+					}
+				}
 
 				throw redirect(303, '/onboarding/initial-ratings');
 			}

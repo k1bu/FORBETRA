@@ -7,8 +7,8 @@ export const POST: RequestHandler = async (event) => {
 	const { dbUser } = requireRole(event, 'INDIVIDUAL');
 
 	const body = await event.request.json();
-	const cycleId = body.cycleId as string;
-	const weeks = body.weeks as number ?? 4;
+	const cycleId = typeof body.cycleId === 'string' ? body.cycleId.trim() : '';
+	const weeks = typeof body.weeks === 'number' && body.weeks >= 1 ? body.weeks : 4;
 
 	if (!cycleId) {
 		return json({ error: 'cycleId is required' }, { status: 400 });

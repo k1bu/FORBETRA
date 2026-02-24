@@ -132,7 +132,7 @@ async function createFeedbackToken(
 
 	const primarySubgoal = objective.subgoals[0];
 	if (!primarySubgoal) {
-		return { ok: false, status: 400, error: 'Add a subgoal before requesting feedback.' };
+		return { ok: false, status: 400, error: 'Add a sub-objective before requesting feedback.' };
 	}
 
 	const cycle = objective.cycles[0];

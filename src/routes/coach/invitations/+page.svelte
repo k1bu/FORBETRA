@@ -103,7 +103,7 @@
 	type FilterTab = 'all' | 'pending' | 'accepted' | 'cancelled';
 	let activeFilter = $state<FilterTab>('all');
 
-	const filteredInvitations = $derived(() => {
+	const filteredInvitations = $derived.by(() => {
 		if (activeFilter === 'all') return data.invitations;
 		return data.invitations.filter((invite) => {
 			const status = getInviteStatus(invite);
@@ -464,7 +464,7 @@
 				{/each}
 			</div>
 
-			{#if filteredInvitations().length === 0}
+			{#if filteredInvitations.length === 0}
 				<div class="rounded-xl border border-dashed border-border-strong bg-surface-raised p-6 text-center">
 					<p class="text-sm text-text-tertiary">
 						{#if activeFilter === 'all'}
@@ -476,7 +476,7 @@
 				</div>
 			{:else}
 				<ul class="space-y-3 text-sm">
-					{#each filteredInvitations() as invite (invite.id)}
+					{#each filteredInvitations as invite (invite.id)}
 						{@const status = getInviteStatus(invite)}
 						{@const config = statusConfig[status]}
 						<li

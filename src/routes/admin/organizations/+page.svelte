@@ -15,6 +15,10 @@
 	};
 </script>
 
+<svelte:head>
+	<title>Organizations | Forbetra Admin</title>
+</svelte:head>
+
 <section class="mx-auto flex max-w-5xl flex-col gap-6 p-6">
 	<header class="space-y-2">
 		<h1 class="text-2xl font-semibold">Organizations ({data.organizations.length})</h1>

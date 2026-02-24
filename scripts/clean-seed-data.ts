@@ -131,6 +131,16 @@ async function cleanSeedData() {
 			});
 			deletedTokens += tokenResult.count;
 
+			// Delete insights
+			await tx.insight.deleteMany({
+				where: { userId: user.id }
+			});
+
+			// Delete organization memberships
+			await tx.organizationMember.deleteMany({
+				where: { userId: user.id }
+			});
+
 			// Delete user
 			await tx.user.delete({ where: { id: user.id } });
 		}
@@ -147,7 +157,7 @@ async function cleanSeedData() {
 		console.log(`  Coach-client links: ${deletedCoachClients}`);
 		console.log(`  Coach invites: ${deletedCoachInvites}`);
 		console.log(`  Tokens: ${deletedTokens}`);
-	});
+	}, { timeout: 60000 });
 
 	console.log('\nSeed data cleaned successfully.\n');
 	await prisma.$disconnect();

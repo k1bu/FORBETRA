@@ -5,6 +5,7 @@ import { sendEmail } from '$lib/notifications/email';
 import { emailTemplates } from '$lib/notifications/emailTemplates';
 import { trySendSms } from '$lib/notifications/sms';
 import { smsTemplates } from '$lib/notifications/smsTemplates';
+import { validatePhone, normalizePhone } from '$lib/utils/phone';
 import type { Actions, PageServerLoad } from './$types';
 
 const sanitizeToken = (value: string | undefined) => {
@@ -96,6 +97,8 @@ export const load: PageServerLoad = async ({ params, url }) => {
 	if (!token || !token.stakeholder || !token.reflection || token.expiresAt < new Date()) {
 		throw redirect(302, '/stakeholder/invalid');
 	}
+
+	const isAlreadySubmitted = !!token.usedAt;
 
 	// Fetch previous feedback ratings from this stakeholder (only if not Week 1)
 	let previousRatings: {
@@ -191,6 +194,7 @@ export const load: PageServerLoad = async ({ params, url }) => {
 		subgoals,
 		revealScores: token.reflection.cycle.revealScores,
 		isPreview: false,
+		isAlreadySubmitted,
 		isFirstFeedback,
 		previousRatings,
 		historicRatings
@@ -207,8 +211,16 @@ export const actions: Actions = {
 		// Verify the token belongs to this stakeholder
 		const token = await prisma.token.findUnique({
 			where: { tokenHash: tokenParam },
-			select: { stakeholderId: true }
+			select: { stakeholderId: true, expiresAt: true, usedAt: true }
 		});
+
+		if (!token) {
+			return fail(400, { phoneError: 'Invalid token.' });
+		}
+
+		if (token.expiresAt < new Date()) {
+			return fail(400, { phoneError: 'This feedback link has expired.' });
+		}
 
 		const formData = await request.formData();
 		const stakeholderId = String(formData.get('stakeholderId') ?? '').trim();
@@ -219,19 +231,18 @@ export const actions: Actions = {
 		}
 
 		// Ensure the stakeholder ID matches the token's stakeholder
-		if (!token || token.stakeholderId !== stakeholderId) {
+		if (token.stakeholderId !== stakeholderId) {
 			return fail(403, { phoneError: 'Unauthorized.' });
 		}
 
-		// Basic phone validation
-		const cleanPhone = phone.replace(/[\s\-()]/g, '');
-		if (!/^\+?\d{7,15}$/.test(cleanPhone)) {
+		if (!validatePhone(phone)) {
 			return fail(400, { phoneError: 'Please enter a valid phone number.' });
 		}
 
+		const normalized = normalizePhone(phone);
 		await prisma.stakeholder.update({
 			where: { id: stakeholderId },
-			data: { phone }
+			data: { phone: normalized }
 		});
 
 		return { phoneSaved: true };
@@ -259,7 +270,7 @@ export const actions: Actions = {
 		if (!parsed.success) {
 			const errors = parsed.error.flatten();
 			return fail(400, {
-				error: errors.fieldErrors.comment?.[0] ?? 'Invalid feedback submission.'
+				error: errors.fieldErrors._form?.[0] ?? errors.fieldErrors.comment?.[0] ?? 'Invalid feedback submission.'
 			});
 		}
 
@@ -395,6 +406,44 @@ export const actions: Actions = {
 					weekNumber: reflection.weekNumber
 				})
 			);
+		}
+
+		// Notify coach if the individual has one
+		if (stakeholder?.individual && reflection) {
+			try {
+				const coachClient = await prisma.coachClient.findFirst({
+					where: {
+						individualId: stakeholder.individual.id,
+						archivedAt: null
+					},
+					select: {
+						coach: {
+							select: { email: true, name: true, phone: true }
+						}
+					}
+				});
+
+				if (coachClient?.coach) {
+					const coachTemplate = emailTemplates.coachStakeholderFeedbackReceived({
+						coachName: coachClient.coach.name ?? 'Coach',
+						individualName: stakeholder.individual.name || 'a client',
+						stakeholderName: stakeholder.name || undefined,
+						weekNumber: reflection.weekNumber,
+						appUrl: url.origin
+					});
+					await sendEmail({
+						to: coachClient.coach.email,
+						...coachTemplate
+					});
+
+					await trySendSms(
+						coachClient.coach.phone,
+						`Forbetra: ${stakeholder.name || 'A stakeholder'} submitted feedback for your client ${stakeholder.individual.name || 'a client'} (Week ${reflection.weekNumber}). ${url.origin}/coach/roster`
+					);
+				}
+			} catch (error) {
+				console.error('[email:error] Failed to send coach feedback notification', error);
+			}
 		}
 
 		return {

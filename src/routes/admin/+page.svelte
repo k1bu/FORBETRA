@@ -29,6 +29,10 @@
 	];
 </script>
 
+<svelte:head>
+	<title>Dashboard | Forbetra Admin</title>
+</svelte:head>
+
 <section class="mx-auto flex max-w-6xl flex-col gap-6 p-6">
 	<header>
 		<h1 class="text-2xl font-bold text-text-primary">Admin Dashboard</h1>

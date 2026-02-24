@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { ActionData, PageData } from './$types';
 	import type { ClientSummary } from '$lib/server/buildClientSummary';
+	import { enhance } from '$app/forms';
 	import PerformanceEffortChart from '$lib/components/PerformanceEffortChart.svelte';
 	import { addToast } from '$lib/stores/toasts.svelte';
 	import { Search, AlertTriangle, Target, Sparkles, Inbox, MessageSquare, Save } from 'lucide-svelte';
@@ -149,6 +150,14 @@
 	});
 
 	const selectedClient = $derived(filteredClients.find((c) => c.id === selectedClientId) ?? null);
+
+	// Close note modal reactively when submission succeeds
+	$effect(() => {
+		if (form?.noteSuccess) {
+			noteFormOpen = false;
+			noteClientId = null;
+		}
+	});
 </script>
 
 <svelte:head>
@@ -346,7 +355,11 @@
 									<p class="mb-3 text-xs text-text-secondary">
 										How often should stakeholders be asked to rate {client.name.split(' ')[0]}?
 									</p>
-									<form method="post" action="?/updateCadence" class="space-y-3">
+									<form method="post" action="?/updateCadence" class="space-y-3" use:enhance={() => {
+									return async ({ update }) => {
+										await update();
+									};
+								}}>
 										<input type="hidden" name="individualId" value={client.id} />
 										<input type="hidden" name="cycleId" value={client.objective.cycle.id} />
 										<div class="flex gap-2">
@@ -520,7 +533,11 @@
 						{/if}
 
 						<div class="flex gap-2">
-							<form method="post" action="?/archiveClient" class="flex-1">
+							<form method="post" action="?/archiveClient" class="flex-1" use:enhance={() => {
+								return async ({ update }) => {
+									await update();
+								};
+							}}>
 								<input type="hidden" name="individualId" value={client.id} />
 								<input type="hidden" name="archive" value={client.archived ? 'false' : 'true'} />
 								<button
@@ -582,13 +599,10 @@
 					</div>
 				</div>
 			{/if}
-			<form method="post" action="?/createNote" class="space-y-4" onsubmit={() => {
-				setTimeout(() => {
-					if (form?.noteSuccess) {
-						noteFormOpen = false;
-						noteClientId = null;
-					}
-				}, 1000);
+			<form method="post" action="?/createNote" class="space-y-4" use:enhance={() => {
+				return async ({ update }) => {
+					await update();
+				};
 			}}>
 				<input type="hidden" name="individualId" value={noteClientId} />
 				{#if client?.objective?.cycle}

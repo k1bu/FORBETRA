@@ -8,10 +8,10 @@
 		<p class="text-text-secondary mb-1">Error {$page.status}</p>
 		<p class="text-sm text-text-tertiary mb-6">{$page.error?.message ?? 'An unexpected error occurred.'}</p>
 		<a
-			href="/individual"
+			href="/coach"
 			class="inline-flex items-center rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover transition-colors"
 		>
-			Return to Hub
+			Return to Dashboard
 		</a>
 	</div>
 </div>

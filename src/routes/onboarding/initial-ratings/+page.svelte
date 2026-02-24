@@ -73,8 +73,8 @@
 			{#if form?.success}
 				<div class="mx-auto max-w-2xl animate-in fade-in slide-in-from-top-2 rounded-xl border border-success/30 bg-success-muted p-6 text-center">
 					<CircleCheck class="mx-auto mb-2 h-10 w-10 text-success" />
-					<p class="text-lg font-semibold text-success">Ratings saved!</p>
-					<p class="mt-1 text-sm text-success">Your starting point has been recorded.</p>
+					<p class="text-lg font-semibold text-success">Baseline set!</p>
+					<p class="mt-1 text-sm text-success">You're ready to begin. Your dashboard is waiting for you.</p>
 				</div>
 			{/if}
 		</div>
@@ -207,7 +207,7 @@
 							Saving...
 						{:else}
 							<Send class="h-4 w-4" />
-							Continue
+							Set My Baseline
 						{/if}
 					</span>
 					<div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 opacity-0 transition-opacity group-hover:opacity-100"></div>

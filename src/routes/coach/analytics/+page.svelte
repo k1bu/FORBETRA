@@ -39,7 +39,7 @@
 
 	const formatPercent = (value: number | null | undefined) => {
 		if (value === null || value === undefined) return '—';
-		return `${Math.round(value * 100)}%`;
+		return `${Math.round(value)}%`;
 	};
 
 	const formatScore = (value: number | null | undefined) => {
@@ -68,7 +68,7 @@
 		<div>
 			<nav aria-label="Breadcrumb" class="mb-2">
 				<ol class="flex items-center gap-1.5 text-sm text-text-tertiary">
-					<li><a href="/coach" class="rounded transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">Coach Hub</a></li>
+					<li><a href="/coach" class="rounded transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">Dashboard</a></li>
 					<li aria-hidden="true" class="text-text-muted"><svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg></li>
 					<li><span class="font-medium text-text-primary">Analytics</span></li>
 				</ol>
@@ -134,7 +134,7 @@
 					<thead>
 						<tr class="border-b border-border-default">
 							<th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-text-tertiary" aria-sort={sortKey === 'name' ? (sortAsc ? 'ascending' : 'descending') : 'none'}>
-								<button class="flex items-center gap-1" onclick={() => toggleSort('name')}>
+								<button type="button" class="flex items-center gap-1" onclick={() => toggleSort('name')}>
 									Name{sortIndicator('name')}
 								</button>
 							</th>
@@ -142,32 +142,32 @@
 								Objective
 							</th>
 							<th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wider text-text-tertiary" aria-sort={sortKey === 'avgEffort' ? (sortAsc ? 'ascending' : 'descending') : 'none'}>
-								<button class="flex items-center gap-1" onclick={() => toggleSort('avgEffort')}>
+								<button type="button" class="flex items-center gap-1" onclick={() => toggleSort('avgEffort')}>
 									Effort{sortIndicator('avgEffort')}
 								</button>
 							</th>
 							<th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wider text-text-tertiary" aria-sort={sortKey === 'avgProgress' ? (sortAsc ? 'ascending' : 'descending') : 'none'}>
-								<button class="flex items-center gap-1" onclick={() => toggleSort('avgProgress')}>
+								<button type="button" class="flex items-center gap-1" onclick={() => toggleSort('avgProgress')}>
 									Performance{sortIndicator('avgProgress')}
 								</button>
 							</th>
 							<th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wider text-text-tertiary" aria-sort={sortKey === 'stability' ? (sortAsc ? 'ascending' : 'descending') : 'none'}>
-								<button class="flex items-center gap-1" onclick={() => toggleSort('stability')}>
+								<button type="button" class="flex items-center gap-1" onclick={() => toggleSort('stability')}>
 									Stability{sortIndicator('stability')}
 								</button>
 							</th>
 							<th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wider text-text-tertiary" aria-sort={sortKey === 'trajectory' ? (sortAsc ? 'ascending' : 'descending') : 'none'}>
-								<button class="flex items-center gap-1" onclick={() => toggleSort('trajectory')}>
+								<button type="button" class="flex items-center gap-1" onclick={() => toggleSort('trajectory')}>
 									Trajectory{sortIndicator('trajectory')}
 								</button>
 							</th>
 							<th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wider text-text-tertiary" aria-sort={sortKey === 'completionRate' ? (sortAsc ? 'ascending' : 'descending') : 'none'}>
-								<button class="flex items-center gap-1" onclick={() => toggleSort('completionRate')}>
+								<button type="button" class="flex items-center gap-1" onclick={() => toggleSort('completionRate')}>
 									Completion{sortIndicator('completionRate')}
 								</button>
 							</th>
 							<th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wider text-text-tertiary" aria-sort={sortKey === 'alertCount' ? (sortAsc ? 'ascending' : 'descending') : 'none'}>
-								<button class="flex items-center gap-1" onclick={() => toggleSort('alertCount')}>
+								<button type="button" class="flex items-center gap-1" onclick={() => toggleSort('alertCount')}>
 									Alerts{sortIndicator('alertCount')}
 								</button>
 							</th>
@@ -176,7 +176,7 @@
 					<tbody>
 						{#each sortedComparison as row}
 							<tr
-								class="border-b border-border-default transition-colors hover:bg-accent-muted/50"
+								class="border-b border-border-default transition-colors hover:bg-accent-muted/50 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface-base"
 								tabindex="0"
 								role="link"
 								onclick={() => goto(`/coach/session/${row.clientId}`)}
@@ -312,13 +312,13 @@
 
 	.scroll-shadow-container::before {
 		left: 0;
-		background: linear-gradient(to right, var(--color-surface-raised, #fff), transparent);
+		background: linear-gradient(to right, var(--color-surface-raised, transparent), transparent);
 		opacity: 0;
 	}
 
 	.scroll-shadow-container::after {
 		right: 0;
-		background: linear-gradient(to left, var(--color-surface-raised, #fff), transparent);
+		background: linear-gradient(to left, var(--color-surface-raised, transparent), transparent);
 		opacity: 1;
 	}
 </style>

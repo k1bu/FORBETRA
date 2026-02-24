@@ -71,13 +71,16 @@ export const load: PageServerLoad = async (event) => {
 			email: u.email,
 			clientCount: u._count.coachClientsManaged
 		})),
-		stakeholders: stakeholders.map((s) => ({
-			id: s.id,
-			name: s.name,
-			email: s.email,
-			relationship: s.relationship,
-			individualName: s.individual.name ?? s.individual.email,
-			tokenHash: s.tokens[0]?.tokenHash ?? null
-		}))
+		stakeholders: stakeholders.map((s) => {
+			const hash = s.tokens[0]?.tokenHash ?? null;
+			return {
+				id: s.id,
+				name: s.name,
+				email: s.email,
+				relationship: s.relationship,
+				individualName: s.individual.name ?? s.individual.email,
+				feedbackUrl: hash ? `/stakeholder/feedback/${hash}` : null
+			};
+		})
 	};
 };

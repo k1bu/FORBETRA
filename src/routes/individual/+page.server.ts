@@ -2,16 +2,8 @@ import { redirect } from '@sveltejs/kit';
 import prisma from '$lib/server/prisma';
 import { requireRole } from '$lib/server/auth';
 import { stdDev, computeWeekNumber } from '$lib/server/coachUtils';
+import { parseCheckInDays } from '$lib/utils/checkInDays';
 import type { PageServerLoad } from './$types';
-
-// Parse check-in days from frequency string (shared with checkin server)
-function parseCheckInDays(frequency: string): string[] {
-	if (frequency === '3x') return ['mon', 'wed', 'fri'];
-	if (frequency === '2x') return ['tue', 'fri'];
-	if (frequency === '1x') return ['fri'];
-	const days = frequency.split(',').map(d => d.trim().toLowerCase()).filter(d => d.length > 0);
-	return days.length > 0 ? days : ['fri'];
-}
 
 export const load: PageServerLoad = async (event) => {
 	try {
@@ -89,7 +81,7 @@ export const load: PageServerLoad = async (event) => {
 		if (cycle && currentWeek) {
 			totalExpected = currentWeek * checksPerWeek;
 			totalCompleted = cycle.reflections.length;
-			completionRate = totalExpected > 0 ? Math.round((totalCompleted / totalExpected) * 100) : 0;
+			completionRate = totalExpected > 0 ? Math.min(100, Math.round((totalCompleted / totalExpected) * 100)) : 0;
 
 			// Count open and missed experiences for current week
 			// Unified: each check-in day = one RATING_A expected

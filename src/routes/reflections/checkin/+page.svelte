@@ -83,13 +83,13 @@
 		</p>
 		{#if !data.isPreview && !data.isAvailable}
 			<div class="mx-auto max-w-md rounded-xl border border-warning/30 bg-warning-muted p-4 text-sm text-warning">
-				<p class="font-medium">Coming soon</p>
-				<p class="mt-1">This check-in will be available on {formatDate(data.availableDate)}.</p>
+				<p class="font-medium">Check-in not yet available</p>
+				<p class="mt-1">This check-in opens on {formatDate(data.availableDate)}. Check back then to record your reflection.</p>
 			</div>
 		{:else if data.isLocked}
 			<div class="mx-auto max-w-md rounded-xl border border-border-default bg-surface-raised p-4 text-sm text-text-secondary">
 				<p class="font-medium">Check-in locked</p>
-				<p class="mt-1">This check-in can no longer be edited because the next Monday intention has been submitted.</p>
+				<p class="mt-1">This check-in is locked because your next week's Monday intention has already been submitted. Check-ins lock 48 hours after the following week begins.</p>
 			</div>
 		{/if}
 	</header>
@@ -385,11 +385,12 @@
 						href="/individual"
 						class="rounded-xl border border-border-default bg-surface-raised px-6 py-3.5 text-sm font-semibold text-text-secondary transition-all hover:border-border-strong hover:bg-surface-subtle"
 					>
-						Back to Today
+						Cancel
 					</a>
 					<button
 						type="submit"
 						disabled={!data.isAvailable || data.isLocked || isSubmitting}
+						title={data.isLocked ? 'Check-in already submitted' : !data.isAvailable ? 'This check-in is not yet available' : isSubmitting ? 'Submitting...' : undefined}
 						class="group relative overflow-hidden rounded-xl bg-accent px-8 py-3.5 font-semibold text-white shadow-lg transition-all hover:bg-accent-hover hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
 					>
 						<span class="relative z-10 flex items-center gap-2">

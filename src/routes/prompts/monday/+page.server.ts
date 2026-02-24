@@ -144,7 +144,7 @@ export const actions: Actions = {
 		const firstSubgoal = objective.subgoals[0];
 
 		if (!firstSubgoal) {
-			return fail(400, { error: 'No subgoals found. Please complete onboarding first.' });
+			return fail(400, { error: 'No sub-objectives found. Please complete onboarding first.' });
 		}
 
 		try {

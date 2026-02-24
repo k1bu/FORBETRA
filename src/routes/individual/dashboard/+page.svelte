@@ -120,7 +120,7 @@
 
 		<!-- Identity Anchor -->
 		{#if data.identityAnchor}
-			<div class="mt-4 rounded-lg border border-border-default bg-surface-raised p-4">
+			<div class="mt-4 rounded-xl border border-border-default bg-surface-raised p-4">
 				<div class="mb-2 flex items-center gap-2">
 					<Target class="h-4 w-4 text-text-muted" />
 					<h2 class="text-sm font-semibold text-text-primary">Identity Anchor</h2>
@@ -152,7 +152,7 @@
 		<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 			<!-- Next Prompt Card -->
 			{#if data.nextPrompt}
-				<div class="rounded-lg border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30">
+				<div class="rounded-xl border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30">
 					<div class="mb-3 flex items-center gap-2">
 						<Clock class="h-4 w-4 text-text-muted" />
 						<p class="text-xs font-semibold uppercase tracking-wide text-text-tertiary">Next Up</p>
@@ -171,7 +171,7 @@
 			{/if}
 
 			<!-- Cycle Progress Card -->
-			<div class="rounded-lg border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30">
+			<div class="rounded-xl border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30">
 				<div class="mb-3 flex items-center justify-between">
 					<div class="flex items-center gap-2">
 						<BarChart3 class="h-4 w-4 text-text-muted" />
@@ -199,7 +199,7 @@
 
 			<!-- Feedback Summary Card -->
 			{#if data.feedbackSummary}
-				<div class="rounded-lg border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30">
+				<div class="rounded-xl border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30">
 					<div class="mb-3 flex items-center gap-2">
 						<Users class="h-4 w-4 text-text-muted" />
 						<p class="text-xs font-semibold uppercase tracking-wide text-text-tertiary">Feedback</p>
@@ -223,7 +223,7 @@
 
 			<!-- Engagement Card (Completion Rate & Streaks) -->
 			{#if data.engagement}
-				<div class="rounded-lg border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30">
+				<div class="rounded-xl border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30">
 					<div class="mb-3 flex items-center gap-2">
 						<Flame class="h-4 w-4 text-text-muted" />
 						<p class="text-xs font-semibold uppercase tracking-wide text-text-tertiary">Engagement</p>
@@ -246,12 +246,12 @@
 						</div>
 					{/if}
 					<div class="flex gap-4 text-xs">
-						<div class="flex-1 rounded-lg border border-border-default bg-surface-raised p-3">
+						<div class="flex-1 rounded-xl border border-border-default bg-surface-raised p-3">
 							<p class="text-text-tertiary">Current Streak</p>
 							<p class="mt-1 text-2xl font-bold text-success">{data.engagement.currentStreak}</p>
 							<p class="text-text-secondary">check-ins</p>
 						</div>
-						<div class="flex-1 rounded-lg border border-border-default bg-surface-raised p-3">
+						<div class="flex-1 rounded-xl border border-border-default bg-surface-raised p-3">
 							<p class="text-text-tertiary">Best Streak</p>
 							<p class="mt-1 text-2xl font-bold text-accent">{data.engagement.bestStreak}</p>
 							<p class="text-text-secondary">check-ins</p>
@@ -264,7 +264,7 @@
 
 		<!-- Cycle Details -->
 		<div class="space-y-6">
-			<div class="rounded-lg border border-border-default bg-surface-raised p-6">
+			<div class="rounded-xl border border-border-default bg-surface-raised p-6">
 				<div class="mb-4 flex items-center gap-2">
 					<Calendar class="h-4 w-4 text-text-muted" />
 					<h2 class="text-lg font-bold text-text-primary">Cycle Details</h2>
@@ -288,7 +288,7 @@
 									upcoming: 'Upcoming',
 									catchup: 'Catch Up'
 								}}
-								<div class="rounded-lg border border-border-default bg-surface-raised p-4 transition-all">
+								<div class="rounded-xl border border-border-default bg-surface-raised p-4 transition-all">
 									<div class="mb-2 flex items-center gap-2">
 										{#if experience.state === 'open'}
 											<span class="h-2 w-2 rounded-full bg-accent"></span>
@@ -349,7 +349,7 @@
 
 	<!-- Performance/Effort Visualization -->
 	{#if data.cycle && data.visualizationData && data.visualizationData.individual && data.visualizationData.stakeholders && data.visualizationData.stakeholderList}
-		<div class="rounded-lg border border-border-default bg-surface-raised p-6">
+		<div class="rounded-xl border border-border-default bg-surface-raised p-6">
 			<PerformanceEffortChart
 				individualData={data.visualizationData.individual}
 				stakeholderData={data.visualizationData.stakeholders}

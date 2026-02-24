@@ -204,7 +204,8 @@ export const actions: Actions = {
 			return fail(403, { error: 'You do not have access to this client.' });
 		}
 
-		const weekNumber = weekNumberRaw ? parseInt(weekNumberRaw, 10) : null;
+		let weekNumber = weekNumberRaw ? parseInt(weekNumberRaw, 10) : null;
+		if (weekNumber !== null && isNaN(weekNumber)) weekNumber = null;
 		const cycleIdOrNull = cycleId || null;
 
 		try {

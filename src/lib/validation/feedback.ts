@@ -15,11 +15,17 @@ export const stakeholderFeedbackSchema = z
 			.min(0, 'Minimum score is 0')
 			.max(10, 'Maximum score is 10')
 			.optional(),
-		comment: z.string().trim().max(2000, 'Keep comments under 2000 characters').optional()
+		comment: z.string().trim().max(500, 'Keep comments under 500 characters').optional()
 	})
-	.refine((data) => Boolean(data.effortScore ?? data.performanceScore ?? data.comment), {
-		message: 'Provide at least one score or a comment.',
-		path: ['comment']
-	});
+	.refine(
+		(data) =>
+			data.effortScore !== undefined ||
+			data.performanceScore !== undefined ||
+			!!data.comment?.trim(),
+		{
+			message: 'Provide at least one score or a comment.',
+			path: ['_form']
+		}
+	);
 
 export type StakeholderFeedbackData = z.infer<typeof stakeholderFeedbackSchema>;

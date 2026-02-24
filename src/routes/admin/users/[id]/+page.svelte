@@ -15,14 +15,22 @@
 	};
 
 	const impersonateAndOpen = async (path = '/') => {
-		await fetch('/api/admin/impersonate', {
+		const res = await fetch('/api/admin/impersonate', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ userId: user.id })
 		});
+		if (!res.ok) {
+			alert('Failed to start impersonation. Please try again.');
+			return;
+		}
 		window.open(path, '_blank');
 	};
 </script>
+
+<svelte:head>
+	<title>User Detail | Forbetra Admin</title>
+</svelte:head>
 
 <section class="mx-auto flex max-w-5xl flex-col gap-6 p-6">
 	<header class="flex items-center justify-between">
@@ -122,7 +130,7 @@
 			<ul class="space-y-1 text-sm">
 				{#each user.coachClientsManaged as rel (rel.id)}
 					<li class="flex items-center justify-between rounded bg-surface-raised px-3 py-2">
-						<a href="/admin/users/{rel.individual.email ? '' : ''}" class="font-medium">{rel.individual.name ?? rel.individual.email}</a>
+						<a href="/admin/users/{rel.individual.id}" class="font-medium">{rel.individual.name ?? rel.individual.email}</a>
 						<span class="text-xs text-text-tertiary">{rel.archivedAt ? 'Archived' : 'Active'}</span>
 					</li>
 				{/each}

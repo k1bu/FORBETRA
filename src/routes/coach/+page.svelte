@@ -6,13 +6,14 @@
 </script>
 
 <svelte:head>
-	<title>Coach Hub | Forbetra</title>
+	<title>Coach Dashboard | Forbetra</title>
 </svelte:head>
 
 <section class="mx-auto flex max-w-7xl flex-col gap-6 p-4 pb-12">
 	<!-- Page Header -->
 	<header>
-		<h1 class="text-3xl font-bold text-text-primary">Coach Hub</h1>
+		<p class="text-sm text-text-tertiary mb-1">Coach</p>
+		<h1 class="text-3xl font-bold text-text-primary">Coach Dashboard</h1>
 		<p class="mt-1 text-text-secondary">
 			Monitor client progress, track insights, and guide your practice.
 		</p>
@@ -20,7 +21,7 @@
 
 	<!-- Stat Cards -->
 	<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-		<div class="rounded-lg border border-border-default bg-surface-raised p-4">
+		<div class="rounded-xl border border-border-default bg-surface-raised p-4">
 			<div class="mb-1 flex items-center gap-1.5">
 				<Users class="h-4 w-4 text-text-muted" />
 				<p class="text-xs font-medium text-text-tertiary">Active Clients</p>
@@ -32,7 +33,7 @@
 				</p>
 			{/if}
 		</div>
-		<div class="rounded-lg border border-border-default bg-surface-raised p-4">
+		<div class="rounded-xl border border-border-default bg-surface-raised p-4">
 			<div class="mb-1 flex items-center gap-1.5">
 				<AlertTriangle class="h-4 w-4 text-text-muted" />
 				<p class="text-xs font-medium text-text-tertiary">Total Alerts</p>
@@ -46,7 +47,7 @@
 				<p class="mt-1 text-xs text-success">All clear</p>
 			{/if}
 		</div>
-		<div class="rounded-lg border border-border-default bg-surface-raised p-4">
+		<div class="rounded-xl border border-border-default bg-surface-raised p-4">
 			<div class="mb-1 flex items-center gap-1.5">
 				<BarChart3 class="h-4 w-4 text-text-muted" />
 				<p class="text-xs font-medium text-text-tertiary">Avg. Stability</p>
@@ -55,7 +56,7 @@
 				{data.analytics.avgStability !== null ? `${data.analytics.avgStability}/100` : '—'}
 			</p>
 		</div>
-		<div class="rounded-lg border border-border-default bg-surface-raised p-4">
+		<div class="rounded-xl border border-border-default bg-surface-raised p-4">
 			<div class="mb-1 flex items-center gap-1.5">
 				<Target class="h-4 w-4 text-text-muted" />
 				<p class="text-xs font-medium text-text-tertiary">Avg. Alignment</p>
@@ -68,7 +69,7 @@
 
 	<!-- Recent Alerts -->
 	{#if data.recentAlerts.length > 0}
-		<section class="rounded-lg border border-border-default bg-surface-raised p-4">
+		<section class="rounded-xl border border-border-default bg-surface-raised p-4">
 			<div class="mb-3 flex items-center justify-between">
 				<div class="flex items-center gap-2">
 					<AlertTriangle class="h-4 w-4 text-text-muted" />
@@ -103,7 +104,7 @@
 
 	<!-- Navigation Links -->
 	<div class="flex flex-col gap-2">
-		<a href="/coach/analytics" class="group flex items-center gap-3 rounded-lg border border-border-default bg-surface-raised px-4 py-3 transition-colors hover:border-border-strong hover:bg-surface-subtle">
+		<a href="/coach/analytics" class="group flex items-center gap-3 rounded-xl border border-border-default bg-surface-raised px-4 py-3 transition-colors hover:border-border-strong hover:bg-surface-subtle">
 			<BarChart3 class="h-4 w-4 shrink-0 text-text-muted" />
 			<div class="min-w-0 flex-1">
 				<p class="text-sm font-medium text-text-primary">Analytics</p>
@@ -112,7 +113,7 @@
 			<ChevronRight class="h-4 w-4 shrink-0 text-text-muted opacity-0 transition-opacity group-hover:opacity-100" />
 		</a>
 
-		<a href="/coach/invitations" class="group flex items-center gap-3 rounded-lg border border-border-default bg-surface-raised px-4 py-3 transition-colors hover:border-border-strong hover:bg-surface-subtle">
+		<a href="/coach/invitations" class="group flex items-center gap-3 rounded-xl border border-border-default bg-surface-raised px-4 py-3 transition-colors hover:border-border-strong hover:bg-surface-subtle">
 			<Mail class="h-4 w-4 shrink-0 text-text-muted" />
 			<div class="min-w-0 flex-1">
 				<p class="text-sm font-medium text-text-primary">Invitations{#if data.rosterSummary.pendingInvites > 0} <span class="text-accent">{data.rosterSummary.pendingInvites} pending</span>{/if}</p>
@@ -121,7 +122,7 @@
 			<ChevronRight class="h-4 w-4 shrink-0 text-text-muted opacity-0 transition-opacity group-hover:opacity-100" />
 		</a>
 
-		<a href="/coach/roster" class="group flex items-center gap-3 rounded-lg border border-border-default bg-surface-raised px-4 py-3 transition-colors hover:border-border-strong hover:bg-surface-subtle">
+		<a href="/coach/roster" class="group flex items-center gap-3 rounded-xl border border-border-default bg-surface-raised px-4 py-3 transition-colors hover:border-border-strong hover:bg-surface-subtle">
 			<ClipboardList class="h-4 w-4 shrink-0 text-text-muted" />
 			<div class="min-w-0 flex-1">
 				<p class="text-sm font-medium text-text-primary">Client Roster</p>

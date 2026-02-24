@@ -192,7 +192,7 @@
 					</form>
 				</div>
 
-				<p class="text-center text-xs text-text-muted">You can change your role later from settings.</p>
+				<p class="text-center text-xs text-text-muted">Need to change your role later? Contact support.</p>
 			</div>
 		</section>
 	{:else}

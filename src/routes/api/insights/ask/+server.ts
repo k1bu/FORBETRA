@@ -15,12 +15,20 @@ export const POST: RequestHandler = async (event) => {
 		return json({ error: 'Missing user message' }, { status: 400 });
 	}
 
-	// Simple rate limit: max 20 requests per hour
+	if (messages.length > 20) {
+		return json({ error: 'Too many messages. Please start a new conversation.' }, { status: 400 });
+	}
+
+	const oversizedMessage = messages.find((m) => m.content.length > 2000);
+	if (oversizedMessage) {
+		return json({ error: 'Message too long. Please keep each message under 2000 characters.' }, { status: 400 });
+	}
+
+	// Simple rate limit: max 20 insight requests per hour (all types)
 	const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
 	const recentCount = await prisma.insight.count({
 		where: {
 			userId: dbUser.id,
-			type: 'CHECK_IN',
 			createdAt: { gte: oneHourAgo }
 		}
 	});

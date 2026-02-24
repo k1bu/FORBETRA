@@ -95,9 +95,11 @@ async function cleanExistingSeedData() {
 				where: { OR: [{ coachId: user.id }, { individualId: user.id }] }
 			});
 			await tx.token.deleteMany({ where: { userId: user.id } });
+			await tx.insight.deleteMany({ where: { userId: user.id } });
+			await tx.organizationMember.deleteMany({ where: { userId: user.id } });
 			await tx.user.delete({ where: { id: user.id } });
 		}
-	});
+	}, { timeout: 60000 });
 
 	console.log(`  Cleaned up ${seedUsers.length} seed users and all related data.`);
 }

@@ -143,7 +143,7 @@ export const load: PageServerLoad = async (event) => {
 	);
 	const stabilityScores = clientSummaries
 		.map((c) => c.objective?.insights?.stabilityScore)
-		.filter((s): s is number => s !== null);
+		.filter((s): s is number => s != null);
 	const avgStability =
 		stabilityScores.length > 0
 			? Math.round(stabilityScores.reduce((sum, s) => sum + s, 0) / stabilityScores.length)

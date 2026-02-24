@@ -1,9 +1,14 @@
+import { redirect } from '@sveltejs/kit';
 import prisma from '$lib/server/prisma';
 import { requireRole } from '$lib/server/auth';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
-	requireRole(event, 'ADMIN');
+	const { dbUser } = requireRole(event, ['ADMIN', 'ORG_ADMIN']);
+
+	if (dbUser.role === 'ORG_ADMIN') {
+		throw redirect(303, '/admin/organizations');
+	}
 
 	const [
 		userCounts,

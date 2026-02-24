@@ -5,6 +5,7 @@ import { checkInEntrySchema } from '$lib/validation/reflection';
 import type { Actions, PageServerLoad } from './$types';
 import type { ReflectionType } from '@prisma/client';
 import { computeWeekNumber, getDateForWeekday } from '$lib/server/coachUtils';
+import { parseCheckInDays } from '$lib/utils/checkInDays';
 
 // Unified check-in: every check-in is RATING_A (effort + performance + notes)
 const getCheckInType = (
@@ -56,17 +57,6 @@ const getCheckInType = (
 		isAvailable: false
 	};
 };
-
-// Parse check-in days from frequency string
-function parseCheckInDays(frequency: string): string[] {
-	// Legacy support: "3x" = mon,wed,fri; "2x" = tue,fri; "1x" = fri
-	if (frequency === '3x') return ['mon', 'wed', 'fri'];
-	if (frequency === '2x') return ['tue', 'fri'];
-	if (frequency === '1x') return ['fri'];
-	// New format: comma-separated day names
-	const days = frequency.split(',').map(d => d.trim().toLowerCase()).filter(d => d.length > 0);
-	return days.length > 0 ? days : ['fri'];
-}
 
 function dayNameToNumber(day: string): number {
 	const map: Record<string, number> = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
@@ -361,7 +351,7 @@ export const actions: Actions = {
 		});
 
 		if (!objectiveWithSubgoals || objectiveWithSubgoals.subgoals.length === 0) {
-			return fail(400, { error: 'No subgoals found. Complete onboarding first.' });
+			return fail(400, { error: 'No sub-objectives found. Complete onboarding first.' });
 		}
 
 		const firstSubgoal = objectiveWithSubgoals.subgoals[0];

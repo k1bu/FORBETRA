@@ -37,21 +37,37 @@
 	const formatDate = (value: string) =>
 		new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(new Date(value));
 
-	let effortScore = $state(5);
-	let performanceScore = $state(5);
+	let effortScore = $state<number | null>(null);
+	let performanceScore = $state<number | null>(null);
 	let notes = $state('');
 	let isSubmitting = $state(false);
 	let showReveal = $state(false);
-	let stakeholderScores = $state<{ effortScore: number; performanceScore: number } | null>(null);
+	let scoresRequired = $state(false);
+	let stakeholderScores = $state<{ effortScore: number | null; performanceScore: number | null } | null>(null);
 	let previewIndividualScores = $state<{ effortScore: number; performanceScore: number; participantName: string } | null>(null);
 	let phoneInput = $state('');
 	let phoneSaved = $state(false);
 	let phoneSaving = $state(false);
 
-	const handleSubmit = () => {
+	const hasAtLeastOneScore = $derived(effortScore !== null || performanceScore !== null);
+
+	const handleSubmit = (e: Event) => {
+		if (!hasAtLeastOneScore && !notes.trim()) {
+			e.preventDefault();
+			scoresRequired = true;
+			return;
+		}
+		scoresRequired = false;
 		isSubmitting = true;
 		stakeholderScores = { effortScore, performanceScore };
 	};
+
+	// Clear validation error when user selects a score or types notes
+	$effect(() => {
+		if (effortScore !== null || performanceScore !== null || notes.trim()) {
+			scoresRequired = false;
+		}
+	});
 
 	// Reset isSubmitting and phoneSaving on form response (success or error)
 	$effect(() => {
@@ -63,7 +79,7 @@
 
 	// Simulate reveal for preview mode
 	const simulateReveal = () => {
-		stakeholderScores = { effortScore, performanceScore };
+		stakeholderScores = { effortScore: effortScore ?? 0, performanceScore: performanceScore ?? 0 };
 		previewIndividualScores = {
 			effortScore: 7,
 			performanceScore: 6,
@@ -144,6 +160,19 @@
 	<title>Feedback for {data.reflection.participantName} | Forbetra</title>
 </svelte:head>
 
+{#if data.isAlreadySubmitted}
+	<div class="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
+		<div class="rounded-xl border border-border-default bg-surface-raised p-8 shadow-lg max-w-md">
+			<div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-success-muted">
+				<svg class="h-6 w-6 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+				</svg>
+			</div>
+			<h1 class="text-xl font-bold text-text-primary mb-2">Feedback Already Submitted</h1>
+			<p class="text-sm text-text-secondary">You've already submitted your feedback for {data.reflection?.participantName ?? 'this person'}. Thank you for your input!</p>
+		</div>
+	</div>
+{:else}
 <section class="mx-auto flex min-h-screen max-w-4xl flex-col gap-6 p-4 pb-12">
 	<!-- Forbetra brand header -->
 	<div class="pt-2 pb-1 text-center">
@@ -403,9 +432,13 @@
 		<div class="mx-auto w-full max-w-2xl space-y-6">
 			<form method="post" onsubmit={handleSubmit} class="space-y-6">
 			<input type="hidden" name="token" value={data.token} />
-			<!-- Hidden inputs for form submission -->
-			<input type="hidden" name="effortScore" value={effortScore} />
-			<input type="hidden" name="performanceScore" value={performanceScore} />
+			<!-- Hidden inputs for form submission (only included when a score is selected) -->
+			{#if effortScore !== null}
+				<input type="hidden" name="effortScore" value={effortScore} />
+			{/if}
+			{#if performanceScore !== null}
+				<input type="hidden" name="performanceScore" value={performanceScore} />
+			{/if}
 
 			<!-- Objective Display -->
 			<div class="rounded-xl border border-border-default bg-surface-subtle px-5 py-4">
@@ -481,11 +514,11 @@
 						</div>
 					</div>
 					<div
-						class="flex h-16 w-16 items-center justify-center rounded-full border-2 transition-all {getScoreBgColor(
-							effortScore, 'effort'
-						)}"
+						class="flex h-16 w-16 items-center justify-center rounded-full border-2 transition-all {effortScore !== null
+							? getScoreBgColor(effortScore, 'effort')
+							: 'bg-surface-subtle border-border-default'}"
 					>
-						<span class="text-2xl font-bold {getScoreColor(effortScore, 'effort')}">{effortScore}</span>
+						<span class="text-2xl font-bold {effortScore !== null ? getScoreColor(effortScore, 'effort') : 'text-text-muted'}">{effortScore !== null ? effortScore : '—'}</span>
 					</div>
 				</div>
 
@@ -512,13 +545,19 @@
 
 				<div class="mb-2 flex items-center justify-between">
 					<span class="text-xs font-medium text-text-tertiary">Rarely intentional</span>
-					<div
-						class="rounded-full px-3 py-1 text-xs font-semibold {getScoreBgColor(
-							effortScore, 'effort'
-						)} {getScoreColor(effortScore, 'effort')}"
-					>
-						{getScoreLabel(effortScore, 'effort')}
-					</div>
+					{#if effortScore !== null}
+						<div
+							class="rounded-full px-3 py-1 text-xs font-semibold {getScoreBgColor(
+								effortScore, 'effort'
+							)} {getScoreColor(effortScore, 'effort')}"
+						>
+							{getScoreLabel(effortScore, 'effort')}
+						</div>
+					{:else}
+						<div class="rounded-full px-3 py-1 text-xs font-semibold bg-surface-subtle text-text-muted">
+							Select a score
+						</div>
+					{/if}
 					<span class="text-xs font-medium text-text-tertiary">Relentless commitment</span>
 				</div>
 				<p class="text-xs text-text-muted italic">
@@ -545,11 +584,11 @@
 						</div>
 					</div>
 					<div
-						class="flex h-16 w-16 items-center justify-center rounded-full border-2 transition-all {getScoreBgColor(
-							performanceScore, 'performance'
-						)}"
+						class="flex h-16 w-16 items-center justify-center rounded-full border-2 transition-all {performanceScore !== null
+							? getScoreBgColor(performanceScore, 'performance')
+							: 'bg-surface-subtle border-border-default'}"
 					>
-						<span class="text-2xl font-bold {getScoreColor(performanceScore, 'performance')}">{performanceScore}</span>
+						<span class="text-2xl font-bold {performanceScore !== null ? getScoreColor(performanceScore, 'performance') : 'text-text-muted'}">{performanceScore !== null ? performanceScore : '—'}</span>
 					</div>
 				</div>
 
@@ -576,13 +615,19 @@
 
 				<div class="mb-2 flex items-center justify-between">
 					<span class="text-xs font-medium text-text-tertiary">Not yet visible</span>
-					<div
-						class="rounded-full px-3 py-1 text-xs font-semibold {getScoreBgColor(
-							performanceScore, 'performance'
-						)} {getScoreColor(performanceScore, 'performance')}"
-					>
-						{getScoreLabel(performanceScore, 'performance')}
-					</div>
+					{#if performanceScore !== null}
+						<div
+							class="rounded-full px-3 py-1 text-xs font-semibold {getScoreBgColor(
+								performanceScore, 'performance'
+							)} {getScoreColor(performanceScore, 'performance')}"
+						>
+							{getScoreLabel(performanceScore, 'performance')}
+						</div>
+					{:else}
+						<div class="rounded-full px-3 py-1 text-xs font-semibold bg-surface-subtle text-text-muted">
+							Select a score
+						</div>
+					{/if}
 					<span class="text-xs font-medium text-text-tertiary">Transformative impact</span>
 				</div>
 				<p class="text-xs text-text-muted italic">
@@ -615,6 +660,13 @@
 				</div>
 			</div>
 
+			<!-- Validation message -->
+			{#if scoresRequired}
+				<div class="rounded-xl border border-error-muted bg-error-muted p-4 text-sm text-error">
+					<p class="font-medium"><AlertTriangle class="h-4 w-4 inline" /> Please select at least one score or write an observation before submitting.</p>
+				</div>
+			{/if}
+
 			<!-- Submit Button with Enhanced Design -->
 			<div class="flex flex-col gap-4 rounded-2xl border border-border-default bg-surface-base p-6 sm:flex-row sm:items-center sm:justify-between">
 				<div class="flex-1">
@@ -645,6 +697,7 @@
 		</div>
 	{/if}
 </section>
+{/if}
 
 <style>
 	@keyframes fade-in {

@@ -2,8 +2,8 @@ import { z } from 'zod';
 
 export const reflectionEntrySchema = z.object({
 	subgoalId: z
-		.string({ error: 'Subgoal is required' })
-		.cuid({ message: 'Invalid subgoal' }),
+		.string({ error: 'Sub-objective is required' })
+		.cuid({ message: 'Invalid sub-objective' }),
 	score: z.coerce
 		.number({ error: 'Score must be a number' })
 		.int()

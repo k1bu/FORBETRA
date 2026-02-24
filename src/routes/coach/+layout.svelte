@@ -48,7 +48,7 @@
 	});
 
 	const navItems = [
-		{ href: '/coach', label: 'Hub', icon: Home, mobileVisible: true },
+		{ href: '/coach', label: 'Dashboard', icon: Home, mobileVisible: true },
 		{ href: '/coach/roster', label: 'Roster', icon: Users, mobileVisible: true },
 		{ href: '/coach/invitations', label: 'Invitations', icon: Mail, mobileVisible: true },
 		{ href: '/coach/analytics', label: 'Analytics', icon: BarChart3, mobileVisible: false },

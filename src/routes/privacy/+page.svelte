@@ -17,7 +17,7 @@
 			<p class="mb-2">We collect the following types of information:</p>
 			<ul class="ml-4 list-disc space-y-1">
 				<li><strong>Account Information:</strong> Name, email address, and phone number (optional) provided during registration.</li>
-				<li><strong>Development Data:</strong> Objectives, subgoals, weekly reflection scores, and notes you enter into the platform.</li>
+				<li><strong>Development Data:</strong> Objectives, sub-objectives, weekly reflection scores, and notes you enter into the platform.</li>
 				<li><strong>Stakeholder Feedback:</strong> Ratings and observations submitted by stakeholders you invite.</li>
 				<li><strong>Usage Data:</strong> Timezone preferences, reminder settings, and interaction patterns.</li>
 				<li><strong>Communication Data:</strong> Email addresses and phone numbers used to send notifications and feedback requests.</li>

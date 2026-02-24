@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { ActionData, PageData } from './$types';
+	import { enhance } from '$app/forms';
 	import PerformanceEffortChart from '$lib/components/PerformanceEffortChart.svelte';
 	import { addToast } from '$lib/stores/toasts.svelte';
 	import { Target, Sparkles, AlertTriangle } from 'lucide-svelte';
@@ -71,12 +72,19 @@
 	})());
 
 	$effect(() => {
+		if (form) {
+			submittingNote = false;
+		}
 		if (form?.noteSuccess) {
 			addToast('Note saved', 'success');
 			noteContent = '';
 		}
 	});
 </script>
+
+<svelte:head>
+	<title>Client Session | Forbetra</title>
+</svelte:head>
 
 <section class="mx-auto flex max-w-5xl flex-col gap-6 p-4 pb-12">
 	<!-- Header -->
@@ -261,7 +269,13 @@
 		<h2 class="mb-4 text-lg font-bold text-text-primary">Coach Notes</h2>
 
 		<!-- Inline add note form -->
-		<form method="post" action="?/createNote" class="mb-4 rounded-xl border border-border-default bg-surface-raised p-4">
+		<form method="post" action="?/createNote" class="mb-4 rounded-xl border border-border-default bg-surface-raised p-4" use:enhance={() => {
+		submittingNote = true;
+		return async ({ update }) => {
+			submittingNote = false;
+			await update();
+		};
+	}}>
 			{#if data.cycleId}
 				<input type="hidden" name="cycleId" value={data.cycleId} />
 			{/if}
@@ -292,9 +306,10 @@
 					/>
 					<button
 						type="submit"
-						class="rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white transition-all hover:bg-accent-hover"
+						disabled={submittingNote}
+						class="rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white transition-all hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed"
 					>
-						Save
+						{submittingNote ? 'Saving...' : 'Save'}
 					</button>
 				</div>
 			</div>

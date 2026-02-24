@@ -5,7 +5,7 @@ import { clerkClient } from 'svelte-clerk/server';
 import type { Actions, PageServerLoad } from './$types';
 import type { UserRole } from '@prisma/client';
 
-const ALLOWED_ROLES: UserRole[] = ['INDIVIDUAL', 'COACH', 'STAKEHOLDER', 'ADMIN'];
+const ALLOWED_ROLES: UserRole[] = ['INDIVIDUAL', 'COACH', 'STAKEHOLDER', 'ADMIN', 'ORG_ADMIN'];
 
 export const load: PageServerLoad = async (event) => {
 	requireRole(event, 'ADMIN');
@@ -55,7 +55,7 @@ export const load: PageServerLoad = async (event) => {
 				}
 			},
 			coachClientsManaged: {
-				include: { individual: { select: { name: true, email: true } } }
+				include: { individual: { select: { id: true, name: true, email: true } } }
 			},
 			coachClientsOwned: {
 				include: { coach: { select: { name: true, email: true } } }
@@ -78,12 +78,17 @@ export const actions: Actions = {
 
 		const name = (formData.get('name') as string)?.trim() || null;
 		const email = (formData.get('email') as string)?.trim();
-		const role = (formData.get('role') as string)?.toUpperCase() as UserRole;
+		const roleRaw = formData.get('role');
 
 		if (!email) {
 			return fail(400, { error: 'Email is required.' });
 		}
 
+		if (!roleRaw || typeof roleRaw !== 'string') {
+			return fail(400, { error: 'Role is required.' });
+		}
+
+		const role = roleRaw.toUpperCase() as UserRole;
 		if (!ALLOWED_ROLES.includes(role)) {
 			return fail(400, { error: 'Invalid role.' });
 		}

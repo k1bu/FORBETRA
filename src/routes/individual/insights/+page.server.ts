@@ -117,7 +117,6 @@ export const load: PageServerLoad = async (event) => {
 	}
 
 	const trendWeeks = Array.from(reflectionTrendMap.values())
-		.filter((week) => week.weekNumber !== 13) // Exclude Week 13
 		.sort((a, b) => b.weekNumber - a.weekNumber)
 		.slice(0, 4);
 
@@ -273,9 +272,9 @@ export const load: PageServerLoad = async (event) => {
 			};
 		});
 
-		// Prepare correlation data (only weeks with both effort and progress, exclude Week 13)
+		// Prepare correlation data (only weeks with both effort and progress)
 		const individualCorrelation = individualWeeklyData
-			.filter((week) => week.weekNumber !== 13 && week.effortScore !== null && week.performanceScore !== null)
+			.filter((week) => week.effortScore !== null && week.performanceScore !== null)
 			.map((week) => ({
 				effort: week.effortScore!,
 				progress: week.performanceScore!,
@@ -293,7 +292,6 @@ export const load: PageServerLoad = async (event) => {
 		allFeedbacks.forEach((feedback) => {
 			if (
 				feedback.reflection &&
-				feedback.reflection.weekNumber !== 13 &&
 				feedback.effortScore !== null &&
 				feedback.performanceScore !== null
 			) {

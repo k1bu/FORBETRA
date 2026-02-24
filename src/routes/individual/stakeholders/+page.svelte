@@ -147,7 +147,7 @@
 									>
 										<input type="hidden" name="stakeholderId" value={stakeholder.id} />
 										<div>
-											<label for="phone-prompt-{stakeholder.id}" class="mb-1 block text-xs font-medium text-text-primary">Phone number</label>
+											<label for="phone-prompt-{stakeholder.id}" class="mb-1.5 block text-xs font-medium text-text-primary">Phone number</label>
 											<input
 												id="phone-prompt-{stakeholder.id}"
 												name="phone"
@@ -169,7 +169,7 @@
 														Sending...
 													</span>
 												{:else}
-													Send with SMS
+													Send invite with SMS
 												{/if}
 											</button>
 										</div>
@@ -200,7 +200,7 @@
 													Sending...
 												</span>
 											{:else}
-												Skip, email only
+												Send email only
 											{/if}
 										</button>
 									</form>
@@ -222,7 +222,7 @@
 									<input type="hidden" name="stakeholderId" value={stakeholder.id} />
 									<button
 										type="submit"
-										disabled={submittingStakeholderId === stakeholder.id}
+										disabled={submittingStakeholderId !== null}
 										class="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-xs font-semibold text-text-secondary transition-all hover:border-accent/30 hover:bg-accent-muted hover:text-accent disabled:cursor-not-allowed disabled:opacity-60"
 									>
 										{#if submittingStakeholderId === stakeholder.id}
@@ -240,7 +240,7 @@
 								<button
 									type="button"
 									onclick={() => { phonelessStakeholderId = stakeholder.id; phonePromptValue = ''; }}
-									disabled={submittingStakeholderId === stakeholder.id}
+									disabled={submittingStakeholderId !== null}
 									class="mt-3 w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-xs font-semibold text-text-secondary transition-all hover:border-accent/30 hover:bg-accent-muted hover:text-accent disabled:cursor-not-allowed disabled:opacity-60"
 								>
 									Generate Feedback Link
@@ -274,7 +274,7 @@
 				{/if}
 				<form method="post" action="?/addStakeholder" class="space-y-3">
 					<div>
-						<label for="stakeholder-name" class="mb-1 block text-sm font-medium text-text-primary">Name</label>
+						<label for="stakeholder-name" class="mb-1.5 block text-sm font-medium text-text-primary">Name</label>
 						<input
 							id="stakeholder-name"
 							name="name"
@@ -286,7 +286,7 @@
 						/>
 					</div>
 					<div>
-						<label for="stakeholder-email" class="mb-1 block text-sm font-medium text-text-primary">Email</label>
+						<label for="stakeholder-email" class="mb-1.5 block text-sm font-medium text-text-primary">Email</label>
 						<input
 							id="stakeholder-email"
 							name="email"
@@ -298,7 +298,7 @@
 						/>
 					</div>
 					<div>
-						<label for="stakeholder-relationship" class="mb-1 block text-sm font-medium text-text-primary">Relationship <span class="font-normal text-text-tertiary">(optional)</span></label>
+						<label for="stakeholder-relationship" class="mb-1.5 block text-sm font-medium text-text-primary">Relationship <span class="font-normal text-text-tertiary">(optional)</span></label>
 						<input
 							id="stakeholder-relationship"
 							name="relationship"
@@ -309,7 +309,7 @@
 						/>
 					</div>
 					<div>
-						<label for="stakeholder-phone" class="mb-1 block text-sm font-medium text-text-primary">Phone <span class="font-normal text-text-tertiary">(optional)</span></label>
+						<label for="stakeholder-phone" class="mb-1.5 block text-sm font-medium text-text-primary">Phone <span class="font-normal text-text-tertiary">(optional)</span></label>
 						<input
 							id="stakeholder-phone"
 							name="phone"

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { ChevronLeft, ChevronRight, MessageSquare } from 'lucide-svelte';
+	import Badge from '$lib/components/Badge.svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 
@@ -96,11 +97,11 @@
 						<p class="text-sm font-semibold text-text-primary">{row.stakeholderName}</p>
 						{#if row.effortGapTrend || row.performanceGapTrend}
 							{#if row.effortGapTrend === 'closing' || row.performanceGapTrend === 'closing'}
-								<span class="rounded-full bg-success/10 px-2 py-0.5 text-[10px] font-semibold text-success">Gap closing</span>
+								<Badge variant="success">Gap closing</Badge>
 							{:else if row.effortGapTrend === 'widening' || row.performanceGapTrend === 'widening'}
-								<span class="rounded-full bg-error/10 px-2 py-0.5 text-[10px] font-semibold text-error">Gap widening</span>
+								<Badge variant="error">Gap widening</Badge>
 							{:else}
-								<span class="rounded-full bg-surface-subtle px-2 py-0.5 text-[10px] font-semibold text-text-muted">Gap stable</span>
+								<Badge>Gap stable</Badge>
 							{/if}
 						{/if}
 					</div>

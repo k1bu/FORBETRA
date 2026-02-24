@@ -4,6 +4,10 @@
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
 </script>
 
+<svelte:head>
+	<title>Seed Data | Forbetra Admin</title>
+</svelte:head>
+
 <section class="mx-auto flex max-w-3xl flex-col gap-6 p-6">
 	<header>
 		<h1 class="text-2xl font-bold text-text-primary">Seed Data</h1>

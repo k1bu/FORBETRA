@@ -197,6 +197,11 @@ export const actions: Actions = {
 			return fail(500, { error: 'Failed to create new cycle. Please try again.' });
 		}
 
+		// If "fresh" objective was created with no subgoals, redirect to onboarding
+		// to let the user add sub-objectives, otherwise go to individual hub
+		if (cycleMode === 'fresh') {
+			throw redirect(303, '/onboarding');
+		}
 		throw redirect(303, '/individual');
 	}
 };

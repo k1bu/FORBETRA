@@ -22,6 +22,7 @@ type IndividualWithRelations = {
 			startDate: Date;
 			endDate: Date | null;
 			status: string;
+			checkInFrequency?: string;
 			stakeholderCadence?: string;
 			autoThrottle?: boolean;
 			reflections: Array<{
@@ -310,16 +311,21 @@ export function buildClientSummary(
 	const alerts: Array<{ type: string; message: string; severity: 'low' | 'medium' | 'high' }> = [];
 
 	if (cycle && currentWeek) {
-		// Overdue reflections check
+		// Overdue reflections check — respect checkInFrequency
+		const checkInFrequency = cycle.checkInFrequency ?? '3x';
 		const submittedTypes = new Set(
 			cycle.reflections
 				.filter((r) => r.weekNumber === currentWeek)
 				.map((r) => r.reflectionType)
 		);
 		const overdueTypes: string[] = [];
-		if (!submittedTypes.has('INTENTION')) overdueTypes.push('Monday intention');
+		if (checkInFrequency === '3x' || checkInFrequency === '2x') {
+			if (!submittedTypes.has('INTENTION')) overdueTypes.push('Monday intention');
+		}
 		if (!submittedTypes.has('RATING_A')) overdueTypes.push('Wednesday check-in');
-		if (!submittedTypes.has('RATING_B')) overdueTypes.push('Friday check-in');
+		if (checkInFrequency === '3x') {
+			if (!submittedTypes.has('RATING_B')) overdueTypes.push('Friday check-in');
+		}
 
 		if (overdueTypes.length > 0) {
 			alerts.push({
@@ -330,7 +336,8 @@ export function buildClientSummary(
 		}
 
 		// Engagement check (reflection completion rate)
-		const expectedReflections = currentWeek * 3; // 3 per week (intention, effort, progress)
+		const reflectionsPerWeek = checkInFrequency === '1x' ? 1 : checkInFrequency === '2x' ? 2 : 3;
+		const expectedReflections = currentWeek * reflectionsPerWeek;
 		const actualReflections = cycle.reflections.length;
 		const completionRate = expectedReflections > 0 ? actualReflections / expectedReflections : 0;
 

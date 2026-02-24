@@ -45,14 +45,14 @@ export const load: PageServerLoad = async (event) => {
 	const subgoals = objective.subgoals;
 	const stakeholders = objective.stakeholders;
 
-	// Send welcome email to individual (only once, check if we've sent it before)
-	// We can check if this is the first time they're seeing this page by checking if they have any reflections
-	const hasReflections = await prisma.reflection.findFirst({
-		where: { userId: dbUser.id },
-		select: { id: true }
+	// Send welcome email to individual (only once)
+	// Use total reflection count as a proxy: if only the week-0 baseline exists (count=1),
+	// send the welcome. Once a real check-in exists (count>1), don't re-send.
+	const reflectionCount = await prisma.reflection.count({
+		where: { userId: dbUser.id }
 	});
 
-	if (!hasReflections) {
+	if (reflectionCount <= 1) {
 		try {
 			const template = emailTemplates.welcomeIndividual({
 				individualName: dbUser.name || undefined,

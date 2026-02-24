@@ -6,7 +6,7 @@ const baseUrl =
 export const smsTemplates = {
 	welcomeIndividual: (data: { individualName?: string; appUrl?: string }) => {
 		const name = data.individualName || 'there';
-		return `Welcome to Forbetra, ${name}! Your development journey starts now. Get started: ${data.appUrl || baseUrl}`;
+		return `Welcome to Forbetra, ${name}! Your development journey starts now. Get started: ${data.appUrl || baseUrl}\n\nReply STOP to opt out`;
 	},
 
 	reminderBase: (data: {
@@ -32,11 +32,12 @@ export const smsTemplates = {
 	},
 
 	welcomeStakeholder: (data: {
+		stakeholderName?: string;
 		individualName?: string;
 		appUrl?: string;
 	}) => {
 		const name = data.individualName || 'someone';
-		return `Forbetra: ${name} added you as a stakeholder. You'll occasionally be asked to rate their progress — takes <60 seconds.`;
+		return `Forbetra: ${name} added you as a stakeholder. You'll occasionally be asked to rate their progress — takes <60 seconds.\n\nReply STOP to opt out`;
 	},
 
 	feedbackInvite: (data: {
@@ -44,7 +45,7 @@ export const smsTemplates = {
 		feedbackLink: string;
 	}) => {
 		const name = data.individualName || 'your participant';
-		return `Forbetra: ${name} needs your feedback. Takes <60 seconds: ${data.feedbackLink}`;
+		return `Forbetra: ${name} needs your feedback. Takes <60 seconds: ${data.feedbackLink}\n\nReply STOP to opt out`;
 	},
 
 	stakeholderFeedbackReceived: (data: {
@@ -68,7 +69,7 @@ export const smsTemplates = {
 		feedbackLink: string;
 	}) => {
 		const name = data.individualName || 'your participant';
-		return `Forbetra reminder: ${name} is waiting for your feedback. Takes <60 sec: ${data.feedbackLink}`;
+		return `Forbetra reminder: ${name} is waiting for your feedback. Takes <60 sec: ${data.feedbackLink}\n\nReply STOP to opt out`;
 	},
 
 	stakeholderImpactSummary: (data: {

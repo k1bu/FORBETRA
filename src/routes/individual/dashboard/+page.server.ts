@@ -9,14 +9,7 @@ import { trySendSms } from '$lib/notifications/sms';
 import { smsTemplates } from '$lib/notifications/smsTemplates';
 import { Prisma } from '@prisma/client';
 import { stdDev, computeWeekNumber, getDateForWeekday, toIsoDate, weeksBetween, FEEDBACK_TOKEN_EXPIRY_DAYS } from '$lib/server/coachUtils';
-
-function parseCheckInDays(frequency: string): string[] {
-	if (frequency === '3x') return ['mon', 'wed', 'fri'];
-	if (frequency === '2x') return ['tue', 'fri'];
-	if (frequency === '1x') return ['fri'];
-	const days = frequency.split(',').map(d => d.trim().toLowerCase()).filter(d => d.length > 0);
-	return days.length > 0 ? days : ['fri'];
-}
+import { parseCheckInDays } from '$lib/utils/checkInDays';
 
 function dayNameToNumber(day: string): number {
 	const map: Record<string, number> = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
@@ -343,18 +336,6 @@ export const load: PageServerLoad = async (event) => {
 	// Double-check currentWeek calculation to ensure it's correct
 	const verifiedCurrentWeek = cycle ? computeWeekNumber(cycle.startDate) : null;
 	const weekToUse = verifiedCurrentWeek ?? currentWeek;
-
-	// Debug: Log week calculation to verify correctness
-	if (cycle && verifiedCurrentWeek) {
-		const today = new Date();
-		today.setHours(0, 0, 0, 0);
-		const start = new Date(cycle.startDate);
-		start.setHours(0, 0, 0, 0);
-		const diffDays = Math.floor((today.getTime() - start.getTime()) / (24 * 60 * 60 * 1000));
-		console.log(
-			`[Dashboard] Cycle start: ${start.toISOString().split('T')[0]}, Today: ${today.toISOString().split('T')[0]}, Days diff: ${diffDays}, Calculated week: ${verifiedCurrentWeek}`
-		);
-	}
 
 	const weeklyExperiencesRaw =
 		cycle && weekToUse ? await getWeeklyExperiences(cycle, dbUser.id, weekToUse, prisma) : [];
@@ -781,7 +762,7 @@ export const actions: Actions = {
 		const primarySubgoal = objective.subgoals[0];
 
 		if (!primarySubgoal) {
-			return fail(400, { action: 'feedback', error: 'Add a subgoal before requesting feedback.' });
+			return fail(400, { action: 'feedback', error: 'Add a sub-objective before requesting feedback.' });
 		}
 
 		const cycle = objective.cycles[0];
@@ -850,7 +831,7 @@ export const actions: Actions = {
 				cycleId_weekNumber_reflectionType_subgoalId: {
 					cycleId: cycle.id,
 					weekNumber,
-					reflectionType: 'RATING_A',
+					reflectionType: 'RATING_B',
 					subgoalId: primarySubgoal.id
 				}
 			},
@@ -859,7 +840,7 @@ export const actions: Actions = {
 				cycleId: cycle.id,
 				userId: dbUser.id,
 				subgoalId: primarySubgoal.id,
-				reflectionType: 'RATING_A',
+				reflectionType: 'RATING_B',
 				weekNumber,
 				checkInDate: new Date()
 			}

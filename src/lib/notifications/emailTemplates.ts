@@ -24,6 +24,14 @@ export type CoachClientAcceptedData = {
 	appUrl?: string;
 };
 
+export type CoachStakeholderFeedbackReceivedData = {
+	coachName: string;
+	individualName: string;
+	stakeholderName?: string;
+	weekNumber?: number;
+	appUrl?: string;
+};
+
 const escapeHtml = (str: string) =>
 	str
 		.replace(/&/g, '&amp;')
@@ -138,7 +146,7 @@ export const emailTemplates = {
 		const shName = escapeHtml(data.stakeholderName || 'there');
 		const objTitle = data.objectiveTitle ? escapeHtml(data.objectiveTitle) : '';
 		return {
-			subject: `Quick feedback request for ${data.individualName || 'your participant'}`,
+			subject: `60-Second Feedback: How's ${data.individualName || 'Your Participant'} Doing?`,
 			html: `
 			<!DOCTYPE html>
 			<html>
@@ -165,7 +173,7 @@ export const emailTemplates = {
 			</body>
 			</html>
 		`,
-			text: `Quick feedback request for ${data.individualName || 'your participant'}\n\nHi ${data.stakeholderName || 'there'},\n\n${data.individualName || 'Your participant'} just completed a reflection and would love your feedback.\n\n${data.objectiveTitle ? `Objective: ${data.objectiveTitle}\n\n` : ''}This will take less than 60 seconds — just two quick questions about effort and progress.\n\nShare feedback: ${data.feedbackLink}\n\nThis link expires in 10 days${textFooter()}`
+			text: `60-Second Feedback: How's ${data.individualName || 'Your Participant'} Doing?\n\nHi ${data.stakeholderName || 'there'},\n\n${data.individualName || 'Your participant'} just completed a reflection and would love your feedback.\n\n${data.objectiveTitle ? `Objective: ${data.objectiveTitle}\n\n` : ''}This will take less than 60 seconds — just two quick questions about effort and progress.\n\nShare feedback: ${data.feedbackLink}\n\nThis link expires in 10 days${textFooter()}`
 		};
 	},
 
@@ -304,7 +312,7 @@ export const emailTemplates = {
 					${objTitle ? `<p style="font-size: 14px; color: #64748b; background: #f1f5f9; padding: 12px; border-radius: 6px; margin: 20px 0;"><strong>Objective:</strong> ${objTitle}</p>` : ''}
 					<p style="font-size: 16px;">Your growth report is ready — it summarizes your progress, key patterns, and areas for continued development.</p>
 					<div style="text-align: center; margin: 30px 0;">
-						<a href="${data.appUrl || baseUrl}/individual/insights" style="display: inline-block; background: #10b981; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">View Your Cycle Report</a>
+						<a href="${data.appUrl || baseUrl}/individual/insights" style="display: inline-block; background: #10b981; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">See Your Growth Report</a>
 					</div>
 					<p style="font-size: 14px; color: #64748b; margin-top: 30px;">When you're ready, start a new cycle to keep growing.</p>
 				</div>
@@ -312,7 +320,7 @@ export const emailTemplates = {
 			</body>
 			</html>
 		`,
-			text: `Your cycle is complete — your growth report is ready\n\nHi ${data.individualName || 'there'},\n\nCongratulations — you've completed your cycle${data.cycleLabel ? ` "${data.cycleLabel}"` : ''}!\n\n${data.objectiveTitle ? `Objective: ${data.objectiveTitle}\n\n` : ''}Your growth report is ready — it summarizes your progress, key patterns, and areas for continued development.\n\nView your cycle report: ${data.appUrl || baseUrl}/individual/insights\n\nWhen you're ready, start a new cycle to keep growing.${textFooter()}`
+			text: `Your cycle is complete — your growth report is ready\n\nHi ${data.individualName || 'there'},\n\nCongratulations — you've completed your cycle${data.cycleLabel ? ` "${data.cycleLabel}"` : ''}!\n\n${data.objectiveTitle ? `Objective: ${data.objectiveTitle}\n\n` : ''}Your growth report is ready — it summarizes your progress, key patterns, and areas for continued development.\n\nSee your growth report: ${data.appUrl || baseUrl}/individual/insights\n\nWhen you're ready, start a new cycle to keep growing.${textFooter()}`
 		};
 	},
 
@@ -354,7 +362,7 @@ export const emailTemplates = {
 		const indName = escapeHtml(data.individualName || 'your participant');
 		const shName = escapeHtml(data.stakeholderName || 'there');
 		return {
-			subject: `Thank you for your feedback on ${data.individualName || 'your participant'}`,
+			subject: `Your feedback is now shaping ${data.individualName || 'your participant'}'s insights`,
 			html: `
 			<!DOCTYPE html>
 			<html>
@@ -380,7 +388,7 @@ export const emailTemplates = {
 			</body>
 			</html>
 		`,
-			text: `Thank you for your feedback on ${data.individualName || 'your participant'}\n\nHi ${data.stakeholderName || 'there'},\n\nYour Week ${data.weekNumber ?? ''} feedback for ${data.individualName || 'your participant'} has been recorded.\n\nYour perspective matters — it helps reveal blind spots and validate progress that might otherwise go unnoticed.\n\nYou'll receive the next feedback request when ${data.individualName || 'they'} completes their next check-in.${textFooter()}`
+			text: `Your feedback is now shaping ${data.individualName || 'your participant'}'s insights\n\nHi ${data.stakeholderName || 'there'},\n\nYour Week ${data.weekNumber ?? ''} feedback for ${data.individualName || 'your participant'} has been recorded.\n\nYour perspective matters — it helps reveal blind spots and validate progress that might otherwise go unnoticed.\n\nYou'll receive the next feedback request when ${data.individualName || 'they'} completes their next check-in.${textFooter()}`
 		};
 	},
 
@@ -478,13 +486,13 @@ export const emailTemplates = {
 					<div style="text-align: center; margin: 30px 0;">
 						<a href="${data.inviteUrl}" style="display: inline-block; background: linear-gradient(135deg, #6366f1, #3b82f6); color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Accept Invitation</a>
 					</div>
-					<p style="font-size: 12px; color: #94a3b8; text-align: center; margin-top: 20px;">This invitation is valid for 14 days</p>
+					<p style="font-size: 12px; color: #94a3b8; text-align: center; margin-top: 20px;">This invitation is valid for 30 days</p>
 				</div>
 			${emailFooter()}
 			</body>
 			</html>
 		`,
-			text: `${data.coachName} invited you to join Forbetra\n\nHi ${data.recipientName || 'there'},\n\n${data.coachName} has invited you to join Forbetra — a platform for structured personal development.\n\n${data.message ? `"${data.message}"\n— ${data.coachName}\n\n` : ''}What to expect:\n- Set a development objective and break it into observable behaviors\n- Track your effort and performance with weekly check-ins\n- Get feedback from stakeholders who see your work\n- Receive AI-powered insights and coaching from ${data.coachName}\n\nAccept invitation: ${data.inviteUrl}\n\nThis invitation is valid for 14 days${textFooter()}`
+			text: `${data.coachName} invited you to join Forbetra\n\nHi ${data.recipientName || 'there'},\n\n${data.coachName} has invited you to join Forbetra — a platform for structured personal development.\n\n${data.message ? `"${data.message}"\n— ${data.coachName}\n\n` : ''}What to expect:\n- Set a development objective and break it into observable behaviors\n- Track your effort and performance with weekly check-ins\n- Get feedback from stakeholders who see your work\n- Receive AI-powered insights and coaching from ${data.coachName}\n\nAccept invitation: ${data.inviteUrl}\n\nThis invitation is valid for 30 days${textFooter()}`
 		};
 	},
 
@@ -519,6 +527,41 @@ export const emailTemplates = {
 			</html>
 		`,
 			text: `${data.clientName} accepted your Forbetra invitation\n\nHi ${data.coachName},\n\n${data.clientName} (${data.clientEmail}) has accepted your invitation and joined Forbetra.\n\nThey'll now appear in your roster. Once they complete onboarding, you'll be able to view their reflections and generate coaching insights.\n\nView roster: ${data.appUrl || baseUrl}/coach/roster${textFooter()}`
+		};
+	},
+
+	coachStakeholderFeedbackReceived: (data: CoachStakeholderFeedbackReceivedData) => {
+		const coach = escapeHtml(data.coachName);
+		const client = escapeHtml(data.individualName);
+		const stakeholder = escapeHtml(data.stakeholderName || 'A stakeholder');
+		const week = data.weekNumber ? ` (Week ${data.weekNumber})` : '';
+		return {
+			subject: `Stakeholder feedback received for ${data.individualName}${week}`,
+			html: `
+			<!DOCTYPE html>
+			<html>
+			<head>
+				<meta charset="utf-8">
+				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			</head>
+			<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #334155; max-width: 600px; margin: 0 auto; padding: 20px;">
+				<div style="display: none; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #ffffff;">New stakeholder feedback for your client</div>
+				<div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
+					<h1 style="color: white; margin: 0; font-size: 24px; font-weight: 600;">Stakeholder Feedback Received</h1>
+				</div>
+				<div style="background: white; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+					<p style="font-size: 16px; margin-top: 0;">Hi ${coach},</p>
+					<p style="font-size: 16px;"><strong>${stakeholder}</strong> just submitted feedback for your client <strong>${client}</strong>${week}.</p>
+					<p style="font-size: 16px;">Check your coaching dashboard to review updated insights and identify coaching opportunities.</p>
+					<div style="text-align: center; margin: 30px 0;">
+						<a href="${data.appUrl || baseUrl}/coach/roster" style="display: inline-block; background: #10b981; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">View Dashboard</a>
+					</div>
+				</div>
+			${emailFooter()}
+			</body>
+			</html>
+		`,
+			text: `Stakeholder feedback received for ${data.individualName}${week}\n\nHi ${data.coachName},\n\n${data.stakeholderName || 'A stakeholder'} just submitted feedback for your client ${data.individualName}${week}.\n\nCheck your coaching dashboard to review updated insights and identify coaching opportunities.\n\nView dashboard: ${data.appUrl || baseUrl}/coach/roster${textFooter()}`
 		};
 	}
 };

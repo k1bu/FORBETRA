@@ -167,7 +167,7 @@
 				href="/individual/insights"
 				class="shrink-0 rounded-lg bg-green-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-green-700 transition-colors"
 			>
-				View Cycle Report
+				See Your Growth Report
 			</a>
 			<a
 				href="/individual/new-cycle"
@@ -205,7 +205,7 @@
 
 	<!-- Objective Card -->
 	{#if data.objective}
-		<div class="rounded-lg border border-border-default bg-surface-raised p-5">
+		<div class="rounded-xl border border-border-default bg-surface-raised p-6">
 			<div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
 				<!-- Objective + subgoals -->
 				<div class="flex-1 min-w-0">
@@ -249,7 +249,7 @@
 
 	<!-- Welcome to Week 1 guidance card -->
 	{#if data.isOnboardingComplete && data.currentWeek === 1 && data.summary && data.summary.totalCompleted === 0}
-		<div class="rounded-2xl border border-accent/20 bg-accent-muted p-5">
+		<div class="rounded-xl border border-accent/20 bg-accent-muted p-6">
 			<h2 class="text-lg font-bold text-text-primary mb-3">Welcome to your first week!</h2>
 			<ul class="space-y-2 text-sm text-text-secondary">
 				<li class="flex items-start gap-2">
@@ -266,7 +266,7 @@
 				</li>
 				<li class="flex items-start gap-2">
 					<span class="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent"></span>
-					AI insights will appear after your first full week
+					AI will surface patterns after 2 weeks of data
 				</li>
 			</ul>
 		</div>
@@ -353,7 +353,7 @@
 
 	<!-- Recent Notes -->
 	{#if data.recentNotes && data.recentNotes.length > 0}
-		<div class="rounded-lg border border-border-default bg-surface-raised p-4">
+		<div class="rounded-xl border border-border-default bg-surface-raised p-4">
 			<p class="mb-3 text-xs font-semibold uppercase tracking-wider text-text-muted">Recent Notes</p>
 			<div class="flex flex-col gap-3">
 				{#each data.recentNotes as note}

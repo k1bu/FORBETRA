@@ -229,6 +229,14 @@ export const actions: Actions = {
 
 		const weekNumber = weekNumberRaw ? parseInt(weekNumberRaw, 10) : null;
 
+		// Verify cycle exists if provided
+		if (cycleId) {
+			const cycle = await prisma.cycle.findUnique({ where: { id: cycleId } });
+			if (!cycle) {
+				return fail(400, { noteError: 'Cycle no longer exists.' });
+			}
+		}
+
 		await prisma.coachNote.create({
 			data: {
 				coachId: dbUser.id,

@@ -23,6 +23,10 @@
 	};
 </script>
 
+<svelte:head>
+	<title>Stakeholders | Forbetra Admin</title>
+</svelte:head>
+
 <section class="mx-auto flex max-w-5xl flex-col gap-6 p-6">
 	<header>
 		<h1 class="text-2xl font-bold text-text-primary">Stakeholders ({data.stakeholders.length})</h1>

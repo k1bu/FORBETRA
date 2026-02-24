@@ -100,7 +100,7 @@ export const actions: Actions = {
 		});
 
 		if (!objective || !objective.cycles[0] || !objective.subgoals[0]) {
-			return fail(400, { error: 'Objective, cycle, or subgoals not found.' });
+			return fail(400, { error: 'Objective, cycle, or sub-objectives not found.' });
 		}
 
 		const cycle = objective.cycles[0];
@@ -160,7 +160,7 @@ export const actions: Actions = {
 			// Redirect to complete page
 			throw redirect(303, '/onboarding/complete');
 		} catch (error) {
-			if (error instanceof Error && error.message.includes('redirect')) {
+			if (error && typeof error === 'object' && 'status' in error && 'location' in error) {
 				throw error;
 			}
 			console.error('Failed to record initial ratings', error);

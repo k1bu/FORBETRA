@@ -7,11 +7,15 @@
 	let roleFilter = $state('ALL');
 
 	const viewAsUser = async (userId: string, path = '/') => {
-		await fetch('/api/admin/impersonate', {
+		const res = await fetch('/api/admin/impersonate', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ userId })
 		});
+		if (!res.ok) {
+			alert('Failed to start impersonation. Please try again.');
+			return;
+		}
 		window.open(path, '_blank');
 	};
 
@@ -27,6 +31,10 @@
 		})
 	);
 </script>
+
+<svelte:head>
+	<title>Users | Forbetra Admin</title>
+</svelte:head>
 
 <section class="mx-auto flex max-w-5xl flex-col gap-6 p-6">
 	<header class="space-y-2">

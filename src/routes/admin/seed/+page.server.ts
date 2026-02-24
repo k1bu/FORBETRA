@@ -73,6 +73,7 @@ export const actions: Actions = {
 					await tx.coachInvite.deleteMany({
 						where: { OR: [{ coachId: user.id }, { individualId: user.id }] }
 					});
+					await tx.insight.deleteMany({ where: { userId: user.id } });
 					await tx.token.deleteMany({ where: { userId: user.id } });
 					await tx.user.delete({ where: { id: user.id } });
 				}

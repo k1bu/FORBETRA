@@ -10,6 +10,10 @@
 	};
 </script>
 
+<svelte:head>
+	<title>Objective Detail | Forbetra Admin</title>
+</svelte:head>
+
 <section class="mx-auto flex max-w-5xl flex-col gap-6 p-6">
 	<header>
 		<a href="/admin/objectives" class="text-sm font-medium text-text-tertiary hover:text-text-secondary">&larr; Back to Objectives</a>

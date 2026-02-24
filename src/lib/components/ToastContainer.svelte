@@ -5,7 +5,7 @@
 </script>
 
 {#if toasts.length > 0}
-	<div class="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
+	<div class="fixed bottom-24 right-4 z-50 flex flex-col gap-2 lg:bottom-4">
 		{#each toasts as toast (toast.id)}
 			<div
 				transition:fly={{ x: 80, duration: 300 }}

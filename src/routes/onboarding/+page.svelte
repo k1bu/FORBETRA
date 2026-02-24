@@ -599,7 +599,7 @@
 										type="text"
 										required
 										placeholder="e.g., Enhance strategic thinking"
-										class="w-full rounded-xl border px-4 py-3 text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10 {getClientError('objectiveTitle') ? 'border-error' : 'border-border-default bg-surface-raised'}"
+										class="w-full rounded-xl border px-4 py-3 text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 {getClientError('objectiveTitle') ? 'border-error' : 'border-border-default bg-surface-raised'}"
 										value={objectiveTitle}
 										oninput={(event) => { objectiveTitle = event.currentTarget.value; if (getClientError('objectiveTitle')) validateField('objectiveTitle'); }}
 										onblur={() => validateField('objectiveTitle')}
@@ -633,7 +633,7 @@
 										name="objectiveDescription"
 										rows="5"
 										placeholder="Describe what this objective means to you and why it matters right now..."
-										class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10"
+										class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
 										bind:value={objectiveDescription}
 									></textarea>
 									{#if getError('objectiveDescription')}
@@ -722,7 +722,7 @@
 													type="text"
 													required={index === 0}
 													placeholder="e.g., Run structured strategic reviews"
-													class="w-full rounded-lg border border-border-default bg-surface-raised px-4 py-3 text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10"
+													class="w-full rounded-lg border border-border-default bg-surface-raised px-4 py-3 text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
 													value={subgoal.label}
 													oninput={(event) =>
 														updateSubgoalField(index, 'label', event.currentTarget.value)}
@@ -744,7 +744,7 @@
 													name={`subgoalDescription${index + 1}`}
 													rows="3"
 													placeholder="Describe what success looks like — make it observable and measurable..."
-													class="w-full rounded-lg border border-border-default bg-surface-raised px-4 py-3 text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10"
+													class="w-full rounded-lg border border-border-default bg-surface-raised px-4 py-3 text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
 													oninput={(event) =>
 														updateSubgoalField(index, 'description', event.currentTarget.value)}
 												>{subgoal.description}</textarea>
@@ -794,7 +794,7 @@
 										name="cycleLabel"
 										type="text"
 										placeholder="e.g. Q1 2026 Leadership Cycle"
-										class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10"
+										class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
 										value={cycleLabel}
 										oninput={(event) => (cycleLabel = event.currentTarget.value)}
 									/>
@@ -812,7 +812,7 @@
 										name="cycleStartDate"
 										type="date"
 										required
-										class="w-full rounded-xl border px-4 py-3 text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10 {getClientError('cycleStartDate') ? 'border-error' : 'border-border-default bg-surface-raised'}"
+										class="w-full rounded-xl border px-4 py-3 text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 {getClientError('cycleStartDate') ? 'border-error' : 'border-border-default bg-surface-raised'}"
 										value={cycleStartDate}
 										oninput={(event) => { cycleStartDate = event.currentTarget.value; validateField('cycleStartDate'); }}
 										onblur={() => validateField('cycleStartDate')}
@@ -862,7 +862,7 @@
 												min="4"
 												max="26"
 												placeholder="4-26"
-												class="w-24 rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-center text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10"
+												class="w-24 rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-center text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
 												value={customDurationWeeks}
 												oninput={(event) => {
 													customDurationWeeks = event.currentTarget.value;
@@ -1173,7 +1173,7 @@
 													name={`stakeholderName${index + 1}`}
 													type="text"
 													placeholder="John Smith"
-													class="w-full rounded-lg border border-border-default bg-surface-raised px-4 py-2 text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10"
+													class="w-full rounded-lg border border-border-default bg-surface-raised px-4 py-2 text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
 													value={stakeholder.name}
 													oninput={(event) =>
 														updateStakeholderField(index, 'name', event.currentTarget.value)}
@@ -1195,7 +1195,7 @@
 													name={`stakeholderEmail${index + 1}`}
 													type="email"
 													placeholder="john@example.com"
-													class="w-full rounded-lg border px-4 py-2 text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10 {getClientError(`stakeholderEmail${index + 1}`) ? 'border-error' : 'border-border-default bg-surface-raised'}"
+													class="w-full rounded-lg border px-4 py-2 text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 {getClientError(`stakeholderEmail${index + 1}`) ? 'border-error' : 'border-border-default bg-surface-raised'}"
 													value={stakeholder.email}
 													oninput={(event) => {
 														updateStakeholderField(index, 'email', event.currentTarget.value);
@@ -1222,7 +1222,7 @@
 													name={`stakeholderRelationship${index + 1}`}
 													type="text"
 													placeholder="e.g. direct manager, peer, direct report"
-													class="w-full rounded-lg border border-border-default bg-surface-raised px-4 py-2 text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10"
+													class="w-full rounded-lg border border-border-default bg-surface-raised px-4 py-2 text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
 													value={stakeholder.relationship}
 													oninput={(event) =>
 														updateStakeholderField(
@@ -1250,7 +1250,7 @@
 													name={`stakeholderPhone${index + 1}`}
 													type="tel"
 													placeholder="+1 (555) 123-4567"
-													class="w-full rounded-lg border border-border-default bg-surface-raised px-4 py-2 text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10"
+													class="w-full rounded-lg border border-border-default bg-surface-raised px-4 py-2 text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
 													value={stakeholder.phone}
 													oninput={(event) =>
 														updateStakeholderField(

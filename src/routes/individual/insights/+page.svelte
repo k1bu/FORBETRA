@@ -3,6 +3,7 @@
 	import CorrelationView from '$lib/components/CorrelationView.svelte';
 	import GapLensView from '$lib/components/GapLensView.svelte';
 	import { FileText, TrendingUp, Sparkles, ThumbsUp, ThumbsDown } from 'lucide-svelte';
+	import Badge from '$lib/components/Badge.svelte';
 
 	const { data }: { data: PageData } = $props();
 
@@ -309,14 +310,9 @@
 								<td class="px-4 py-3 font-bold text-text-primary">Week {week.weekNumber}</td>
 								<td class="px-4 py-3">
 									{#if week.intentionSubmitted}
-										<span class="inline-flex items-center gap-1 rounded-full bg-success-muted px-3 py-1 text-xs font-semibold text-success">
-											<span>✓</span>
-											Submitted
-										</span>
+										<Badge variant="success">✓ Submitted</Badge>
 									{:else}
-										<span class="inline-flex items-center gap-1 rounded-full bg-warning-muted px-3 py-1 text-xs font-semibold text-warning">
-											Missing
-										</span>
+										<Badge variant="warning">Missing</Badge>
 									{/if}
 								</td>
 								<td class="px-4 py-3">
@@ -390,6 +386,11 @@
 				stakeholderData={data.correlationData.stakeholders}
 			/>
 		</div>
+	{:else}
+		<div class="rounded-lg border border-border-default bg-surface-raised p-6">
+			<h2 class="mb-2 text-lg font-bold text-text-primary">Correlation View</h2>
+			<p class="text-sm text-text-secondary">Not enough data yet. Complete more check-ins to see how your effort and performance relate over time.</p>
+		</div>
 	{/if}
 
 	<!-- Gap Lens View -->
@@ -400,6 +401,11 @@
 				performanceGaps={data.gapLensData.performance}
 				stakeholders={data.gapLensData.stakeholders ?? []}
 			/>
+		</div>
+	{:else}
+		<div class="rounded-lg border border-border-default bg-surface-raised p-6">
+			<h2 class="mb-2 text-lg font-bold text-text-primary">Gap Lens</h2>
+			<p class="text-sm text-text-secondary">Not enough data yet. Complete more check-ins and gather stakeholder feedback to see perception gaps.</p>
 		</div>
 	{/if}
 </section>
