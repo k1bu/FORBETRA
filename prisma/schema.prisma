@@ -60,7 +60,9 @@ model User {
   role      UserRole @default(INDIVIDUAL)
   phone     String?
   timezone  String?
-  reminderDays String? // 'wednesday_friday' or 'tuesday_thursday'
+  reminderDays     String? // 'wednesday_friday' or 'tuesday_thursday'
+  notificationTime String? // e.g. '09:00', '17:00'
+  deliveryMethod   String? // 'email' or 'sms'
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   coachOnboardingCompletedAt DateTime?
@@ -79,6 +81,7 @@ model User {
   coachInvitationsLinked CoachInvite[]      @relation("CoachInviteIndividual")
   insights             Insight[]
   organizationMemberships OrganizationMember[]
+  objectiveChanges     ObjectiveChange[]
 }
 
 model Objective {
@@ -98,6 +101,25 @@ model Objective {
   stakeholders Stakeholder[]
 
   @@index([userId])
+  changes ObjectiveChange[]
+}
+
+model ObjectiveChange {
+  id             String    @id @default(cuid())
+  objectiveId    String
+  userId         String
+  previousTitle  String
+  newTitle       String
+  previousDesc   String?
+  newDesc        String?
+  reason         String?
+  createdAt      DateTime  @default(now())
+
+  objective Objective @relation(fields: [objectiveId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
+
+  @@index([objectiveId])
+  @@index([userId])
 }
 
 model Cycle {
@@ -110,8 +132,9 @@ model Cycle {
   status              CycleStatus @default(PLANNED)
   summary             String?
   checkInFrequency    String      @default("3x")    // "3x" | "2x" | "1x"
-  stakeholderCadence  String      @default("weekly")
-  autoThrottle        Boolean     @default(true)
+  stakeholderCadence       String      @default("weekly")
+  stakeholderFeedbackTime  String?     // e.g. '09:00', '17:00'
+  autoThrottle             Boolean     @default(true)
   revealScores        Boolean     @default(true)
   createdAt           DateTime    @default(now())
   updatedAt           DateTime    @updatedAt

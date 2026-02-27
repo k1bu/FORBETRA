@@ -60,9 +60,12 @@ export const load: PageServerLoad = async (event) => {
 
 	if (existingObjective && !isPreview) {
 		const cycle = existingObjective.cycles[0] ?? null;
-		const durationWeeks = cycle?.endDate && cycle?.startDate
-			? Math.round((cycle.endDate.getTime() - cycle.startDate.getTime()) / (7 * 24 * 60 * 60 * 1000))
-			: 12;
+		const durationWeeks =
+			cycle?.endDate && cycle?.startDate
+				? Math.round(
+						(cycle.endDate.getTime() - cycle.startDate.getTime()) / (7 * 24 * 60 * 60 * 1000)
+					)
+				: 12;
 
 		existingData = {
 			objectiveId: existingObjective.id,
@@ -80,7 +83,8 @@ export const load: PageServerLoad = async (event) => {
 				relationship: s.relationship ?? ''
 			})),
 			cycleLabel: cycle?.label ?? '',
-			cycleStartDate: cycle?.startDate.toISOString().slice(0, 10) ?? new Date().toISOString().slice(0, 10),
+			cycleStartDate:
+				cycle?.startDate.toISOString().slice(0, 10) ?? new Date().toISOString().slice(0, 10),
 			cycleDurationWeeks: durationWeeks,
 			checkInFrequency: cycle?.checkInFrequency ?? '3x',
 			stakeholderCadence: cycle?.stakeholderCadence ?? 'weekly'
@@ -93,30 +97,37 @@ export const load: PageServerLoad = async (event) => {
 			where: {
 				email: dbUser.email.toLowerCase(),
 				acceptedAt: { not: null },
-				payload: { not: null as any }
+				payload: { not: null as unknown }
 			},
 			orderBy: { updatedAt: 'desc' },
 			select: { payload: true }
 		});
 
 		if (coachInvite?.payload && typeof coachInvite.payload === 'object') {
-			const p = coachInvite.payload as Record<string, any>;
+			const p = coachInvite.payload as Record<string, unknown>;
 			if (p.objectiveTitle) {
 				existingData = {
 					objectiveId: '',
-					objectiveTitle: p.objectiveTitle ?? '',
-					objectiveDescription: p.objectiveDescription ?? '',
+					objectiveTitle: (p.objectiveTitle as string) ?? '',
+					objectiveDescription: (p.objectiveDescription as string) ?? '',
 					subgoals: Array.isArray(p.subgoals)
-						? p.subgoals.map((s: any) => ({ label: s.label ?? '', description: s.description ?? '' }))
+						? (p.subgoals as Record<string, unknown>[]).map((s) => ({
+								label: (s.label as string) ?? '',
+								description: (s.description as string) ?? ''
+							}))
 						: [],
 					stakeholders: Array.isArray(p.stakeholders)
-						? p.stakeholders.map((s: any) => ({ name: s.name ?? '', email: s.email ?? '', relationship: '' }))
+						? (p.stakeholders as Record<string, unknown>[]).map((s) => ({
+								name: (s.name as string) ?? '',
+								email: (s.email as string) ?? '',
+								relationship: ''
+							}))
 						: [],
-					cycleLabel: p.objectiveTitle ?? '',
+					cycleLabel: (p.objectiveTitle as string) ?? '',
 					cycleStartDate: new Date().toISOString().slice(0, 10),
-					cycleDurationWeeks: p.cycleDurationWeeks ?? 12,
-					checkInFrequency: p.checkInFrequency ?? '3x',
-					stakeholderCadence: p.stakeholderCadence ?? 'weekly'
+					cycleDurationWeeks: (p.cycleDurationWeeks as number) ?? 12,
+					checkInFrequency: (p.checkInFrequency as string) ?? '3x',
+					stakeholderCadence: (p.stakeholderCadence as string) ?? 'weekly'
 				};
 				isPrePopulated = true;
 			}
@@ -157,10 +168,19 @@ export const actions: Actions = {
 		const reminderDays = (formData.get('reminderDays') ?? 'wednesday_friday').toString() as
 			| 'wednesday_friday'
 			| 'tuesday_thursday';
-		const checkInFrequency = (formData.get('checkInFrequency') ?? '3x').toString() as '3x' | '2x' | '1x';
-		const stakeholderCadence = (formData.get('stakeholderCadence') ?? 'weekly').toString() as 'weekly' | 'biweekly';
+		const checkInFrequency = (formData.get('checkInFrequency') ?? '3x').toString() as
+			| '3x'
+			| '2x'
+			| '1x';
+		const stakeholderCadenceRaw = (formData.get('stakeholderCadence') ?? 'weekly').toString();
+		const stakeholderCadence = stakeholderCadenceRaw;
+		const stakeholderFeedbackTime = (formData.get('stakeholderFeedbackTime') ?? '09:00')
+			.toString()
+			.trim();
 		const revealScores = (formData.get('revealScores') ?? 'true').toString() === 'true';
 		const phone = (formData.get('phone') ?? '').toString().trim() || null;
+		const notificationTime = (formData.get('notificationTime') ?? '09:00').toString().trim();
+		const deliveryMethod = (formData.get('deliveryMethod') ?? 'email').toString().trim();
 
 		const subgoals = Array.from({ length: MAX_SUBGOALS }, (_, index) => {
 			const label = (formData.get(`subgoalLabel${index + 1}`) ?? '').toString().trim();
@@ -198,13 +218,15 @@ export const actions: Actions = {
 				label: subgoal.label,
 				description: subgoal.description.length > 0 ? subgoal.description : undefined
 			})),
-			stakeholders: submission.stakeholders.length > 0
-				? submission.stakeholders.map((stakeholder) => ({
-						name: stakeholder.name,
-						email: stakeholder.email,
-						relationship: stakeholder.relationship.length > 0 ? stakeholder.relationship : undefined
-					}))
-				: [],
+			stakeholders:
+				submission.stakeholders.length > 0
+					? submission.stakeholders.map((stakeholder) => ({
+							name: stakeholder.name,
+							email: stakeholder.email,
+							relationship:
+								stakeholder.relationship.length > 0 ? stakeholder.relationship : undefined
+						}))
+					: [],
 			cycleLabel: submission.cycleLabel.length > 0 ? submission.cycleLabel : undefined,
 			cycleStartDate: submission.cycleStartDate,
 			cycleDurationWeeks: cycleDurationWeeksValue,
@@ -259,7 +281,9 @@ export const actions: Actions = {
 						where: { objectiveId },
 						select: { id: true, email: true }
 					});
-					const existingEmailMap = new Map(existingStakeholders.map((s) => [s.email.toLowerCase(), s.id]));
+					const existingEmailMap = new Map(
+						existingStakeholders.map((s) => [s.email.toLowerCase(), s.id])
+					);
 
 					if (data.stakeholders && data.stakeholders.length > 0) {
 						for (const stakeholder of data.stakeholders) {
@@ -334,11 +358,15 @@ export const actions: Actions = {
 						await tx.cycle.update({
 							where: { id: existingCycle.id },
 							data: {
-								label: data.cycleLabel && data.cycleLabel.trim().length > 0 ? data.cycleLabel.trim() : existingCycle.label,
+								label:
+									data.cycleLabel && data.cycleLabel.trim().length > 0
+										? data.cycleLabel.trim()
+										: existingCycle.label,
 								startDate,
 								endDate,
 								checkInFrequency: data.checkInFrequency,
 								stakeholderCadence: data.stakeholderCadence,
+								stakeholderFeedbackTime,
 								revealScores
 							}
 						});
@@ -347,7 +375,7 @@ export const actions: Actions = {
 					// Update reminder days
 					await tx.user.update({
 						where: { id: dbUser.id },
-						data: { reminderDays, phone }
+						data: { reminderDays, phone, notificationTime, deliveryMethod }
 					});
 				});
 
@@ -435,20 +463,24 @@ export const actions: Actions = {
 						data: {
 							userId: dbUser.id,
 							objectiveId: objective.id,
-							label: data.cycleLabel && data.cycleLabel.trim().length > 0 ? data.cycleLabel.trim() : 'Cycle 1',
+							label:
+								data.cycleLabel && data.cycleLabel.trim().length > 0
+									? data.cycleLabel.trim()
+									: 'Cycle 1',
 							startDate,
 							endDate,
 							status: 'ACTIVE',
 							checkInFrequency: data.checkInFrequency,
 							stakeholderCadence: data.stakeholderCadence,
+							stakeholderFeedbackTime,
 							revealScores
 						}
 					});
 
-					// Store reminder days preference in User model
+					// Store preferences in User model
 					await tx.user.update({
 						where: { id: dbUser.id },
-						data: { reminderDays, phone }
+						data: { reminderDays, phone, notificationTime, deliveryMethod }
 					});
 
 					const pendingInvites = await tx.coachInvite.findMany({

@@ -36,10 +36,12 @@ const INVITE_SELECT = {
 } as const;
 
 export const load: PageServerLoad = async (event) => {
-	const { dbUser } = requireRole(event, 'COACH');
+	const { dbUser } = requireRole(event, ['COACH', 'ADMIN']);
+
+	const isAdmin = dbUser.role === 'ADMIN';
 
 	const invitations = await prisma.coachInvite.findMany({
-		where: { coachId: dbUser.id },
+		where: isAdmin ? {} : { coachId: dbUser.id },
 		orderBy: { createdAt: 'desc' },
 		select: INVITE_SELECT
 	});
@@ -73,10 +75,12 @@ export const load: PageServerLoad = async (event) => {
 
 export const actions: Actions = {
 	createInvite: async (event) => {
-		const { dbUser } = requireRole(event, 'COACH');
+		const { dbUser } = requireRole(event, ['COACH', 'ADMIN']);
 
 		const formData = await event.request.formData();
-		const email = String(formData.get('email') ?? '').trim().toLowerCase();
+		const email = String(formData.get('email') ?? '')
+			.trim()
+			.toLowerCase();
 		const name = String(formData.get('name') ?? '').trim();
 		const phone = String(formData.get('phone') ?? '').trim();
 		const message = String(formData.get('message') ?? '').trim();
@@ -90,15 +94,19 @@ export const actions: Actions = {
 		const checkInFrequency = String(formData.get('prefillCheckInFrequency') ?? '').trim();
 		const stakeholderCadence = String(formData.get('prefillStakeholderCadence') ?? '').trim();
 
-		let payload: Record<string, any> | null = null;
+		let payload: Record<string, unknown> | null = null;
 		if (objectiveTitle.length > 0) {
 			payload = { objectiveTitle, objectiveDescription };
 			try {
 				if (subgoalsJson) payload.subgoals = JSON.parse(subgoalsJson);
-			} catch {}
+			} catch {
+				/* intentionally empty */
+			}
 			try {
 				if (stakeholdersJson) payload.stakeholders = JSON.parse(stakeholdersJson);
-			} catch {}
+			} catch {
+				/* intentionally empty */
+			}
 			if (cycleDurationWeeks) payload.cycleDurationWeeks = Number(cycleDurationWeeks) || 12;
 			if (checkInFrequency) payload.checkInFrequency = checkInFrequency;
 			if (stakeholderCadence) payload.stakeholderCadence = stakeholderCadence;
@@ -259,8 +267,9 @@ export const actions: Actions = {
 			if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
 				return fail(400, {
 					action: 'createInvite' as const,
-					error: 'An invitation already exists for this email. Cancel or reuse the existing invite.',
-					values: { email, name, message }
+					error:
+						'An invitation already exists for this email. Cancel or reuse the existing invite.',
+					values: { email, name, phone, message }
 				});
 			}
 
@@ -269,24 +278,30 @@ export const actions: Actions = {
 		}
 	},
 	cancelInvite: async (event) => {
-		const { dbUser } = requireRole(event, 'COACH');
+		const { dbUser } = requireRole(event, ['COACH', 'ADMIN']);
 		const formData = await event.request.formData();
 		const inviteId = String(formData.get('inviteId') ?? '');
 
 		if (!inviteId) {
-			return fail(400, { action: 'cancelInvite' as const, error: 'Missing invitation identifier.' });
+			return fail(400, {
+				action: 'cancelInvite' as const,
+				error: 'Missing invitation identifier.'
+			});
 		}
 
 		const invite = await prisma.coachInvite.findUnique({
 			where: { id: inviteId }
 		});
 
-		if (!invite || invite.coachId !== dbUser.id) {
+		if (!invite || (invite.coachId !== dbUser.id && dbUser.role !== 'ADMIN')) {
 			return fail(404, { action: 'cancelInvite' as const, error: 'Invitation not found.' });
 		}
 
 		if (invite.acceptedAt) {
-			return fail(400, { action: 'cancelInvite' as const, error: 'Invitation has already been accepted.' });
+			return fail(400, {
+				action: 'cancelInvite' as const,
+				error: 'Invitation has already been accepted.'
+			});
 		}
 
 		if (invite.cancelledAt) {
@@ -312,24 +327,30 @@ export const actions: Actions = {
 		return { success: true, action: 'cancelInvite' as const };
 	},
 	resendInvite: async (event) => {
-		const { dbUser } = requireRole(event, 'COACH');
+		const { dbUser } = requireRole(event, ['COACH', 'ADMIN']);
 		const formData = await event.request.formData();
 		const inviteId = String(formData.get('inviteId') ?? '');
 
 		if (!inviteId) {
-			return fail(400, { action: 'resendInvite' as const, error: 'Missing invitation identifier.' });
+			return fail(400, {
+				action: 'resendInvite' as const,
+				error: 'Missing invitation identifier.'
+			});
 		}
 
 		const invite = await prisma.coachInvite.findUnique({
 			where: { id: inviteId }
 		});
 
-		if (!invite || invite.coachId !== dbUser.id) {
+		if (!invite || (invite.coachId !== dbUser.id && dbUser.role !== 'ADMIN')) {
 			return fail(404, { action: 'resendInvite' as const, error: 'Invitation not found.' });
 		}
 
 		if (invite.acceptedAt) {
-			return fail(400, { action: 'resendInvite' as const, error: 'Invitation has already been accepted.' });
+			return fail(400, {
+				action: 'resendInvite' as const,
+				error: 'Invitation has already been accepted.'
+			});
 		}
 
 		const tokenRaw = createInviteToken();
