@@ -110,6 +110,7 @@
 			? `${data.user.name} — ${values.objectiveTitle}`
 			: values.objectiveTitle) ||
 		'';
+	let cycleLabelManuallyEdited = values.cycleLabel.length > 0;
 	let cycleStartDate = values.cycleStartDate;
 	let cycleDurationWeeks = values.cycleDurationWeeks || '12';
 	let cycleDurationMode: 'preset' | 'custom' = [8, 12, 16].includes(Number(cycleDurationWeeks))
@@ -130,14 +131,14 @@
 	};
 
 	function parseExistingDaysOnb(freq: string): string[] {
-		if (freq === '3x') return ['mon', 'wed', 'fri'];
+		if (freq === '3x') return ['mon', 'tue', 'wed', 'thu', 'fri'];
 		if (freq === '2x') return ['tue', 'fri'];
 		if (freq === '1x') return ['fri'];
 		const ds = freq
 			.split(',')
 			.map((d: string) => d.trim().toLowerCase())
 			.filter((d: string) => allDays.includes(d));
-		return ds.length > 0 ? ds : ['tue', 'fri'];
+		return ds.length > 0 ? ds : ['mon', 'tue', 'wed', 'thu', 'fri'];
 	}
 
 	let selectedDays: string[] = parseExistingDaysOnb(
@@ -259,6 +260,7 @@
 		objectiveTitle = '';
 		objectiveDescription = '';
 		cycleLabel = '';
+		cycleLabelManuallyEdited = false;
 		cycleStartDate = data.defaults.startDate;
 		cycleDurationWeeks = '12';
 		cycleDurationMode = 'preset';
@@ -281,6 +283,7 @@
 		const composedDescription = `${template.description}\n\n${template.contextSummary}`.trim();
 		objectiveTitle = template.title;
 		objectiveDescription = composedDescription;
+		cycleLabelManuallyEdited = false;
 		cycleLabel = data.user.name ? `${data.user.name} — ${template.title}` : template.title;
 		const prefilled = template.subgoals.slice(0, minSubgoalFields);
 		subgoalForms = Array.from({ length: minSubgoalFields }, (_, index) => ({
@@ -472,7 +475,7 @@
 					: currentStep === 'stakeholders'
 						? true
 						: false;
-	$: if (objectiveTitle.trim().length > 0 && (!cycleLabel || cycleLabel.trim().length === 0)) {
+	$: if (objectiveTitle.trim().length > 0 && !cycleLabelManuallyEdited) {
 		cycleLabel = data.user.name ? `${data.user.name} — ${objectiveTitle}` : objectiveTitle;
 	}
 	$: endDatePreview = (() => {
@@ -921,7 +924,10 @@
 													placeholder="e.g. Q1 2026 Leadership Cycle"
 													class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-text-primary transition-all focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
 													value={cycleLabel}
-													oninput={(event) => (cycleLabel = event.currentTarget.value)}
+													oninput={(event) => {
+														cycleLabel = event.currentTarget.value;
+														cycleLabelManuallyEdited = true;
+													}}
 												/>
 												{#if getError('cycleLabel')}
 													<p class="text-sm text-error">{getError('cycleLabel')}</p>
@@ -1689,7 +1695,9 @@
 													<span
 														class="rounded-full border border-border-default bg-surface-raised px-3 py-1 text-xs font-medium text-text-muted"
 													>
-														Invite will be sent on setup completion
+														{sendStakeholderIntro
+															? 'Welcome notification will be sent on setup completion'
+															: 'No welcome notification'}
 													</span>
 												{/if}
 											</div>
@@ -1797,12 +1805,23 @@
 												<div
 													class="mt-4 rounded-lg border border-accent/20 bg-accent-muted/30 px-4 py-3 text-xs text-text-secondary"
 												>
-													Feedback requests: {stakeholderCadence === 'weekly'
-														? 'Weekly'
-														: stakeholderCadence === 'biweekly'
-															? 'Every 2 weeks'
-															: `Every ${customCadenceDays} days`} at {stakeholderFeedbackTime ||
-														'9:00 AM'} via email
+													<p>
+														Feedback requests: {stakeholderCadence === 'weekly'
+															? 'Weekly'
+															: stakeholderCadence === 'biweekly'
+																? 'Every 2 weeks'
+																: `Every ${customCadenceDays} days`} at {stakeholderFeedbackTime ||
+															'9:00 AM'} via email
+													</p>
+													{#if sendStakeholderIntro}
+														<p class="mt-1 text-success">
+															Welcome notification will be sent on setup completion
+														</p>
+													{:else}
+														<p class="mt-1 text-text-muted">
+															No welcome notification (you opted out above)
+														</p>
+													{/if}
 												</div>
 											{/if}
 										</div>
@@ -1830,10 +1849,24 @@
 										class="rounded-xl border border-accent/30 bg-accent-muted p-4 text-sm text-text-secondary"
 									>
 										<p class="font-medium text-accent">What happens next?</p>
+										{#if sendStakeholderIntro}
+											<p class="mt-1 text-text-secondary">
+												When you complete setup, stakeholders with name and email will receive a
+												welcome notification (email{stakeholderForms.some((s) => s.phone.trim())
+													? ' + SMS for those with a phone number'
+													: ''}) introducing them to the process. Feedback requests will follow on
+												the schedule you set above.
+											</p>
+										{:else}
+											<p class="mt-1 text-text-secondary">
+												You've opted out of sending welcome notifications. Stakeholders will be
+												created but won't receive any intro message — their first contact will be
+												the scheduled feedback request.
+											</p>
+										{/if}
 										<p class="mt-1 text-text-secondary">
-											When you complete setup, stakeholders with name and email will receive an
-											invitation to provide feedback. You can manage invitations, resend, or cancel
-											them at any time from your dashboard.
+											You can manage invitations, resend, or cancel them at any time from your
+											dashboard.
 										</p>
 									</div>
 								</div>
