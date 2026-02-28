@@ -31,6 +31,7 @@
 	let deliveryMethod = $state(data.user.deliveryMethod);
 
 	// --- Objective state ---
+	let isSavingObjective = $state(false);
 	let objectiveTitle = $state(data.objective?.title ?? '');
 	let objectiveDescription = $state(data.objective?.description ?? '');
 	let showObjectiveWarning = $state(false);
@@ -537,6 +538,7 @@
 					method="POST"
 					action="?/updateObjective"
 					use:enhance={() => {
+						isSavingObjective = true;
 						return async ({
 							result,
 							update
@@ -544,6 +546,7 @@
 							result: { type: string; data?: Record<string, unknown> };
 							update: () => Promise<void>;
 						}) => {
+							isSavingObjective = false;
 							if (result.type === 'redirect') {
 								addToast('Session expired — please sign in again.', 'error');
 								return;
@@ -612,7 +615,20 @@
 					</div>
 
 					<div class="mt-5 flex justify-end">
-						{#if objectiveChanged}
+						{#if isSavingObjective}
+							<button
+								type="button"
+								disabled
+								class="cursor-not-allowed rounded-xl bg-accent px-6 py-2.5 text-sm font-semibold text-white opacity-60"
+							>
+								<span class="inline-flex items-center gap-2">
+									<span
+										class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent"
+									></span>
+									Saving...
+								</span>
+							</button>
+						{:else if objectiveChanged}
 							<button
 								type="button"
 								onclick={() => {
