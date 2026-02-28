@@ -1,7 +1,20 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { invalidateAll } from '$app/navigation';
-	import { Flame, AlertTriangle, Calendar, CircleCheck, Rocket, TrendingUp, TrendingDown, ArrowRight, MessageSquare, User } from 'lucide-svelte';
+	import {
+		Flame,
+		AlertTriangle,
+		Calendar,
+		CircleCheck,
+		Rocket,
+		TrendingUp,
+		TrendingDown,
+		ArrowRight,
+		MessageSquare,
+		User,
+		Sparkles,
+		ChevronRight
+	} from 'lucide-svelte';
 
 	const { data }: { data: PageData } = $props();
 
@@ -33,7 +46,6 @@
 				return;
 			}
 			extendSuccess = true;
-			// Refresh data to reflect new endDate
 			setTimeout(() => invalidateAll(), 1000);
 		} catch {
 			extendError = 'Network error. Please try again.';
@@ -43,313 +55,518 @@
 	}
 
 	// Quick insights — pattern-based, derived from existing data
-	const quickInsights = $derived((() => {
-		const insights: Array<{ text: string; tone: 'positive' | 'warning' | 'neutral' }> = [];
-		if (!data.isOnboardingComplete) return insights;
+	const quickInsights = $derived(
+		(() => {
+			const insights: Array<{ text: string; tone: 'positive' | 'warning' | 'neutral' }> = [];
+			if (!data.isOnboardingComplete) return insights;
 
-		const my = data.myLastRatings;
-		const stk = data.stakeholdersLastRatings;
-		const metrics = data.cycleMetrics;
-		const gaps = data.perceptionGaps ?? [];
+			const my = data.myLastRatings;
+			const stk = data.stakeholdersLastRatings;
+			const metrics = data.cycleMetrics;
+			const gaps = data.perceptionGaps ?? [];
 
-		// Effort trend
-		if (my?.effortChange !== null && my?.effortChange !== undefined) {
-			if (my.effortChange >= 1) {
-				insights.push({ text: 'Your effort is climbing — keep it up.', tone: 'positive' });
-			} else if (my.effortChange <= -1) {
-				insights.push({ text: 'Your effort dipped this week. Worth a check-in with yourself.', tone: 'warning' });
+			// Effort trend
+			if (my?.effortChange !== null && my?.effortChange !== undefined) {
+				if (my.effortChange >= 1) {
+					insights.push({ text: 'Your effort is climbing — keep it up.', tone: 'positive' });
+				} else if (my.effortChange <= -1) {
+					insights.push({
+						text: 'Your effort dipped this week. Worth a check-in with yourself.',
+						tone: 'warning'
+					});
+				}
 			}
-		}
 
-		// Performance trend
-		if (my?.performanceChange !== null && my?.performanceChange !== undefined) {
-			if (my.performanceChange >= 1) {
-				insights.push({ text: 'Performance trending up — nice momentum.', tone: 'positive' });
-			} else if (my.performanceChange <= -1) {
-				insights.push({ text: 'Performance slipped a bit. What shifted?', tone: 'warning' });
+			// Performance trend
+			if (my?.performanceChange !== null && my?.performanceChange !== undefined) {
+				if (my.performanceChange >= 1) {
+					insights.push({ text: 'Performance trending up — nice momentum.', tone: 'positive' });
+				} else if (my.performanceChange <= -1) {
+					insights.push({ text: 'Performance slipped a bit. What shifted?', tone: 'warning' });
+				}
 			}
-		}
 
-		// Effort up but performance flat/down
-		if (my?.effortChange !== null && my?.performanceChange !== null &&
-			my?.effortChange !== undefined && my?.performanceChange !== undefined &&
-			my.effortChange >= 0.5 && my.performanceChange <= -0.5) {
-			insights.push({ text: 'You\'re putting in more effort but performance isn\'t following yet — could be a lag or a strategy issue.', tone: 'neutral' });
-		}
-
-		// Stakeholder alignment
-		if (stk?.effortChange !== null && stk?.effortChange !== undefined && stk.effortChange >= 1) {
-			insights.push({ text: 'Stakeholders are noticing more effort from you.', tone: 'positive' });
-		}
-		if (stk?.performanceChange !== null && stk?.performanceChange !== undefined && stk.performanceChange >= 1) {
-			insights.push({ text: 'Stakeholders see your performance improving.', tone: 'positive' });
-		}
-
-		// Big perception gaps
-		const bigGaps = gaps.filter(g => g.maxAbsGap > 2);
-		if (bigGaps.length > 0) {
-			const name = bigGaps[0].stakeholderName;
-			const isEffort = Math.abs(bigGaps[0].effortGap ?? 0) > Math.abs(bigGaps[0].performanceGap ?? 0);
-			const gap = isEffort ? bigGaps[0].effortGap : bigGaps[0].performanceGap;
-			if (gap !== null) {
-				const metric = isEffort ? 'effort' : 'performance';
-				const direction = gap > 0 ? 'higher' : 'lower';
-				insights.push({ text: `You rate your ${metric} ${direction} than ${name} does — worth a conversation.`, tone: 'warning' });
+			// Effort up but performance flat/down
+			if (
+				my?.effortChange !== null &&
+				my?.performanceChange !== null &&
+				my?.effortChange !== undefined &&
+				my?.performanceChange !== undefined &&
+				my.effortChange >= 0.5 &&
+				my.performanceChange <= -0.5
+			) {
+				insights.push({
+					text: "You're putting in more effort but performance isn't following yet — could be a lag or a strategy issue.",
+					tone: 'neutral'
+				});
 			}
-		}
 
-		// Closing gaps
-		const closingGaps = gaps.filter(g => g.effortGapTrend === 'closing' || g.performanceGapTrend === 'closing');
-		if (closingGaps.length > 0) {
-			insights.push({ text: `Perception gap with ${closingGaps[0].stakeholderName} is closing — alignment improving.`, tone: 'positive' });
-		}
-
-		// Stability
-		if (metrics?.stabilityScore !== null && metrics?.stabilityScore !== undefined) {
-			if (metrics.stabilityScore >= 80) {
-				insights.push({ text: 'Your scores are very consistent — strong stability.', tone: 'positive' });
-			} else if (metrics.stabilityScore < 40) {
-				insights.push({ text: 'Your scores are fluctuating a lot — what\'s driving the swings?', tone: 'warning' });
+			// Stakeholder alignment
+			if (stk?.effortChange !== null && stk?.effortChange !== undefined && stk.effortChange >= 1) {
+				insights.push({
+					text: 'Stakeholders are noticing more effort from you.',
+					tone: 'positive'
+				});
 			}
-		}
-
-		// Trajectory
-		if (metrics?.trajectoryScore !== null && metrics?.trajectoryScore !== undefined) {
-			if (metrics.trajectoryScore >= 15) {
-				insights.push({ text: 'Strong upward trajectory over the last 4 weeks.', tone: 'positive' });
-			} else if (metrics.trajectoryScore <= -15) {
-				insights.push({ text: 'Scores are trending down over the last 4 weeks.', tone: 'warning' });
+			if (
+				stk?.performanceChange !== null &&
+				stk?.performanceChange !== undefined &&
+				stk.performanceChange >= 1
+			) {
+				insights.push({ text: 'Stakeholders see your performance improving.', tone: 'positive' });
 			}
-		}
 
-		// Cap at 3 most relevant
-		return insights.slice(0, 3);
-	})());
+			// Big perception gaps
+			const bigGaps = gaps.filter((g) => g.maxAbsGap > 2);
+			if (bigGaps.length > 0) {
+				const name = bigGaps[0].stakeholderName;
+				const isEffort =
+					Math.abs(bigGaps[0].effortGap ?? 0) > Math.abs(bigGaps[0].performanceGap ?? 0);
+				const gap = isEffort ? bigGaps[0].effortGap : bigGaps[0].performanceGap;
+				if (gap !== null) {
+					const metric = isEffort ? 'effort' : 'performance';
+					const direction = gap > 0 ? 'higher' : 'lower';
+					insights.push({
+						text: `You rate your ${metric} ${direction} than ${name} does — worth a conversation.`,
+						tone: 'warning'
+					});
+				}
+			}
 
+			// Closing gaps
+			const closingGaps = gaps.filter(
+				(g) => g.effortGapTrend === 'closing' || g.performanceGapTrend === 'closing'
+			);
+			if (closingGaps.length > 0) {
+				insights.push({
+					text: `Perception gap with ${closingGaps[0].stakeholderName} is closing — alignment improving.`,
+					tone: 'positive'
+				});
+			}
+
+			// Stability
+			if (metrics?.stabilityScore !== null && metrics?.stabilityScore !== undefined) {
+				if (metrics.stabilityScore >= 80) {
+					insights.push({
+						text: 'Your scores are very consistent — strong stability.',
+						tone: 'positive'
+					});
+				} else if (metrics.stabilityScore < 40) {
+					insights.push({
+						text: "Your scores are fluctuating a lot — what's driving the swings?",
+						tone: 'warning'
+					});
+				}
+			}
+
+			// Trajectory
+			if (metrics?.trajectoryScore !== null && metrics?.trajectoryScore !== undefined) {
+				if (metrics.trajectoryScore >= 15) {
+					insights.push({
+						text: 'Strong upward trajectory over the last 4 weeks.',
+						tone: 'positive'
+					});
+				} else if (metrics.trajectoryScore <= -15) {
+					insights.push({
+						text: 'Scores are trending down over the last 4 weeks.',
+						tone: 'warning'
+					});
+				}
+			}
+
+			// Return only the single most relevant insight
+			return insights.slice(0, 1);
+		})()
+	);
 </script>
 
 <svelte:head>
 	<title>Today | Forbetra</title>
 </svelte:head>
 
-<section class="mx-auto flex max-w-7xl flex-col gap-6 p-4 pb-12">
-	<!-- Top bar: welcome + week -->
-	<div class="flex items-center justify-between">
-		<p class="text-sm text-text-tertiary">
-			{#if data.isFirstVisit}Welcome to Forbetra{:else}Welcome back{/if}
-		</p>
-		<div class="flex items-center gap-2">
-			{#if data.summary?.currentStreak && data.summary.currentStreak > 0}
-				<span class="rounded-full bg-surface-subtle px-3 py-0.5 text-xs font-semibold text-warning flex items-center gap-1">
-					<Flame class="h-3.5 w-3.5" /> {data.summary.currentStreak}{#if data.summary.currentStreak >= 12}+ streak!{:else if data.summary.currentStreak >= 9} streak!{:else if data.summary.currentStreak >= 6} streak{:else if data.summary.currentStreak >= 3} streak{:else} streak{/if}
-				</span>
-			{/if}
-			{#if data.currentWeek}
-				{#if data.cycle?.isCycleCompleted}
-					<span class="rounded-full bg-surface-subtle px-3 py-0.5 text-xs font-semibold text-success">Cycle Complete</span>
-				{:else if data.cycle?.isOverdue}
-					<span class="rounded-full bg-surface-subtle px-3 py-0.5 text-xs font-semibold text-warning">Week {data.currentWeek} &middot; Cycle ended at week {data.totalWeeks}</span>
-				{:else}
-					<span class="rounded-full bg-surface-subtle px-3 py-0.5 text-xs font-semibold text-accent">Week {data.currentWeek}{#if data.totalWeeks} of {data.totalWeeks}{/if}</span>
+<section class="mx-auto flex max-w-3xl flex-col gap-5 p-4 pb-12">
+	<!-- ═══ ZONE 1: Top Bar — Welcome + Objective + Week + Streak ═══ -->
+	<div class="flex flex-col gap-1">
+		<div class="flex items-center justify-between">
+			<p class="text-sm text-text-tertiary">
+				{#if data.isFirstVisit}Welcome to Forbetra{:else}Welcome back{/if}
+			</p>
+			<div class="flex items-center gap-2">
+				{#if data.summary?.currentStreak && data.summary.currentStreak > 0}
+					<span
+						class="flex items-center gap-1 rounded-full bg-surface-subtle px-2.5 py-0.5 text-xs font-semibold text-warning"
+					>
+						<Flame class="h-3 w-3" />
+						{data.summary.currentStreak}
+					</span>
 				{/if}
-			{/if}
+				{#if data.currentWeek}
+					{#if data.cycle?.isCycleCompleted}
+						<span
+							class="rounded-full bg-surface-subtle px-2.5 py-0.5 text-xs font-semibold text-success"
+							>Complete</span
+						>
+					{:else if data.cycle?.isOverdue}
+						<span
+							class="rounded-full bg-surface-subtle px-2.5 py-0.5 text-xs font-semibold text-warning"
+							>Wk {data.currentWeek} / {data.totalWeeks}</span
+						>
+					{:else}
+						<span
+							class="rounded-full bg-surface-subtle px-2.5 py-0.5 text-xs font-semibold text-accent"
+							>Wk {data.currentWeek}{#if data.totalWeeks}
+								/ {data.totalWeeks}{/if}</span
+						>
+					{/if}
+				{/if}
+			</div>
 		</div>
+		{#if data.objective}
+			<div class="flex items-baseline gap-2">
+				<h1 class="truncate text-lg font-bold text-text-primary">{data.objective.title}</h1>
+				{#if data.objective.subgoals && data.objective.subgoals.length > 0}
+					<button
+						onclick={() => (showSubgoals = !showSubgoals)}
+						class="shrink-0 text-xs font-medium text-accent transition-colors hover:text-accent-hover"
+					>
+						{data.objective.subgoals.length} sub-objective{data.objective.subgoals.length === 1
+							? ''
+							: 's'}
+						<svg
+							class="inline h-3 w-3 transition-transform {showSubgoals ? 'rotate-90' : ''}"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M9 5l7 7-7 7"
+							/>
+						</svg>
+					</button>
+				{/if}
+			</div>
+			{#if showSubgoals && data.objective.subgoals}
+				<ul class="mt-1 space-y-0.5 pl-1">
+					{#each data.objective.subgoals as subgoal (subgoal.label)}
+						<li class="flex items-start gap-2 text-sm text-text-secondary">
+							<span class="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-accent"></span>
+							{subgoal.label}
+						</li>
+					{/each}
+				</ul>
+			{/if}
+		{/if}
 	</div>
 
-	<!-- Cycle completed banner -->
-	{#if data.cycle?.isCycleCompleted}
-		<div class="flex flex-wrap items-center gap-3 rounded-xl border border-success/20 bg-success-muted px-4 py-3">
-			<div class="flex-1 min-w-0">
-				<p class="text-sm font-semibold text-success">Your cycle is complete! Your growth report is ready.</p>
-				<p class="text-xs text-success">Review your progress or start a new cycle when you're ready.</p>
-			</div>
-			<a
-				href="/individual/insights"
-				class="shrink-0 rounded-lg bg-green-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-green-700 transition-colors"
-			>
-				See Your Growth Report
-			</a>
-			<a
-				href="/individual/new-cycle"
-				class="shrink-0 rounded-lg border border-success/20 bg-surface-raised px-4 py-1.5 text-xs font-semibold text-success hover:bg-success-muted transition-colors"
-			>
-				Start New Cycle
-			</a>
-		</div>
-	{/if}
+	<!-- ═══ ZONE 2: Next Action (Hero) ═══ -->
+	<!-- This is the FIRST thing the user should focus on. Absorbs all status banners. -->
 
-	<!-- Cycle overdue banner -->
-	{#if data.cycle?.isOverdue && !data.cycle?.isCycleCompleted && !extendSuccess}
-		<div class="flex flex-wrap items-center gap-3 rounded-xl border border-warning/20 bg-warning-muted px-4 py-3">
-			<div class="flex-1 min-w-0">
-				<p class="text-sm font-semibold text-warning">Your cycle has passed its end date.</p>
-				<p class="text-xs text-warning">Extend to keep tracking, or wrap up when you're ready.</p>
+	{#if !data.isOnboardingComplete}
+		<!-- Onboarding incomplete -->
+		<!-- eslint-disable svelte/no-navigation-without-resolve -->
+		<a
+			href="/onboarding"
+			class="group flex items-center gap-4 rounded-xl border border-accent/30 bg-gradient-to-r from-accent/5 to-transparent p-5 transition-all hover:border-accent/50"
+		>
+			<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent/10">
+				<Rocket class="h-5 w-5 text-accent" />
 			</div>
-			{#if extendError}
-				<span class="text-xs text-error">{extendError}</span>
-			{/if}
+			<div class="min-w-0 flex-1">
+				<p class="text-base font-semibold text-text-primary">Complete your setup</p>
+				<p class="text-sm text-text-tertiary">Set your objective and start your first cycle</p>
+			</div>
+			<ChevronRight
+				class="h-5 w-5 shrink-0 text-accent transition-transform group-hover:translate-x-0.5"
+			/>
+		</a>
+		<!-- eslint-enable svelte/no-navigation-without-resolve -->
+	{:else if data.cycle?.isCycleCompleted}
+		<!-- Cycle complete -->
+		<div
+			class="flex flex-col gap-3 rounded-xl border border-success/20 bg-gradient-to-r from-success/5 to-transparent p-5"
+		>
+			<div class="flex items-center gap-3">
+				<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-success/10">
+					<CircleCheck class="h-5 w-5 text-success" />
+				</div>
+				<div class="min-w-0 flex-1">
+					<p class="text-base font-semibold text-text-primary">Cycle complete!</p>
+					<p class="text-sm text-text-tertiary">Your growth report is ready</p>
+				</div>
+			</div>
+			<!-- eslint-disable svelte/no-navigation-without-resolve -->
+			<div class="flex gap-2 pl-[52px]">
+				<a
+					href="/individual/insights"
+					class="rounded-lg bg-green-600 px-4 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-green-700"
+				>
+					See Growth Report
+				</a>
+				<a
+					href="/individual/new-cycle"
+					class="rounded-lg border border-success/20 bg-surface-raised px-4 py-1.5 text-xs font-semibold text-success transition-colors hover:bg-success-muted"
+				>
+					Start New Cycle
+				</a>
+			</div>
+			<!-- eslint-enable svelte/no-navigation-without-resolve -->
+		</div>
+	{:else if data.cycle?.isOverdue && !extendSuccess}
+		<!-- Cycle overdue -->
+		<div
+			class="flex items-center gap-4 rounded-xl border border-warning/20 bg-gradient-to-r from-warning/5 to-transparent p-5"
+		>
+			<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-warning/10">
+				<AlertTriangle class="h-5 w-5 text-warning" />
+			</div>
+			<div class="min-w-0 flex-1">
+				<p class="text-base font-semibold text-text-primary">Cycle has passed its end date</p>
+				<p class="text-sm text-text-tertiary">Extend to keep tracking, or wrap up</p>
+				{#if extendError}
+					<p class="mt-1 text-xs text-error">{extendError}</p>
+				{/if}
+			</div>
 			<button
 				onclick={() => extendCycle(4)}
 				disabled={extending}
-				class="shrink-0 rounded-lg bg-amber-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-amber-700 transition-colors disabled:opacity-60"
+				class="shrink-0 rounded-lg bg-amber-600 px-4 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-amber-700 disabled:opacity-60"
 			>
-				{#if extending}Extending...{:else}Extend 4 weeks{/if}
+				{#if extending}Extending...{:else}Extend 4 wks{/if}
 			</button>
 		</div>
-	{/if}
-	{#if extendSuccess}
-		<div class="flex items-center gap-2 rounded-xl border border-success/20 bg-success-muted px-4 py-3">
+	{:else if extendSuccess}
+		<div
+			class="flex items-center gap-3 rounded-xl border border-success/20 bg-success-muted px-5 py-4"
+		>
+			<CircleCheck class="h-5 w-5 text-success" />
 			<span class="text-sm font-semibold text-success">Cycle extended! Reloading...</span>
 		</div>
-	{/if}
-
-	<!-- Objective Card -->
-	{#if data.objective}
-		<div class="rounded-xl border border-border-default bg-surface-raised p-6">
-			<div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
-				<!-- Objective + subgoals -->
-				<div class="flex-1 min-w-0">
-					<p class="mb-1 text-[10px] font-semibold uppercase tracking-wider text-text-muted">Your Objective</p>
-					<h1 class="text-xl font-bold text-text-primary sm:text-2xl">{data.objective.title}</h1>
-
-					<!-- Expandable subgoals -->
-					{#if data.objective.subgoals && data.objective.subgoals.length > 0}
-						<button
-							onclick={() => showSubgoals = !showSubgoals}
-							class="mt-2 inline-flex items-center gap-1 text-xs font-medium text-accent hover:text-accent-hover transition-colors"
-						>
-							<svg class="h-3.5 w-3.5 transition-transform {showSubgoals ? 'rotate-90' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-							</svg>
-							{data.objective.subgoals.length} sub-objective{data.objective.subgoals.length === 1 ? '' : 's'}
-						</button>
-						{#if showSubgoals}
-							<ul class="mt-2 space-y-1 pl-1">
-								{#each data.objective.subgoals as subgoal}
-									<li class="flex items-start gap-2 text-sm text-text-secondary">
-										<span class="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-accent"></span>
-										{subgoal.label}
-									</li>
-								{/each}
-							</ul>
-						{/if}
+	{:else if data.nextAction}
+		<!-- Regular next action -->
+		{#if data.nextAction.url}
+			<!-- eslint-disable svelte/no-navigation-without-resolve -->
+			<a
+				href={data.nextAction.url}
+				class="group flex items-center gap-4 rounded-xl border p-5 transition-all {data.nextAction
+					.state === 'missed'
+					? 'border-error/30 bg-gradient-to-r from-error/5 to-transparent'
+					: 'border-accent/30 bg-gradient-to-r from-accent/5 to-transparent hover:border-accent/50'}"
+			>
+				<div
+					class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full {data.nextAction
+						.state === 'missed'
+						? 'bg-error/10'
+						: 'bg-accent/10'}"
+				>
+					{#if data.nextAction.state === 'missed'}<AlertTriangle
+							class="h-5 w-5 text-error"
+						/>{:else}<Calendar class="h-5 w-5 text-accent" />{/if}
+				</div>
+				<div class="min-w-0 flex-1">
+					<p class="text-base font-semibold text-text-primary">{data.nextAction.label}</p>
+					{#if data.nextAction.state === 'missed'}
+						<p class="text-sm text-error/80">Overdue — complete now</p>
 					{/if}
 				</div>
-
+				<ChevronRight
+					class="h-5 w-5 shrink-0 {data.nextAction.state === 'missed'
+						? 'text-error'
+						: 'text-accent'} transition-transform group-hover:translate-x-0.5"
+				/>
+			</a>
+			<!-- eslint-enable svelte/no-navigation-without-resolve -->
+		{:else}
+			<!-- All caught up -->
+			<div
+				class="flex items-center gap-4 rounded-xl border border-success/20 bg-gradient-to-r from-success/5 to-transparent p-5"
+			>
+				<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-success/10">
+					<CircleCheck class="h-5 w-5 text-success" />
 				</div>
-		</div>
+				<div class="min-w-0 flex-1">
+					<p class="text-base font-semibold text-text-primary">{data.nextAction.label}</p>
+					{#if data.isOnboardingComplete && data.currentWeek === 1 && data.summary && data.summary.totalCompleted === 0}
+						<!-- eslint-disable svelte/no-navigation-without-resolve -->
+						<p class="text-sm text-text-tertiary">
+							Your first check-in opens on {data.nextCheckInDay}. In the meantime,
+							<a href="/individual/stakeholders" class="text-accent hover:underline"
+								>add stakeholders</a
+							> for 360 feedback.
+						</p>
+						<!-- eslint-enable svelte/no-navigation-without-resolve -->
+					{:else}
+						<p class="text-sm text-text-tertiary">You're on track this week</p>
+					{/if}
+				</div>
+			</div>
+		{/if}
 	{/if}
 
-	<!-- Welcome to Week 1 guidance card -->
-	{#if data.isOnboardingComplete && data.currentWeek === 1 && data.summary && data.summary.totalCompleted === 0}
-		<div class="rounded-xl border border-accent/20 bg-accent-muted p-6">
-			<h2 class="text-lg font-bold text-text-primary mb-3">Welcome to your first week!</h2>
-			<ul class="space-y-2 text-sm text-text-secondary">
-				<li class="flex items-start gap-2">
-					<span class="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent"></span>
-					Your first check-in is on {data.nextCheckInDay}
-				</li>
-				<li class="flex items-start gap-2">
-					<span class="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent"></span>
-					Rate your effort and performance on a 0-10 scale
-				</li>
-				<li class="flex items-start gap-2">
-					<span class="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent"></span>
-					Your stakeholders will provide their perspective
-				</li>
-				<li class="flex items-start gap-2">
-					<span class="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent"></span>
-					AI will surface patterns after 2 weeks of data
-				</li>
-			</ul>
-		</div>
-	{/if}
-
-	<!-- At a Glance -->
-	{#if data.isOnboardingComplete && (data.myLastRatings || data.stakeholdersLastRatings || data.currentWeek || data.summary)}
-		<div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
-			<!-- Self Effort -->
+	<!-- ═══ ZONE 3: At-a-Glance (2 cards instead of 4) ═══ -->
+	{#if data.isOnboardingComplete && (data.myLastRatings || data.stakeholdersLastRatings || data.summary)}
+		<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+			<!-- Card 1: Your Ratings -->
 			<div class="rounded-xl border border-border-default bg-surface-raised p-4">
-				<p class="mb-1 text-[10px] font-semibold uppercase tracking-wider text-text-muted">Your Effort</p>
+				<p class="mb-3 text-[10px] font-semibold tracking-wider text-text-muted uppercase">
+					Your Ratings
+				</p>
 				{#if data.myLastRatings?.effort !== null && data.myLastRatings?.effort !== undefined}
-					<p class="text-3xl font-bold tabular-nums text-cyan-400">{data.myLastRatings.effort}</p>
-					{#if data.myLastRatings.effortChange !== null && data.myLastRatings.effortChange !== undefined}
-						<p class="mt-0.5 text-xs {data.myLastRatings.effortChange > 0 ? 'text-success' : data.myLastRatings.effortChange < 0 ? 'text-error' : 'text-text-muted'}">
-							{data.myLastRatings.effortChange > 0 ? '+' : ''}{data.myLastRatings.effortChange.toFixed(1)} from last week
-						</p>
-					{/if}
+					<div class="flex items-baseline gap-6">
+						<div>
+							<span class="text-[10px] font-medium tracking-wider text-text-muted uppercase"
+								>Effort</span
+							>
+							<div class="flex items-baseline gap-1.5">
+								<span class="text-2xl font-bold text-cyan-400 tabular-nums"
+									>{data.myLastRatings.effort}</span
+								>
+								{#if data.myLastRatings.effortChange !== null && data.myLastRatings.effortChange !== undefined}
+									<span
+										class="text-xs font-medium {data.myLastRatings.effortChange > 0
+											? 'text-success'
+											: data.myLastRatings.effortChange < 0
+												? 'text-error'
+												: 'text-text-muted'}"
+									>
+										{data.myLastRatings.effortChange > 0
+											? '+'
+											: ''}{data.myLastRatings.effortChange.toFixed(1)}
+									</span>
+								{/if}
+							</div>
+						</div>
+						<div>
+							<span class="text-[10px] font-medium tracking-wider text-text-muted uppercase"
+								>Performance</span
+							>
+							<div class="flex items-baseline gap-1.5">
+								<span class="text-2xl font-bold text-amber-400 tabular-nums"
+									>{data.myLastRatings.performance ?? '--'}</span
+								>
+								{#if data.myLastRatings.performanceChange !== null && data.myLastRatings.performanceChange !== undefined}
+									<span
+										class="text-xs font-medium {data.myLastRatings.performanceChange > 0
+											? 'text-success'
+											: data.myLastRatings.performanceChange < 0
+												? 'text-error'
+												: 'text-text-muted'}"
+									>
+										{data.myLastRatings.performanceChange > 0
+											? '+'
+											: ''}{data.myLastRatings.performanceChange.toFixed(1)}
+									</span>
+								{/if}
+							</div>
+						</div>
+					</div>
 				{:else}
-					<p class="text-2xl font-bold text-text-muted">--</p>
+					<p class="text-lg font-bold text-text-muted">--</p>
+					<p class="text-[10px] text-text-muted">Appears after your first check-in</p>
 				{/if}
 			</div>
 
-			<!-- Self Performance -->
+			<!-- Card 2: Stakeholder View + Completion -->
 			<div class="rounded-xl border border-border-default bg-surface-raised p-4">
-				<p class="mb-1 text-[10px] font-semibold uppercase tracking-wider text-text-muted">Your Performance</p>
-				{#if data.myLastRatings?.performance !== null && data.myLastRatings?.performance !== undefined}
-					<p class="text-3xl font-bold tabular-nums text-amber-400">{data.myLastRatings.performance}</p>
-					{#if data.myLastRatings.performanceChange !== null && data.myLastRatings.performanceChange !== undefined}
-						<p class="mt-0.5 text-xs {data.myLastRatings.performanceChange > 0 ? 'text-success' : data.myLastRatings.performanceChange < 0 ? 'text-error' : 'text-text-muted'}">
-							{data.myLastRatings.performanceChange > 0 ? '+' : ''}{data.myLastRatings.performanceChange.toFixed(1)} from last week
-						</p>
-					{/if}
-				{:else}
-					<p class="text-2xl font-bold text-text-muted">--</p>
-				{/if}
-			</div>
-
-			<!-- Stakeholder Average -->
-			<div class="rounded-xl border border-border-default bg-surface-raised p-4">
-				<p class="mb-1 text-[10px] font-semibold uppercase tracking-wider text-text-muted">Stakeholder Avg</p>
-				{#if data.stakeholdersLastRatings?.effort !== null && data.stakeholdersLastRatings?.effort !== undefined}
-					<div class="flex items-baseline gap-3">
-						<span class="text-lg font-bold tabular-nums text-cyan-400">{data.stakeholdersLastRatings.effort}<span class="text-xs font-normal text-text-muted"> E</span></span>
-						{#if data.stakeholdersLastRatings?.performance !== null && data.stakeholdersLastRatings?.performance !== undefined}
-							<span class="text-lg font-bold tabular-nums text-amber-400">{data.stakeholdersLastRatings.performance}<span class="text-xs font-normal text-text-muted"> P</span></span>
+				<p class="mb-3 text-[10px] font-semibold tracking-wider text-text-muted uppercase">
+					Stakeholder View
+				</p>
+				<div class="flex items-baseline gap-6">
+					<div>
+						{#if data.stakeholdersLastRatings?.effort !== null && data.stakeholdersLastRatings?.effort !== undefined}
+							<span class="text-[10px] font-medium tracking-wider text-text-muted uppercase"
+								>Avg</span
+							>
+							<div class="flex items-baseline gap-2">
+								<span class="text-lg font-bold text-cyan-400 tabular-nums"
+									>{data.stakeholdersLastRatings.effort}<span
+										class="text-[10px] font-normal text-text-muted"
+									>
+										E</span
+									></span
+								>
+								{#if data.stakeholdersLastRatings?.performance !== null && data.stakeholdersLastRatings?.performance !== undefined}
+									<span class="text-lg font-bold text-amber-400 tabular-nums"
+										>{data.stakeholdersLastRatings.performance}<span
+											class="text-[10px] font-normal text-text-muted"
+										>
+											P</span
+										></span
+									>
+								{/if}
+							</div>
+						{:else}
+							<span class="text-[10px] font-medium tracking-wider text-text-muted uppercase"
+								>Avg</span
+							>
+							<p class="text-lg font-bold text-text-muted">--</p>
+							<p class="text-[10px] text-text-muted">Appears when stakeholders respond</p>
 						{/if}
 					</div>
-					{#if data.stakeholdersLastRatings.weekNumber}
-						<p class="mt-0.5 text-[10px] text-text-muted">Week {data.stakeholdersLastRatings.weekNumber}</p>
+					{#if data.summary?.completionRate !== null && data.summary?.completionRate !== undefined}
+						<div class="ml-auto text-right">
+							<span class="text-[10px] font-medium tracking-wider text-text-muted uppercase"
+								>Completion</span
+							>
+							<p class="text-2xl font-bold text-accent tabular-nums">
+								{data.summary.completionRate}%
+							</p>
+						</div>
 					{/if}
-				{:else}
-					<p class="text-2xl font-bold text-text-muted">--</p>
-					<p class="mt-0.5 text-[10px] text-text-muted">No feedback yet</p>
-				{/if}
-			</div>
-
-			<!-- Completion Rate -->
-			<div class="rounded-xl border border-border-default bg-surface-raised p-4">
-				<p class="mb-1 text-[10px] font-semibold uppercase tracking-wider text-text-muted">Completion</p>
-				{#if data.summary?.completionRate !== null && data.summary?.completionRate !== undefined}
-					<p class="text-3xl font-bold tabular-nums text-accent">{data.summary.completionRate}%</p>
-					<p class="mt-0.5 text-[10px] text-text-muted">{data.summary.totalCompleted}/{data.summary.totalExpected} check-ins</p>
-				{:else}
-					<p class="text-2xl font-bold text-text-muted">--</p>
-				{/if}
+				</div>
 			</div>
 		</div>
 	{/if}
 
-	<!-- Quick Insights -->
-	{#if quickInsights.length > 0}
-		<div class="flex flex-col gap-1.5">
-			{#each quickInsights as insight}
-				<div class="flex items-start gap-2 rounded-lg px-3 py-2 bg-surface-raised">
+	<!-- ═══ ZONE 4: Quick Insight (single) + AI Insight Teaser ═══ -->
+	{#if quickInsights.length > 0 || data.latestInsight}
+		<div class="flex flex-col gap-2">
+			{#if quickInsights.length > 0}
+				{@const insight = quickInsights[0]}
+				<div
+					class="flex items-start gap-2.5 rounded-xl border border-border-default bg-surface-raised px-4 py-3"
+				>
 					<span class="mt-0.5 shrink-0">
-						{#if insight.tone === 'positive'}<TrendingUp class="h-3.5 w-3.5 shrink-0 text-success" />{:else if insight.tone === 'warning'}<TrendingDown class="h-3.5 w-3.5 shrink-0 text-warning" />{:else}<ArrowRight class="h-3.5 w-3.5 shrink-0 text-text-muted" />{/if}
+						{#if insight.tone === 'positive'}<TrendingUp
+								class="h-4 w-4 text-success"
+							/>{:else if insight.tone === 'warning'}<TrendingDown
+								class="h-4 w-4 text-warning"
+							/>{:else}<ArrowRight class="h-4 w-4 text-text-muted" />{/if}
 					</span>
 					<p class="text-sm text-text-secondary">{insight.text}</p>
 				</div>
-			{/each}
+			{/if}
+			{#if data.latestInsight}
+				<!-- eslint-disable svelte/no-navigation-without-resolve -->
+				<a
+					href="/individual/insights"
+					class="group flex items-center gap-2.5 rounded-xl border border-border-default bg-surface-raised px-4 py-3 transition-all hover:border-accent/30"
+				>
+					<Sparkles class="h-4 w-4 shrink-0 text-accent" />
+					<p class="flex-1 truncate text-sm text-text-secondary">
+						{#if data.latestInsight.weekNumber}Week {data.latestInsight.weekNumber} AI insight available{:else}AI
+							insight available{/if}
+					</p>
+					<span
+						class="shrink-0 text-xs font-semibold text-accent transition-transform group-hover:translate-x-0.5"
+						>Read →</span
+					>
+				</a>
+				<!-- eslint-enable svelte/no-navigation-without-resolve -->
+			{/if}
 		</div>
 	{/if}
 
-	<!-- Recent Notes -->
+	<!-- ═══ ZONE 5: Recent Activity ═══ -->
 	{#if data.recentNotes && data.recentNotes.length > 0}
 		<div class="rounded-xl border border-border-default bg-surface-raised p-4">
-			<p class="mb-3 text-xs font-semibold uppercase tracking-wider text-text-muted">Recent Notes</p>
+			<p class="mb-3 text-[10px] font-semibold tracking-wider text-text-muted uppercase">
+				Recent Activity
+			</p>
 			<div class="flex flex-col gap-3">
-				{#each data.recentNotes as note}
+				{#each data.recentNotes as note, i (i)}
 					<div class="flex items-start gap-2">
 						{#if note.source === 'self'}
 							<User class="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent" />
@@ -366,45 +583,5 @@
 				{/each}
 			</div>
 		</div>
-	{/if}
-
-	<!-- Onboarding Status -->
-	{#if !data.isOnboardingComplete}
-		<div class="rounded-xl border border-warning/20 bg-surface-raised p-4">
-			<div class="flex items-center gap-3">
-				<Rocket class="h-4 w-4 shrink-0 text-warning" />
-				<div class="flex-1">
-					<p class="text-sm font-semibold text-warning">Complete your onboarding to get started</p>
-				</div>
-				<a href="/onboarding" class="shrink-0 rounded-lg bg-amber-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-amber-700 transition-colors">
-					Start
-				</a>
-			</div>
-		</div>
-	{/if}
-
-	<!-- What to Do Next — slim banner -->
-	{#if data.isOnboardingComplete && data.nextAction}
-		{#if data.nextAction.url}
-			<a
-				href={data.nextAction.url}
-				class="group flex items-center gap-3 rounded-xl border px-4 py-3 transition-all {data.nextAction.state === 'missed' ? 'border-error/30 bg-error-muted' : 'border-border-default bg-surface-raised hover:border-accent/30'}"
-			>
-				<span>
-					{#if data.nextAction.state === 'missed'}<AlertTriangle class="h-4 w-4 text-error" />{:else if data.nextAction.state === 'upcoming'}<Calendar class="h-4 w-4 text-accent" />{:else}<CircleCheck class="h-4 w-4 text-success" />{/if}
-				</span>
-				<div class="flex-1 min-w-0">
-					<p class="text-sm font-semibold text-text-primary truncate">{data.nextAction.label}</p>
-				</div>
-				<span class="shrink-0 text-xs font-semibold {data.nextAction.state === 'missed' ? 'text-error' : 'text-accent'} transition-transform group-hover:translate-x-0.5">
-					{#if data.nextAction.state === 'missed'}Complete now →{:else}Go →{/if}
-				</span>
-			</a>
-		{:else}
-			<div class="flex items-center gap-3 rounded-xl border border-border-default bg-surface-raised px-4 py-3">
-				<CircleCheck class="h-4 w-4 text-success" />
-				<p class="text-sm font-medium text-text-secondary">{data.nextAction.label}</p>
-			</div>
-		{/if}
 	{/if}
 </section>

@@ -476,28 +476,32 @@
 						>{form?.values?.message ?? defaultInviteMessage}</textarea
 					>
 				</label>
-				<!-- Pre-fill Accordion -->
-				<div class="rounded-xl border border-border-default bg-surface-raised">
-					<button
-						type="button"
-						onclick={() => (showPrefill = !showPrefill)}
-						class="flex w-full items-center justify-between px-4 py-3 text-sm font-semibold text-text-secondary hover:text-text-primary"
-					>
-						<span>Pre-fill client's onboarding (optional)</span>
-						<svg
-							class="h-4 w-4 transition-transform {showPrefill ? 'rotate-180' : ''}"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
+				<!-- Pre-fill Client's Setup -->
+				<div class="rounded-xl border border-accent/20 bg-surface-raised">
+					<div class="flex items-center justify-between px-4 py-3">
+						<div class="min-w-0 flex-1">
+							<p class="text-sm font-semibold text-text-primary">Pre-fill client's setup</p>
+							<p class="text-xs text-text-tertiary">
+								Set their objective, sub-objectives, and stakeholders so they skip those onboarding
+								steps
+							</p>
+						</div>
+						<button
+							type="button"
+							onclick={() => (showPrefill = !showPrefill)}
+							class="relative ml-3 inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors {showPrefill
+								? 'bg-accent'
+								: 'border border-border-default bg-surface-subtle'}"
+							role="switch"
+							aria-checked={showPrefill}
 						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M19 9l-7 7-7-7"
-							/>
-						</svg>
-					</button>
+							<span
+								class="inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform {showPrefill
+									? 'translate-x-6'
+									: 'translate-x-1'}"
+							></span>
+						</button>
+					</div>
 					{#if showPrefill}
 						<div class="space-y-4 border-t border-border-default px-4 py-4">
 							<div class="space-y-1">

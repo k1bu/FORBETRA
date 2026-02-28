@@ -59,6 +59,8 @@ docs/
 ├── expert-panel-review.md  # 5-person UX/product audit
 ├── expert-panel-ux-redesign.md
 ├── expert-panel-growth-strategy.md
+├── ux-evaluation-framework.md  # Systematic UX scoring (10 dims, 8 personas, 16 scenarios)
+├── ux-baseline-assessment.md   # Baseline scores (Platform: 6.87) + 34 issues + prioritized fix list
 └── session-prep-feb27.md   # Collaboration prep with Kieran
 ```
 
@@ -88,15 +90,15 @@ npm run seed:clean           # Remove seed data
 
 Defined in `vercel.json`, authenticated via `CRON_SECRET` = `JOB_SECRET_TOKEN`:
 
-| Job | Schedule | Route |
-|-----|----------|-------|
-| Base reminders | Mon-Fri 9am | /api/jobs/remind-base |
-| Overdue reminders | Mon-Fri 2pm | /api/jobs/remind-prompts |
-| Stakeholder feedback reminders | Mon-Fri 3pm | /api/jobs/remind-feedback |
-| AI insight generation | Sun 8pm | /api/jobs/generate-insights |
-| Coach prep | Mon 7am | /api/jobs/coach-prep |
-| Cycle completion | Daily 1am | /api/jobs/complete-cycles |
-| Stakeholder impact summaries | 1st of month 10am | /api/jobs/stakeholder-impact |
+| Job                            | Schedule          | Route                        |
+| ------------------------------ | ----------------- | ---------------------------- |
+| Base reminders                 | Mon-Fri 9am       | /api/jobs/remind-base        |
+| Overdue reminders              | Mon-Fri 2pm       | /api/jobs/remind-prompts     |
+| Stakeholder feedback reminders | Mon-Fri 3pm       | /api/jobs/remind-feedback    |
+| AI insight generation          | Sun 8pm           | /api/jobs/generate-insights  |
+| Coach prep                     | Mon 7am           | /api/jobs/coach-prep         |
+| Cycle completion               | Daily 1am         | /api/jobs/complete-cycles    |
+| Stakeholder impact summaries   | 1st of month 10am | /api/jobs/stakeholder-impact |
 
 ## Deployment
 

@@ -2,7 +2,16 @@
 	import type { ActionData, PageData } from './$types';
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import { Compass, Target, PenLine, Users, BrainCircuit, Mail, Check, Smartphone } from 'lucide-svelte';
+	import {
+		Compass,
+		Target,
+		PenLine,
+		Users,
+		BrainCircuit,
+		Mail,
+		Check,
+		Smartphone
+	} from 'lucide-svelte';
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
 
@@ -34,9 +43,11 @@
 	// Handle successful invite creation — redirect to coach hub
 	$effect(() => {
 		if (form?.success) {
+			// eslint-disable-next-line svelte/no-navigation-without-resolve
 			goto('/coach');
 		}
 		if (form?.skipped) {
+			// eslint-disable-next-line svelte/no-navigation-without-resolve
 			goto('/coach');
 		}
 	});
@@ -46,13 +57,17 @@
 	<title>Coach Setup | Forbetra</title>
 </svelte:head>
 
-<section class="mx-auto flex min-h-screen max-w-3xl flex-col items-center justify-center gap-8 p-4 pb-12">
+<section
+	class="mx-auto flex min-h-screen max-w-3xl flex-col items-center justify-center gap-8 p-4 pb-12"
+>
 	<!-- Progress Dots -->
 	<div class="flex items-center gap-3">
-		{#each allSteps as step, i}
+		{#each allSteps as step, i (step)}
 			<button
 				type="button"
-				onclick={() => { if (i <= currentStepIndex) currentStep = step; }}
+				onclick={() => {
+					if (i <= currentStepIndex) currentStep = step;
+				}}
 				class="h-3 w-3 rounded-full transition-all {i === currentStepIndex
 					? 'scale-110 bg-accent shadow-md shadow-accent/30'
 					: i < currentStepIndex
@@ -67,7 +82,9 @@
 	{#if currentStep === 'welcome'}
 		<div class="w-full space-y-8 text-center">
 			<div class="space-y-4">
-				<div class="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-accent to-accent shadow-xl shadow-accent/20">
+				<div
+					class="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-accent to-accent shadow-xl shadow-accent/20"
+				>
 					<Compass class="h-10 w-10 text-white" />
 				</div>
 				<h1 class="text-4xl font-bold text-text-primary">Welcome to Forbetra, {data.coach.name}</h1>
@@ -78,24 +95,27 @@
 
 			<div class="mx-auto max-w-xl space-y-4">
 				<div class="rounded-2xl border border-border-default bg-surface-raised p-6 text-left">
-					<h3 class="mb-3 text-sm font-semibold uppercase tracking-wide text-accent">Your role</h3>
-					<p class="text-sm text-text-secondary leading-relaxed">
-						Guide individuals through development cycles, review their progress data, and provide targeted feedback that helps them grow.
+					<h3 class="mb-3 text-sm font-semibold tracking-wide text-accent uppercase">Your role</h3>
+					<p class="text-sm leading-relaxed text-text-secondary">
+						Guide individuals through development cycles, review their progress data, and provide
+						targeted feedback that helps them grow.
 					</p>
 				</div>
 				<div class="rounded-2xl border border-border-default bg-surface-raised p-6 text-left">
-					<h3 class="mb-3 text-sm font-semibold uppercase tracking-wide text-accent">What you'll have access to</h3>
+					<h3 class="mb-3 text-sm font-semibold tracking-wide text-accent uppercase">
+						What you'll have access to
+					</h3>
 					<ul class="space-y-2 text-sm text-text-secondary">
 						<li class="flex items-start gap-2">
-							<Check class="mt-0.5 h-4 w-4 text-accent shrink-0" />
+							<Check class="mt-0.5 h-4 w-4 shrink-0 text-accent" />
 							Real-time tracking of client effort and performance
 						</li>
 						<li class="flex items-start gap-2">
-							<Check class="mt-0.5 h-4 w-4 text-accent shrink-0" />
+							<Check class="mt-0.5 h-4 w-4 shrink-0 text-accent" />
 							AI-generated insights and coaching prep
 						</li>
 						<li class="flex items-start gap-2">
-							<Check class="mt-0.5 h-4 w-4 text-accent shrink-0" />
+							<Check class="mt-0.5 h-4 w-4 shrink-0 text-accent" />
 							Stakeholder feedback trends and blind-spot alerts
 						</li>
 					</ul>
@@ -119,20 +139,19 @@
 			<div class="space-y-3">
 				<h1 class="text-3xl font-bold text-text-primary">How Forbetra Works</h1>
 				<p class="mx-auto max-w-md text-base text-text-secondary">
-					A continuous cycle of reflection, feedback, and insight — powered by the people around your client.
+					A continuous cycle of reflection, feedback, and insight — powered by the people around
+					your client.
 				</p>
 			</div>
 
 			<div class="mx-auto max-w-xl space-y-3">
-				{#each [
-					{ num: 1, icon: Target, title: 'Individual sets an objective', desc: 'They define what they want to improve and break it into observable behaviors.' },
-					{ num: 2, icon: PenLine, title: 'Weekly check-ins', desc: 'Self-rated effort and performance scores (0-10) with reflection notes.' },
-					{ num: 3, icon: Users, title: 'Stakeholders rate the same dimensions', desc: 'External perspectives reveal blind spots between self-perception and reality.' },
-					{ num: 4, icon: BrainCircuit, title: 'AI analyzes patterns', desc: 'Weekly synthesis, trend detection, and actionable coaching prep.' },
-					{ num: 5, icon: Compass, title: 'You see everything', desc: 'Alerts, trends, stakeholder feedback, and AI insights — all in one dashboard.' }
-				] as card}
-					<div class="flex items-start gap-4 rounded-xl border border-border-default bg-surface-raised p-5 text-left transition-all hover:border-accent/30">
-						<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent-muted text-sm font-bold text-accent">
+				{#each [{ num: 1, icon: Target, title: 'Individual sets an objective', desc: 'They define what they want to improve and break it into observable behaviors.' }, { num: 2, icon: PenLine, title: 'Weekly check-ins', desc: 'Self-rated effort and performance scores (0-10) with reflection notes.' }, { num: 3, icon: Users, title: 'Stakeholders rate the same dimensions', desc: 'External perspectives reveal blind spots between self-perception and reality.' }, { num: 4, icon: BrainCircuit, title: 'AI analyzes patterns', desc: 'Weekly synthesis, trend detection, and actionable coaching prep.' }, { num: 5, icon: Compass, title: 'You see everything', desc: 'Alerts, trends, stakeholder feedback, and AI insights — all in one dashboard.' }] as card (card.num)}
+					<div
+						class="flex items-start gap-4 rounded-xl border border-border-default bg-surface-raised p-5 text-left transition-all hover:border-accent/30"
+					>
+						<div
+							class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent-muted text-sm font-bold text-accent"
+						>
 							{card.num}
 						</div>
 						<div class="flex-1">
@@ -140,7 +159,7 @@
 								<card.icon class="h-5 w-5 text-accent" />
 								<h3 class="text-sm font-bold text-text-primary">{card.title}</h3>
 							</div>
-							<p class="mt-1 text-xs text-text-secondary leading-relaxed">{card.desc}</p>
+							<p class="mt-1 text-xs leading-relaxed text-text-secondary">{card.desc}</p>
 						</div>
 					</div>
 				{/each}
@@ -170,17 +189,27 @@
 	{#if currentStep === 'invite'}
 		<div class="w-full space-y-8 text-center">
 			<div class="space-y-3">
-				<div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-accent to-accent shadow-lg shadow-accent/20">
+				<div
+					class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-accent to-accent shadow-lg shadow-accent/20"
+				>
 					<Mail class="h-8 w-8 text-white" />
 				</div>
 				<h1 class="text-3xl font-bold text-text-primary">Invite Your First Client</h1>
 				<p class="mx-auto max-w-md text-base text-text-secondary">
-					Send an invitation to an individual you'd like to coach. They'll set up their own objective and stakeholders.
+					Send an invitation to an individual you'd like to coach. They'll set up their own
+					objective and stakeholders.
+				</p>
+				<p class="mx-auto max-w-md text-xs text-text-tertiary">
+					Want to pre-fill their objective and stakeholders? You can do this from the
+					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+					<a href="/coach/invitations" class="text-accent hover:underline">Invitations</a> page later.
 				</p>
 			</div>
 
 			{#if form?.error}
-				<div class="mx-auto max-w-md rounded-xl border border-error/50 bg-error-muted p-4 text-sm text-error">
+				<div
+					class="mx-auto max-w-md rounded-xl border border-error/50 bg-error-muted p-4 text-sm text-error"
+				>
 					<p class="font-medium">{form.error}</p>
 				</div>
 			{/if}
@@ -208,7 +237,7 @@
 						bind:value={email}
 						required
 						placeholder="client@example.com"
-						class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
+						class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
 					/>
 				</div>
 
@@ -222,14 +251,20 @@
 						name="name"
 						bind:value={name}
 						placeholder="Their name"
-						class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
+						class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
 					/>
 				</div>
 
 				<div>
-					<label for="phone" class="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-text-primary">
+					<label
+						for="phone"
+						class="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-text-primary"
+					>
 						<Smartphone class="h-3.5 w-3.5" />
-						Phone <span class="text-xs font-normal text-text-tertiary">(optional — enables SMS invite)</span>
+						Phone
+						<span class="text-xs font-normal text-text-tertiary"
+							>(optional — enables SMS invite)</span
+						>
 					</label>
 					<input
 						type="tel"
@@ -237,7 +272,7 @@
 						name="phone"
 						bind:value={phone}
 						placeholder="+1 555 123 4567"
-						class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
+						class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
 					/>
 				</div>
 
@@ -250,7 +285,7 @@
 						name="message"
 						bind:value={message}
 						rows="4"
-						class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
+						class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
 						placeholder="Add a personal note to your invitation..."
 					></textarea>
 				</div>
@@ -263,7 +298,9 @@
 					>
 						{#if isSubmitting}
 							<span class="inline-flex items-center gap-2">
-								<span class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+								<span
+									class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
+								></span>
 								Sending Invitation...
 							</span>
 						{:else}

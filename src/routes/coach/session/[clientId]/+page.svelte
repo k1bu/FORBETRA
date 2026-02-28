@@ -15,6 +15,16 @@
 
 	const prepData = $derived(freshPrep ?? data.coachPrep);
 
+	// Tab navigation
+	type SessionTab = 'prep' | 'timeline' | 'notes' | 'chart';
+	let activeTab = $state<SessionTab>('prep');
+	const tabs: { id: SessionTab; label: string }[] = [
+		{ id: 'prep', label: 'Prep' },
+		{ id: 'timeline', label: 'Timeline' },
+		{ id: 'notes', label: 'Notes' },
+		{ id: 'chart', label: 'Chart' }
+	];
+
 	const formatDate = (value: string | null | undefined) => {
 		if (!value) return '';
 		return new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(new Date(value));
@@ -60,16 +70,18 @@
 	}
 
 	// Group reflections by week
-	const reflectionsByWeek = $derived((() => {
-		const map = new Map<number, typeof data.allReflections>();
-		for (const r of data.allReflections) {
-			const week = r.weekNumber;
-			if (!map.has(week)) map.set(week, []);
-			map.get(week)!.push(r);
-		}
-		return Array.from(map.entries())
-			.sort(([a], [b]) => b - a);
-	})());
+	const reflectionsByWeek = $derived(
+		(() => {
+			// eslint-disable-next-line svelte/prefer-svelte-reactivity
+			const map = new Map<number, typeof data.allReflections>();
+			for (const r of data.allReflections) {
+				const week = r.weekNumber;
+				if (!map.has(week)) map.set(week, []);
+				map.get(week)!.push(r);
+			}
+			return Array.from(map.entries()).sort(([a], [b]) => b - a);
+		})()
+	);
 
 	$effect(() => {
 		if (form) {
@@ -92,10 +104,42 @@
 		<div>
 			<nav aria-label="Breadcrumb" class="mb-2">
 				<ol class="flex items-center gap-1.5 text-sm text-text-tertiary">
-					<li><a href="/coach" class="rounded transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">Coach Hub</a></li>
-					<li aria-hidden="true" class="text-text-muted"><svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg></li>
-					<li><a href="/coach/roster" class="rounded transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">Roster</a></li>
-					<li aria-hidden="true" class="text-text-muted"><svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg></li>
+					<!-- eslint-disable svelte/no-navigation-without-resolve -->
+					<li>
+						<a
+							href="/coach"
+							class="rounded transition-colors hover:text-text-primary focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
+							>Coach Hub</a
+						>
+					</li>
+					<li aria-hidden="true" class="text-text-muted">
+						<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+							><path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M9 5l7 7-7 7"
+							/></svg
+						>
+					</li>
+					<li>
+						<a
+							href="/coach/roster"
+							class="rounded transition-colors hover:text-text-primary focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
+							>Roster</a
+						>
+					</li>
+					<!-- eslint-enable svelte/no-navigation-without-resolve -->
+					<li aria-hidden="true" class="text-text-muted">
+						<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+							><path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M9 5l7 7-7 7"
+							/></svg
+						>
+					</li>
 					<li><span class="font-medium text-text-primary">{data.client.name}</span></li>
 				</ol>
 			</nav>
@@ -115,225 +159,311 @@
 		{/if}
 	</header>
 
-	<!-- AI Coaching Insights -->
-	<div class="rounded-2xl border border-accent/30 bg-accent-muted p-6">
-		<div class="mb-4 flex items-center justify-between">
-			<div class="flex items-center gap-2">
-				<Sparkles class="h-5 w-5 text-accent" />
-				<div>
-					<h2 class="text-lg font-bold text-text-primary">AI Coaching Insights</h2>
-					<p class="text-xs text-text-tertiary">AI-generated analysis based on your client's reflection and feedback data</p>
-				</div>
-				{#if prepData}
-					<span class="text-xs text-text-tertiary">{formatRelativeDays(prepData.createdAt)}</span>
-				{/if}
-			</div>
+	<!-- Tab Navigation -->
+	<div
+		class="flex gap-1 rounded-xl border border-border-default bg-surface-subtle p-1"
+		role="tablist"
+	>
+		{#each tabs as tab (tab.id)}
 			<button
 				type="button"
-				disabled={generatingPrep}
-				onclick={generatePrep}
-				class="rounded-lg border border-accent/30 bg-surface-raised px-4 py-2 text-xs font-semibold text-accent transition-all hover:border-accent hover:bg-accent-muted disabled:cursor-not-allowed disabled:opacity-50"
+				role="tab"
+				aria-selected={activeTab === tab.id}
+				onclick={() => (activeTab = tab.id)}
+				class="flex-1 rounded-lg px-4 py-2 text-sm font-semibold transition-all {activeTab ===
+				tab.id
+					? 'bg-surface-raised text-text-primary shadow-sm'
+					: 'text-text-tertiary hover:text-text-secondary'}"
 			>
-				{generatingPrep ? 'Generating...' : prepData ? 'Refresh Insights' : 'Generate Insights'}
+				{tab.label}
+				{#if tab.id === 'prep' && (data.alerts.length > 0 || data.client.alerts.length > 0)}
+					<span class="ml-1 inline-flex h-2 w-2 rounded-full bg-warning"></span>
+				{/if}
 			</button>
-		</div>
-		{#if prepData?.content}
-			<div class="prose prose-sm max-w-none text-text-secondary whitespace-pre-line">
-				{prepData.content}
-			</div>
-		{:else}
-			<p class="text-sm text-text-tertiary">No prep generated yet. Click above to generate.</p>
-		{/if}
+		{/each}
 	</div>
 
-	<!-- Alerts -->
-	{#if data.alerts.length > 0}
-		<div class="rounded-2xl border border-error/50 bg-error-muted p-6">
-			<div class="mb-3 flex items-center gap-2">
-				<AlertTriangle class="h-5 w-5 text-warning" />
-				<h2 class="text-lg font-bold text-error">AI Alerts</h2>
+	<!-- ═══ TAB: Prep ═══ -->
+	{#if activeTab === 'prep'}
+		<!-- AI Coaching Insights -->
+		<div class="rounded-2xl border border-accent/30 bg-accent-muted p-6">
+			<div class="mb-4 flex items-center justify-between">
+				<div class="flex items-center gap-2">
+					<Sparkles class="h-5 w-5 text-accent" />
+					<div>
+						<h2 class="text-lg font-bold text-text-primary">AI Coaching Insights</h2>
+						<p class="text-xs text-text-tertiary">
+							AI-generated analysis based on your client's reflection and feedback data
+						</p>
+					</div>
+					{#if prepData}
+						<span class="text-xs text-text-tertiary">{formatRelativeDays(prepData.createdAt)}</span>
+					{/if}
+				</div>
+				<button
+					type="button"
+					disabled={generatingPrep}
+					onclick={generatePrep}
+					class="rounded-lg border border-accent/30 bg-surface-raised px-4 py-2 text-xs font-semibold text-accent transition-all hover:border-accent hover:bg-accent-muted disabled:cursor-not-allowed disabled:opacity-50"
+				>
+					{generatingPrep ? 'Generating...' : prepData ? 'Refresh Insights' : 'Generate Insights'}
+				</button>
 			</div>
-			<ul class="space-y-2">
-				{#each data.alerts as alert}
-					<li class="rounded-lg glass px-3 py-2 text-sm text-error">
-						{alert.content}
-					</li>
-				{/each}
-			</ul>
+			{#if prepData?.content}
+				<div class="prose prose-sm max-w-none whitespace-pre-line text-text-secondary">
+					{prepData.content}
+				</div>
+			{:else}
+				<p class="text-sm text-text-tertiary">No prep generated yet. Click above to generate.</p>
+			{/if}
 		</div>
+
+		<!-- Alerts -->
+		{#if data.alerts.length > 0}
+			<div class="rounded-2xl border border-error/50 bg-error-muted p-6">
+				<div class="mb-3 flex items-center gap-2">
+					<AlertTriangle class="h-5 w-5 text-warning" />
+					<h2 class="text-lg font-bold text-error">AI Alerts</h2>
+				</div>
+				<ul class="space-y-2">
+					{#each data.alerts as alert, i (i)}
+						<li class="glass rounded-lg px-3 py-2 text-sm text-error">
+							{alert.content}
+						</li>
+					{/each}
+				</ul>
+			</div>
+		{/if}
+
+		{#if data.client.alerts.length > 0}
+			<div class="rounded-2xl border border-border-strong bg-warning-muted p-6">
+				<div class="mb-3 flex items-center gap-2">
+					<AlertTriangle class="h-5 w-5 text-warning" />
+					<h2 class="text-lg font-bold text-warning">Status Alerts</h2>
+				</div>
+				<ul class="space-y-2">
+					{#each data.client.alerts as alert, i (i)}
+						<li
+							class="glass flex items-start gap-2 rounded-lg px-3 py-2 text-sm {alert.severity ===
+							'high'
+								? 'border border-error/50 font-semibold text-error'
+								: 'text-warning'}"
+						>
+							<span
+								class="mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full {alert.severity === 'high'
+									? 'bg-error'
+									: alert.severity === 'medium'
+										? 'bg-warning'
+										: 'bg-accent'}"
+							></span>
+							{alert.message}
+						</li>
+					{/each}
+				</ul>
+			</div>
+		{/if}
 	{/if}
 
-	{#if data.client.alerts.length > 0}
-		<div class="rounded-2xl border border-border-strong bg-warning-muted p-6">
-			<div class="mb-3 flex items-center gap-2">
-				<AlertTriangle class="h-5 w-5 text-warning" />
-				<h2 class="text-lg font-bold text-warning">Status Alerts</h2>
-			</div>
-			<ul class="space-y-2">
-				{#each data.client.alerts as alert}
-					<li class="flex items-start gap-2 rounded-lg glass px-3 py-2 text-sm {alert.severity === 'high' ? 'font-semibold text-error border border-error/50' : 'text-warning'}">
-						<span class="mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full {alert.severity === 'high' ? 'bg-error' : alert.severity === 'medium' ? 'bg-warning' : 'bg-accent'}"></span>
-						{alert.message}
-					</li>
-				{/each}
-			</ul>
-		</div>
-	{/if}
-
-	<!-- Reflections Timeline -->
-	{#if reflectionsByWeek.length > 0}
-		<div class="rounded-2xl border border-border-default bg-surface-raised p-6">
-			<h2 class="mb-4 text-lg font-bold text-text-primary">Reflections Timeline</h2>
-			<div class="space-y-4">
-				{#each reflectionsByWeek as [weekNumber, reflections]}
-					<div class="rounded-xl border border-border-default bg-surface-subtle p-4">
-						<p class="mb-2 text-sm font-bold text-text-secondary">Week {weekNumber}</p>
-						<div class="space-y-2">
-							{#each reflections as r}
-								<div class="flex items-start gap-3 rounded-lg bg-surface-raised px-3 py-2 text-sm">
-									<span class="shrink-0 rounded bg-accent-muted px-1.5 py-0.5 text-[10px] font-semibold text-accent">
-										{r.reflectionType === 'RATING_A' ? 'Check-in' : r.reflectionType === 'RATING_B' ? 'Check-in' : r.reflectionType}
-									</span>
-									<div class="min-w-0 flex-1">
-										{#if r.effortScore !== null || r.performanceScore !== null}
-											<div class="flex gap-3 text-xs">
-												{#if r.effortScore !== null}
-													<span class="text-warning">Effort: <strong>{r.effortScore}</strong></span>
-												{/if}
-												{#if r.performanceScore !== null}
-													<span class="text-accent">Perf: <strong>{r.performanceScore}</strong></span>
-												{/if}
-											</div>
-										{/if}
-										{#if r.notes}
-											<p class="mt-1 text-xs text-text-secondary">{r.notes}</p>
+	<!-- ═══ TAB: Timeline ═══ -->
+	{#if activeTab === 'timeline'}
+		<!-- Reflections Timeline -->
+		{#if reflectionsByWeek.length > 0}
+			<div class="rounded-2xl border border-border-default bg-surface-raised p-6">
+				<h2 class="mb-4 text-lg font-bold text-text-primary">Reflections Timeline</h2>
+				<div class="space-y-4">
+					{#each reflectionsByWeek as [weekNumber, reflections] (weekNumber)}
+						<div class="rounded-xl border border-border-default bg-surface-subtle p-4">
+							<p class="mb-2 text-sm font-bold text-text-secondary">Week {weekNumber}</p>
+							<div class="space-y-2">
+								{#each reflections as r, i (i)}
+									<div
+										class="flex items-start gap-3 rounded-lg bg-surface-raised px-3 py-2 text-sm"
+									>
+										<span
+											class="shrink-0 rounded bg-accent-muted px-1.5 py-0.5 text-[10px] font-semibold text-accent"
+										>
+											{r.reflectionType === 'RATING_A'
+												? 'Check-in'
+												: r.reflectionType === 'RATING_B'
+													? 'Check-in'
+													: r.reflectionType}
+										</span>
+										<div class="min-w-0 flex-1">
+											{#if r.effortScore !== null || r.performanceScore !== null}
+												<div class="flex gap-3 text-xs">
+													{#if r.effortScore !== null}
+														<span class="text-warning"
+															>Effort: <strong>{r.effortScore}</strong></span
+														>
+													{/if}
+													{#if r.performanceScore !== null}
+														<span class="text-accent"
+															>Perf: <strong>{r.performanceScore}</strong></span
+														>
+													{/if}
+												</div>
+											{/if}
+											{#if r.notes}
+												<p class="mt-1 text-xs text-text-secondary">{r.notes}</p>
+											{/if}
+										</div>
+										{#if r.submittedAt}
+											<span class="shrink-0 text-[10px] text-text-muted"
+												>{formatDate(r.submittedAt)}</span
+											>
 										{/if}
 									</div>
-									{#if r.submittedAt}
-										<span class="shrink-0 text-[10px] text-text-muted">{formatDate(r.submittedAt)}</span>
+								{/each}
+							</div>
+						</div>
+					{/each}
+				</div>
+			</div>
+		{:else}
+			<div class="rounded-2xl border border-border-default bg-surface-raised p-6 text-center">
+				<p class="text-sm text-text-tertiary">No reflections yet.</p>
+			</div>
+		{/if}
+
+		<!-- Stakeholder Feedback Summary -->
+		{#if data.client.stakeholders.length > 0}
+			<div class="rounded-2xl border border-border-strong bg-success-muted p-6">
+				<h2 class="mb-4 text-lg font-bold text-text-primary">Stakeholder Feedback</h2>
+				<div class="grid gap-3 sm:grid-cols-2">
+					{#each data.client.stakeholders as stakeholder (stakeholder.email)}
+						<div class="glass rounded-xl border border-border-default p-3">
+							<p class="text-sm font-semibold text-text-primary">{stakeholder.name}</p>
+							<p class="text-xs text-text-tertiary">{stakeholder.email}</p>
+							{#if stakeholder.lastFeedback}
+								<div class="mt-2 flex gap-3 text-xs">
+									{#if stakeholder.lastFeedback.effortScore !== null}
+										<span class="text-success"
+											>Effort: <strong>{stakeholder.lastFeedback.effortScore}</strong></span
+										>
+									{/if}
+									{#if stakeholder.lastFeedback.performanceScore !== null}
+										<span class="text-success"
+											>Perf: <strong>{stakeholder.lastFeedback.performanceScore}</strong></span
+										>
 									{/if}
 								</div>
-							{/each}
-						</div>
-					</div>
-				{/each}
-			</div>
-		</div>
-	{/if}
-
-	<!-- Stakeholder Feedback Summary -->
-	{#if data.client.stakeholders.length > 0}
-		<div class="rounded-2xl border border-border-strong bg-success-muted p-6">
-			<h2 class="mb-4 text-lg font-bold text-text-primary">Stakeholder Feedback</h2>
-			<div class="grid gap-3 sm:grid-cols-2">
-				{#each data.client.stakeholders as stakeholder}
-					<div class="rounded-xl border border-border-default glass p-3">
-						<p class="text-sm font-semibold text-text-primary">{stakeholder.name}</p>
-						<p class="text-xs text-text-tertiary">{stakeholder.email}</p>
-						{#if stakeholder.lastFeedback}
-							<div class="mt-2 flex gap-3 text-xs">
-								{#if stakeholder.lastFeedback.effortScore !== null}
-									<span class="text-success">Effort: <strong>{stakeholder.lastFeedback.effortScore}</strong></span>
-								{/if}
-								{#if stakeholder.lastFeedback.performanceScore !== null}
-									<span class="text-success">Perf: <strong>{stakeholder.lastFeedback.performanceScore}</strong></span>
-								{/if}
-							</div>
-							<p class="mt-1 text-[10px] text-text-muted">
-								{stakeholder.lastFeedback.weekNumber ? `Week ${stakeholder.lastFeedback.weekNumber}` : ''}
-								{stakeholder.lastFeedback.submittedAt ? ` · ${formatRelativeDays(stakeholder.lastFeedback.submittedAt)}` : ''}
-							</p>
-						{:else}
-							<p class="mt-2 text-xs text-text-muted">No feedback yet</p>
-						{/if}
-					</div>
-				{/each}
-			</div>
-		</div>
-	{/if}
-
-	<!-- Performance Chart -->
-	{#if data.client.visualizationData && data.client.visualizationData.individual.length > 0}
-		<div class="rounded-2xl border border-accent/30 bg-accent-muted p-6">
-			<h2 class="mb-4 text-lg font-bold text-text-primary">Performance & Effort Over Time</h2>
-			<PerformanceEffortChart
-				individualData={data.client.visualizationData.individual}
-				stakeholderData={data.client.visualizationData.stakeholders}
-				stakeholders={data.client.visualizationData.stakeholderList}
-			/>
-		</div>
-	{/if}
-
-	<!-- Coach Notes -->
-	<div class="rounded-2xl border border-accent/30 bg-accent-muted p-6">
-		<h2 class="mb-4 text-lg font-bold text-text-primary">Coach Notes</h2>
-
-		<!-- Inline add note form -->
-		<form method="post" action="?/createNote" class="mb-4 rounded-xl border border-border-default bg-surface-raised p-4" use:enhance={() => {
-		submittingNote = true;
-		return async ({ update }) => {
-			submittingNote = false;
-			await update();
-		};
-	}}>
-			{#if data.cycleId}
-				<input type="hidden" name="cycleId" value={data.cycleId} />
-			{/if}
-			{#if form?.noteError}
-				<p class="mb-2 text-xs text-error">{form.noteError}</p>
-			{/if}
-			<div class="flex gap-3">
-				<div class="min-w-0 flex-1">
-					<textarea
-						name="content"
-						rows="2"
-						required
-						minlength="10"
-						bind:value={noteContent}
-						class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:bg-surface-raised focus:outline-none focus:ring-1 focus:ring-accent/30"
-						placeholder="Add a note for this client..."
-					></textarea>
-				</div>
-				<div class="flex shrink-0 flex-col gap-2">
-					<input
-						type="number"
-						name="weekNumber"
-						min="1"
-						max="12"
-						bind:value={noteWeek}
-						class="w-16 rounded-lg border border-border-default bg-surface-raised px-2 py-1 text-center text-xs text-text-primary focus:border-accent focus:outline-none"
-						placeholder="Wk"
-					/>
-					<button
-						type="submit"
-						disabled={submittingNote}
-						class="rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white transition-all hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed"
-					>
-						{submittingNote ? 'Saving...' : 'Save'}
-					</button>
-				</div>
-			</div>
-		</form>
-
-		<!-- Notes list -->
-		{#if data.allCoachNotes.length > 0}
-			<ul class="space-y-2">
-				{#each data.allCoachNotes as note (note.id)}
-					<li class="rounded-lg border border-border-default bg-surface-raised p-3">
-						<p class="text-sm text-text-secondary">{note.content}</p>
-						<div class="mt-2 flex items-center gap-2 text-xs text-text-tertiary">
-							{#if note.weekNumber}
-								<span class="rounded-full bg-accent-muted px-2 py-0.5 font-semibold text-accent">
-									Week {note.weekNumber}
-								</span>
+								<p class="mt-1 text-[10px] text-text-muted">
+									{stakeholder.lastFeedback.weekNumber
+										? `Week ${stakeholder.lastFeedback.weekNumber}`
+										: ''}
+									{stakeholder.lastFeedback.submittedAt
+										? ` · ${formatRelativeDays(stakeholder.lastFeedback.submittedAt)}`
+										: ''}
+								</p>
+							{:else}
+								<p class="mt-2 text-xs text-text-muted">No feedback yet</p>
 							{/if}
-							<span>{formatRelativeDays(note.createdAt)}</span>
 						</div>
-					</li>
-				{/each}
-			</ul>
-		{:else}
-			<p class="text-center text-sm text-text-tertiary">No notes yet.</p>
+					{/each}
+				</div>
+			</div>
 		{/if}
-	</div>
+	{/if}
+
+	<!-- ═══ TAB: Notes ═══ -->
+	{#if activeTab === 'notes'}
+		<div class="rounded-2xl border border-border-default bg-surface-raised p-6">
+			<h2 class="mb-4 text-lg font-bold text-text-primary">Coach Notes</h2>
+
+			<!-- Inline add note form -->
+			<form
+				method="post"
+				action="?/createNote"
+				class="mb-4 rounded-xl border border-border-default bg-surface-subtle p-4"
+				use:enhance={() => {
+					submittingNote = true;
+					return async ({ update }) => {
+						submittingNote = false;
+						await update();
+					};
+				}}
+			>
+				{#if data.cycleId}
+					<input type="hidden" name="cycleId" value={data.cycleId} />
+				{/if}
+				{#if form?.noteError}
+					<p class="mb-2 text-xs text-error">{form.noteError}</p>
+				{/if}
+				<div class="flex gap-3">
+					<div class="min-w-0 flex-1">
+						<textarea
+							name="content"
+							rows="2"
+							required
+							minlength="10"
+							bind:value={noteContent}
+							class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:bg-surface-raised focus:ring-1 focus:ring-accent/30 focus:outline-none"
+							placeholder="Add a note for this client..."
+						></textarea>
+					</div>
+					<div class="flex shrink-0 flex-col gap-2">
+						<input
+							type="number"
+							name="weekNumber"
+							min="1"
+							max="12"
+							bind:value={noteWeek}
+							class="w-16 rounded-lg border border-border-default bg-surface-raised px-2 py-1 text-center text-xs text-text-primary focus:border-accent focus:outline-none"
+							placeholder="Wk"
+						/>
+						<button
+							type="submit"
+							disabled={submittingNote}
+							class="rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white transition-all hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+						>
+							{submittingNote ? 'Saving...' : 'Save'}
+						</button>
+					</div>
+				</div>
+			</form>
+
+			<!-- Notes list -->
+			{#if data.allCoachNotes.length > 0}
+				<ul class="space-y-2">
+					{#each data.allCoachNotes as note (note.id)}
+						<li class="rounded-lg border border-border-default bg-surface-subtle p-3">
+							<p class="text-sm text-text-secondary">{note.content}</p>
+							<div class="mt-2 flex items-center gap-2 text-xs text-text-tertiary">
+								{#if note.weekNumber}
+									<span class="rounded-full bg-accent-muted px-2 py-0.5 font-semibold text-accent">
+										Week {note.weekNumber}
+									</span>
+								{/if}
+								<span>{formatRelativeDays(note.createdAt)}</span>
+							</div>
+						</li>
+					{/each}
+				</ul>
+			{:else}
+				<p class="text-center text-sm text-text-tertiary">
+					No notes yet. Add your first note above.
+				</p>
+			{/if}
+		</div>
+	{/if}
+
+	<!-- ═══ TAB: Chart ═══ -->
+	{#if activeTab === 'chart'}
+		{#if data.client.visualizationData && data.client.visualizationData.individual.length > 0}
+			<div class="rounded-2xl border border-border-default bg-surface-raised p-6">
+				<h2 class="mb-4 text-lg font-bold text-text-primary">Performance & Effort Over Time</h2>
+				<PerformanceEffortChart
+					individualData={data.client.visualizationData.individual}
+					stakeholderData={data.client.visualizationData.stakeholders}
+					stakeholders={data.client.visualizationData.stakeholderList}
+				/>
+			</div>
+		{:else}
+			<div class="rounded-2xl border border-border-default bg-surface-raised p-6 text-center">
+				<p class="text-sm text-text-tertiary">
+					No data available yet. Charts will appear after check-ins begin.
+				</p>
+			</div>
+		{/if}
+	{/if}
 </section>

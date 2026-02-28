@@ -10,7 +10,15 @@
 		getScoreLabel
 	} from '$lib/utils/scoreColors';
 	import { addToast } from '$lib/stores/toasts.svelte';
-	import { CircleCheck, Target, ClipboardList, Dumbbell, TrendingUp, PenLine, Send } from 'lucide-svelte';
+	import {
+		CircleCheck,
+		Target,
+		ClipboardList,
+		Dumbbell,
+		TrendingUp,
+		PenLine,
+		Send
+	} from 'lucide-svelte';
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
 
@@ -24,7 +32,9 @@
 	let performanceScore = $state(data.previousEntry?.performanceScore ?? 5);
 	let notes = $state(data.previousEntry?.notes ?? '');
 	let isSubmitting = $state(false);
-	let showBehavioralIndicators = $state(false);
+	// Auto-expand on first check-in, collapse thereafter
+	const isFirstCheckin = !data.previousEntry && data.currentWeek <= 1;
+	let showBehavioralIndicators = $state(isFirstCheckin);
 
 	// Update scores when previousEntry changes
 	$effect(() => {
@@ -49,6 +59,7 @@
 <section class="mx-auto flex max-w-4xl flex-col gap-6 p-4 pb-12">
 	<!-- Back to Today Link -->
 	<div class="flex items-center justify-between">
+		<!-- eslint-disable svelte/no-navigation-without-resolve -->
 		<a
 			href="/individual"
 			class="group flex items-center gap-2 text-sm font-medium text-text-secondary transition-colors hover:text-text-primary"
@@ -63,17 +74,22 @@
 			</svg>
 			Back to Today
 		</a>
+		<!-- eslint-enable svelte/no-navigation-without-resolve -->
 	</div>
 
 	{#if data.isPreview}
-		<div class="fixed top-4 right-4 z-50 max-w-xs rounded-lg border border-accent/30 bg-accent-muted p-3 text-xs text-accent">
+		<div
+			class="fixed top-4 right-4 z-50 max-w-xs rounded-lg border border-accent/30 bg-accent-muted p-3 text-xs text-accent"
+		>
 			<p class="font-semibold">Preview Mode</p>
 			<p class="mt-1 text-xs">Submissions will be saved normally.</p>
 		</div>
 	{/if}
 	<!-- Header with encouraging messaging -->
 	<header class="space-y-3 text-center">
-		<div class="inline-flex items-center gap-2 rounded-full bg-accent-muted px-4 py-1.5 text-xs font-medium text-accent">
+		<div
+			class="inline-flex items-center gap-2 rounded-full bg-accent-muted px-4 py-1.5 text-xs font-medium text-accent"
+		>
 			<span class="h-2 w-2 rounded-full bg-accent"></span>
 			Week {data.currentWeek} Check-in
 		</div>
@@ -82,40 +98,61 @@
 			Take a moment to reflect on your progress. Every check-in moves you forward.
 		</p>
 		{#if !data.isPreview && !data.isAvailable}
-			<div class="mx-auto max-w-md rounded-xl border border-warning/30 bg-warning-muted p-4 text-sm text-warning">
+			<div
+				class="mx-auto max-w-md rounded-xl border border-warning/30 bg-warning-muted p-4 text-sm text-warning"
+			>
 				<p class="font-medium">Check-in not yet available</p>
-				<p class="mt-1">This check-in opens on {formatDate(data.availableDate)}. Check back then to record your reflection.</p>
+				<p class="mt-1">
+					This check-in opens on {formatDate(data.availableDate)}. Check back then to record your
+					reflection.
+				</p>
 			</div>
 		{/if}
 	</header>
 
 	<div aria-live="polite">
 		{#if form?.error}
-			<div class="mx-auto max-w-2xl rounded-xl border border-error/30 bg-error-muted p-4 text-sm text-error">
+			<div
+				class="mx-auto max-w-2xl rounded-xl border border-error/30 bg-error-muted p-4 text-sm text-error"
+			>
 				<p class="font-medium">{form.error}</p>
 			</div>
 		{/if}
 
 		{#if form?.success}
-			<div class="mx-auto max-w-2xl animate-in fade-in slide-in-from-top-2 rounded-xl border border-success/30 bg-success-muted p-6 text-center">
+			<div
+				class="animate-in fade-in slide-in-from-top-2 mx-auto max-w-2xl rounded-xl border border-success/30 bg-success-muted p-6 text-center"
+			>
 				<CircleCheck class="mx-auto mb-2 h-10 w-10 text-success" />
 				<p class="text-lg font-semibold text-success">Check-in saved!</p>
 				{#if form.streak && form.streak >= 3}
 					<p class="mt-1 text-sm font-semibold text-warning">
-						You're on a {form.streak} check-in streak!{#if form.streak >= 12} Incredible consistency!{:else if form.streak >= 9} Outstanding!{:else if form.streak >= 6} Keep it going!{/if}
+						You're on a {form.streak} check-in streak!{#if form.streak >= 12}
+							Incredible consistency!{:else if form.streak >= 9}
+							Outstanding!{:else if form.streak >= 6}
+							Keep it going!{/if}
 					</p>
 				{:else}
-					<p class="mt-1 text-sm text-success">Your reflection has been recorded. Keep up the great work!</p>
+					<p class="mt-1 text-sm text-success">
+						Your reflection has been recorded. Keep up the great work!
+					</p>
 				{/if}
+				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<a
 					href="/individual"
 					class="mt-4 inline-flex items-center gap-2 rounded-lg bg-success px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-success/90"
 				>
 					Return to Today
 					<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M9 5l7 7-7 7"
+						/>
 					</svg>
 				</a>
+				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 			</div>
 		{/if}
 	</div>
@@ -132,7 +169,7 @@
 				<div class="flex items-center gap-3 text-base text-text-secondary">
 					<Target class="h-5 w-5 text-accent" />
 					<span class="font-medium">Objective:</span>
-					<span class="font-semibold text-lg text-text-primary">{data.objective.title}</span>
+					<span class="text-lg font-semibold text-text-primary">{data.objective.title}</span>
 				</div>
 			</div>
 
@@ -155,18 +192,28 @@
 						stroke="currentColor"
 						viewBox="0 0 24 24"
 					>
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M19 9l-7 7-7-7"
+						/>
 					</svg>
 				</button>
 				{#if showBehavioralIndicators}
 					<div class="border-t border-border-default px-4 py-4">
 						<p class="mb-3 text-xs leading-relaxed text-text-secondary">
-							Use these as reference points when rating your overall effort and progress. They help define what success looks like for your objective.
+							Use these as reference points when rating your overall effort and progress. They help
+							define what success looks like for your objective.
 						</p>
 						<div class="space-y-2">
 							{#each data.subgoals as subgoal, index (subgoal.id)}
-								<div class="flex items-start gap-3 rounded-lg border border-border-default bg-surface-subtle p-3">
-									<span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent-muted text-xs font-bold text-accent">
+								<div
+									class="flex items-start gap-3 rounded-lg border border-border-default bg-surface-subtle p-3"
+								>
+									<span
+										class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent-muted text-xs font-bold text-accent"
+									>
 										{index + 1}
 									</span>
 									<div class="flex-1">
@@ -191,27 +238,33 @@
 					<div class="flex gap-6 text-sm">
 						<div class="flex items-center gap-2">
 							<span class="text-accent">Effort:</span>
-							<span class="font-bold text-lg text-accent">
+							<span class="text-lg font-bold text-accent">
 								{data.previousRatings.effortScore !== null ? data.previousRatings.effortScore : '—'}
 							</span>
 						</div>
 						<div class="flex items-center gap-2">
 							<span class="text-accent">Performance:</span>
-							<span class="font-bold text-lg text-accent">
-								{data.previousRatings.performanceScore !== null ? data.previousRatings.performanceScore : '—'}
+							<span class="text-lg font-bold text-accent">
+								{data.previousRatings.performanceScore !== null
+									? data.previousRatings.performanceScore
+									: '—'}
 							</span>
 						</div>
 					</div>
-					<p class="mt-2 text-xs text-accent">Use this as context - adjust freely based on this week.</p>
+					<p class="mt-2 text-xs text-accent">
+						Use this as context - adjust freely based on this week.
+					</p>
 					{#if historicRatings.length > 1}
 						<div class="mt-4">
-							<HistoricRatingsChart historicRatings={historicRatings} />
+							<HistoricRatingsChart {historicRatings} />
 						</div>
 					{/if}
 				</div>
 			{/if}
 			<!-- Effort Score with Enhanced UI -->
-			<div class="group rounded-2xl border border-border-default bg-surface-raised p-6 transition-all hover:border-border-strong">
+			<div
+				class="group rounded-2xl border border-border-default bg-surface-raised p-6 transition-all hover:border-border-strong"
+			>
 				<div class="mb-4 flex items-center justify-between">
 					<div class="flex items-center gap-3">
 						<Dumbbell class="h-6 w-6 text-accent" />
@@ -220,23 +273,31 @@
 								Focused Effort
 							</label>
 							<p class="text-xs text-text-tertiary">
-								How much attention did you give to your objective: "{data.objective.title}" this week?
+								How much attention did you give to your objective: "{data.objective.title}" this
+								week?
 							</p>
 						</div>
 					</div>
 					<div
 						class="flex h-16 w-16 items-center justify-center rounded-full border-2 transition-all {getScoreBgColor(
-							effortScore, 'effort'
+							effortScore,
+							'effort'
 						)}"
 						aria-valuetext="Effort score: {effortScore} out of 10"
 					>
-						<span class="text-2xl font-bold {getScoreColor(effortScore, 'effort')}">{effortScore}</span>
+						<span class="text-2xl font-bold {getScoreColor(effortScore, 'effort')}"
+							>{effortScore}</span
+						>
 					</div>
 				</div>
 
 				<!-- Button Grid (Primary Input) -->
-				<div class="mb-4 grid grid-cols-6 gap-2 sm:grid-cols-11" role="radiogroup" aria-label="Effort score selection">
-					{#each Array(11) as _, i}
+				<div
+					class="mb-4 grid grid-cols-6 gap-2 sm:grid-cols-11"
+					role="radiogroup"
+					aria-label="Effort score selection"
+				>
+					{#each Array.from({ length: 11 }, (_, i) => i) as i (i)}
 						{@const isSelected = effortScore === i}
 						{@const buttonColors = getButtonSelectedColors(i, 'effort')}
 						{@const hoverColors = getButtonHoverColors(i, 'effort')}
@@ -249,7 +310,8 @@
 							aria-label="Score {i} out of 10"
 							class="flex h-10 w-full items-center justify-center rounded-lg border-2 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-60 {isSelected
 								? buttonColors + ' shadow-md'
-								: 'border-border-default bg-surface-raised text-text-secondary ' + hoverColors} focus:outline-none focus:ring-2 {focusRing} focus:ring-offset-2"
+								: 'border-border-default bg-surface-raised text-text-secondary ' +
+									hoverColors} focus:ring-2 focus:outline-none {focusRing} focus:ring-offset-2"
 						>
 							{i}
 						</button>
@@ -260,7 +322,8 @@
 					<span class="text-xs font-medium text-text-tertiary">Rarely intentional</span>
 					<div
 						class="rounded-full px-3 py-1 text-xs font-semibold {getScoreBgColor(
-							effortScore, 'effort'
+							effortScore,
+							'effort'
 						)} {getScoreColor(effortScore, 'effort')}"
 					>
 						{getScoreLabel(effortScore, 'effort')}
@@ -273,7 +336,9 @@
 			</div>
 
 			<!-- Progress Score with Enhanced UI -->
-			<div class="group rounded-2xl border border-border-default bg-surface-raised p-6 transition-all hover:border-border-strong">
+			<div
+				class="group rounded-2xl border border-border-default bg-surface-raised p-6 transition-all hover:border-border-strong"
+			>
 				<div class="mb-4 flex items-center justify-between">
 					<div class="flex items-center gap-3">
 						<TrendingUp class="h-6 w-6 text-accent" />
@@ -282,23 +347,31 @@
 								Performance
 							</label>
 							<p class="text-xs text-text-tertiary">
-								How effective was your performance related to your objective: "{data.objective.title}" this week?
+								How effective was your performance related to your objective: "{data.objective
+									.title}" this week?
 							</p>
 						</div>
 					</div>
 					<div
 						class="flex h-16 w-16 items-center justify-center rounded-full border-2 transition-all {getScoreBgColor(
-							performanceScore, 'performance'
+							performanceScore,
+							'performance'
 						)}"
 						aria-valuetext="Performance score: {performanceScore} out of 10"
 					>
-						<span class="text-2xl font-bold {getScoreColor(performanceScore, 'performance')}">{performanceScore}</span>
+						<span class="text-2xl font-bold {getScoreColor(performanceScore, 'performance')}"
+							>{performanceScore}</span
+						>
 					</div>
 				</div>
 
 				<!-- Button Grid (Primary Input) -->
-				<div class="mb-4 grid grid-cols-6 gap-2 sm:grid-cols-11" role="radiogroup" aria-label="Performance score selection">
-					{#each Array(11) as _, i}
+				<div
+					class="mb-4 grid grid-cols-6 gap-2 sm:grid-cols-11"
+					role="radiogroup"
+					aria-label="Performance score selection"
+				>
+					{#each Array.from({ length: 11 }, (_, i) => i) as i (i)}
 						{@const isSelected = performanceScore === i}
 						{@const buttonColors = getButtonSelectedColors(i, 'performance')}
 						{@const hoverColors = getButtonHoverColors(i, 'performance')}
@@ -311,7 +384,8 @@
 							aria-label="Score {i} out of 10"
 							class="flex h-10 w-full items-center justify-center rounded-lg border-2 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-60 {isSelected
 								? buttonColors + ' shadow-md'
-								: 'border-border-default bg-surface-raised text-text-secondary ' + hoverColors} focus:outline-none focus:ring-2 {focusRing} focus:ring-offset-2"
+								: 'border-border-default bg-surface-raised text-text-secondary ' +
+									hoverColors} focus:ring-2 focus:outline-none {focusRing} focus:ring-offset-2"
 						>
 							{i}
 						</button>
@@ -322,7 +396,8 @@
 					<span class="text-xs font-medium text-text-tertiary">Not yet visible</span>
 					<div
 						class="rounded-full px-3 py-1 text-xs font-semibold {getScoreBgColor(
-							performanceScore, 'performance'
+							performanceScore,
+							'performance'
 						)} {getScoreColor(performanceScore, 'performance')}"
 					>
 						{getScoreLabel(performanceScore, 'performance')}
@@ -335,7 +410,9 @@
 			</div>
 
 			<!-- Notes with Better UX -->
-			<div class="rounded-2xl border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30">
+			<div
+				class="rounded-2xl border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30"
+			>
 				<div class="mb-3 flex items-center gap-2">
 					<PenLine class="h-5 w-5 text-accent" />
 					<label for="notes" class="text-base font-semibold text-text-primary">
@@ -349,19 +426,21 @@
 					maxlength="500"
 					bind:value={notes}
 					disabled={!data.isAvailable || data.isLocked}
-					class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:bg-surface-raised focus:outline-none focus:ring-2 focus:ring-accent/30 disabled:cursor-not-allowed disabled:opacity-60"
+					class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:bg-surface-raised focus:ring-2 focus:ring-accent/30 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
 					placeholder="What went well? What's challenging? What stood out this week?"
 				></textarea>
 				<div class="mt-2 flex items-center justify-between">
 					<p class="text-xs text-text-tertiary">
 						Your reflections help you and your coach see the full picture of your growth.
 					</p>
-					<p class="text-xs text-text-muted text-right">{notes.length}/500</p>
+					<p class="text-right text-xs text-text-muted">{notes.length}/500</p>
 				</div>
 			</div>
 
 			<!-- Submit Button with Enhanced Design -->
-			<div class="flex flex-col gap-4 rounded-2xl border border-border-default bg-accent-muted p-6 sm:flex-row sm:items-center sm:justify-between">
+			<div
+				class="flex flex-col gap-4 rounded-2xl border border-border-default bg-accent-muted p-6 sm:flex-row sm:items-center sm:justify-between"
+			>
 				<div class="flex-1">
 					{#if data.isLocked || data.previousEntry}
 						<p class="font-semibold text-text-primary">Viewing completed check-in</p>
@@ -376,28 +455,40 @@
 					{/if}
 				</div>
 				<div class="flex items-center gap-3">
+					<!-- eslint-disable svelte/no-navigation-without-resolve -->
 					<a
 						href="/individual"
 						class="rounded-xl border border-border-default bg-surface-raised px-6 py-3.5 text-sm font-semibold text-text-secondary transition-all hover:border-border-strong hover:bg-surface-subtle"
 					>
 						Cancel
 					</a>
+					<!-- eslint-enable svelte/no-navigation-without-resolve -->
 					<button
 						type="submit"
 						disabled={!data.isAvailable || data.isLocked || isSubmitting}
-						title={data.isLocked ? 'Check-in already submitted' : !data.isAvailable ? 'This check-in is not yet available' : isSubmitting ? 'Submitting...' : undefined}
-						class="group relative overflow-hidden rounded-xl bg-accent px-8 py-3.5 font-semibold text-white shadow-lg transition-all hover:bg-accent-hover hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+						title={data.isLocked
+							? 'Check-in already submitted'
+							: !data.isAvailable
+								? 'This check-in is not yet available'
+								: isSubmitting
+									? 'Submitting...'
+									: undefined}
+						class="group relative overflow-hidden rounded-xl bg-accent px-8 py-3.5 font-semibold text-white shadow-lg transition-all hover:bg-accent-hover hover:shadow-xl focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
 					>
 						<span class="relative z-10 flex items-center gap-2">
 							{#if isSubmitting}
-								<span class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+								<span
+									class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
+								></span>
 								Saving...
 							{:else}
 								<Send class="h-4 w-4" />
 								Save Check-in
 							{/if}
 						</span>
-						<div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 opacity-0 transition-opacity group-hover:opacity-100"></div>
+						<div
+							class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 opacity-0 transition-opacity group-hover:opacity-100"
+						></div>
 					</button>
 				</div>
 			</div>
@@ -425,6 +516,8 @@
 	}
 
 	.animate-in {
-		animation: fade-in 0.3s ease-out, slide-in-from-top-2 0.3s ease-out;
+		animation:
+			fade-in 0.3s ease-out,
+			slide-in-from-top-2 0.3s ease-out;
 	}
 </style>
