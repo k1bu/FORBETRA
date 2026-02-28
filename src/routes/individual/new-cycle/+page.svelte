@@ -78,8 +78,6 @@
 
 	const weekPreviewDays = $derived((() => {
 		const days: Array<{ day: string; label: string; time: string }> = [];
-		// Week 1 Monday is always an intention
-		days.push({ day: 'MON', label: 'Week 1: Set your intention', time: '~2 min' });
 		// Each selected day = unified check-in
 		const sortOrder = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 		const sorted = [...selectedDays].sort((a, b) => sortOrder.indexOf(a) - sortOrder.indexOf(b));

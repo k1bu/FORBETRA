@@ -52,8 +52,6 @@
 
 	const formatPromptLabel = (type: string) => {
 		switch (type) {
-		case 'INTENTION':
-			return 'Monday intention';
 		case 'RATING_A':
 			return 'Check-in';
 		case 'RATING_B':
@@ -65,8 +63,6 @@
 
 	const promptTarget = (type: string) => {
 		switch (type) {
-		case 'INTENTION':
-			return '/prompts/monday';
 		case 'RATING_A':
 		case 'RATING_B':
 			return '/reflections/checkin';
@@ -82,7 +78,7 @@
 		return 'from-purple-500 to-pink-500';
 	};
 
-	import { Target, Clock, BarChart3, Users, Flame, Calendar, CircleCheck, CircleX, RotateCcw } from 'lucide-svelte';
+	import { Clock, BarChart3, Users, Flame, Calendar, CircleCheck, CircleX, RotateCcw } from 'lucide-svelte';
 	import PerformanceEffortChart from '$lib/components/PerformanceEffortChart.svelte';
 	import { getScoreColorNullable, getStabilityColor } from '$lib/utils/scoreColors';
 
@@ -118,16 +114,6 @@
 			</div>
 		{/if}
 
-		<!-- Identity Anchor -->
-		{#if data.identityAnchor}
-			<div class="mt-4 rounded-xl border border-border-default bg-surface-raised p-4">
-				<div class="mb-2 flex items-center gap-2">
-					<Target class="h-4 w-4 text-text-muted" />
-					<h2 class="text-sm font-semibold text-text-primary">Identity Anchor</h2>
-				</div>
-				<p class="text-sm italic text-text-secondary">"{data.identityAnchor}"</p>
-			</div>
-		{/if}
 	</header>
 
 	{#if form?.action === 'feedback'}

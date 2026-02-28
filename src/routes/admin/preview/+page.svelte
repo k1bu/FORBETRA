@@ -65,11 +65,6 @@
 			action: () => impersonateAndOpen(selectedIndividualId, '/onboarding/initial-ratings?preview=true')
 		},
 		{
-			label: 'Monday Intention',
-			description: 'Weekly intention-setting prompt',
-			action: () => impersonateAndOpen(selectedIndividualId, '/prompts/monday?preview=true')
-		},
-		{
 			label: 'Check-in (Effort)',
 			description: 'Mid-week effort rating',
 			action: () => impersonateAndOpen(selectedIndividualId, '/reflections/checkin?type=RATING_A&preview=true')

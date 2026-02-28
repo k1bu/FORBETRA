@@ -759,13 +759,6 @@ async function buildCycleReportContext(userId: string, cycleId: string): Promise
 			? Math.round((respondedThisWeek / cycle.objective.stakeholders.length) * 100)
 			: null;
 
-	const weeklyIntentions = cycle.reflections
-		.filter((r) => r.reflectionType === 'INTENTION' && r.notes)
-		.map((r) => ({ weekNumber: r.weekNumber, notes: r.notes! }));
-
-	const identityAnchor =
-		weeklyIntentions.find((i) => i.weekNumber === 1)?.notes ?? null;
-
 	const context: CycleReportContext = {
 		objectiveTitle: cycle.objective.title,
 		subgoals: cycle.objective.subgoals.map((s) => s.label),
@@ -779,9 +772,7 @@ async function buildCycleReportContext(userId: string, cycleId: string): Promise
 		trajectoryScore,
 		completionRate,
 		alignmentRatio,
-		weeklyIntentions,
-		coachNotes: cycle.coachNotes.map((n) => n.content),
-		identityAnchor
+		coachNotes: cycle.coachNotes.map((n) => n.content)
 	};
 
 	return buildCycleReportPrompt(context);

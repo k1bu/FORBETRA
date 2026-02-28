@@ -236,14 +236,7 @@
 					{/if}
 				</div>
 
-				<!-- Intention anchor (right side on desktop) -->
-				{#if data.identityAnchor}
-					<div class="sm:max-w-[40%] shrink-0 rounded-xl bg-accent-muted p-3">
-						<p class="mb-1 text-[10px] font-semibold uppercase tracking-wider text-accent">Week 1 Intention</p>
-						<p class="text-sm italic text-accent leading-snug">"{data.identityAnchor}"</p>
-					</div>
-				{/if}
-			</div>
+				</div>
 		</div>
 	{/if}
 

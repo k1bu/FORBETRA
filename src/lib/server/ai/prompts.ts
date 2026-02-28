@@ -5,8 +5,6 @@
  * specific developmental feedback.
  */
 
-import { getIntentionPromptForWeek } from '$lib/prompts/intention';
-
 const SYSTEM_MESSAGE = `You are a developmental psychology expert embedded in Forbetra, a personal growth platform. Your role is to provide specific, pattern-based observations that help individuals grow.
 
 Core principles:
@@ -70,8 +68,6 @@ export type CoachPrepContext = {
 };
 
 export function buildCheckInPrompt(context: CheckInContext): string {
-	const prompt = getIntentionPromptForWeek(context.currentWeek);
-
 	const trendLines = context.last3Weeks
 		.map(
 			(w) =>
@@ -93,7 +89,7 @@ export function buildCheckInPrompt(context: CheckInContext): string {
 
 **Objective**: ${context.objectiveTitle}
 **Subgoals**: ${context.subgoals.join(', ')}
-**Current Week**: ${context.currentWeek} (Topic: ${prompt.heading})
+**Current Week**: ${context.currentWeek} (Topic: ${context.weeklyPromptTopic})
 
 **This Week's Self-Scores**:
   Effort: ${context.thisWeekScores.effort ?? 'Not submitted'}
@@ -107,7 +103,7 @@ ${stakeholderLines}
 
 ---
 
-Provide a 2-3 sentence developmental observation. Be specific about the pattern you see. If there's an effort-performance gap, name it and explain what it might mean at this stage of their cycle. Reference the weekly theme (${prompt.heading}) if relevant.`;
+Provide a 2-3 sentence developmental observation. Be specific about the pattern you see. If there's an effort-performance gap, name it and explain what it might mean at this stage of their cycle. Reference the weekly theme (${context.weeklyPromptTopic}) if relevant.`;
 }
 
 export function buildWeeklySynthesisPrompt(context: WeeklySynthesisContext): string {
@@ -188,9 +184,7 @@ export type CycleReportContext = {
 	trajectoryScore: number | null;
 	completionRate: number | null;
 	alignmentRatio: number | null;
-	weeklyIntentions: Array<{ weekNumber: number; notes: string }>;
 	coachNotes: string[];
-	identityAnchor: string | null;
 };
 
 export function buildCycleReportPrompt(context: CycleReportContext): string {
@@ -225,13 +219,6 @@ export function buildCycleReportPrompt(context: CycleReportContext): string {
 					.join('\n')
 			: '  No perception gap data available.';
 
-	const intentionLines =
-		context.weeklyIntentions.length > 0
-			? context.weeklyIntentions
-					.map((i) => `  Week ${i.weekNumber}: "${i.notes}"`)
-					.join('\n')
-			: '  No intentions recorded.';
-
 	const coachNoteLines =
 		context.coachNotes.length > 0
 			? context.coachNotes.map((n) => `  - "${n}"`).join('\n')
@@ -243,8 +230,6 @@ export function buildCycleReportPrompt(context: CycleReportContext): string {
 **Subgoals**: ${context.subgoals.join(', ')}
 **Cycle Start**: ${context.cycleStartDate}
 **Current Week**: ${context.currentWeek} of ${context.totalWeeks}
-${context.identityAnchor ? `**Identity Anchor (Week 1 Intention)**: "${context.identityAnchor}"` : ''}
-
 **Key Metrics**:
   Stability: ${context.stabilityScore !== null ? `${context.stabilityScore}/100` : 'N/A'}
   Trajectory: ${context.trajectoryScore !== null ? `${context.trajectoryScore}` : 'N/A'}
@@ -259,9 +244,6 @@ ${stakeholderLines}
 
 **Perception Gaps (Self - Stakeholder)**:
 ${gapLines}
-
-**Weekly Intentions**:
-${intentionLines}
 
 **Coach Notes**:
 ${coachNoteLines}

@@ -15,11 +15,6 @@ function resolveRedirect(param: string | undefined): string {
 	if (!param) return '/individual';
 	const normalized = param.toLowerCase();
 
-	// Intention type → redirect to Monday prompts
-	if (normalized === 'intention') {
-		return '/prompts/monday';
-	}
-
 	const mapped = typeMap[normalized];
 	if (mapped) {
 		return `/reflections/checkin?type=${mapped}`;

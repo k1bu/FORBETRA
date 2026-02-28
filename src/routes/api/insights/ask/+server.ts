@@ -93,7 +93,7 @@ export const POST: RequestHandler = async (event) => {
 	];
 
 	for (const r of cycle.reflections) {
-		const typeLabel = r.reflectionType === 'INTENTION' ? 'Intention' : r.reflectionType === 'RATING_A' ? 'Mid-week' : 'End-of-week';
+		const typeLabel = r.reflectionType === 'RATING_A' ? 'Mid-week' : 'End-of-week';
 		let line = `Week ${r.weekNumber} ${typeLabel}:`;
 		if (r.effortScore !== null) line += ` Effort=${r.effortScore}`;
 		if (r.performanceScore !== null) line += ` Performance=${r.performanceScore}`;

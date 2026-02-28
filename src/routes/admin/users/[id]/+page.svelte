@@ -76,12 +76,6 @@
 				Check-in / Ratings
 			</button>
 			<button
-				onclick={() => impersonateAndOpen('/prompts/monday?preview=true')}
-				class="rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-accent hover:bg-accent-muted"
-			>
-				Monday Intention
-			</button>
-			<button
 				onclick={() => impersonateAndOpen('/individual')}
 				class="rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-accent hover:bg-accent-muted"
 			>

@@ -221,6 +221,7 @@
 				}
 				if (result.type === 'failure' && result.data?.error) {
 					addToast(result.data.error as string, 'error');
+					return;
 				}
 				if (result.type === 'success' && result.data?.success) {
 					addToast(result.data.message as string, 'success');

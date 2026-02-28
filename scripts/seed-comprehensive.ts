@@ -26,22 +26,6 @@ import { generateCoachNotes } from './seed-coach-notes';
 
 const prisma = new PrismaClient();
 
-// Intention note templates per week
-const INTENTION_NOTES: Record<number, string> = {
-	1: "I'm choosing to become someone who approaches this objective as a core part of my identity, not just a task to complete.",
-	2: 'This week I will focus on the single highest-leverage action that moves me forward the most.',
-	3: 'I will actively engage my stakeholders this week, seeking alignment and asking for specific support.',
-	4: "I'll invest my best energy in the morning blocks and protect them from interruptions.",
-	5: 'I will deliberately practice the key skill with intention, tracking reps not just outcomes.',
-	6: 'The biggest obstacle this week will likely be time pressure. My plan: block 2 hours Wednesday for focused work.',
-	7: 'I will ask for specific, actionable feedback this week using the question: "What is one thing I could do differently?"',
-	8: 'This week is about sustainability. I commit to ending work by 6pm and getting 7+ hours of sleep.',
-	9: "I'll push my comfort zone by volunteering for the cross-team presentation on Thursday.",
-	10: 'My tracking system needs a tweak: switching from daily logs to weekly summaries for better signal.',
-	11: 'I will share my progress narrative with the team in a way that invites their input, not just their praise.',
-	12: 'Final week integration: I will practice the three most important lessons from this cycle as if they are already habits.'
-};
-
 async function cleanExistingSeedData() {
 	console.log('Cleaning up existing seed data...');
 
@@ -229,7 +213,6 @@ async function main() {
 				const weekStartDate = new Date(cycleStartDate);
 				weekStartDate.setDate(weekStartDate.getDate() + (week - 1) * 7);
 
-				const mondayDate = new Date(weekStartDate);
 				const wednesdayDate = new Date(weekStartDate);
 				wednesdayDate.setDate(wednesdayDate.getDate() + 2);
 				const fridayDate = new Date(weekStartDate);
@@ -237,25 +220,8 @@ async function main() {
 
 				const scores = getScores(persona.pattern, week);
 
-				// INTENTION reflection (week 1 always, then ~70% of other weeks)
-				if (week === 1 || Math.sin(week * 3.7 + i * 2.1) > -0.3) {
-					await prisma.reflection.create({
-						data: {
-							cycleId: cycle.id,
-							userId: individual.id,
-							subgoalId: subgoal.id,
-							reflectionType: ReflectionType.INTENTION,
-							weekNumber: week,
-							checkInDate: mondayDate,
-							submittedAt: mondayDate,
-							notes: INTENTION_NOTES[week] ?? `Week ${week} intention reflection.`
-						}
-					});
-					totalReflections++;
-				}
-
 				// EFFORT reflection (RATING_A)
-				const effortReflection = await prisma.reflection.create({
+				await prisma.reflection.create({
 					data: {
 						cycleId: cycle.id,
 						userId: individual.id,

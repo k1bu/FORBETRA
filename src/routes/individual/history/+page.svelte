@@ -23,8 +23,6 @@
 
 	const reflectionLabel = (type: string) => {
 		switch (type) {
-			case 'INTENTION':
-				return 'Intention';
 			case 'RATING_A':
 				return 'Check-in';
 			case 'RATING_B':

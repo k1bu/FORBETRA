@@ -34,13 +34,11 @@ export const remindOverduePrompts = async () => {
 
 		// Determine expected reflection types based on check-in frequency
 		const freq = cycle.checkInFrequency ?? '3x';
-		let expectedTypes: readonly ('INTENTION' | 'RATING_A' | 'RATING_B')[];
+		let expectedTypes: readonly ('RATING_A' | 'RATING_B')[];
 		if (freq === '1x') {
 			expectedTypes = ['RATING_A'] as const;
-		} else if (freq === '2x') {
-			expectedTypes = ['INTENTION', 'RATING_A'] as const;
 		} else {
-			expectedTypes = ['INTENTION', 'RATING_A', 'RATING_B'] as const;
+			expectedTypes = ['RATING_A', 'RATING_B'] as const;
 		}
 
 		const overdue: string[] = [];
@@ -61,11 +59,7 @@ export const remindOverduePrompts = async () => {
 				for (let w = 1; w <= currentWeek; w++) {
 					if (freq === '1x') {
 						streakExpected.push({ week: w, type: 'RATING_A' });
-					} else if (freq === '2x') {
-						streakExpected.push({ week: w, type: 'INTENTION' });
-						streakExpected.push({ week: w, type: 'RATING_A' });
 					} else {
-						streakExpected.push({ week: w, type: 'INTENTION' });
 						streakExpected.push({ week: w, type: 'RATING_A' });
 						streakExpected.push({ week: w, type: 'RATING_B' });
 					}

@@ -213,11 +213,9 @@ export const emailTemplates = {
 
 	reminderBase: (data: EmailTemplateData) => {
 		const dayLabel =
-			data.reflectionType === 'INTENTION'
-				? 'Monday'
-				: data.reflectionType === 'RATING_A'
-					? 'Wednesday'
-					: 'Friday';
+			data.reflectionType === 'RATING_A'
+				? 'Wednesday'
+				: 'Friday';
 		const name = escapeHtml(data.individualName || 'there');
 		const objTitle = data.objectiveTitle ? escapeHtml(data.objectiveTitle) : '';
 		return {
@@ -241,7 +239,7 @@ export const emailTemplates = {
 						${data.currentStreak && data.currentStreak >= 3 ? `<p style="font-size: 16px; color: #c2410c; font-weight: 600;">You're on a ${data.currentStreak} check-in streak — keep it going!</p>` : ''}
 						<p style="font-size: 16px;">Take a moment to check in on your effort and progress this week.</p>
 						<div style="text-align: center; margin: 30px 0;">
-							<a href="${data.appUrl || baseUrl}${data.reflectionType === 'INTENTION' ? '/prompts/monday' : `/reflections/checkin?type=${(data.reflectionType ?? 'RATING_A').toUpperCase()}`}" style="display: inline-block; background: #f59e0b; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Complete Check-in</a>
+							<a href="${data.appUrl || baseUrl}/reflections/checkin?type=${(data.reflectionType ?? 'RATING_A').toUpperCase()}" style="display: inline-block; background: #f59e0b; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Complete Check-in</a>
 						</div>
 						<p style="font-size: 14px; color: #64748b; margin-top: 30px;">Staying consistent helps you track your growth.</p>
 					</div>
@@ -249,7 +247,7 @@ export const emailTemplates = {
 				</body>
 				</html>
 			`,
-			text: `Reminder: Time for your ${dayLabel} check-in\n\nHi ${data.individualName || 'there'},\n\nIt's ${dayLabel} — time for your weekly check-in!\n\n${data.currentStreak && data.currentStreak >= 3 ? `You're on a ${data.currentStreak} check-in streak — keep it going!\n\n` : ''}${data.objectiveTitle ? `Objective: ${data.objectiveTitle}\n\n` : ''}Take a moment to check in on your effort and progress this week.\n\nComplete check-in: ${data.appUrl || baseUrl}${data.reflectionType === 'INTENTION' ? '/prompts/monday' : `/reflections/checkin?type=${(data.reflectionType ?? 'RATING_A').toUpperCase()}`}\n\nThis helps you stay consistent and track your growth.${textFooter()}`
+			text: `Reminder: Time for your ${dayLabel} check-in\n\nHi ${data.individualName || 'there'},\n\nIt's ${dayLabel} — time for your weekly check-in!\n\n${data.currentStreak && data.currentStreak >= 3 ? `You're on a ${data.currentStreak} check-in streak — keep it going!\n\n` : ''}${data.objectiveTitle ? `Objective: ${data.objectiveTitle}\n\n` : ''}Take a moment to check in on your effort and progress this week.\n\nComplete check-in: ${data.appUrl || baseUrl}/reflections/checkin?type=${(data.reflectionType ?? 'RATING_A').toUpperCase()}\n\nThis helps you stay consistent and track your growth.${textFooter()}`
 		};
 	},
 

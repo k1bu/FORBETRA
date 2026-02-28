@@ -86,11 +86,6 @@
 				<p class="font-medium">Check-in not yet available</p>
 				<p class="mt-1">This check-in opens on {formatDate(data.availableDate)}. Check back then to record your reflection.</p>
 			</div>
-		{:else if data.isLocked}
-			<div class="mx-auto max-w-md rounded-xl border border-border-default bg-surface-raised p-4 text-sm text-text-secondary">
-				<p class="font-medium">Check-in locked</p>
-				<p class="mt-1">This check-in is locked because your next week's Monday intention has already been submitted. Check-ins lock 48 hours after the following week begins.</p>
-			</div>
 		{/if}
 	</header>
 

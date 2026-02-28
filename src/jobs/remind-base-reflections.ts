@@ -18,13 +18,10 @@ export const remindBaseReflections = async () => {
 
 	// Determine which reflection type to remind for based on day
 	// Monday = 1, Tuesday = 2, Wednesday = 3, Thursday = 4, Friday = 5
-	let reflectionType: 'INTENTION' | 'RATING_A' | 'RATING_B' | null = null;
+	let reflectionType: 'RATING_A' | 'RATING_B' | null = null;
 	let reminderDays: 'wednesday_friday' | 'tuesday_thursday' | null = null;
 
-	if (dayOfWeek === 1) {
-		// Monday - always INTENTION
-		reflectionType = 'INTENTION';
-	} else if (dayOfWeek === 3) {
+	if (dayOfWeek === 3) {
 		// Wednesday - RATING_A for wednesday_friday users
 		reflectionType = 'RATING_A';
 		reminderDays = 'wednesday_friday';
@@ -83,10 +80,6 @@ export const remindBaseReflections = async () => {
 			// 1x frequency: only send for RATING_A (single combined check-in)
 			continue;
 		}
-		if (freq === '2x' && reflectionType === 'RATING_B') {
-			// 2x frequency: skip RATING_B (combine effort+performance into RATING_A)
-			continue;
-		}
 
 		const currentWeek = computeWeekNumber(cycle.startDate);
 
@@ -113,11 +106,7 @@ export const remindBaseReflections = async () => {
 			for (let w = 1; w <= currentWeek; w++) {
 				if (freq === '1x') {
 					expectedSequence.push({ week: w, type: 'RATING_A' });
-				} else if (freq === '2x') {
-					expectedSequence.push({ week: w, type: 'INTENTION' });
-					expectedSequence.push({ week: w, type: 'RATING_A' });
 				} else {
-					expectedSequence.push({ week: w, type: 'INTENTION' });
 					expectedSequence.push({ week: w, type: 'RATING_A' });
 					expectedSequence.push({ week: w, type: 'RATING_B' });
 				}

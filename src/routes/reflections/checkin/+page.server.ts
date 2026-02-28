@@ -63,32 +63,6 @@ function dayNameToNumber(day: string): number {
 	return map[day] ?? 3;
 }
 
-// Check if next Monday intention has been submitted (locks editing)
-// 48-hour grace period: even after submitting the next intention, the previous
-// week's check-ins remain editable for 48 hours.
-const isNextMondayIntentionSubmitted = async (
-	cycleId: string,
-	userId: string,
-	currentWeek: number
-): Promise<boolean> => {
-	const nextWeekIntention = await prisma.reflection.findFirst({
-		where: {
-			cycleId,
-			userId,
-			reflectionType: 'INTENTION',
-			weekNumber: currentWeek + 1
-		},
-		select: { submittedAt: true }
-	});
-
-	if (!nextWeekIntention) return false;
-
-	// Grace period: 48 hours after intention submission
-	const gracePeriodMs = 48 * 60 * 60 * 1000;
-	const lockTime = new Date(nextWeekIntention.submittedAt.getTime() + gracePeriodMs);
-	return new Date() >= lockTime;
-};
-
 export const load: PageServerLoad = async (event) => {
 	const isPreview = event.url.searchParams.get('preview') === 'true';
 	const { dbUser } = requireRole(event, isPreview ? ['INDIVIDUAL', 'ADMIN'] : 'INDIVIDUAL');
@@ -131,20 +105,11 @@ export const load: PageServerLoad = async (event) => {
 	}
 
 	// Unified: all check-ins are RATING_A
-	let checkInInfo: {
-		type: ReflectionType;
-		label: string;
-		availableDate: Date;
-		isAvailable: boolean;
-	};
-
 	// Always use unified check-in (RATING_A with both effort + performance)
-	checkInInfo = getCheckInType(cycle.startDate, currentWeek, checkInFrequency);
+	const checkInInfo = getCheckInType(cycle.startDate, currentWeek, checkInFrequency);
 	if (isPreview) {
 		checkInInfo.isAvailable = true;
 	}
-
-	const isLocked = await isNextMondayIntentionSubmitted(cycle.id, dbUser.id, currentWeek);
 
 	// Get existing reflection for this check-in type (using first subgoal as placeholder for objective-level reflection)
 	const firstSubgoal = objective.subgoals[0];
@@ -239,7 +204,7 @@ export const load: PageServerLoad = async (event) => {
 		checkInFrequency,
 		isAvailable: checkInInfo.isAvailable,
 		availableDate: checkInInfo.availableDate.toISOString(),
-		isLocked: isPreview ? false : isLocked, // Allow editing in preview mode
+		isLocked: false,
 		isPreview,
 		objective: {
 			id: objective.id,
@@ -293,7 +258,6 @@ export const actions: Actions = {
 
 		const computedWeek = computeWeekNumber(cycle.startDate);
 		const isPreview = event.url.searchParams.get('preview') === 'true';
-		const typeParam = event.url.searchParams.get('type');
 
 		// Support ?week=N for catch-up submissions
 		const weekParam = event.url.searchParams.get('week');
@@ -307,15 +271,8 @@ export const actions: Actions = {
 
 		const actionCheckInFrequency = cycle.checkInFrequency ?? '3x';
 
-		let checkInInfo: {
-			type: ReflectionType;
-			label: string;
-			availableDate: Date;
-			isAvailable: boolean;
-		};
-
 		// Unified: always RATING_A
-		checkInInfo = getCheckInType(cycle.startDate, weekNumber, actionCheckInFrequency);
+		const checkInInfo = getCheckInType(cycle.startDate, weekNumber, actionCheckInFrequency);
 		if (isPreview) {
 			checkInInfo.isAvailable = true;
 		}
@@ -325,17 +282,6 @@ export const actions: Actions = {
 			return fail(400, {
 				error: `This check-in is not available yet. It will be available on ${checkInInfo.availableDate.toLocaleDateString()}.`
 			});
-		}
-
-		// Check if locked (next Monday intention submitted) - skip in preview mode
-		if (!isPreview) {
-			const isLocked = await isNextMondayIntentionSubmitted(cycle.id, dbUser.id, weekNumber);
-			if (isLocked) {
-				return fail(400, {
-					error:
-						'This check-in can no longer be edited because the next Monday intention has been submitted.'
-				});
-			}
 		}
 
 		// Get first subgoal to use as placeholder for objective-level reflection
@@ -421,10 +367,6 @@ export const actions: Actions = {
 				const currentWeek = computeWeekNumber(cycle.startDate);
 				const expectedSequence: Array<{ week: number; type: string }> = [];
 				for (let w = 1; w <= currentWeek; w++) {
-					// Week 1 always has an INTENTION on Monday
-					if (w === 1) {
-						expectedSequence.push({ week: w, type: 'INTENTION' });
-					}
 					// Each check-in day = one RATING_A
 					for (let d = 0; d < streakCheckInDays.length; d++) {
 						expectedSequence.push({ week: w, type: 'RATING_A' });

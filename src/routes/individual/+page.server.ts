@@ -68,7 +68,6 @@ export const load: PageServerLoad = async (event) => {
 		// Determine check-in frequency for this cycle
 		const checkInFrequency = cycle?.checkInFrequency ?? '3x';
 		const checkInDays = parseCheckInDays(checkInFrequency);
-		// Week 1 has an extra INTENTION, plus one RATING_A per check-in day
 		const checksPerWeek = checkInDays.length;
 
 		let completionRate: number | null = null;
@@ -92,7 +91,7 @@ export const load: PageServerLoad = async (event) => {
 			openExperiences = pendingCheckIns;
 
 			// Calculate current streak
-			const typeOrder: Record<string, number> = { INTENTION: 0, RATING_A: 1, RATING_B: 2 };
+			const typeOrder: Record<string, number> = { RATING_A: 0, RATING_B: 1 };
 			const sortedReflections = [...cycle.reflections].sort((a, b) => {
 				if (a.weekNumber !== b.weekNumber) {
 					return a.weekNumber - b.weekNumber;
@@ -107,10 +106,6 @@ export const load: PageServerLoad = async (event) => {
 
 			const expectedSequence: Array<{ week: number; type: string }> = [];
 			for (let week = 1; week <= currentWeek; week++) {
-				// Week 1 always has an INTENTION
-				if (week === 1) {
-					expectedSequence.push({ week, type: 'INTENTION' });
-				}
 				// Each check-in day = one RATING_A
 				for (let d = 0; d < checkInDays.length; d++) {
 					expectedSequence.push({ week, type: 'RATING_A' });
@@ -132,7 +127,7 @@ export const load: PageServerLoad = async (event) => {
 
 		// Calculate data for the three cards
 		let nextAction: {
-			type: 'INTENTION' | 'RATING_A' | 'RATING_B';
+			type: 'RATING_A' | 'RATING_B';
 			label: string;
 			url: string | null;
 			state: 'open' | 'missed' | 'upcoming';
@@ -169,38 +164,23 @@ export const load: PageServerLoad = async (event) => {
 
 		if (cycle && currentWeek && isOnboardingComplete) {
 			// Calculate next action (unified)
-			const submittedTypes = new Set(
-				cycle.reflections.filter((r) => r.weekNumber === currentWeek).map((r) => r.reflectionType)
-			);
-
-			// Week 1 Monday: intention prompt
-			if (currentWeek === 1 && !submittedTypes.has('INTENTION')) {
+			const ratingACount = cycle.reflections.filter(
+				(r) => r.weekNumber === currentWeek && r.reflectionType === 'RATING_A'
+			).length;
+			if (ratingACount < checkInDays.length) {
 				nextAction = {
-					type: 'INTENTION',
-					label: 'Complete your Week 1 intention',
-					url: '/prompts/monday',
+					type: 'RATING_A',
+					label: 'Complete your check-in',
+					url: '/reflections/checkin',
 					state: 'open'
 				};
 			} else {
-				// Unified: check if there are remaining RATING_A check-ins this week
-				const ratingACount = cycle.reflections.filter(
-					(r) => r.weekNumber === currentWeek && r.reflectionType === 'RATING_A'
-				).length;
-				if (ratingACount < checkInDays.length) {
-					nextAction = {
-						type: 'RATING_A',
-						label: 'Complete your check-in',
-						url: '/reflections/checkin',
-						state: 'open'
-					};
-				} else {
-					nextAction = {
-						type: 'RATING_A',
-						label: 'All check-ins complete this week',
-						url: null,
-						state: 'upcoming'
-					};
-				}
+				nextAction = {
+					type: 'RATING_A',
+					label: 'All check-ins complete this week',
+					url: null,
+					state: 'upcoming'
+				};
 			}
 
 			// Get latest individual ratings
@@ -208,7 +188,7 @@ export const load: PageServerLoad = async (event) => {
 				.filter((r) => r.effortScore !== null || r.performanceScore !== null)
 				.sort((a, b) => {
 					if (a.weekNumber !== b.weekNumber) return b.weekNumber - a.weekNumber;
-					const typeOrder: Record<string, number> = { INTENTION: 0, RATING_A: 1, RATING_B: 2 };
+					const typeOrder: Record<string, number> = { RATING_A: 0, RATING_B: 1 };
 					return (typeOrder[b.reflectionType] ?? 0) - (typeOrder[a.reflectionType] ?? 0);
 				});
 
@@ -846,24 +826,7 @@ export const load: PageServerLoad = async (event) => {
 			}
 		}
 
-		// --- Identity Anchor: week 1 intention notes ---
-		let identityAnchor: string | null = null;
-		if (cycle && isOnboardingComplete) {
-			const intentionReflection = await prisma.reflection.findFirst({
-				where: {
-					cycleId: cycle.id,
-					userId: dbUser.id,
-					reflectionType: 'INTENTION',
-					weekNumber: 1
-				},
-				select: { notes: true }
-			});
-			if (intentionReflection?.notes) {
-				identityAnchor = intentionReflection.notes;
-			}
-		}
-
-		// --- Recent Notes: self reflections + stakeholder feedback comments ---
+			// --- Recent Notes: self reflections + stakeholder feedback comments ---
 		let recentNotes: Array<{
 			source: 'self' | 'stakeholder';
 			name: string | null;
@@ -979,7 +942,6 @@ export const load: PageServerLoad = async (event) => {
 				? { stabilityScore, trajectoryScore, completionRate, alignmentRatio }
 				: null,
 			latestInsight,
-			identityAnchor,
 			latestScorecard: isOnboardingComplete ? latestScorecard : [],
 			visualizationData: isOnboardingComplete ? visualizationData : null,
 			recentNotes

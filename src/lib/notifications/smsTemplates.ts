@@ -15,15 +15,10 @@ export const smsTemplates = {
 		appUrl?: string;
 	}) => {
 		const dayLabel =
-			data.reflectionType === 'intention'
-				? 'Monday'
-				: data.reflectionType === 'rating_a'
-					? 'Wednesday'
-					: 'Friday';
-		const url =
-			data.reflectionType === 'intention'
-				? `${data.appUrl || baseUrl}/prompts/monday`
-				: `${data.appUrl || baseUrl}/reflections/checkin?type=${data.reflectionType.toUpperCase()}`;
+			data.reflectionType === 'rating_a'
+				? 'Wednesday'
+				: 'Friday';
+		const url = `${data.appUrl || baseUrl}/reflections/checkin?type=${data.reflectionType.toUpperCase()}`;
 		return `Forbetra: Time for your ${dayLabel} check-in (Week ${data.weekNumber}). ${url}`;
 	},
 

@@ -11,7 +11,6 @@
 	};
 
 	const reflectionTypeLabels: Record<string, string> = {
-		INTENTION: 'Intention',
 		RATING_A: 'Effort check-in',
 		RATING_B: 'Performance check-in'
 	};

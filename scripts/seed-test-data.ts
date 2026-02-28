@@ -4,7 +4,7 @@
  * Creates a test individual with a complete 12-week cycle including:
  * - Full objective and subgoals
  * - 3 stakeholders (positive, neutral, negative feedback patterns)
- * - All 12 weeks of reflections (INTENTION, EFFORT, PROGRESS)
+ * - All 12 weeks of reflections (EFFORT, PROGRESS)
  * - Stakeholder feedback for each week with varying patterns
  * - Links to test coach (coach@test.forbetra.com)
  *
@@ -273,7 +273,6 @@ async function seedTestData() {
 			const weekStartDate = new Date(cycleStartDate);
 			weekStartDate.setDate(weekStartDate.getDate() + (week - 1) * 7);
 
-			const mondayDate = new Date(weekStartDate);
 			const wednesdayDate = new Date(weekStartDate);
 			wednesdayDate.setDate(wednesdayDate.getDate() + 2);
 			const fridayDate = new Date(weekStartDate);
@@ -283,26 +282,8 @@ async function seedTestData() {
 			const individualEffort = generateIndividualEffort(week);
 			const individualProgress = generateIndividualProgress(week);
 
-			// Create Week 1 INTENTION (identity anchor)
-			if (week === 1) {
-				await prisma.reflection.create({
-					data: {
-						cycleId: cycle.id,
-						userId: individual.id,
-						subgoalId: subgoal.id,
-						reflectionType: ReflectionType.INTENTION,
-						weekNumber: week,
-						checkInDate: mondayDate,
-						submittedAt: mondayDate,
-						notes:
-							"I'm choosing to become someone who communicates with clarity and confidence, making sure my message is understood and respected."
-					}
-				});
-				totalReflections++;
-			}
-
 			// Create EFFORT reflection (both scores captured, but effort is primary)
-			const effortReflection = await prisma.reflection.create({
+			await prisma.reflection.create({
 				data: {
 					cycleId: cycle.id,
 					userId: individual.id,
@@ -406,7 +387,7 @@ async function seedTestData() {
 			`   - Cycle: 12 weeks (${cycleStartDate.toISOString().split('T')[0]} to ${cycleEndDate.toISOString().split('T')[0]})`
 		);
 		console.log(
-			`   - Reflections: ${totalReflections} (INTENTION + EFFORT + PROGRESS for 12 weeks)`
+			`   - Reflections: ${totalReflections} (EFFORT + PROGRESS for 12 weeks)`
 		);
 		console.log(`   - Stakeholder Feedback: ${totalFeedbacks} (3 stakeholders × 12 weeks)`);
 		console.log('\n🎨 You can now preview the visualization by:');

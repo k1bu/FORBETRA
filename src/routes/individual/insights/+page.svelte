@@ -3,7 +3,6 @@
 	import CorrelationView from '$lib/components/CorrelationView.svelte';
 	import GapLensView from '$lib/components/GapLensView.svelte';
 	import { FileText, TrendingUp, Sparkles, ThumbsUp, ThumbsDown } from 'lucide-svelte';
-	import Badge from '$lib/components/Badge.svelte';
 
 	const { data }: { data: PageData } = $props();
 
@@ -299,7 +298,6 @@
 					<thead>
 						<tr class="border-b-2 border-border-default">
 							<th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-text-tertiary">Week</th>
-							<th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-text-tertiary">Intention</th>
 							<th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-text-tertiary">Effort</th>
 							<th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-text-tertiary">Progress</th>
 						</tr>
@@ -308,13 +306,6 @@
 						{#each data.reflectionTrend.weeks as week (week.weekNumber)}
 							<tr class="border-b border-border-default transition-colors hover:bg-surface-subtle">
 								<td class="px-4 py-3 font-bold text-text-primary">Week {week.weekNumber}</td>
-								<td class="px-4 py-3">
-									{#if week.intentionSubmitted}
-										<Badge variant="success">✓ Submitted</Badge>
-									{:else}
-										<Badge variant="warning">Missing</Badge>
-									{/if}
-								</td>
 								<td class="px-4 py-3">
 									<span class="font-semibold {getScoreColor(week.effortScore, 'effort')}">{formatAverage(week.effortScore)}</span>
 								</td>

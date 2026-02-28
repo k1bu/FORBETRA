@@ -20,7 +20,7 @@ const getNextPrompt = (
 	startDate: Date,
 	currentWeek: number,
 	weeklyExperiences: WeeklyExperience[]
-): { type: 'INTENTION' | 'RATING_A'; date: Date } | null => {
+): { type: 'RATING_A'; date: Date } | null => {
 	const today = new Date();
 	today.setHours(0, 0, 0, 0);
 
@@ -47,7 +47,7 @@ const getNextPrompt = (
 	const nextWeekFirstDay = getDateForWeekday(1, startDate, currentWeek + 1);
 	if (nextWeekFirstDay >= today) {
 		return {
-			type: currentWeek === 0 ? 'INTENTION' : 'RATING_A',
+			type: 'RATING_A',
 			date: nextWeekFirstDay
 		};
 	}
@@ -60,7 +60,7 @@ const getNextPrompt = (
 type ExperienceState = 'open' | 'completed' | 'missed' | 'upcoming' | 'catchup';
 
 type WeeklyExperience = {
-	type: 'INTENTION' | 'RATING_A';
+	type: 'RATING_A';
 	label: string;
 	state: ExperienceState;
 	availableDate: Date | null;
@@ -112,9 +112,6 @@ const getWeeklyExperiences = async (
 
 	// Get submitted reflections for current week
 	const submittedReflections = cycle.reflections.filter((r) => r.weekNumber === currentWeek);
-	const hasIntention = submittedReflections.some((r) => r.reflectionType === 'INTENTION');
-	const intentionReflection = submittedReflections.find((r) => r.reflectionType === 'INTENTION');
-
 	// Count RATING_A reflections submitted this week (each check-in day = one RATING_A)
 	const ratingAReflections = submittedReflections.filter((r) => r.reflectionType === 'RATING_A');
 	const ratingACount = ratingAReflections.length;
@@ -132,82 +129,44 @@ const getWeeklyExperiences = async (
 		const dayDate = getDateForWeekday(dayNumber, normalizedStartDate, currentWeek);
 		const dayLabel = dayLabels[dayName] ?? dayName;
 
-		// Week 1, first check-in day, and no INTENTION submitted yet: show INTENTION
-		const isIntentionSlot = currentWeek === 1 && slotIndex === 0;
+		// RATING_A experience
+		const isCompleted = slotIndex < ratingACount;
+		const matchingReflection = isCompleted ? ratingAReflections[slotIndex] : null;
 
-		if (isIntentionSlot) {
-			// INTENTION experience
-			const displayDate = today.getDay() === dayNumber && !hasIntention && !isLocked ? today : dayDate;
+		// Calculate the next check-in day's date for deadline (or end of week)
+		const nextDayIndex = checkInDays.indexOf(dayName) + 1;
+		const nextDayDate = nextDayIndex < checkInDays.length
+			? getDateForWeekday(dayNameToNumber(checkInDays[nextDayIndex]), normalizedStartDate, currentWeek)
+			: null;
 
-			let intentionState: ExperienceState;
-			if (hasIntention) {
-				intentionState = 'completed';
-			} else if (today < dayDate) {
-				intentionState = 'upcoming';
-			} else if (isLocked) {
-				intentionState = 'missed';
-			} else if (nextWeekFirstReflection && !isLocked) {
-				intentionState = 'catchup';
-			} else {
-				intentionState = 'open';
-			}
-
-			experiences.push({
-				type: 'INTENTION',
-				label: `${dayLabel} intention`,
-				state: intentionState,
-				availableDate: displayDate,
-				deadlineDate: isLocked ? dayDate : null,
-				reflectionId: intentionReflection?.id ?? null,
-				url: intentionState === 'open' || intentionState === 'completed'
-					? '/prompts/monday'
-					: intentionState === 'catchup'
-						? `/prompts/monday?week=${currentWeek}`
-						: null,
-				catchupDeadline: intentionState === 'catchup' ? catchupDeadline : null
-			});
+		let ratingState: ExperienceState;
+		if (isCompleted) {
+			ratingState = 'completed';
+		} else if (today < dayDate) {
+			ratingState = 'upcoming';
+		} else if (isLocked) {
+			ratingState = 'missed';
+		} else if (nextWeekFirstReflection && !isLocked) {
+			ratingState = 'catchup';
 		} else {
-			// RATING_A experience
-			// Determine which RATING_A slot this is (accounting for the intention slot in week 1)
-			const ratingSlotIndex = currentWeek === 1 ? slotIndex - 1 : slotIndex;
-			const isCompleted = ratingSlotIndex < ratingACount;
-			const matchingReflection = isCompleted ? ratingAReflections[ratingSlotIndex] : null;
-
-			// Calculate the next check-in day's date for deadline (or end of week)
-			const nextDayIndex = checkInDays.indexOf(dayName) + 1;
-			const nextDayDate = nextDayIndex < checkInDays.length
-				? getDateForWeekday(dayNameToNumber(checkInDays[nextDayIndex]), normalizedStartDate, currentWeek)
-				: null;
-
-			let ratingState: ExperienceState;
-			if (isCompleted) {
-				ratingState = 'completed';
-			} else if (today < dayDate) {
-				ratingState = 'upcoming';
-			} else if (isLocked) {
-				ratingState = 'missed';
-			} else if (nextWeekFirstReflection && !isLocked) {
-				ratingState = 'catchup';
-			} else {
-				ratingState = 'open';
-			}
-
-			experiences.push({
-				type: 'RATING_A',
-				label: `${dayLabel} check-in`,
-				state: ratingState,
-				availableDate: dayDate,
-				deadlineDate: nextDayDate,
-				reflectionId: matchingReflection?.id ?? null,
-				url:
-					ratingState === 'open' || ratingState === 'completed'
-						? '/reflections/checkin?type=RATING_A'
-						: ratingState === 'catchup'
-							? `/reflections/checkin?type=RATING_A&week=${currentWeek}`
-							: null,
-				catchupDeadline: ratingState === 'catchup' ? catchupDeadline : null
-			});
+			ratingState = 'open';
 		}
+
+		experiences.push({
+			type: 'RATING_A',
+			label: `${dayLabel} check-in`,
+			state: ratingState,
+			availableDate: dayDate,
+			deadlineDate: nextDayDate,
+			reflectionId: matchingReflection?.id ?? null,
+			url:
+				ratingState === 'open' || ratingState === 'completed'
+					? '/reflections/checkin?type=RATING_A'
+					: ratingState === 'catchup'
+						? `/reflections/checkin?type=RATING_A&week=${currentWeek}`
+						: null,
+			catchupDeadline: ratingState === 'catchup' ? catchupDeadline : null
+		});
 
 		slotIndex++;
 	}
@@ -291,34 +250,18 @@ export const load: PageServerLoad = async (event) => {
 		number,
 		{
 			weekNumber: number;
-			intention: boolean;
 			effortScores: number[];
 			performanceScores: number[];
 		}
 	>();
 
-	// Get identity anchor (week 1 intention)
-	let identityAnchor: string | null = null;
-	if (cycle) {
-		const week1Intention = cycle.reflections.find(
-			(r) => r.reflectionType === 'INTENTION' && r.weekNumber === 1
-		);
-		if (week1Intention && week1Intention.notes) {
-			identityAnchor = week1Intention.notes;
-		}
-	}
-
 	if (cycle) {
 		cycle.reflections.forEach((reflection) => {
 			const weekEntry = reflectionTrendMap.get(reflection.weekNumber) ?? {
 				weekNumber: reflection.weekNumber,
-				intention: false,
 				effortScores: [],
 				performanceScores: []
 			};
-			if (reflection.reflectionType === 'INTENTION') {
-				weekEntry.intention = true;
-			}
 			// RATING_A check-ins capture both scores (RATING_B kept for legacy data)
 			if (reflection.reflectionType === 'RATING_A' || reflection.reflectionType === 'RATING_B') {
 				if (reflection.effortScore !== null) {
@@ -341,7 +284,7 @@ export const load: PageServerLoad = async (event) => {
 		cycle && weekToUse ? await getWeeklyExperiences(cycle, dbUser.id, weekToUse, prisma) : [];
 
 	const weeklyExperiences: Array<{
-		type: 'INTENTION' | 'RATING_A';
+		type: 'RATING_A';
 		label: string;
 		state: 'open' | 'completed' | 'missed' | 'upcoming' | 'catchup';
 		availableDate: string | null;
@@ -457,7 +400,6 @@ export const load: PageServerLoad = async (event) => {
 
 		return {
 			weekNumber: week.weekNumber,
-			intentionSubmitted: week.intention,
 			effortScore: effortAverage,
 			performanceScore: progressAverage
 		};
@@ -612,14 +554,13 @@ export const load: PageServerLoad = async (event) => {
 		const engagementDays = parseCheckInDays(cycle.checkInFrequency ?? '3x');
 		const checkInsPerWeek = engagementDays.length;
 
-		// Week 1 has INTENTION (1 slot) + remaining RATING_A slots
-		// All other weeks have only RATING_A slots (one per check-in day)
+		// Each check-in day = one RATING_A slot
 		totalExpected = checkInsPerWeek * currentWeek;
 		totalCompleted = cycle.reflections.length;
 		completionRate = totalExpected > 0 ? Math.round((totalCompleted / totalExpected) * 100) : 0;
 
 		// Calculate streaks based on dynamic check-in slots
-		// Build expected sequence: Week 1 has INTENTION + RATING_A slots, subsequent weeks all RATING_A
+		// Build expected sequence: each check-in day = one RATING_A slot
 		const expectedSequence: Array<{ week: number; slotIndex: number }> = [];
 		for (let week = 1; week <= currentWeek; week++) {
 			for (let slot = 0; slot < checkInsPerWeek; slot++) {
@@ -678,7 +619,6 @@ export const load: PageServerLoad = async (event) => {
 			label: subgoal.label,
 			description: subgoal.description
 		})),
-		identityAnchor,
 		stakeholders,
 		feedbackSummary,
 		reflectionTrend: normalizedReflectionTrend,

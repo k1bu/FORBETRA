@@ -87,7 +87,6 @@ export const load: PageServerLoad = async (event) => {
 		number,
 		{
 			weekNumber: number;
-			intention: boolean;
 			effortScores: number[];
 			performanceScores: number[];
 		}
@@ -97,13 +96,9 @@ export const load: PageServerLoad = async (event) => {
 		cycle.reflections.forEach((reflection) => {
 			const weekEntry = reflectionTrendMap.get(reflection.weekNumber) ?? {
 				weekNumber: reflection.weekNumber,
-				intention: false,
 				effortScores: [],
 				performanceScores: []
 			};
-			if (reflection.reflectionType === 'INTENTION') {
-				weekEntry.intention = true;
-			}
 			if (reflection.reflectionType === 'RATING_A' || reflection.reflectionType === 'RATING_B') {
 				if (reflection.effortScore !== null) {
 					weekEntry.effortScores.push(reflection.effortScore);
@@ -155,7 +150,6 @@ export const load: PageServerLoad = async (event) => {
 
 		return {
 			weekNumber: week.weekNumber,
-			intentionSubmitted: week.intention,
 			effortScore: effortAverage,
 			performanceScore: progressAverage
 		};

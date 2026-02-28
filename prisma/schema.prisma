@@ -34,7 +34,6 @@ enum CycleStatus {
 }
 
 enum ReflectionType {
-  INTENTION
   RATING_A
   RATING_B
 }

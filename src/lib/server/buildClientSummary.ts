@@ -1,4 +1,3 @@
-import prisma from '$lib/server/prisma';
 import {
 	toIsoDate,
 	weeksBetween,
@@ -319,9 +318,6 @@ export function buildClientSummary(
 				.map((r) => r.reflectionType)
 		);
 		const overdueTypes: string[] = [];
-		if (checkInFrequency === '3x' || checkInFrequency === '2x') {
-			if (!submittedTypes.has('INTENTION')) overdueTypes.push('Monday intention');
-		}
 		if (!submittedTypes.has('RATING_A')) overdueTypes.push('Wednesday check-in');
 		if (checkInFrequency === '3x') {
 			if (!submittedTypes.has('RATING_B')) overdueTypes.push('Friday check-in');

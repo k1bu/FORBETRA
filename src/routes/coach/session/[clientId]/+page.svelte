@@ -192,7 +192,7 @@
 							{#each reflections as r}
 								<div class="flex items-start gap-3 rounded-lg bg-surface-raised px-3 py-2 text-sm">
 									<span class="shrink-0 rounded bg-accent-muted px-1.5 py-0.5 text-[10px] font-semibold text-accent">
-										{r.reflectionType === 'INTENTION' ? 'Intention' : r.reflectionType === 'RATING_A' ? 'Check-in' : r.reflectionType === 'RATING_B' ? 'Check-in' : r.reflectionType}
+										{r.reflectionType === 'RATING_A' ? 'Check-in' : r.reflectionType === 'RATING_B' ? 'Check-in' : r.reflectionType}
 									</span>
 									<div class="min-w-0 flex-1">
 										{#if r.effortScore !== null || r.performanceScore !== null}
