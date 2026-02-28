@@ -61,7 +61,7 @@ model User {
   timezone  String?
   reminderDays     String? // 'wednesday_friday' or 'tuesday_thursday'
   notificationTime String? // e.g. '09:00', '17:00'
-  deliveryMethod   String? // 'email' or 'sms'
+  deliveryMethod   String? // 'email', 'sms', or 'both'
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   coachOnboardingCompletedAt DateTime?

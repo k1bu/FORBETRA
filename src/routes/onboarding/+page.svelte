@@ -104,7 +104,12 @@
 
 	let objectiveTitle = values.objectiveTitle;
 	let objectiveDescription = values.objectiveDescription;
-	let cycleLabel = values.cycleLabel || values.objectiveTitle || '';
+	let cycleLabel =
+		values.cycleLabel ||
+		(data.user.name && values.objectiveTitle
+			? `${data.user.name} — ${values.objectiveTitle}`
+			: values.objectiveTitle) ||
+		'';
 	let cycleStartDate = values.cycleStartDate;
 	let cycleDurationWeeks = values.cycleDurationWeeks || '12';
 	let cycleDurationMode: 'preset' | 'custom' = [8, 12, 16].includes(Number(cycleDurationWeeks))
@@ -136,7 +141,7 @@
 	}
 
 	let selectedDays: string[] = parseExistingDaysOnb(
-		(existingData?.checkInFrequency as string) ?? '3x'
+		(existingData?.checkInFrequency as string) ?? 'mon,tue,wed,thu,fri'
 	);
 	let checkInFrequency: string = selectedDays.join(',') || 'fri';
 
@@ -156,10 +161,11 @@
 	let customCadenceDays = '7';
 	let stakeholderFeedbackTime = '09:00';
 	let revealScores = true;
+	let sendStakeholderIntro = true;
 	let phone = '';
-	let notificationTime = '09:00';
-	let notificationTimePreset: 'morning' | 'evening' | 'night' | 'custom' = 'morning';
-	let deliveryMethod: 'email' | 'sms' = 'email';
+	let notificationTime = '17:00';
+	let notificationTimePreset: 'morning' | 'evening' | 'night' | 'custom' = 'evening';
+	let deliveryMethod: 'email' | 'sms' | 'both' = 'email';
 
 	let subgoalForms: SubgoalFormValue[] = Array.from(
 		{ length: initialSubgoalCount },
@@ -275,7 +281,7 @@
 		const composedDescription = `${template.description}\n\n${template.contextSummary}`.trim();
 		objectiveTitle = template.title;
 		objectiveDescription = composedDescription;
-		cycleLabel = template.title;
+		cycleLabel = data.user.name ? `${data.user.name} — ${template.title}` : template.title;
 		const prefilled = template.subgoals.slice(0, minSubgoalFields);
 		subgoalForms = Array.from({ length: minSubgoalFields }, (_, index) => ({
 			label: prefilled[index]?.label ?? '',
@@ -467,7 +473,7 @@
 						? true
 						: false;
 	$: if (objectiveTitle.trim().length > 0 && (!cycleLabel || cycleLabel.trim().length === 0)) {
-		cycleLabel = objectiveTitle;
+		cycleLabel = data.user.name ? `${data.user.name} — ${objectiveTitle}` : objectiveTitle;
 	}
 	$: endDatePreview = (() => {
 		if (!cycleStartDate || !cycleDurationNumber) return '';
@@ -637,6 +643,11 @@
 							: stakeholderCadence}
 					/>
 					<input type="hidden" name="revealScores" value={revealScores ? 'true' : 'false'} />
+					<input
+						type="hidden"
+						name="sendStakeholderIntro"
+						value={sendStakeholderIntro ? 'true' : 'false'}
+					/>
 
 					<!-- Hidden inputs for all form data when on stakeholders step -->
 					{#if currentStep === 'stakeholders'}
@@ -951,32 +962,24 @@
 										<div class="space-y-3">
 											<p class="block text-sm font-semibold text-text-secondary">Duration</p>
 											<input type="hidden" name="cycleDurationWeeks" value={cycleDurationWeeks} />
-											<div class="grid grid-cols-4 gap-3">
-												{#each [8, 12, 16] as weeks (weeks)}
-													<button
-														type="button"
-														onclick={() => selectPresetDuration(weeks)}
-														class="rounded-xl border px-4 py-3 text-center transition-all {cycleDurationMode ===
-															'preset' && cycleDurationWeeks === String(weeks)
-															? 'border-accent bg-accent-muted'
-															: 'border-border-default bg-surface-raised hover:border-accent/30 hover:bg-surface-subtle'}"
-													>
-														<div class="text-lg font-bold text-text-primary">{weeks}</div>
-														<div class="text-xs text-text-tertiary">weeks</div>
-													</button>
-												{/each}
-												<button
-													type="button"
-													onclick={enableCustomDuration}
-													class="rounded-xl border px-4 py-3 text-center transition-all {cycleDurationMode ===
-													'custom'
-														? 'border-accent bg-accent-muted'
-														: 'border-border-default bg-surface-raised hover:border-accent/30 hover:bg-surface-subtle'}"
-												>
-													<div class="text-lg font-bold text-text-primary">?</div>
-													<div class="text-xs text-text-tertiary">Custom</div>
-												</button>
-											</div>
+											<select
+												id="cycleDurationSelect"
+												class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-text-primary transition-all focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
+												value={cycleDurationMode === 'custom' ? 'custom' : cycleDurationWeeks}
+												onchange={(event) => {
+													const val = event.currentTarget.value;
+													if (val === 'custom') {
+														enableCustomDuration();
+													} else {
+														selectPresetDuration(Number(val));
+													}
+												}}
+											>
+												<option value="8">8 weeks</option>
+												<option value="12">12 weeks</option>
+												<option value="16">16 weeks</option>
+												<option value="custom">Custom</option>
+											</select>
 											{#if cycleDurationMode === 'custom'}
 												<div class="flex items-center gap-3">
 													<input
@@ -1050,135 +1053,23 @@
 											<p class="text-sm font-semibold text-text-secondary">
 												When should we remind you?
 											</p>
-											<div class="grid gap-2 md:grid-cols-2">
-												<label
-													class="flex cursor-pointer items-center gap-3 rounded-xl border p-4 transition-all {notificationTimePreset ===
-													'morning'
-														? 'border-accent bg-accent-muted'
-														: 'border-border-default bg-surface-raised hover:border-accent/30'}"
-												>
-													<input
-														type="radio"
-														name="notificationTimePreset"
-														value="morning"
-														class="sr-only"
-														checked={notificationTimePreset === 'morning'}
-														onchange={() => {
-															notificationTimePreset = 'morning';
-															notificationTime = '09:00';
-														}}
-													/>
-													<div
-														class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 {notificationTimePreset ===
-														'morning'
-															? 'border-accent bg-accent'
-															: 'border-border-strong bg-surface-raised'}"
-													>
-														{#if notificationTimePreset === 'morning'}<div
-																class="h-2 w-2 rounded-full bg-white"
-															></div>{/if}
-													</div>
-													<div>
-														<div class="font-semibold text-text-primary">Start of workday</div>
-														<div class="text-xs text-text-tertiary">9:00 AM</div>
-													</div>
-												</label>
-												<label
-													class="flex cursor-pointer items-center gap-3 rounded-xl border p-4 transition-all {notificationTimePreset ===
-													'evening'
-														? 'border-accent bg-accent-muted'
-														: 'border-border-default bg-surface-raised hover:border-accent/30'}"
-												>
-													<input
-														type="radio"
-														name="notificationTimePreset"
-														value="evening"
-														class="sr-only"
-														checked={notificationTimePreset === 'evening'}
-														onchange={() => {
-															notificationTimePreset = 'evening';
-															notificationTime = '17:00';
-														}}
-													/>
-													<div
-														class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 {notificationTimePreset ===
-														'evening'
-															? 'border-accent bg-accent'
-															: 'border-border-strong bg-surface-raised'}"
-													>
-														{#if notificationTimePreset === 'evening'}<div
-																class="h-2 w-2 rounded-full bg-white"
-															></div>{/if}
-													</div>
-													<div>
-														<div class="font-semibold text-text-primary">End of workday</div>
-														<div class="text-xs text-text-tertiary">5:00 PM</div>
-													</div>
-												</label>
-												<label
-													class="flex cursor-pointer items-center gap-3 rounded-xl border p-4 transition-all {notificationTimePreset ===
-													'night'
-														? 'border-accent bg-accent-muted'
-														: 'border-border-default bg-surface-raised hover:border-accent/30'}"
-												>
-													<input
-														type="radio"
-														name="notificationTimePreset"
-														value="night"
-														class="sr-only"
-														checked={notificationTimePreset === 'night'}
-														onchange={() => {
-															notificationTimePreset = 'night';
-															notificationTime = '20:00';
-														}}
-													/>
-													<div
-														class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 {notificationTimePreset ===
-														'night'
-															? 'border-accent bg-accent'
-															: 'border-border-strong bg-surface-raised'}"
-													>
-														{#if notificationTimePreset === 'night'}<div
-																class="h-2 w-2 rounded-full bg-white"
-															></div>{/if}
-													</div>
-													<div>
-														<div class="font-semibold text-text-primary">Evening reflection</div>
-														<div class="text-xs text-text-tertiary">8:00 PM</div>
-													</div>
-												</label>
-												<label
-													class="flex cursor-pointer items-center gap-3 rounded-xl border p-4 transition-all {notificationTimePreset ===
-													'custom'
-														? 'border-accent bg-accent-muted'
-														: 'border-border-default bg-surface-raised hover:border-accent/30'}"
-												>
-													<input
-														type="radio"
-														name="notificationTimePreset"
-														value="custom"
-														class="sr-only"
-														checked={notificationTimePreset === 'custom'}
-														onchange={() => {
-															notificationTimePreset = 'custom';
-														}}
-													/>
-													<div
-														class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 {notificationTimePreset ===
-														'custom'
-															? 'border-accent bg-accent'
-															: 'border-border-strong bg-surface-raised'}"
-													>
-														{#if notificationTimePreset === 'custom'}<div
-																class="h-2 w-2 rounded-full bg-white"
-															></div>{/if}
-													</div>
-													<div>
-														<div class="font-semibold text-text-primary">Custom time</div>
-														<div class="text-xs text-text-tertiary">Pick your own</div>
-													</div>
-												</label>
-											</div>
+											<select
+												id="notificationTimeSelect"
+												class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-text-primary transition-all focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
+												value={notificationTimePreset}
+												onchange={(event) => {
+													const val = event.currentTarget.value as typeof notificationTimePreset;
+													notificationTimePreset = val;
+													if (val === 'morning') notificationTime = '09:00';
+													else if (val === 'evening') notificationTime = '17:00';
+													else if (val === 'night') notificationTime = '20:00';
+												}}
+											>
+												<option value="morning">9:00 AM (Start of day)</option>
+												<option value="evening">5:00 PM (End of day)</option>
+												<option value="night">8:00 PM (Evening)</option>
+												<option value="custom">Custom</option>
+											</select>
 											{#if notificationTimePreset === 'custom'}
 												<input
 													type="time"
@@ -1196,7 +1087,7 @@
 											<p class="text-sm font-semibold text-text-secondary">
 												How should we remind you?
 											</p>
-											<div class="grid gap-2 md:grid-cols-2">
+											<div class="grid gap-2 md:grid-cols-3">
 												<label
 													class="flex cursor-pointer items-center gap-3 rounded-xl border p-4 transition-all {deliveryMethod ===
 													'email'
@@ -1205,7 +1096,7 @@
 												>
 													<input
 														type="radio"
-														name="deliveryMethod"
+														name="_deliveryMethodRadio"
 														value="email"
 														class="sr-only"
 														checked={deliveryMethod === 'email'}
@@ -1223,9 +1114,7 @@
 													</div>
 													<div>
 														<div class="font-semibold text-text-primary">Email</div>
-														<div class="text-xs text-text-tertiary">
-															Works well if you check email regularly
-														</div>
+														<div class="text-xs text-text-tertiary">Check email regularly</div>
 													</div>
 												</label>
 												<label
@@ -1236,7 +1125,7 @@
 												>
 													<input
 														type="radio"
-														name="deliveryMethod"
+														name="_deliveryMethodRadio"
 														value="sms"
 														class="sr-only"
 														checked={deliveryMethod === 'sms'}
@@ -1254,13 +1143,42 @@
 													</div>
 													<div>
 														<div class="font-semibold text-text-primary">SMS</div>
-														<div class="text-xs text-text-tertiary">
-															Harder to ignore — choose for extra accountability
-														</div>
+														<div class="text-xs text-text-tertiary">Extra accountability</div>
+													</div>
+												</label>
+												<label
+													class="flex cursor-pointer items-center gap-3 rounded-xl border p-4 transition-all {deliveryMethod ===
+													'both'
+														? 'border-accent bg-accent-muted'
+														: 'border-border-default bg-surface-raised hover:border-accent/30'}"
+												>
+													<input
+														type="radio"
+														name="_deliveryMethodRadio"
+														value="both"
+														class="sr-only"
+														checked={deliveryMethod === 'both'}
+														onchange={() => (deliveryMethod = 'both')}
+													/>
+													<div
+														class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 {deliveryMethod ===
+														'both'
+															? 'border-accent bg-accent'
+															: 'border-border-strong bg-surface-raised'}"
+													>
+														{#if deliveryMethod === 'both'}<div
+																class="h-2 w-2 rounded-full bg-white"
+															></div>{/if}
+													</div>
+													<div>
+														<div class="font-semibold text-text-primary">Both</div>
+														<div class="text-xs text-text-tertiary">Email + SMS</div>
 													</div>
 												</label>
 											</div>
-											{#if deliveryMethod === 'sms'}
+											<input type="hidden" name="deliveryMethod" value={deliveryMethod} />
+
+											{#if deliveryMethod === 'sms' || deliveryMethod === 'both'}
 												<div class="space-y-1">
 													<label class="block text-sm font-semibold text-text-secondary" for="phone"
 														>Phone number</label
@@ -1296,7 +1214,11 @@
 														? '5:00 PM'
 														: notificationTimePreset === 'night'
 															? '8:00 PM'
-															: notificationTime} via {deliveryMethod === 'sms' ? 'SMS' : 'Email'}
+															: notificationTime} via {deliveryMethod === 'both'
+													? 'Email + SMS'
+													: deliveryMethod === 'sms'
+														? 'SMS'
+														: 'Email'}
 											</li>
 											<li>Missed check-ins trigger automatic reminders</li>
 										</ul>
@@ -1709,6 +1631,26 @@
 											<p class="text-xs text-text-tertiary">
 												When enabled, stakeholders see how you rated yourself so they can compare
 												perspectives.
+											</p>
+										</div>
+									</label>
+
+									<!-- Stakeholder Intro Notification Toggle -->
+									<label class="flex cursor-pointer items-center gap-3">
+										<input
+											type="checkbox"
+											checked={sendStakeholderIntro}
+											onchange={() => (sendStakeholderIntro = !sendStakeholderIntro)}
+											class="h-4 w-4 rounded border-border-default text-accent focus:ring-accent"
+										/>
+										<div>
+											<span class="text-sm font-semibold text-text-secondary"
+												>Send introductory notification to stakeholders when they're added</span
+											>
+											<p class="text-xs text-text-tertiary">
+												When enabled, stakeholders receive a welcome email (and SMS if they have a
+												phone number) explaining their role. Turn off if you'd prefer to introduce
+												them yourself.
 											</p>
 										</div>
 									</label>

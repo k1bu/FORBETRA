@@ -483,6 +483,17 @@
 										<Smartphone class="h-4 w-4" />
 										SMS
 									</button>
+									<button
+										type="button"
+										onclick={() => (deliveryMethod = 'both')}
+										class="flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors {deliveryMethod ===
+										'both'
+											? 'border-accent bg-accent/10 text-accent'
+											: 'border-border-default bg-surface-subtle text-text-secondary hover:border-border-strong'}"
+									>
+										<Mail class="h-4 w-4" />
+										Both
+									</button>
 								</div>
 								<input type="hidden" name="deliveryMethod" value={deliveryMethod} />
 							</div>
@@ -558,6 +569,7 @@
 							}
 							if (result.type === 'failure' && result.data?.error) {
 								addToast(result.data.error as string, 'error');
+								return;
 							}
 							if (result.type === 'success' && result.data?.success) {
 								addToast(result.data.message as string, 'success');

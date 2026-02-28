@@ -86,7 +86,7 @@ export const load: PageServerLoad = async (event) => {
 			cycleStartDate:
 				cycle?.startDate.toISOString().slice(0, 10) ?? new Date().toISOString().slice(0, 10),
 			cycleDurationWeeks: durationWeeks,
-			checkInFrequency: cycle?.checkInFrequency ?? '3x',
+			checkInFrequency: cycle?.checkInFrequency ?? 'mon,tue,wed,thu,fri',
 			stakeholderCadence: cycle?.stakeholderCadence ?? 'weekly'
 		};
 	}
@@ -168,10 +168,7 @@ export const actions: Actions = {
 		const reminderDays = (formData.get('reminderDays') ?? 'wednesday_friday').toString() as
 			| 'wednesday_friday'
 			| 'tuesday_thursday';
-		const checkInFrequency = (formData.get('checkInFrequency') ?? '3x').toString() as
-			| '3x'
-			| '2x'
-			| '1x';
+		const checkInFrequency = (formData.get('checkInFrequency') ?? 'mon,tue,wed,thu,fri').toString();
 		const stakeholderCadenceRaw = (formData.get('stakeholderCadence') ?? 'weekly').toString();
 		const stakeholderCadence = stakeholderCadenceRaw;
 		const stakeholderFeedbackTime = (formData.get('stakeholderFeedbackTime') ?? '09:00')
@@ -181,6 +178,8 @@ export const actions: Actions = {
 		const phone = (formData.get('phone') ?? '').toString().trim() || null;
 		const notificationTime = (formData.get('notificationTime') ?? '09:00').toString().trim();
 		const deliveryMethod = (formData.get('deliveryMethod') ?? 'email').toString().trim();
+		const sendStakeholderIntro =
+			(formData.get('sendStakeholderIntro') ?? 'true').toString() !== 'false';
 
 		const subgoals = Array.from({ length: MAX_SUBGOALS }, (_, index) => {
 			const label = (formData.get(`subgoalLabel${index + 1}`) ?? '').toString().trim();
@@ -313,33 +312,35 @@ export const actions: Actions = {
 									}
 								});
 
-								// Send welcome email to new stakeholder
-								try {
-									const template = emailTemplates.welcomeStakeholder({
-										individualName: dbUser.name || undefined,
-										stakeholderName: stakeholder.name || undefined,
-										appUrl:
-											process.env.PUBLIC_APP_URL || process.env.VERCEL_URL
-												? `https://${process.env.PUBLIC_APP_URL || process.env.VERCEL_URL}`
-												: 'https://app.forbetra.com'
-									});
-									await sendEmail({
-										to: stakeholder.email,
-										...template
-									});
-								} catch (error) {
-									console.error('[email:error] Failed to send stakeholder welcome email', error);
-								}
+								if (sendStakeholderIntro) {
+									// Send welcome email to new stakeholder
+									try {
+										const template = emailTemplates.welcomeStakeholder({
+											individualName: dbUser.name || undefined,
+											stakeholderName: stakeholder.name || undefined,
+											appUrl:
+												process.env.PUBLIC_APP_URL || process.env.VERCEL_URL
+													? `https://${process.env.PUBLIC_APP_URL || process.env.VERCEL_URL}`
+													: 'https://app.forbetra.com'
+										});
+										await sendEmail({
+											to: stakeholder.email,
+											...template
+										});
+									} catch (error) {
+										console.error('[email:error] Failed to send stakeholder welcome email', error);
+									}
 
-								// Send welcome SMS to new stakeholder
-								await trySendSms(
-									stakeholderPhone,
-									smsTemplates.welcomeStakeholder({
-										stakeholderName: stakeholder.name || undefined,
-										individualName: dbUser.name || undefined,
-										appUrl: event.url.origin
-									})
-								);
+									// Send welcome SMS to new stakeholder
+									await trySendSms(
+										stakeholderPhone,
+										smsTemplates.welcomeStakeholder({
+											stakeholderName: stakeholder.name || undefined,
+											individualName: dbUser.name || undefined,
+											appUrl: event.url.origin
+										})
+									);
+								}
 							}
 						}
 					}
@@ -420,32 +421,34 @@ export const actions: Actions = {
 								}
 							});
 
-							try {
-								const template = emailTemplates.welcomeStakeholder({
-									individualName: dbUser.name || undefined,
-									stakeholderName: stakeholder.name || undefined,
-									appUrl:
-										process.env.PUBLIC_APP_URL || process.env.VERCEL_URL
-											? `https://${process.env.PUBLIC_APP_URL || process.env.VERCEL_URL}`
-											: 'https://app.forbetra.com'
-								});
-								await sendEmail({
-									to: stakeholder.email,
-									...template
-								});
-							} catch (error) {
-								console.error('[email:error] Failed to send stakeholder welcome email', error);
-							}
+							if (sendStakeholderIntro) {
+								try {
+									const template = emailTemplates.welcomeStakeholder({
+										individualName: dbUser.name || undefined,
+										stakeholderName: stakeholder.name || undefined,
+										appUrl:
+											process.env.PUBLIC_APP_URL || process.env.VERCEL_URL
+												? `https://${process.env.PUBLIC_APP_URL || process.env.VERCEL_URL}`
+												: 'https://app.forbetra.com'
+									});
+									await sendEmail({
+										to: stakeholder.email,
+										...template
+									});
+								} catch (error) {
+									console.error('[email:error] Failed to send stakeholder welcome email', error);
+								}
 
-							// Send welcome SMS to stakeholder
-							await trySendSms(
-								stakeholderPhone,
-								smsTemplates.welcomeStakeholder({
-									stakeholderName: stakeholder.name || undefined,
-									individualName: dbUser.name || undefined,
-									appUrl: event.url.origin
-								})
-							);
+								// Send welcome SMS to stakeholder
+								await trySendSms(
+									stakeholderPhone,
+									smsTemplates.welcomeStakeholder({
+										stakeholderName: stakeholder.name || undefined,
+										individualName: dbUser.name || undefined,
+										appUrl: event.url.origin
+									})
+								);
+							}
 						}
 					}
 
