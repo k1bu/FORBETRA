@@ -1,28 +1,42 @@
 -- CreateEnum
-CREATE TYPE "UserRole" AS ENUM ('INDIVIDUAL', 'COACH', 'STAKEHOLDER', 'ADMIN');
+CREATE TYPE "UserRole" AS ENUM ('INDIVIDUAL', 'COACH', 'STAKEHOLDER', 'ADMIN', 'ORG_ADMIN');
+
+-- CreateEnum
+CREATE TYPE "OrgRole" AS ENUM ('MEMBER', 'ORG_ADMIN');
 
 -- CreateEnum
 CREATE TYPE "CycleStatus" AS ENUM ('PLANNED', 'ACTIVE', 'PAUSED', 'COMPLETED');
 
 -- CreateEnum
-CREATE TYPE "ReflectionType" AS ENUM ('INTENTION', 'EFFORT', 'PROGRESS');
+CREATE TYPE "ReflectionType" AS ENUM ('INTENTION', 'RATING_A', 'RATING_B');
 
 -- CreateEnum
 CREATE TYPE "SubgoalMetric" AS ENUM ('EFFORT', 'PROGRESS', 'BOTH');
 
 -- CreateEnum
-CREATE TYPE "TokenType" AS ENUM ('AUTH_MAGIC_LINK', 'FEEDBACK_INVITE', 'RESET_PASSWORD');
+CREATE TYPE "TokenType" AS ENUM ('AUTH_MAGIC_LINK', 'FEEDBACK_INVITE', 'RESET_PASSWORD', 'COACH_INVITE');
+
+-- CreateEnum
+CREATE TYPE "InsightType" AS ENUM ('CHECK_IN', 'WEEKLY_SYNTHESIS', 'COACH_PREP', 'COACH_ALERT', 'CYCLE_REPORT');
+
+-- CreateEnum
+CREATE TYPE "InsightStatus" AS ENUM ('PENDING', 'GENERATING', 'COMPLETED', 'FAILED');
 
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
+    "clerkUserId" TEXT,
     "email" TEXT NOT NULL,
     "name" TEXT,
     "role" "UserRole" NOT NULL DEFAULT 'INDIVIDUAL',
     "phone" TEXT,
     "timezone" TEXT,
+    "reminderDays" TEXT,
+    "notificationTime" TEXT,
+    "deliveryMethod" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "coachOnboardingCompletedAt" TIMESTAMP(3),
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -43,6 +57,21 @@ CREATE TABLE "Objective" (
 );
 
 -- CreateTable
+CREATE TABLE "ObjectiveChange" (
+    "id" TEXT NOT NULL,
+    "objectiveId" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "previousTitle" TEXT NOT NULL,
+    "newTitle" TEXT NOT NULL,
+    "previousDesc" TEXT,
+    "newDesc" TEXT,
+    "reason" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "ObjectiveChange_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Cycle" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
@@ -52,6 +81,11 @@ CREATE TABLE "Cycle" (
     "endDate" TIMESTAMP(3),
     "status" "CycleStatus" NOT NULL DEFAULT 'PLANNED',
     "summary" TEXT,
+    "checkInFrequency" TEXT NOT NULL DEFAULT '3x',
+    "stakeholderCadence" TEXT NOT NULL DEFAULT 'weekly',
+    "stakeholderFeedbackTime" TEXT,
+    "autoThrottle" BOOLEAN NOT NULL DEFAULT true,
+    "revealScores" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -83,7 +117,7 @@ CREATE TABLE "Reflection" (
     "weekNumber" INTEGER NOT NULL,
     "checkInDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "effortScore" INTEGER,
-    "progressScore" INTEGER,
+    "performanceScore" INTEGER,
     "notes" TEXT,
     "submittedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -97,7 +131,7 @@ CREATE TABLE "Feedback" (
     "reflectionId" TEXT NOT NULL,
     "stakeholderId" TEXT NOT NULL,
     "effortScore" INTEGER,
-    "progressScore" INTEGER,
+    "performanceScore" INTEGER,
     "comment" TEXT,
     "submittedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -150,11 +184,93 @@ CREATE TABLE "Token" (
     CONSTRAINT "Token_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "CoachClient" (
+    "id" TEXT NOT NULL,
+    "coachId" TEXT NOT NULL,
+    "individualId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "archivedAt" TIMESTAMP(3),
+
+    CONSTRAINT "CoachClient_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Insight" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "cycleId" TEXT,
+    "weekNumber" INTEGER,
+    "type" "InsightType" NOT NULL,
+    "status" "InsightStatus" NOT NULL DEFAULT 'PENDING',
+    "content" TEXT,
+    "promptHash" TEXT,
+    "modelId" TEXT,
+    "thumbs" INTEGER,
+    "metadata" JSONB,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Insight_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "CoachInvite" (
+    "id" TEXT NOT NULL,
+    "coachId" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "name" TEXT,
+    "phone" TEXT,
+    "message" TEXT,
+    "payload" JSONB,
+    "tokenHash" TEXT NOT NULL,
+    "expiresAt" TIMESTAMP(3) NOT NULL,
+    "acceptedAt" TIMESTAMP(3),
+    "cancelledAt" TIMESTAMP(3),
+    "individualId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "CoachInvite_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Organization" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "domain" TEXT,
+    "settings" JSONB,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Organization_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "OrganizationMember" (
+    "id" TEXT NOT NULL,
+    "organizationId" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "role" "OrgRole" NOT NULL DEFAULT 'MEMBER',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "OrganizationMember_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_clerkUserId_key" ON "User"("clerkUserId");
+
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
 CREATE INDEX "Objective_userId_idx" ON "Objective"("userId");
+
+-- CreateIndex
+CREATE INDEX "ObjectiveChange_objectiveId_idx" ON "ObjectiveChange"("objectiveId");
+
+-- CreateIndex
+CREATE INDEX "ObjectiveChange_userId_idx" ON "ObjectiveChange"("userId");
 
 -- CreateIndex
 CREATE INDEX "Cycle_userId_idx" ON "Cycle"("userId");
@@ -204,8 +320,56 @@ CREATE INDEX "Token_stakeholderId_idx" ON "Token"("stakeholderId");
 -- CreateIndex
 CREATE INDEX "Token_reflectionId_idx" ON "Token"("reflectionId");
 
+-- CreateIndex
+CREATE INDEX "CoachClient_coachId_idx" ON "CoachClient"("coachId");
+
+-- CreateIndex
+CREATE INDEX "CoachClient_individualId_idx" ON "CoachClient"("individualId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "CoachClient_coachId_individualId_key" ON "CoachClient"("coachId", "individualId");
+
+-- CreateIndex
+CREATE INDEX "Insight_userId_idx" ON "Insight"("userId");
+
+-- CreateIndex
+CREATE INDEX "Insight_cycleId_idx" ON "Insight"("cycleId");
+
+-- CreateIndex
+CREATE INDEX "Insight_type_status_idx" ON "Insight"("type", "status");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "CoachInvite_tokenHash_key" ON "CoachInvite"("tokenHash");
+
+-- CreateIndex
+CREATE INDEX "CoachInvite_coachId_idx" ON "CoachInvite"("coachId");
+
+-- CreateIndex
+CREATE INDEX "CoachInvite_email_idx" ON "CoachInvite"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "CoachInvite_coachId_email_key" ON "CoachInvite"("coachId", "email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Organization_domain_key" ON "Organization"("domain");
+
+-- CreateIndex
+CREATE INDEX "OrganizationMember_organizationId_idx" ON "OrganizationMember"("organizationId");
+
+-- CreateIndex
+CREATE INDEX "OrganizationMember_userId_idx" ON "OrganizationMember"("userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "OrganizationMember_organizationId_userId_key" ON "OrganizationMember"("organizationId", "userId");
+
 -- AddForeignKey
 ALTER TABLE "Objective" ADD CONSTRAINT "Objective_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ObjectiveChange" ADD CONSTRAINT "ObjectiveChange_objectiveId_fkey" FOREIGN KEY ("objectiveId") REFERENCES "Objective"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ObjectiveChange" ADD CONSTRAINT "ObjectiveChange_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Cycle" ADD CONSTRAINT "Cycle_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -257,3 +421,28 @@ ALTER TABLE "Token" ADD CONSTRAINT "Token_stakeholderId_fkey" FOREIGN KEY ("stak
 
 -- AddForeignKey
 ALTER TABLE "Token" ADD CONSTRAINT "Token_reflectionId_fkey" FOREIGN KEY ("reflectionId") REFERENCES "Reflection"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "CoachClient" ADD CONSTRAINT "CoachClient_coachId_fkey" FOREIGN KEY ("coachId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "CoachClient" ADD CONSTRAINT "CoachClient_individualId_fkey" FOREIGN KEY ("individualId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Insight" ADD CONSTRAINT "Insight_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Insight" ADD CONSTRAINT "Insight_cycleId_fkey" FOREIGN KEY ("cycleId") REFERENCES "Cycle"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "CoachInvite" ADD CONSTRAINT "CoachInvite_coachId_fkey" FOREIGN KEY ("coachId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "CoachInvite" ADD CONSTRAINT "CoachInvite_individualId_fkey" FOREIGN KEY ("individualId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "OrganizationMember" ADD CONSTRAINT "OrganizationMember_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "OrganizationMember" ADD CONSTRAINT "OrganizationMember_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
