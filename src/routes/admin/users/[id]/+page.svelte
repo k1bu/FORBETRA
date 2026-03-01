@@ -11,7 +11,9 @@
 
 	const formatDateTime = (value: string | Date | null) => {
 		if (!value) return '--';
-		return new Intl.DateTimeFormat('en-US', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value));
+		return new Intl.DateTimeFormat('en-US', { dateStyle: 'short', timeStyle: 'short' }).format(
+			new Date(value)
+		);
 	};
 
 	const impersonateAndOpen = async (path = '/') => {
@@ -32,10 +34,14 @@
 	<title>User Detail | Forbetra Admin</title>
 </svelte:head>
 
+<!-- eslint-disable svelte/no-navigation-without-resolve -->
 <section class="mx-auto flex max-w-5xl flex-col gap-6 p-6">
 	<header class="flex items-center justify-between">
 		<div>
-			<a href="/admin/users" class="text-sm font-medium text-text-tertiary hover:text-text-secondary">
+			<a
+				href="/admin/users"
+				class="text-sm font-medium text-text-tertiary hover:text-text-secondary"
+			>
 				&larr; Back to Users
 			</a>
 			<h1 class="mt-1 text-2xl font-bold text-text-primary">{user.name ?? 'Unnamed User'}</h1>
@@ -48,14 +54,19 @@
 			>
 				View as User
 			</button>
-			<span class="rounded-lg bg-surface-subtle px-3 py-1 text-sm font-bold uppercase text-text-secondary">{user.role}</span>
+			<span
+				class="rounded-lg bg-surface-subtle px-3 py-1 text-sm font-bold text-text-secondary uppercase"
+				>{user.role}</span
+			>
 		</div>
 	</header>
 
 	<!-- Quick Preview Actions -->
 	<div class="rounded-xl border border-border-default bg-accent-muted p-4">
-		<h2 class="mb-3 text-sm font-bold uppercase tracking-wide text-accent">Preview User Flows</h2>
-		<p class="mb-3 text-xs text-text-secondary">Opens in a new window as this user. Admin panel stays open.</p>
+		<h2 class="mb-3 text-sm font-bold tracking-wide text-accent uppercase">Preview User Flows</h2>
+		<p class="mb-3 text-xs text-text-secondary">
+			Opens in a new window as this user. Admin panel stays open.
+		</p>
 		<div class="flex flex-wrap gap-2">
 			<button
 				onclick={() => impersonateAndOpen('/onboarding?preview=true')}
@@ -85,32 +96,52 @@
 	</div>
 
 	{#if form?.error}
-		<div class="rounded border border-border-default bg-error-muted p-3 text-sm text-error">{form.error}</div>
+		<div class="rounded border border-border-default bg-error-muted p-3 text-sm text-error">
+			{form.error}
+		</div>
 	{:else if form?.success}
-		<div class="rounded border border-border-default bg-success-muted p-3 text-sm text-success">{form.message}</div>
+		<div class="rounded border border-border-default bg-success-muted p-3 text-sm text-success">
+			{form.message}
+		</div>
 	{/if}
 
 	<!-- Edit User -->
 	<div class="rounded-xl border border-border-default bg-surface-raised p-4">
-		<h2 class="mb-3 text-sm font-bold uppercase tracking-wide text-text-tertiary">Edit User</h2>
+		<h2 class="mb-3 text-sm font-bold tracking-wide text-text-tertiary uppercase">Edit User</h2>
 		<form method="post" action="?/updateUser" class="flex flex-wrap items-end gap-3">
 			<label class="flex flex-col gap-1 text-sm">
 				<span class="font-medium text-text-secondary">Name</span>
-				<input type="text" name="name" value={user.name ?? ''} class="rounded border border-border-default bg-surface-raised px-3 py-1.5 text-sm text-text-primary" />
+				<input
+					type="text"
+					name="name"
+					value={user.name ?? ''}
+					class="rounded border border-border-default bg-surface-raised px-3 py-1.5 text-sm text-text-primary"
+				/>
 			</label>
 			<label class="flex flex-col gap-1 text-sm">
 				<span class="font-medium text-text-secondary">Email</span>
-				<input type="email" name="email" value={user.email} required class="rounded border border-border-default bg-surface-raised px-3 py-1.5 text-sm text-text-primary" />
+				<input
+					type="email"
+					name="email"
+					value={user.email}
+					required
+					class="rounded border border-border-default bg-surface-raised px-3 py-1.5 text-sm text-text-primary"
+				/>
 			</label>
 			<label class="flex flex-col gap-1 text-sm">
 				<span class="font-medium text-text-secondary">Role</span>
-				<select name="role" class="rounded border border-border-default bg-surface-raised px-3 py-1.5 text-sm text-text-primary">
+				<select
+					name="role"
+					class="rounded border border-border-default bg-surface-raised px-3 py-1.5 text-sm text-text-primary"
+				>
 					{#each data.roles as role (role)}
 						<option value={role} selected={user.role === role}>{role}</option>
 					{/each}
 				</select>
 			</label>
-			<button type="submit" class="rounded bg-accent px-4 py-1.5 text-sm font-medium text-white">Save</button>
+			<button type="submit" class="rounded bg-accent px-4 py-1.5 text-sm font-medium text-white"
+				>Save</button
+			>
 		</form>
 		<p class="mt-2 text-xs text-text-tertiary">
 			Clerk ID: {user.clerkUserId ?? 'Not linked'} &middot; Created {formatDate(user.createdAt)}
@@ -120,11 +151,15 @@
 	<!-- Coach Relationships -->
 	{#if user.coachClientsManaged.length > 0}
 		<div class="rounded-xl border border-border-default bg-surface-raised p-4">
-			<h2 class="mb-3 text-sm font-bold uppercase tracking-wide text-text-tertiary">Manages (as Coach)</h2>
+			<h2 class="mb-3 text-sm font-bold tracking-wide text-text-tertiary uppercase">
+				Manages (as Coach)
+			</h2>
 			<ul class="space-y-1 text-sm">
 				{#each user.coachClientsManaged as rel (rel.id)}
 					<li class="flex items-center justify-between rounded bg-surface-raised px-3 py-2">
-						<a href="/admin/users/{rel.individual.id}" class="font-medium">{rel.individual.name ?? rel.individual.email}</a>
+						<a href="/admin/users/{rel.individual.id}" class="font-medium"
+							>{rel.individual.name ?? rel.individual.email}</a
+						>
 						<span class="text-xs text-text-tertiary">{rel.archivedAt ? 'Archived' : 'Active'}</span>
 					</li>
 				{/each}
@@ -134,10 +169,12 @@
 
 	{#if user.coachClientsOwned.length > 0}
 		<div class="rounded-xl border border-border-default bg-surface-raised p-4">
-			<h2 class="mb-3 text-sm font-bold uppercase tracking-wide text-text-tertiary">Coached By</h2>
+			<h2 class="mb-3 text-sm font-bold tracking-wide text-text-tertiary uppercase">Coached By</h2>
 			<ul class="space-y-1 text-sm">
 				{#each user.coachClientsOwned as rel (rel.id)}
-					<li class="rounded bg-surface-raised px-3 py-2 font-medium">{rel.coach.name ?? rel.coach.email}</li>
+					<li class="rounded bg-surface-raised px-3 py-2 font-medium">
+						{rel.coach.name ?? rel.coach.email}
+					</li>
 				{/each}
 			</ul>
 		</div>
@@ -147,18 +184,23 @@
 	{#each user.objectives as objective (objective.id)}
 		<div class="rounded-xl border border-border-default bg-surface-raised p-4">
 			<div class="flex items-center justify-between">
-				<h2 class="text-sm font-bold uppercase tracking-wide text-text-tertiary">Objective</h2>
-				<a href="/admin/objectives/{objective.id}" class="text-xs font-medium text-accent hover:underline">View Details</a>
+				<h2 class="text-sm font-bold tracking-wide text-text-tertiary uppercase">Objective</h2>
+				<a
+					href="/admin/objectives/{objective.id}"
+					class="text-xs font-medium text-accent hover:underline">View Details</a
+				>
 			</div>
 			<p class="mt-2 font-semibold text-text-primary">{objective.title}</p>
 			{#if objective.description}
 				<p class="mt-1 text-sm text-text-secondary">{objective.description}</p>
 			{/if}
 			<div class="mt-2 flex gap-4 text-xs text-text-tertiary">
-				<span>{objective.subgoals.length} sub-objectives</span>
+				<span>{objective.subgoals.length} focus areas</span>
 				<span>{objective.cycles.length} cycles</span>
 				<span>{objective.stakeholders.length} stakeholders</span>
-				<span class="font-semibold {objective.active ? 'text-success' : 'text-text-tertiary'}">{objective.active ? 'Active' : 'Inactive'}</span>
+				<span class="font-semibold {objective.active ? 'text-success' : 'text-text-tertiary'}"
+					>{objective.active ? 'Active' : 'Inactive'}</span
+				>
 			</div>
 
 			<!-- Cycles under this objective -->
@@ -166,7 +208,9 @@
 				<div class="mt-3 rounded-lg border border-border-default bg-surface-subtle p-3">
 					<div class="flex items-center justify-between text-sm">
 						<span class="font-medium">{cycle.label ?? 'Cycle'}</span>
-						<span class="rounded bg-surface-subtle px-2 py-0.5 text-xs font-semibold uppercase">{cycle.status}</span>
+						<span class="rounded bg-surface-subtle px-2 py-0.5 text-xs font-semibold uppercase"
+							>{cycle.status}</span
+						>
 					</div>
 					<p class="text-xs text-text-tertiary">
 						{formatDate(cycle.startDate)} &mdash; {formatDate(cycle.endDate)} &middot;
@@ -193,7 +237,9 @@
 											<td class="px-2 py-1">{refl.reflectionType}</td>
 											<td class="px-2 py-1">{refl.effortScore ?? '--'}</td>
 											<td class="px-2 py-1">{refl.performanceScore ?? '--'}</td>
-											<td class="px-2 py-1 text-text-tertiary">{formatDateTime(refl.submittedAt)}</td>
+											<td class="px-2 py-1 text-text-tertiary"
+												>{formatDateTime(refl.submittedAt)}</td
+											>
 										</tr>
 									{/each}
 								</tbody>
@@ -210,7 +256,8 @@
 									<li class="rounded bg-surface-raised p-2 text-xs">
 										<p class="text-text-secondary">{note.content}</p>
 										<p class="mt-1 text-text-tertiary">
-											Week {note.weekNumber ?? '--'} &middot; {note.coach?.name ?? 'Unknown'} &middot; {formatDate(note.createdAt)}
+											Week {note.weekNumber ?? '--'} &middot; {note.coach?.name ?? 'Unknown'} &middot;
+											{formatDate(note.createdAt)}
 										</p>
 									</li>
 								{/each}
@@ -226,8 +273,13 @@
 					<p class="text-xs font-semibold text-text-tertiary">Stakeholders:</p>
 					<div class="mt-1 flex flex-wrap gap-2">
 						{#each objective.stakeholders as sh (sh.id)}
-							<span class="rounded-lg border border-border-default bg-surface-raised px-3 py-1 text-xs">
-								{sh.name} ({sh.relationship ?? 'No role'}) &middot; {sh._count.feedbacks} feedback{sh._count.feedbacks === 1 ? '' : 's'}
+							<span
+								class="rounded-lg border border-border-default bg-surface-raised px-3 py-1 text-xs"
+							>
+								{sh.name} ({sh.relationship ?? 'No role'}) &middot; {sh._count.feedbacks} feedback{sh
+									._count.feedbacks === 1
+									? ''
+									: 's'}
 							</span>
 						{/each}
 					</div>
@@ -237,8 +289,11 @@
 	{/each}
 
 	{#if user.objectives.length === 0}
-		<div class="rounded-xl border border-dashed border-border-strong bg-surface-raised p-6 text-center text-sm text-text-tertiary">
+		<div
+			class="rounded-xl border border-dashed border-border-strong bg-surface-raised p-6 text-center text-sm text-text-tertiary"
+		>
 			No objectives for this user.
 		</div>
 	{/if}
 </section>
+<!-- eslint-enable svelte/no-navigation-without-resolve -->

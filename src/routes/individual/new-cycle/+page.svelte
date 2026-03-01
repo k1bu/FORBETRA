@@ -296,7 +296,7 @@
 							{#if data.subgoals.length > 0}
 								<div class="mt-4">
 									<p class="mb-2 text-xs font-semibold tracking-wider text-text-muted uppercase">
-										Sub-objectives
+										Focus areas
 									</p>
 									<ul class="space-y-1">
 										{#each data.subgoals as subgoal (subgoal.label)}
@@ -391,7 +391,7 @@
 				<div class="space-y-6 rounded-2xl border border-border-default bg-surface-raised p-8">
 					<div class="space-y-1">
 						<h2 class="text-2xl font-bold text-text-primary">Schedule</h2>
-						<p class="text-sm text-text-secondary">Set the timing for your new cycle.</p>
+						<p class="text-sm text-text-secondary">Set the timing for your new journey.</p>
 					</div>
 
 					<div class="grid gap-6 md:grid-cols-2">
@@ -613,7 +613,7 @@
 					<div class="space-y-6 rounded-2xl border border-border-default bg-surface-raised p-8">
 						<div class="space-y-1">
 							<h2 class="text-2xl font-bold text-text-primary">Settings</h2>
-							<p class="text-sm text-text-secondary">Fine-tune how your cycle runs.</p>
+							<p class="text-sm text-text-secondary">Fine-tune how your journey runs.</p>
 						</div>
 
 						<!-- Reminder Days -->

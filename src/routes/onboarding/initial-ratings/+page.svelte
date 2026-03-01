@@ -230,7 +230,7 @@
 				<div class="flex-1">
 					<p class="font-semibold text-text-primary">Ready to continue?</p>
 					<p class="mt-1 text-xs text-text-secondary">
-						Your baseline ratings help track your progress throughout the cycle.
+						Your baseline ratings help track your progress throughout the journey.
 					</p>
 				</div>
 				<button

@@ -79,7 +79,7 @@
 			if (week === 1) return 'Week 1 — your baseline is being set.';
 			if (pct >= 90 && week >= total - 1) return 'Final stretch. Strong finish ahead.';
 			if (week === Math.ceil(total / 2)) return `Halfway through — week ${week} of ${total}.`;
-			if (week === total) return `Last week of your cycle. Make it count.`;
+			if (week === total) return `Last week of your journey. Make it count.`;
 
 			// General progress
 			if (pct >= 80) return "You're keeping a strong pace.";
@@ -301,7 +301,7 @@
 						onclick={() => (showSubgoals = !showSubgoals)}
 						class="shrink-0 text-xs font-medium text-accent transition-colors hover:text-accent-hover"
 					>
-						{data.objective.subgoals.length} sub-objective{data.objective.subgoals.length === 1
+						{data.objective.subgoals.length} focus area{data.objective.subgoals.length === 1
 							? ''
 							: 's'}
 						<svg
@@ -483,9 +483,8 @@
 						<!-- eslint-disable svelte/no-navigation-without-resolve -->
 						<p class="text-sm text-text-tertiary">
 							Your first check-in opens on {data.nextCheckInDay}. In the meantime,
-							<a href="/individual/stakeholders" class="text-accent hover:underline"
-								>add stakeholders</a
-							> for 360 feedback.
+							<a href="/individual/stakeholders" class="text-accent hover:underline">add raters</a> for
+							360 feedback.
 						</p>
 						<!-- eslint-enable svelte/no-navigation-without-resolve -->
 					{:else}
@@ -507,7 +506,7 @@
 			<div class="mb-3 flex items-center gap-2">
 				<p class="text-[10px] font-semibold tracking-widest text-text-muted uppercase">This week</p>
 				<InfoTip
-					text="Your latest self-ratings and stakeholder averages. The +/- shows change from last week."
+					text="Your latest self-ratings and rater averages. The +/- shows change from last week."
 				/>
 			</div>
 			<div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -680,7 +679,7 @@
 			if (stkCount === 0)
 				return {
 					icon: 'stakeholder',
-					text: 'Add stakeholders to get 360 feedback — outside perspectives reveal blind spots.'
+					text: 'Add raters to get 360 feedback — outside perspectives show blind spots.'
 				};
 			if (streak === 0 && data.currentWeek > 2)
 				return {

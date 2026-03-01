@@ -52,7 +52,8 @@
 
 			if (!response.ok) {
 				const err = await response.json();
-				messages[messages.length - 1].content = err.error || 'Something went wrong. Please try again.';
+				messages[messages.length - 1].content =
+					err.error || 'Something went wrong. Please try again.';
 				messages = [...messages];
 				isStreaming = false;
 				return;
@@ -92,7 +93,9 @@
 								messages[messages.length - 1].content += '\n\n[Error: ' + parsed.error + ']';
 								messages = [...messages];
 							}
-						} catch {}
+						} catch {
+							/* SSE parse – non-JSON lines are expected */
+						}
 					}
 				}
 			}
@@ -128,20 +131,25 @@
 	<title>Ask | Forbetra</title>
 </svelte:head>
 
-<section class="mx-auto flex max-w-3xl flex-col h-[calc(100vh-2rem)] p-4">
+<section class="mx-auto flex h-[calc(100vh-2rem)] max-w-3xl flex-col p-4">
 	<div class="mb-4">
-		<h1 class="text-lg font-bold text-text-primary text-center">Ask About Your Data</h1>
+		<h1 class="text-center text-lg font-bold text-text-primary">Ask About Your Data</h1>
 	</div>
 
+	<!-- eslint-disable svelte/no-navigation-without-resolve -->
 	{#if !data.hasActiveCycle}
-		<div class="flex-1 flex items-center justify-center">
-			<div class="rounded-2xl border border-border-default bg-surface-raised p-8 text-center max-w-md">
+		<div class="flex flex-1 items-center justify-center">
+			<div
+				class="max-w-md rounded-2xl border border-border-default bg-surface-raised p-8 text-center"
+			>
 				<MessageSquare class="mx-auto mb-3 h-10 w-10 text-text-muted" />
-				<p class="text-lg font-semibold text-text-secondary">No active cycle</p>
-				<p class="mt-1 text-sm text-text-tertiary">Start a cycle to ask questions about your development data.</p>
+				<p class="text-lg font-semibold text-text-secondary">No active journey</p>
+				<p class="mt-1 text-sm text-text-tertiary">
+					Start a journey to ask questions about your development data.
+				</p>
 				<a
 					href="/individual"
-					class="mt-4 inline-block rounded-lg bg-accent px-6 py-2 text-sm font-semibold text-white hover:bg-accent-hover transition-colors"
+					class="mt-4 inline-block rounded-lg bg-accent px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-hover"
 				>
 					Go to Dashboard
 				</a>
@@ -149,23 +157,24 @@
 		</div>
 	{:else}
 		<!-- Messages -->
-		<div
-			bind:this={scrollContainer}
-			class="flex-1 overflow-y-auto space-y-4 pb-4"
-		>
+		<div bind:this={scrollContainer} class="flex-1 space-y-4 overflow-y-auto pb-4">
 			{#if messages.length === 0}
-				<div class="flex flex-col items-center justify-center h-full text-center">
+				<div class="flex h-full flex-col items-center justify-center text-center">
 					<MessageSquare class="mx-auto mb-4 h-12 w-12 text-accent" />
 					<p class="text-lg font-semibold text-text-secondary">Hi {data.userName}!</p>
-					<p class="mt-1 text-sm text-text-tertiary max-w-sm">
-						Ask me anything about your development data — patterns, trends, comparisons, or recommendations.
+					<p class="mt-1 max-w-sm text-sm text-text-tertiary">
+						Ask me anything about your development data — patterns, trends, comparisons, or
+						recommendations.
 					</p>
 					<div class="mt-6 flex flex-wrap justify-center gap-2">
-						{#each suggestedQuestions as question}
+						{#each suggestedQuestions as question (question)}
 							<button
 								type="button"
-								onclick={() => { input = question; sendMessage(); }}
-								class="rounded-full border border-accent/20 bg-accent-muted px-3 py-1.5 text-xs font-medium text-accent hover:bg-accent-muted/80 transition-colors"
+								onclick={() => {
+									input = question;
+									sendMessage();
+								}}
+								class="rounded-full border border-accent/20 bg-accent-muted px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-accent-muted/80"
 							>
 								{question}
 							</button>
@@ -173,18 +182,25 @@
 					</div>
 				</div>
 			{:else}
-				{#each messages as message}
+				{#each messages as message, idx (idx)}
 					<div class="flex {message.role === 'user' ? 'justify-end' : 'justify-start'}">
 						<div
-							class="max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed {message.role === 'user'
+							class="max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed {message.role ===
+							'user'
 								? 'bg-accent text-white'
 								: 'border border-border-default bg-surface-raised text-text-primary'}"
 						>
 							{#if message.role === 'assistant' && message.content === '' && isStreaming}
 								<div class="flex items-center gap-1.5">
-									<div class="h-2 w-2 rounded-full bg-text-muted animate-pulse"></div>
-									<div class="h-2 w-2 rounded-full bg-text-muted animate-pulse" style="animation-delay: 0.2s"></div>
-									<div class="h-2 w-2 rounded-full bg-text-muted animate-pulse" style="animation-delay: 0.4s"></div>
+									<div class="h-2 w-2 animate-pulse rounded-full bg-text-muted"></div>
+									<div
+										class="h-2 w-2 animate-pulse rounded-full bg-text-muted"
+										style="animation-delay: 0.2s"
+									></div>
+									<div
+										class="h-2 w-2 animate-pulse rounded-full bg-text-muted"
+										style="animation-delay: 0.4s"
+									></div>
 								</div>
 							{:else}
 								<div class="whitespace-pre-wrap">{message.content}</div>
@@ -204,17 +220,22 @@
 					placeholder="Ask about your progress, patterns, or what to focus on..."
 					rows="1"
 					disabled={isStreaming}
-					class="flex-1 resize-none rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 disabled:opacity-60 transition-all"
+					class="flex-1 resize-none rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-sm text-text-primary transition-all placeholder:text-text-muted focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none disabled:opacity-60"
 				></textarea>
 				<button
 					type="button"
 					onclick={sendMessage}
 					disabled={!input.trim() || isStreaming}
 					aria-label="Send message"
-					class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent text-white transition-all hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed"
+					class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent text-white transition-all hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
 				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19V5m0 0l-7 7m7-7l7 7" />
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M12 19V5m0 0l-7 7m7-7l7 7"
+						/>
 					</svg>
 				</button>
 			</div>
@@ -223,4 +244,5 @@
 			</p>
 		</div>
 	{/if}
+	<!-- eslint-enable svelte/no-navigation-without-resolve -->
 </section>

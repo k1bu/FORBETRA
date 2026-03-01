@@ -11,8 +11,9 @@
 	let selectedStakeholderId = $state(data.stakeholders[0]?.id ?? '');
 
 	const selectedIndividual = $derived(data.individuals.find((u) => u.id === selectedIndividualId));
-	const selectedCoach = $derived(data.coaches.find((u) => u.id === selectedCoachId));
-	const selectedStakeholder = $derived(data.stakeholders.find((s) => s.id === selectedStakeholderId));
+	const selectedStakeholder = $derived(
+		data.stakeholders.find((s) => s.id === selectedStakeholderId)
+	);
 
 	const impersonateAndOpen = async (userId: string, path: string) => {
 		const res = await fetch('/api/admin/impersonate', {
@@ -36,7 +37,7 @@
 		{
 			id: 'stakeholder',
 			label: 'Stakeholder',
-			description: 'Someone rating an individual\'s effort and performance'
+			description: "Someone rating an individual's effort and performance"
 		},
 		{
 			id: 'coach',
@@ -56,23 +57,26 @@
 	const individualFlows = $derived<FlowCard[]>([
 		{
 			label: 'Onboarding',
-			description: 'Objective setup, sub-objectives, cycle config, stakeholder invites',
+			description: 'Objective setup, focus areas, journey config, rater invites',
 			action: () => impersonateAndOpen(selectedIndividualId, '/onboarding?preview=true')
 		},
 		{
 			label: 'Initial Ratings',
 			description: 'Baseline effort and performance scores',
-			action: () => impersonateAndOpen(selectedIndividualId, '/onboarding/initial-ratings?preview=true')
+			action: () =>
+				impersonateAndOpen(selectedIndividualId, '/onboarding/initial-ratings?preview=true')
 		},
 		{
 			label: 'Check-in (Effort)',
 			description: 'Mid-week effort rating',
-			action: () => impersonateAndOpen(selectedIndividualId, '/reflections/checkin?type=RATING_A&preview=true')
+			action: () =>
+				impersonateAndOpen(selectedIndividualId, '/reflections/checkin?type=RATING_A&preview=true')
 		},
 		{
 			label: 'Check-in (Performance)',
 			description: 'End-of-week performance rating',
-			action: () => impersonateAndOpen(selectedIndividualId, '/reflections/checkin?type=RATING_B&preview=true')
+			action: () =>
+				impersonateAndOpen(selectedIndividualId, '/reflections/checkin?type=RATING_B&preview=true')
 		},
 		{
 			label: 'Individual Hub',
@@ -97,7 +101,7 @@
 				}
 			},
 			disabled: !selectedStakeholder?.feedbackUrl,
-			disabledReason: 'No active feedback token — generate one from the individual\'s cycle first'
+			disabledReason: "No active feedback token — generate one from the individual's cycle first"
 		},
 		{
 			label: 'Feedback Form (Demo)',
@@ -138,7 +142,8 @@
 	<header>
 		<h1 class="text-2xl font-bold text-text-primary">Preview Panel</h1>
 		<p class="text-sm text-text-secondary">
-			Preview every user-facing flow through the lens of each role. All previews open in a new window.
+			Preview every user-facing flow through the lens of each role. All previews open in a new
+			window.
 		</p>
 	</header>
 
@@ -155,13 +160,15 @@
 							: 'border-accent bg-accent-muted'
 					: 'border-border-default bg-surface-raised hover:border-border-strong'}"
 			>
-				<p class="text-sm font-bold {activeLens === lens.id
-					? lens.id === 'individual'
-						? 'text-accent'
-						: lens.id === 'stakeholder'
-							? 'text-success'
-							: 'text-accent'
-					: 'text-text-primary'}">
+				<p
+					class="text-sm font-bold {activeLens === lens.id
+						? lens.id === 'individual'
+							? 'text-accent'
+							: lens.id === 'stakeholder'
+								? 'text-success'
+								: 'text-accent'
+						: 'text-text-primary'}"
+				>
 					{lens.label}
 				</p>
 				<p class="mt-1 text-xs text-text-secondary">{lens.description}</p>
@@ -177,7 +184,7 @@
 					<span class="font-semibold text-accent">Preview as Individual</span>
 					<select
 						bind:value={selectedIndividualId}
-						class="rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
+						class="rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
 					>
 						{#each data.individuals as user (user.id)}
 							<option value={user.id}>
@@ -198,7 +205,7 @@
 								</span>
 							{/if}
 						{:else}
-							<span class="italic text-text-tertiary">No objective yet</span>
+							<span class="text-text-tertiary italic">No objective yet</span>
 						{/if}
 					</div>
 				{/if}
@@ -211,7 +218,9 @@
 						disabled={flow.disabled}
 						class="group rounded-lg border border-border-default bg-surface-subtle px-4 py-3 text-left transition-all hover:border-accent/30 hover:bg-accent-muted disabled:cursor-not-allowed disabled:opacity-40"
 					>
-						<p class="text-sm font-semibold text-text-primary group-hover:text-accent">{flow.label}</p>
+						<p class="text-sm font-semibold text-text-primary group-hover:text-accent">
+							{flow.label}
+						</p>
 						<p class="mt-0.5 text-xs text-text-tertiary">{flow.description}</p>
 					</button>
 				{/each}
@@ -227,7 +236,7 @@
 					<span class="font-semibold text-success">Preview as Stakeholder</span>
 					<select
 						bind:value={selectedStakeholderId}
-						class="rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
+						class="rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
 					>
 						{#each data.stakeholders as stakeholder (stakeholder.id)}
 							<option value={stakeholder.id}>
@@ -253,7 +262,9 @@
 			</div>
 
 			{#if data.stakeholders.length === 0}
-				<div class="rounded-lg border border-dashed border-border-strong bg-surface-raised p-6 text-center text-sm text-text-tertiary">
+				<div
+					class="rounded-lg border border-dashed border-border-strong bg-surface-raised p-6 text-center text-sm text-text-tertiary"
+				>
 					No stakeholders in the system yet. Create one through an individual's onboarding flow.
 				</div>
 			{:else}
@@ -264,7 +275,9 @@
 							disabled={flow.disabled}
 							class="group rounded-lg border border-border-default bg-surface-subtle px-4 py-3 text-left transition-all hover:border-accent/30 hover:bg-success-muted disabled:cursor-not-allowed disabled:opacity-40"
 						>
-							<p class="text-sm font-semibold text-text-primary group-hover:text-success">{flow.label}</p>
+							<p class="text-sm font-semibold text-text-primary group-hover:text-success">
+								{flow.label}
+							</p>
 							<p class="mt-0.5 text-xs text-text-tertiary">
 								{flow.disabled ? flow.disabledReason : flow.description}
 							</p>
@@ -283,7 +296,7 @@
 					<span class="font-semibold text-accent">Preview as Coach</span>
 					<select
 						bind:value={selectedCoachId}
-						class="rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
+						class="rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
 					>
 						{#each data.coaches as coach (coach.id)}
 							<option value={coach.id}>
@@ -296,7 +309,9 @@
 			</div>
 
 			{#if data.coaches.length === 0}
-				<div class="rounded-lg border border-dashed border-border-strong bg-surface-raised p-6 text-center text-sm text-text-tertiary">
+				<div
+					class="rounded-lg border border-dashed border-border-strong bg-surface-raised p-6 text-center text-sm text-text-tertiary"
+				>
 					No coaches in the system yet. Assign the COACH role to a user from the Users page.
 				</div>
 			{:else}
@@ -307,7 +322,9 @@
 							disabled={flow.disabled}
 							class="group rounded-lg border border-border-default bg-surface-subtle px-4 py-3 text-left transition-all hover:border-accent/30 hover:bg-accent-muted disabled:cursor-not-allowed disabled:opacity-40"
 						>
-							<p class="text-sm font-semibold text-text-primary group-hover:text-accent">{flow.label}</p>
+							<p class="text-sm font-semibold text-text-primary group-hover:text-accent">
+								{flow.label}
+							</p>
 							<p class="mt-0.5 text-xs text-text-tertiary">{flow.description}</p>
 						</button>
 					{/each}
@@ -317,8 +334,11 @@
 	{/if}
 
 	<!-- Helpful note -->
-	<div class="rounded-lg border border-border-default bg-surface-raised px-4 py-3 text-xs text-text-tertiary">
-		All previews open in a new browser window. Impersonation is automatically set for individual and coach lenses.
-		Stakeholder previews use token-based access (no impersonation needed). Your admin session stays active here.
+	<div
+		class="rounded-lg border border-border-default bg-surface-raised px-4 py-3 text-xs text-text-tertiary"
+	>
+		All previews open in a new browser window. Impersonation is automatically set for individual and
+		coach lenses. Stakeholder previews use token-based access (no impersonation needed). Your admin
+		session stays active here.
 	</div>
 </section>

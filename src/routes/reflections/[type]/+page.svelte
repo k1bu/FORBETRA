@@ -83,7 +83,7 @@
 		</div>
 		<h1 class="text-3xl font-bold text-text-primary">{reflectionLabel}</h1>
 		<p class="text-base text-text-secondary">
-			Current cycle started on {formatDate(data.cycle.startDate)}. Submit a check-in for each focus
+			Your journey started on {formatDate(data.cycle.startDate)}. Submit a check-in for each focus
 			area below.
 		</p>
 	</header>
@@ -235,7 +235,7 @@
 						type="submit"
 						class="rounded-xl bg-accent px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-accent-hover focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
 					>
-						Save reflection
+						Save check-in
 					</button>
 				</div>
 			</form>

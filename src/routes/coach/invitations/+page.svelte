@@ -548,7 +548,7 @@
 							</div>
 							<!-- Subgoals -->
 							<div class="space-y-2">
-								<p class="text-xs font-semibold text-text-secondary">Sub-objectives (up to 3)</p>
+								<p class="text-xs font-semibold text-text-secondary">Focus areas (up to 3)</p>
 								{#each prefillSubgoals as subgoal, i (i)}
 									<div class="flex gap-2">
 										<input
@@ -577,7 +577,7 @@
 										type="button"
 										onclick={addPrefillSubgoal}
 										class="text-xs font-medium text-accent hover:text-accent-hover"
-										>+ Add sub-objective</button
+										>+ Add focus area</button
 									>
 								{/if}
 							</div>

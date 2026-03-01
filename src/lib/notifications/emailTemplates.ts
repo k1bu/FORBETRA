@@ -33,11 +33,7 @@ export type CoachStakeholderFeedbackReceivedData = {
 };
 
 const escapeHtml = (str: string) =>
-	str
-		.replace(/&/g, '&amp;')
-		.replace(/</g, '&lt;')
-		.replace(/>/g, '&gt;')
-		.replace(/"/g, '&quot;');
+	str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 const baseUrl =
 	process.env.PUBLIC_APP_URL || process.env.VERCEL_URL
@@ -79,13 +75,13 @@ export const emailTemplates = {
 				<div style="background: white; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
 					<p style="font-size: 16px; margin-top: 0;">Hi ${name},</p>
 					<p style="font-size: 16px;">You're all set! Your development journey starts now.</p>
-					<p style="font-size: 16px;">Forbetra helps you turn development goals into measurable behaviors through structured reflection and stakeholder feedback.</p>
+					<p style="font-size: 16px;">Forbetra helps you turn development goals into measurable behaviors through structured check-ins and rater feedback.</p>
 					<div style="background: #f1f5f9; padding: 20px; border-radius: 8px; margin: 24px 0;">
 						<p style="margin: 0; font-size: 14px; color: #64748b;"><strong>What's next?</strong></p>
 						<ul style="margin: 12px 0 0 0; padding-left: 20px; font-size: 14px; color: #64748b;">
 							<li>Complete your onboarding to set up your first objective</li>
-							<li>Add stakeholders who can provide feedback</li>
-							<li>Start your weekly reflection cycle</li>
+							<li>Add raters who can provide feedback</li>
+							<li>Start your weekly check-in journey</li>
 						</ul>
 					</div>
 					<div style="text-align: center; margin: 30px 0;">
@@ -97,7 +93,7 @@ export const emailTemplates = {
 			</body>
 			</html>
 		`,
-			text: `Welcome to Forbetra!\n\nHi ${data.individualName || 'there'},\n\nYou're all set! Your development journey starts now.\n\nForbetra helps you turn development goals into measurable behaviors through structured reflection and stakeholder feedback.\n\nWhat's next?\n- Complete your onboarding to set up your first objective\n- Add stakeholders who can provide feedback\n- Start your weekly reflection cycle\n\nGet started: ${data.appUrl || baseUrl}\n\nQuestions? Just reply to this email.${textFooter()}`
+			text: `Welcome to Forbetra!\n\nHi ${data.individualName || 'there'},\n\nYou're all set! Your development journey starts now.\n\nForbetra helps you turn development goals into measurable behaviors through structured check-ins and rater feedback.\n\nWhat's next?\n- Complete your onboarding to set up your first objective\n- Add raters who can provide feedback\n- Start your weekly check-in journey\n\nGet started: ${data.appUrl || baseUrl}\n\nQuestions? Just reply to this email.${textFooter()}`
 		};
 	},
 
@@ -120,7 +116,7 @@ export const emailTemplates = {
 				</div>
 				<div style="background: white; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
 					<p style="font-size: 16px; margin-top: 0;">Hi ${shName},</p>
-					<p style="font-size: 16px;"><strong>${indName}</strong> has invited you to be a stakeholder in their development journey.</p>
+					<p style="font-size: 16px;"><strong>${indName}</strong> has invited you to be a feedback provider in their development journey.</p>
 					<p style="font-size: 16px;">Your role is simple: twice a week, you'll receive a quick link to share feedback on their progress. It takes less than 60 seconds.</p>
 					<div style="background: #f1f5f9; padding: 20px; border-radius: 8px; margin: 24px 0;">
 						<p style="margin: 0; font-size: 14px; color: #64748b;"><strong>What to expect:</strong></p>
@@ -130,7 +126,7 @@ export const emailTemplates = {
 							<li>Your feedback helps them track real progress</li>
 						</ul>
 					</div>
-					<p style="font-size: 16px;">You'll receive your first feedback request when ${indName} submits their first reflection.</p>
+					<p style="font-size: 16px;">You'll receive your first feedback request when ${indName} submits their first check-in.</p>
 					<p style="font-size: 14px; color: #64748b; margin-top: 30px;">Thank you for supporting their growth!</p>
 				</div>
 			${emailFooter()}
@@ -212,10 +208,7 @@ export const emailTemplates = {
 	},
 
 	reminderBase: (data: EmailTemplateData) => {
-		const dayLabel =
-			data.reflectionType === 'RATING_A'
-				? 'Wednesday'
-				: 'Friday';
+		const dayLabel = data.reflectionType === 'RATING_A' ? 'Wednesday' : 'Friday';
 		const name = escapeHtml(data.individualName || 'there');
 		const objTitle = data.objectiveTitle ? escapeHtml(data.objectiveTitle) : '';
 		return {
@@ -291,7 +284,7 @@ export const emailTemplates = {
 		const objTitle = data.objectiveTitle ? escapeHtml(data.objectiveTitle) : '';
 		const cycle = data.cycleLabel ? escapeHtml(data.cycleLabel) : '';
 		return {
-			subject: 'Your cycle is complete — your growth report is ready',
+			subject: 'Your journey is complete — your growth report is ready',
 			html: `
 			<!DOCTYPE html>
 			<html>
@@ -302,11 +295,11 @@ export const emailTemplates = {
 			<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #334155; max-width: 600px; margin: 0 auto; padding: 20px;">
 				<div style="display: none; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #ffffff;">Your growth report is ready</div>
 				<div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
-					<h1 style="color: white; margin: 0; font-size: 28px; font-weight: 600;">Cycle Complete!</h1>
+					<h1 style="color: white; margin: 0; font-size: 28px; font-weight: 600;">Journey Complete!</h1>
 				</div>
 				<div style="background: white; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
 					<p style="font-size: 16px; margin-top: 0;">Hi ${name},</p>
-					<p style="font-size: 16px;">Congratulations — you've completed your cycle${cycle ? ` <strong>${cycle}</strong>` : ''}!</p>
+					<p style="font-size: 16px;">Congratulations — you've completed your journey${cycle ? ` <strong>${cycle}</strong>` : ''}!</p>
 					${objTitle ? `<p style="font-size: 14px; color: #64748b; background: #f1f5f9; padding: 12px; border-radius: 6px; margin: 20px 0;"><strong>Objective:</strong> ${objTitle}</p>` : ''}
 					<p style="font-size: 16px;">Your growth report is ready — it summarizes your progress, key patterns, and areas for continued development.</p>
 					<div style="text-align: center; margin: 30px 0;">
@@ -398,8 +391,9 @@ export const emailTemplates = {
 		effortTrend: 'up' | 'down' | 'stable';
 		performanceTrend: 'up' | 'down' | 'stable';
 	}) => {
-		const trendIcon = (trend: string) => trend === 'up' ? '↑' : trend === 'down' ? '↓' : '→';
-		const trendLabel = (trend: string) => trend === 'up' ? 'trending up' : trend === 'down' ? 'trending down' : 'stable';
+		const trendIcon = (trend: string) => (trend === 'up' ? '↑' : trend === 'down' ? '↓' : '→');
+		const trendLabel = (trend: string) =>
+			trend === 'up' ? 'trending up' : trend === 'down' ? 'trending down' : 'stable';
 		const indName = escapeHtml(data.individualName || 'your participant');
 		const shName = escapeHtml(data.stakeholderName || 'there');
 		return {

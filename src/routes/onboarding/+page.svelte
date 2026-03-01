@@ -582,7 +582,7 @@
 							Welcome{data.user.name ? `, ${data.user.name}` : ''}!
 						</h1>
 						<p class="mx-auto max-w-2xl text-lg leading-relaxed text-text-secondary md:text-xl">
-							Let's set up your first growth cycle. We'll help you define clear objectives, break
+							Let's set up your first growth journey. We'll help you define clear objectives, break
 							them into observable behaviors, and gather feedback from people who see you in action.
 						</p>
 					</div>
@@ -656,7 +656,7 @@
 							</li>
 							<li class="flex items-center gap-2">
 								<span class="h-1.5 w-1.5 shrink-0 rounded-full bg-success"></span>
-								360 perception gaps — where your self-view differs from stakeholders'
+								360 perception gaps — where your self-view differs from your raters'
 							</li>
 							<li class="flex items-center gap-2">
 								<span class="h-1.5 w-1.5 shrink-0 rounded-full bg-success"></span>
@@ -968,7 +968,7 @@
 								<div class="mb-6 space-y-2">
 									<h2 class="text-3xl font-bold text-text-primary">Check-In Days and Times</h2>
 									<p class="text-text-secondary">
-										Set up your cycle timeline and choose when you want to check in. Consistency
+										Set up your journey timeline and choose when you want to check in. Consistency
 										matters more than frequency.
 									</p>
 								</div>
@@ -1076,7 +1076,7 @@
 											{/if}
 											{#if endDatePreview}
 												<p class="text-sm text-text-tertiary">
-													Your cycle will end on <strong>{endDatePreview}</strong>
+													Your journey will end on <strong>{endDatePreview}</strong>
 												</p>
 											{/if}
 											<p class="text-xs text-text-muted">
@@ -1550,10 +1550,10 @@
 						<div class="animate-in fade-in slide-in-from-right-4 space-y-6 duration-300">
 							<div class="rounded-2xl border border-border-default bg-surface-raised p-8">
 								<div class="mb-6 space-y-2">
-									<h2 class="text-3xl font-bold text-text-primary">Invite your stakeholders</h2>
+									<h2 class="text-3xl font-bold text-text-primary">Invite your raters</h2>
 									<p class="text-text-secondary">
 										Add 3-5 people who regularly observe you in action. They'll provide feedback on
-										your progress throughout the cycle. This step is optional — you can add them
+										your progress throughout the journey. This step is optional — you can add them
 										later.
 									</p>
 								</div>
@@ -1569,7 +1569,7 @@
 									<!-- Cadence -->
 									<div class="space-y-3">
 										<p class="text-sm font-semibold text-text-secondary">
-											How often should stakeholders rate you?
+											How often should raters provide feedback?
 										</p>
 										<div class="grid gap-2 md:grid-cols-3">
 											<label
@@ -1703,10 +1703,10 @@
 										/>
 										<div>
 											<span class="text-sm font-semibold text-text-secondary"
-												>Allow stakeholders to see my self-scores after they submit feedback</span
+												>Allow raters to see my self-scores after they submit feedback</span
 											>
 											<p class="text-xs text-text-tertiary">
-												When enabled, stakeholders see how you rated yourself so they can compare
+												When enabled, raters see how you rated yourself so they can compare
 												perspectives.
 											</p>
 										</div>
@@ -1722,12 +1722,12 @@
 										/>
 										<div>
 											<span class="text-sm font-semibold text-text-secondary"
-												>Send introductory notification to stakeholders when they're added</span
+												>Send introductory notification to raters when they're added</span
 											>
 											<p class="text-xs text-text-tertiary">
-												When enabled, stakeholders receive a welcome email (and SMS if they have a
-												phone number) explaining their role. Turn off if you'd prefer to introduce
-												them yourself.
+												When enabled, raters receive a welcome email (and SMS if they have a phone
+												number) explaining their role. Turn off if you'd prefer to introduce them
+												yourself.
 											</p>
 										</div>
 									</label>
@@ -1933,8 +1933,8 @@
 										<p class="font-medium text-accent">What happens next?</p>
 										{#if sendStakeholderIntro}
 											<p class="mt-1 text-text-secondary">
-												When you complete setup, stakeholders with name and email will receive a
-												welcome notification (email{stakeholderForms.some((s) => s.phone.trim())
+												When you complete setup, raters with name and email will receive a welcome
+												notification (email{stakeholderForms.some((s) => s.phone.trim())
 													? ' + SMS for those with a phone number'
 													: ''}) introducing them to the process. Feedback requests will follow on
 												the schedule you set above.
@@ -2108,11 +2108,11 @@
 													<p
 														class="mb-2 text-xs font-bold tracking-wide text-text-tertiary uppercase"
 													>
-														Behavioral Sub-objectives
+														Behavioral Focus Areas
 													</p>
 													<p class="mb-3 text-xs text-text-secondary">
-														Click any sub-objective to add it to your form, then customize it to
-														your needs.
+														Click any focus area to add it to your form, then customize it to your
+														needs.
 													</p>
 													<div class="space-y-2">
 														{#each objective.subgoals as subgoal (subgoal.label)}

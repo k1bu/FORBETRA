@@ -69,9 +69,7 @@
 		<div>
 			<h1 class="text-lg font-bold text-text-primary">Scorecard</h1>
 			<p class="text-xs text-text-muted">{data.objectiveTitle}</p>
-			<p class="mt-0.5 text-[10px] text-text-tertiary">
-				Your self-perception vs. stakeholder feedback
-			</p>
+			<p class="mt-0.5 text-[10px] text-text-tertiary">Your self-perception vs. rater feedback</p>
 		</div>
 		<div class="flex items-center gap-2">
 			<button
@@ -144,7 +142,7 @@
 				class="flex items-center gap-2 rounded-lg border border-success/20 bg-success-muted px-4 py-2.5"
 			>
 				<span class="text-sm text-success"
-					>Well-aligned this week — you and your stakeholders see eye-to-eye.</span
+					>Well-aligned this week — you and your raters see eye-to-eye.</span
 				>
 			</div>
 		{:else if anyLarge}
@@ -350,11 +348,11 @@
 		>
 			<MessageSquare class="mx-auto mb-2 h-6 w-6 text-text-muted" />
 			<p class="text-sm font-medium text-text-secondary">
-				No stakeholder data yet for week {data.viewWeek}
+				No rater data yet for week {data.viewWeek}
 			</p>
 			<p class="mt-1 text-xs text-text-tertiary">
-				Once your stakeholders submit feedback, their scores will appear here alongside yours to
-				reveal perception gaps.
+				Once your raters submit feedback, their scores will appear here alongside yours to show
+				perception gaps.
 			</p>
 		</div>
 	{/if}

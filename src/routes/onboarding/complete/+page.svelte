@@ -45,9 +45,11 @@
 		</div>
 
 		<div class="rounded-2xl border border-border-default bg-surface-raised p-5">
-			<h2 class="text-xs font-semibold tracking-wide text-text-tertiary uppercase">Cycle</h2>
+			<h2 class="text-xs font-semibold tracking-wide text-text-tertiary uppercase">Journey</h2>
 			{#if data.cycle}
-				<p class="mt-2 text-lg font-semibold text-text-primary">{data.cycle.label ?? 'Cycle 1'}</p>
+				<p class="mt-2 text-lg font-semibold text-text-primary">
+					{data.cycle.label ?? 'Journey 1'}
+				</p>
 				<p class="text-sm text-text-secondary">
 					{formatDate(data.cycle.startDate)} &rarr; {formatDate(data.cycle.endDate)}
 				</p>
@@ -60,9 +62,9 @@
 			<div class="rounded-2xl border border-border-default bg-surface-raised p-5">
 				<h2 class="text-xs font-semibold tracking-wide text-text-tertiary uppercase">
 					{#if data.subgoals.length === 1}
-						Sub-objective
+						Focus Area
 					{:else}
-						Sub-objectives ({data.subgoals.length})
+						Focus Areas ({data.subgoals.length})
 					{/if}
 				</h2>
 				<div class="mt-2 space-y-3">
