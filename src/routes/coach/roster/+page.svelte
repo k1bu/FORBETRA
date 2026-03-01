@@ -213,7 +213,16 @@
 					<li><span class="font-medium text-text-primary">Roster</span></li>
 				</ol>
 			</nav>
-			<h1 class="text-3xl font-bold text-text-primary">Client Roster</h1>
+			<div class="flex items-center gap-3">
+				<h1 class="text-3xl font-bold text-text-primary">Client Roster</h1>
+				{@const activeCount = data.clients.filter((c) => !c.archived).length}
+				{@const archivedCount = data.clients.filter((c) => c.archived).length}
+				<span class="rounded-full bg-accent-muted px-2.5 py-0.5 text-xs font-semibold text-accent">
+					{activeCount} active{#if archivedCount > 0}<span class="text-text-muted">
+							· {archivedCount} archived</span
+						>{/if}
+				</span>
+			</div>
 			<p class="mt-2 text-text-secondary">
 				Review active and archived individuals linked to your practice
 			</p>
@@ -273,10 +282,14 @@
 				>
 					{#each filteredClients as client (client.id)}
 						<button
-							class="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition-all {selectedClientId ===
+							class="flex w-full items-center gap-3 rounded-lg border-l-2 px-3 py-3 text-left transition-all {selectedClientId ===
 							client.id
-								? 'border border-accent/50 bg-accent-muted'
-								: 'border border-transparent hover:border-border-default hover:bg-surface-subtle'}"
+								? 'border border-accent/50 border-l-accent bg-accent-muted'
+								: client.alerts && client.alerts.some((a) => a.severity === 'high')
+									? 'border border-transparent border-l-error hover:border-border-default hover:bg-surface-subtle'
+									: client.alerts && client.alerts.length > 0
+										? 'border border-transparent border-l-warning hover:border-border-default hover:bg-surface-subtle'
+										: 'border border-transparent border-l-transparent hover:border-border-default hover:bg-surface-subtle'}"
 							onclick={() => selectClient(client.id)}
 						>
 							<div class="min-w-0 flex-1">

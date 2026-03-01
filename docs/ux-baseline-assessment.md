@@ -958,7 +958,8 @@ Phase J broke the "Coach dimensions stuck at 7.3" pattern — IA and TC both jum
 | 2026-03-01 | Phase T actual |   8.10   |    8.08    | 8.04  |    8.21     | Tab labels, dashboard disclosure, onboarding progress. +0.00                |
 | 2026-03-01 | Phase U actual |   8.12   |    8.11    | 8.07  |    8.21     | Check-in messaging, scorecard gaps, coach nav/roster. +0.02                 |
 | 2026-03-01 | Phase V actual |   8.15   |    8.13    | 8.10  |    8.23     | Stakeholder impact summary, quick-nav, prep provenance. +0.03               |
-|            | Target         |   9.3+   |    9.3+    | 9.0+  |    9.5+     | Final goal. Remaining gap: 1.15 pts.                                        |
+| 2026-03-01 | Phase W actual |   8.17   |    8.13    | 8.13  |    8.24     | Keyboard shortcuts, roster alerts, post-submission process. +0.02           |
+|            | Target         |   9.3+   |    9.3+    | 9.0+  |    9.5+     | Final goal. Remaining gap: 1.13 pts.                                        |
 
 ---
 

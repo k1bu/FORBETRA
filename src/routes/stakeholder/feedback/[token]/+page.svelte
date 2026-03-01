@@ -371,19 +371,29 @@
 
 				<!-- What happens next -->
 				<div class="rounded-xl border border-border-default bg-surface-raised p-5">
-					<p class="mb-3 text-sm font-semibold text-text-primary">What happens next</p>
-					<ul class="space-y-2 text-xs text-text-secondary">
+					<p class="mb-3 text-sm font-semibold text-text-primary">How your feedback gets used</p>
+					<ul class="space-y-2.5 text-xs text-text-secondary">
 						<li class="flex items-start gap-2">
-							<span class="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent"></span>
-							Your ratings are combined with other stakeholder perspectives
+							<span
+								class="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-accent/10 text-[9px] font-bold text-accent"
+								>1</span
+							>
+							Your scores are compared against {data.reflection.participantName}'s self-ratings to
+							reveal blind spots
 						</li>
 						<li class="flex items-start gap-2">
-							<span class="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent"></span>
-							{data.reflection.participantName} and their coach will review insights this week
+							<span
+								class="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-accent/10 text-[9px] font-bold text-accent"
+								>2</span
+							>
+							AI synthesizes all perspectives into actionable coaching insights by Sunday evening
 						</li>
 						<li class="flex items-start gap-2">
-							<span class="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent"></span>
-							You'll be invited to share feedback again next cycle
+							<span
+								class="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-accent/10 text-[9px] font-bold text-accent"
+								>3</span
+							>
+							Their coach uses your input to guide the next session
 						</li>
 					</ul>
 					<p class="mt-3 text-[10px] text-text-muted">

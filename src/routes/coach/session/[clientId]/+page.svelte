@@ -153,6 +153,14 @@
 	});
 </script>
 
+<svelte:window
+	onkeydown={(e) => {
+		if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+		const idx = parseInt(e.key) - 1;
+		if (idx >= 0 && idx < tabs.length) activeTab = tabs[idx].id;
+	}}
+/>
+
 <svelte:head>
 	<title>Client Session | Forbetra</title>
 </svelte:head>
@@ -284,12 +292,12 @@
 		class="flex gap-1 rounded-xl border border-border-default bg-surface-subtle p-1"
 		role="tablist"
 	>
-		{#each tabs as tab (tab.id)}
+		{#each tabs as tab, tabIdx (tab.id)}
 			<button
 				type="button"
 				role="tab"
 				aria-selected={activeTab === tab.id}
-				title={tab.desc}
+				title="{tab.desc} (press {tabIdx + 1})"
 				onclick={() => (activeTab = tab.id)}
 				class="flex flex-1 flex-col items-center gap-0.5 rounded-lg px-4 py-2 transition-all {activeTab ===
 				tab.id
@@ -298,6 +306,8 @@
 			>
 				<span class="text-sm font-semibold">
 					{tab.label}
+					<span class="ml-0.5 hidden text-[9px] font-normal opacity-50 sm:inline">{tabIdx + 1}</span
+					>
 					{#if tab.id === 'prep' && data.alerts.length + data.client.alerts.length > 0}
 						<span class="ml-1 rounded-full bg-warning px-1.5 text-[10px] font-bold text-white"
 							>{data.alerts.length + data.client.alerts.length}</span
