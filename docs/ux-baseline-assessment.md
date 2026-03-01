@@ -633,14 +633,79 @@ No Phase E changes affected stakeholder screens.
 
 ---
 
-## 11. Score Update Log
+## 11. Phase F Results (Prep freshness, modal streamline, milestones, onboarding pre-fill)
 
-| Date       | Phase          | Platform | Individual | Coach | Stakeholder | Notes                                          |
-| ---------- | -------------- | :------: | :--------: | :---: | :---------: | ---------------------------------------------- |
-| 2026-02-28 | Baseline       |   6.87   |    6.73    | 6.27  |    7.84     | Full codebase walkthrough, all personas        |
-| 2026-02-28 | Phase A actual |   7.27   |    7.20    | 6.85  |    7.89     | 8 fixes shipped, 2 vetoed. +0.40 lift.         |
-| 2026-02-28 | Phase B actual |   7.39   |    7.44    | 6.89  |    7.89     | 3 fixes + landing copy. +0.12 lift.            |
-| 2026-02-28 | Phase C actual |   7.42   |    7.45    | 6.91  |    7.97     | 4 fixes, 2 resolved/N/A. +0.03 lift.           |
-| 2026-02-28 | Phase D actual |   7.54   |    7.50    | 7.23  |    7.97     | Dashboard overhaul + note prompts. +0.12       |
-| 2026-02-28 | Phase E actual |   7.63   |    7.62    | 7.35  |    7.97     | History, scoring guide, alerts, session. +0.09 |
-|            | Target         |   9.3+   |    9.3+    | 9.0+  |    9.5+     | Final goal. Remaining gap: 1.67 pts.           |
+**What shipped:**
+
+1. **AI prep freshness indicator** — Coach session Prep tab shows "Up to date" (green) or "X new data points" (warning) badge comparing prep timestamp against latest reflections/feedback.
+2. **Stakeholder welcome modal streamline** — Reduced from 6 verbose sections to 4 compact ones. 3 separate task cards → compact `<ul>` list. "Why it matters" merged into intro. Privacy condensed to one line. CTA changed to "Rate now · ~60 sec". Added Esc dismiss.
+3. **Milestone-aware messaging** — Individual hub subtitle adapts to cycle state: "Week 1 — your baseline is being set", "Halfway through — week 6 of 12", streak recognition, pacing feedback.
+4. **Coach onboarding pre-fill fields** — Step 3 now has toggle-able pre-fill section with objective title + stakeholder name/email inputs, stored in `payload` JSON field.
+
+### Score Movement
+
+```
+Platform: 7.63 → 7.71 (+0.08)
+Individual: 7.62 → 7.66 (+0.04)
+Coach: 7.35 → 7.46 (+0.11)
+Stakeholder: 7.97 → 8.11 (+0.14) ← first movement since Phase C
+```
+
+#### Individual (was 7.62 → 7.66, +0.04)
+
+| #   | Dimension                 | Phase E | Phase F | Delta | Evidence                                                                                             |
+| --- | ------------------------- | :-----: | :-----: | :---: | ---------------------------------------------------------------------------------------------------- |
+| 6   | Feedback & Progress (FP)  |   7.9   | **8.0** | +0.1  | Milestone messages ("Halfway through", "Final stretch") add cycle progress visibility.               |
+| 9   | Emotional Engagement (EE) |   7.1   | **7.3** | +0.2  | Streak recognition ("5-check-in streak"), pacing feedback, milestone awareness create connection.    |
+| 10  | Value Perception (VP)     |   7.5   | **7.6** | +0.1  | Cycle milestones make the journey feel purposeful — "Week 1 — baseline being set" sets expectations. |
+|     | All others                |    —    |    —    |   0   | FI, CP, OE, CT, IA, CL, TC unchanged.                                                                |
+
+#### Coach (was 7.35 → 7.46, +0.11)
+
+| #   | Dimension                 | Phase E | Phase F | Delta | Evidence                                                                                                   |
+| --- | ------------------------- | :-----: | :-----: | :---: | ---------------------------------------------------------------------------------------------------------- |
+| 3   | Onboarding Ease (OE)      |   7.0   | **7.3** | +0.3  | Pre-fill accessible during onboarding, not hidden on a separate page. Coach can set up client immediately. |
+| 4   | Core Task Flow (CT)       |   8.0   | **8.1** | +0.1  | Invite-with-prefill is now one step instead of two page visits.                                            |
+| 6   | Feedback & Progress (FP)  |   7.0   | **7.2** | +0.2  | Freshness badge answers "is this prep current?" — clear signal to regenerate.                              |
+| 8   | Trust & Credibility (TC)  |   7.0   | **7.2** | +0.2  | Transparency about data staleness builds trust in AI output.                                               |
+| 9   | Emotional Engagement (EE) |   6.2   | **6.4** | +0.2  | Pre-fill makes onboarding feel productive — coach is setting up the whole client experience.               |
+| 10  | Value Perception (VP)     |   7.8   | **7.9** | +0.1  | Freshness indicator makes AI prep more actionable — knowing when to regenerate.                            |
+|     | All others                |    —    |    —    |   0   | FI, CP, IA, CL unchanged.                                                                                  |
+
+#### Stakeholder (was 7.97 → 8.11, +0.14)
+
+| #   | Dimension               | Phase E | Phase F | Delta | Evidence                                                                                                                  |
+| --- | ----------------------- | :-----: | :-----: | :---: | ------------------------------------------------------------------------------------------------------------------------- |
+| 1   | First Impression (FI)   |   8.0   | **8.2** | +0.2  | Cleaner, less overwhelming first screen. Professional density over verbose cards.                                         |
+| 2   | Clarity of Purpose (CP) |   8.5   | **8.6** | +0.1  | Merged "why it matters" into welcome intro — tighter, more cohesive pitch.                                                |
+| 4   | Core Task Flow (CT)     |   7.7   | **7.9** | +0.2  | Faster path to form — less scrolling, less reading before action.                                                         |
+| 7   | Cognitive Load (CL)     |   7.1   | **7.5** | +0.4  | 3 separate verbose cards → compact list. ~50% less text. Privacy condensed. "Why it matters" absorbed. Esc dismiss added. |
+|     | All others              |    —    |    —    |   0   | OE, IA, FP, TC, EE, VP unchanged.                                                                                         |
+
+### Lowest Remaining Dimensions
+
+| Rank | User Type  | Dimension            | Score | Gap to 8.5 |
+| ---- | ---------- | -------------------- | :---: | :--------: |
+| 1    | Coach      | Emotional Engagement |  6.4  |    2.1     |
+| 2    | Coach      | Cognitive Load       |  7.0  |    1.5     |
+| 3    | Coach      | Feedback & Progress  |  7.2  |    1.3     |
+| 4    | Coach      | Trust & Credibility  |  7.2  |    1.3     |
+| 5    | Individual | Cognitive Load       |  7.3  |    1.2     |
+| 6    | Coach      | Onboarding Ease      |  7.3  |    1.2     |
+| 7    | Individual | Emotional Engagement |  7.3  |    1.2     |
+| 8    | Coach      | Info Architecture    |  7.3  |    1.2     |
+
+---
+
+## 12. Score Update Log
+
+| Date       | Phase          | Platform | Individual | Coach | Stakeholder | Notes                                               |
+| ---------- | -------------- | :------: | :--------: | :---: | :---------: | --------------------------------------------------- |
+| 2026-02-28 | Baseline       |   6.87   |    6.73    | 6.27  |    7.84     | Full codebase walkthrough, all personas             |
+| 2026-02-28 | Phase A actual |   7.27   |    7.20    | 6.85  |    7.89     | 8 fixes shipped, 2 vetoed. +0.40 lift.              |
+| 2026-02-28 | Phase B actual |   7.39   |    7.44    | 6.89  |    7.89     | 3 fixes + landing copy. +0.12 lift.                 |
+| 2026-02-28 | Phase C actual |   7.42   |    7.45    | 6.91  |    7.97     | 4 fixes, 2 resolved/N/A. +0.03 lift.                |
+| 2026-02-28 | Phase D actual |   7.54   |    7.50    | 7.23  |    7.97     | Dashboard overhaul + note prompts. +0.12            |
+| 2026-02-28 | Phase E actual |   7.63   |    7.62    | 7.35  |    7.97     | History, scoring guide, alerts, session. +0.09      |
+| 2026-02-28 | Phase F actual |   7.71   |    7.66    | 7.46  |    8.11     | Prep freshness, modal streamline, milestones. +0.08 |
+|            | Target         |   9.3+   |    9.3+    | 9.0+  |    9.5+     | Final goal. Remaining gap: 1.59 pts.                |
