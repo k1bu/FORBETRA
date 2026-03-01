@@ -16,7 +16,8 @@
 		ChevronRight,
 		ChevronDown,
 		ArrowUpDown,
-		Lock
+		Lock,
+		Trophy
 	} from 'lucide-svelte';
 	import InfoTip from '$lib/components/InfoTip.svelte';
 
@@ -24,6 +25,37 @@
 
 	if (!data) {
 		throw new Error('Page data is missing');
+	}
+
+	// Maturity stage helpers
+	const stage = $derived(data.maturityStage ?? 'established');
+	const isGrowingPlus = $derived(stage === 'growing' || stage === 'established');
+	const isEstablished = $derived(stage === 'established');
+
+	// Unlock celebration
+	let unlockCelebration = $state<'growing' | 'established' | null>(null);
+	$effect(() => {
+		try {
+			if (stage === 'growing' && !localStorage.getItem('forbetra_unlock_growing')) {
+				unlockCelebration = 'growing';
+			} else if (stage === 'established' && !localStorage.getItem('forbetra_unlock_established')) {
+				unlockCelebration = 'established';
+			}
+		} catch {
+			/* SSR / localStorage unavailable */
+		}
+	});
+	function dismissCelebration() {
+		try {
+			if (unlockCelebration === 'growing') {
+				localStorage.setItem('forbetra_unlock_growing', 'true');
+			} else if (unlockCelebration === 'established') {
+				localStorage.setItem('forbetra_unlock_established', 'true');
+			}
+		} catch {
+			/* ignore */
+		}
+		unlockCelebration = null;
 	}
 
 	let showRecentActivity = $state(false);
@@ -338,6 +370,67 @@
 		{/if}
 	</div>
 
+	<!-- Unlock Celebration -->
+	{#if unlockCelebration}
+		<div
+			class="flex items-start gap-3 rounded-xl border border-accent/30 bg-gradient-to-r from-accent/10 to-transparent p-5"
+		>
+			<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent/15">
+				<Trophy class="h-5 w-5 text-accent" />
+			</div>
+			<div class="min-w-0 flex-1">
+				{#if unlockCelebration === 'growing'}
+					<p class="text-base font-semibold text-text-primary">Scorecard unlocked!</p>
+					<p class="mt-1 text-sm text-text-secondary">
+						You've built enough data to unlock your Scorecard — see how your raters perceive you.
+					</p>
+					<!-- eslint-disable svelte/no-navigation-without-resolve -->
+					<div class="mt-3 flex gap-2">
+						<a
+							href="/individual/scorecard"
+							onclick={dismissCelebration}
+							class="rounded-lg bg-accent px-4 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-accent-hover"
+						>
+							View Scorecard
+						</a>
+						<button
+							type="button"
+							onclick={dismissCelebration}
+							class="rounded-lg border border-border-default px-4 py-1.5 text-xs font-semibold text-text-secondary transition-colors hover:bg-surface-subtle"
+						>
+							Later
+						</button>
+					</div>
+					<!-- eslint-enable svelte/no-navigation-without-resolve -->
+				{:else}
+					<p class="text-base font-semibold text-text-primary">Full platform unlocked!</p>
+					<p class="mt-1 text-sm text-text-secondary">
+						Your data is now deep enough for advanced analytics and AI conversation. Explore your
+						full toolkit.
+					</p>
+					<!-- eslint-disable svelte/no-navigation-without-resolve -->
+					<div class="mt-3 flex gap-2">
+						<a
+							href="/individual/ask"
+							onclick={dismissCelebration}
+							class="rounded-lg bg-accent px-4 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-accent-hover"
+						>
+							Try Ask AI
+						</a>
+						<button
+							type="button"
+							onclick={dismissCelebration}
+							class="rounded-lg border border-border-default px-4 py-1.5 text-xs font-semibold text-text-secondary transition-colors hover:bg-surface-subtle"
+						>
+							Later
+						</button>
+					</div>
+					<!-- eslint-enable svelte/no-navigation-without-resolve -->
+				{/if}
+			</div>
+		</div>
+	{/if}
+
 	<!-- Streak Milestone Card -->
 	{#if streakMilestone}
 		<div
@@ -501,7 +594,7 @@
 	{/if}
 
 	<!-- ═══ ZONE 3: At-a-Glance (compact row) ═══ -->
-	{#if data.isOnboardingComplete && (data.myLastRatings || data.stakeholdersLastRatings || data.summary)}
+	{#if isGrowingPlus && data.isOnboardingComplete && (data.myLastRatings || data.stakeholdersLastRatings || data.summary)}
 		<div
 			class="anim-stagger rounded-xl border border-border-default bg-surface-raised p-4"
 			style="--stagger: 1"
@@ -636,35 +729,37 @@
 		<!-- eslint-disable svelte/no-navigation-without-resolve -->
 		<div class="anim-stagger flex gap-2 overflow-x-auto" style="--stagger: 2">
 			<a
-				href="/individual/scorecard"
-				class="flex items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-accent/30 hover:text-accent"
-			>
-				<ArrowUpDown class="h-3 w-3" /> Scorecard
-			</a>
-			<a
-				href="/individual/insights"
-				class="flex items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-accent/30 hover:text-accent"
-			>
-				<Sparkles class="h-3 w-3" /> Insights
-			</a>
-			<a
-				href="/individual/stakeholders"
-				class="flex items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-accent/30 hover:text-accent"
-			>
-				<User class="h-3 w-3" /> Stakeholders
-			</a>
-			<a
 				href="/reflections/checkin"
 				class="flex items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-accent/30 hover:text-accent"
 			>
 				<Calendar class="h-3 w-3" /> Check-in
 			</a>
+			<a
+				href="/individual/stakeholders"
+				class="flex items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-accent/30 hover:text-accent"
+			>
+				<User class="h-3 w-3" /> Raters
+			</a>
+			{#if isGrowingPlus}
+				<a
+					href="/individual/scorecard"
+					class="flex items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-accent/30 hover:text-accent"
+				>
+					<ArrowUpDown class="h-3 w-3" /> Scorecard
+				</a>
+				<a
+					href="/individual/insights"
+					class="flex items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-accent/30 hover:text-accent"
+				>
+					<Sparkles class="h-3 w-3" /> Insights
+				</a>
+			{/if}
 		</div>
 		<!-- eslint-enable svelte/no-navigation-without-resolve -->
 	{/if}
 
 	<!-- ═══ ZONE 3a+: Weekly Focus ═══ -->
-	{#if data.isOnboardingComplete && data.currentWeek && data.currentWeek > 1}
+	{#if isGrowingPlus && data.isOnboardingComplete && data.currentWeek && data.currentWeek > 1}
 		{@const gaps = data.perceptionGaps ?? []}
 		{@const bigGaps = gaps.filter((g) => g.maxAbsGap > 2)}
 		{@const rate = data.summary?.completionRate ?? 0}
@@ -728,7 +823,7 @@
 	{/if}
 
 	<!-- ═══ ZONE 3b: Perception Gaps ═══ -->
-	{#if data.perceptionGaps && data.perceptionGaps.length > 0}
+	{#if isEstablished && data.perceptionGaps && data.perceptionGaps.length > 0}
 		{@const significantGaps = data.perceptionGaps.filter((g) => g.maxAbsGap > 1)}
 		{#if significantGaps.length > 0}
 			<!-- eslint-disable svelte/no-navigation-without-resolve -->
@@ -774,7 +869,7 @@
 	{/if}
 
 	<!-- ═══ ZONE 3c: Progress Narrative ═══ -->
-	{#if data.isOnboardingComplete && data.summary && data.currentWeek && data.currentWeek > 1}
+	{#if isGrowingPlus && data.isOnboardingComplete && data.summary && data.currentWeek && data.currentWeek > 1}
 		{@const rate = data.summary.completionRate ?? 0}
 		{@const streak = data.summary.currentStreak ?? 0}
 		{@const stk = data.summary.totalStakeholders ?? 0}
@@ -794,7 +889,7 @@
 	{/if}
 
 	<!-- ═══ ZONE 4: Quick Insight (single) + AI Insight Teaser ═══ -->
-	{#if quickInsights.length > 0 || data.latestInsight}
+	{#if isGrowingPlus && (quickInsights.length > 0 || data.latestInsight)}
 		<div class="anim-stagger flex flex-col gap-2" style="--stagger: 3">
 			<div class="flex items-center gap-2">
 				<p class="text-[10px] font-semibold tracking-widest text-text-muted uppercase">Insights</p>
@@ -844,7 +939,7 @@
 	{/if}
 
 	<!-- ═══ ZONE 5: Recent Activity (collapsible) ═══ -->
-	{#if data.recentNotes && data.recentNotes.length > 0}
+	{#if isEstablished && data.recentNotes && data.recentNotes.length > 0}
 		<div class="rounded-xl border border-border-default bg-surface-raised p-4">
 			<button
 				type="button"

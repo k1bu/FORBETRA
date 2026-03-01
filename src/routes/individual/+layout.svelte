@@ -1,5 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import type { LayoutData } from './$types';
+	import { SvelteSet } from 'svelte/reactivity';
 	import { page } from '$app/stores';
 	import { resolve } from '$app/paths';
 	import {
@@ -12,10 +14,35 @@
 		Settings,
 		Lightbulb,
 		MoreHorizontal,
-		X
+		X,
+		PenLine
 	} from 'lucide-svelte';
 
-	const { children }: { children: Snippet } = $props();
+	const { data, children }: { data: LayoutData; children: Snippet } = $props();
+
+	const stageOrder: Record<string, number> = { new: 0, growing: 1, established: 2 };
+	const currentStageLevel = $derived(stageOrder[data.maturityStage] ?? 0);
+
+	// Track NEW badge dismissals via localStorage
+	const dismissedBadges = new SvelteSet<string>();
+	$effect(() => {
+		try {
+			const stored = localStorage.getItem('forbetra_nav_seen');
+			if (stored) {
+				for (const item of JSON.parse(stored)) dismissedBadges.add(item);
+			}
+		} catch {
+			/* ignore */
+		}
+	});
+	function dismissBadge(href: string) {
+		dismissedBadges.add(href);
+		try {
+			localStorage.setItem('forbetra_nav_seen', JSON.stringify([...dismissedBadges]));
+		} catch {
+			/* ignore */
+		}
+	}
 
 	let showMoreMenu = $state(false);
 	let moreMenuEl = $state<HTMLElement | undefined>(undefined);
@@ -51,67 +78,88 @@
 		}
 	});
 
-	const navItems = [
+	const allNavItems = [
 		{
 			href: '/individual',
 			label: 'Today',
 			desc: 'Next action & status',
 			icon: CalendarDays,
-			mobileVisible: true
+			mobileVisible: true,
+			minStage: 0
+		},
+		{
+			href: '/reflections/checkin',
+			label: 'Check-in',
+			desc: 'Record your week',
+			icon: PenLine,
+			mobileVisible: true,
+			minStage: 0
 		},
 		{
 			href: '/individual/dashboard',
 			label: 'Dashboard',
 			desc: 'Charts & trends',
 			icon: LayoutDashboard,
-			mobileVisible: true
+			mobileVisible: true,
+			minStage: 1
 		},
 		{
 			href: '/individual/scorecard',
 			label: 'Scorecard',
 			desc: 'Perception gaps',
 			icon: BarChart3,
-			mobileVisible: true
+			mobileVisible: true,
+			minStage: 1
 		},
 		{
 			href: '/individual/stakeholders',
-			label: 'Stakeholders',
+			label: 'Raters',
 			desc: 'Your feedback team',
 			icon: Users,
-			mobileVisible: true
+			mobileVisible: true,
+			minStage: 0
 		},
 		{
 			href: '/individual/insights',
 			label: 'Insights',
 			desc: 'AI analysis',
 			icon: Lightbulb,
-			mobileVisible: true
+			mobileVisible: true,
+			minStage: 1
 		},
 		{
 			href: '/individual/history',
 			label: 'History',
 			desc: 'Past check-ins',
 			icon: History,
-			mobileVisible: false
+			mobileVisible: false,
+			minStage: 2
 		},
 		{
 			href: '/individual/ask',
 			label: 'Ask',
 			desc: 'AI coaching chat',
 			icon: MessageSquare,
-			mobileVisible: false
+			mobileVisible: false,
+			minStage: 2
 		},
 		{
 			href: '/individual/settings',
 			label: 'Settings',
 			desc: 'Profile & cycle',
 			icon: Settings,
-			mobileVisible: false
+			mobileVisible: false,
+			minStage: 0
 		}
 	];
 
-	const mobileItems = navItems.filter((item) => item.mobileVisible);
-	const overflowItems = navItems.filter((item) => !item.mobileVisible);
+	const navItems = $derived(allNavItems.filter((item) => currentStageLevel >= item.minStage));
+	const mobileItems = $derived(navItems.filter((item) => item.mobileVisible));
+	const overflowItems = $derived(navItems.filter((item) => !item.mobileVisible));
+
+	// Show NEW badge on items that just became visible (minStage matches current stage, not lower)
+	const isNewItem = (item: (typeof allNavItems)[0]) =>
+		item.minStage === currentStageLevel && item.minStage > 0 && !dismissedBadges.has(item.href);
 
 	const isActive = (href: string) => {
 		const pathname = $page.url.pathname;
@@ -131,6 +179,7 @@
 				{#each navItems as item (item.href)}
 					<a
 						href={resolve(item.href)}
+						onclick={() => dismissBadge(item.href)}
 						class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors
 							{isActive(item.href)
 							? 'bg-accent-muted text-accent'
@@ -138,10 +187,16 @@
 						aria-current={isActive(item.href) ? 'page' : undefined}
 					>
 						<item.icon class="h-4 w-4 shrink-0" />
-						<div class="min-w-0">
+						<div class="min-w-0 flex-1">
 							<span class="block">{item.label}</span>
 							<span class="block text-[10px] font-normal text-text-muted">{item.desc}</span>
 						</div>
+						{#if isNewItem(item)}
+							<span
+								class="rounded-full bg-accent px-1.5 py-0.5 text-[9px] leading-none font-bold text-white"
+								>NEW</span
+							>
+						{/if}
 					</a>
 				{/each}
 			</nav>
@@ -163,12 +218,19 @@
 			{#each mobileItems as item (item.href)}
 				<a
 					href={resolve(item.href)}
-					class="flex flex-1 flex-col items-center gap-0.5 rounded-lg py-1.5 text-[10px] font-medium transition-colors
+					onclick={() => dismissBadge(item.href)}
+					class="relative flex flex-1 flex-col items-center gap-0.5 rounded-lg py-1.5 text-[10px] font-medium transition-colors
 						{isActive(item.href) ? 'text-accent' : 'text-text-muted'}"
 					aria-current={isActive(item.href) ? 'page' : undefined}
 				>
 					<item.icon class="h-5 w-5" />
 					<span>{item.label}</span>
+					{#if isNewItem(item)}
+						<span
+							class="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-accent"
+							aria-label="New"
+						></span>
+					{/if}
 				</a>
 			{/each}
 
@@ -223,7 +285,10 @@
 						{#each overflowItems as item (item.href)}
 							<a
 								href={resolve(item.href)}
-								onclick={closeMoreMenu}
+								onclick={() => {
+									dismissBadge(item.href);
+									closeMoreMenu();
+								}}
 								role="menuitem"
 								class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
 									{isActive(item.href)
@@ -231,10 +296,16 @@
 									: 'text-text-secondary hover:bg-surface-subtle hover:text-text-primary'}"
 							>
 								<item.icon class="h-4 w-4 shrink-0" />
-								<div>
+								<div class="min-w-0 flex-1">
 									<span class="block">{item.label}</span>
 									<span class="block text-[10px] font-normal text-text-muted">{item.desc}</span>
 								</div>
+								{#if isNewItem(item)}
+									<span
+										class="rounded-full bg-accent px-1.5 py-0.5 text-[9px] leading-none font-bold text-white"
+										>NEW</span
+									>
+								{/if}
 							</a>
 						{/each}
 					</div>
