@@ -165,6 +165,11 @@
 							<span class="text-error">(↓{Math.abs(pDiff)})</span>{/if}
 					</p>
 				{/if}
+				{#if !form.streak || form.streak < 3}
+					<p class="mt-1 text-sm text-text-secondary">
+						This data is already working — your coach and AI insights update within 24 hours.
+					</p>
+				{/if}
 				{#if form.streak && form.streak >= 3}
 					{#if form.streak >= 20}
 						<div class="mt-2 rounded-lg bg-warning/10 px-3 py-2">
@@ -511,7 +516,8 @@
 					{:else}
 						<p class="font-semibold text-text-primary">Ready to save your check-in?</p>
 						<p class="mt-1 text-xs text-text-secondary">
-							Your reflection helps track progress and keeps you accountable.
+							Your scores and notes feed AI-generated weekly insights, help your coach prepare for
+							sessions, and reveal patterns over time.
 						</p>
 					{/if}
 				</div>

@@ -156,6 +156,10 @@
 				>
 			</div>
 		{/if}
+		<div class="flex items-center justify-between px-1 text-[10px] text-text-muted">
+			<span>Your self-rating</span>
+			<span>Stakeholder rating</span>
+		</div>
 		<div class="grid gap-3 sm:grid-cols-2">
 			{#each data.scorecard as row (row.stakeholderId)}
 				<div
@@ -341,10 +345,16 @@
 			{/each}
 		</div>
 	{:else}
-		<div class="rounded-lg border border-border-default bg-surface-raised p-8 text-center">
-			<p class="text-sm text-text-muted">No stakeholder data yet for this week.</p>
+		<div
+			class="rounded-lg border border-dashed border-border-strong bg-surface-raised p-8 text-center"
+		>
+			<MessageSquare class="mx-auto mb-2 h-6 w-6 text-text-muted" />
+			<p class="text-sm font-medium text-text-secondary">
+				No stakeholder data yet for week {data.viewWeek}
+			</p>
 			<p class="mt-1 text-xs text-text-tertiary">
-				Once your stakeholders submit feedback, their scores will appear here.
+				Once your stakeholders submit feedback, their scores will appear here alongside yours to
+				reveal perception gaps.
 			</p>
 		</div>
 	{/if}

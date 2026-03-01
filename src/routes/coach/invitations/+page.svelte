@@ -413,6 +413,8 @@
 						/>
 						{#if emailError}
 							<p class="text-xs text-error">{emailError}</p>
+						{:else}
+							<p class="text-xs text-text-muted">They'll receive a secure invite link via email</p>
 						{/if}
 					</label>
 					<label class="space-y-1 text-sm">
@@ -737,15 +739,18 @@
 
 			{#if filteredInvitations.length === 0}
 				<div
-					class="rounded-xl border border-dashed border-border-strong bg-surface-raised p-6 text-center"
+					class="rounded-xl border border-dashed border-border-strong bg-surface-raised p-8 text-center"
 				>
-					<p class="text-sm text-text-tertiary">
-						{#if activeFilter === 'all'}
-							No invitations yet. Send one using the form to the left.
-						{:else}
-							No {activeFilter} invitations.
-						{/if}
-					</p>
+					{#if activeFilter === 'all'}
+						<Mail class="mx-auto mb-2 h-6 w-6 text-text-muted" />
+						<p class="text-sm font-medium text-text-secondary">No invitations yet</p>
+						<p class="mt-1 text-xs text-text-tertiary">
+							Use the form to invite your first client. They'll receive a secure link to join and
+							connect with you automatically.
+						</p>
+					{:else}
+						<p class="text-sm text-text-tertiary">No {activeFilter} invitations.</p>
+					{/if}
 				</div>
 			{:else}
 				<ul class="space-y-3 text-sm">
