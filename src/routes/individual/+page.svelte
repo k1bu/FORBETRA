@@ -15,8 +15,10 @@
 		Sparkles,
 		ChevronRight,
 		ChevronDown,
-		ArrowUpDown
+		ArrowUpDown,
+		Lock
 	} from 'lucide-svelte';
+	import InfoTip from '$lib/components/InfoTip.svelte';
 
 	const { data }: { data: PageData } = $props();
 
@@ -501,9 +503,12 @@
 			role="region"
 			aria-label="Weekly metrics at a glance"
 		>
-			<p class="mb-3 text-[10px] font-semibold tracking-widest text-text-muted uppercase">
-				This week
-			</p>
+			<div class="mb-3 flex items-center gap-2">
+				<p class="text-[10px] font-semibold tracking-widest text-text-muted uppercase">This week</p>
+				<InfoTip
+					text="Your latest self-ratings and stakeholder averages. The +/- shows change from last week."
+				/>
+			</div>
 			<div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
 				<div>
 					<span class="text-[10px] font-medium tracking-wider text-text-muted uppercase"
@@ -783,7 +788,11 @@
 	<!-- ═══ ZONE 4: Quick Insight (single) + AI Insight Teaser ═══ -->
 	{#if quickInsights.length > 0 || data.latestInsight}
 		<div class="flex flex-col gap-2">
-			<p class="text-[10px] font-semibold tracking-widest text-text-muted uppercase">Insights</p>
+			<div class="flex items-center gap-2">
+				<p class="text-[10px] font-semibold tracking-widest text-text-muted uppercase">Insights</p>
+				<Lock class="h-3 w-3 text-text-muted" />
+				<span class="text-[10px] text-text-muted">Visible to you and your coach</span>
+			</div>
 			{#if quickInsights.length > 0}
 				{@const insight = quickInsights[0]}
 				<div

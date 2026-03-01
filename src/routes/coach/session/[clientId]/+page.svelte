@@ -3,7 +3,15 @@
 	import { enhance } from '$app/forms';
 	import PerformanceEffortChart from '$lib/components/PerformanceEffortChart.svelte';
 	import { addToast } from '$lib/stores/toasts.svelte';
-	import { Target, Sparkles, AlertTriangle, TrendingUp, TrendingDown, Minus } from 'lucide-svelte';
+	import {
+		Target,
+		Sparkles,
+		AlertTriangle,
+		TrendingUp,
+		TrendingDown,
+		Minus,
+		Lock
+	} from 'lucide-svelte';
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
 
@@ -652,7 +660,10 @@
 		<div class="rounded-2xl border border-border-default bg-surface-raised p-6">
 			<div class="mb-4 flex items-baseline justify-between">
 				<h2 class="text-lg font-bold text-text-primary">Coach Notes</h2>
-				<p class="text-[10px] text-text-muted">Notes shape AI-generated prompts and insights</p>
+				<p class="flex items-center gap-1 text-[10px] text-text-muted">
+					<Lock class="h-3 w-3" />
+					Only you can see these. They shape AI prompts and insights.
+				</p>
 			</div>
 
 			<!-- Inline add note form -->

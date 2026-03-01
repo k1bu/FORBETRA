@@ -103,6 +103,10 @@
 		animation: slideUp 0.3s ease-out both;
 		animation-delay: calc(var(--stagger, 0) * 60ms);
 	}
+
+	.anim-pop {
+		animation: pop 0.15s ease-out;
+	}
 }
 
 @keyframes slideUp {
@@ -125,13 +129,26 @@
 	}
 }
 
+@keyframes pop {
+	0% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.15);
+	}
+	100% {
+		transform: scale(1);
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.anim-lift:hover {
 		transform: none;
 	}
 	.anim-slide-up,
 	.anim-fade-in,
-	.anim-stagger {
+	.anim-stagger,
+	.anim-pop {
 		animation: none;
 	}
 }

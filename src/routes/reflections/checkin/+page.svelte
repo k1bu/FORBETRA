@@ -16,7 +16,8 @@
 		Dumbbell,
 		TrendingUp,
 		PenLine,
-		Send
+		Send,
+		Lock
 	} from 'lucide-svelte';
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
@@ -369,7 +370,7 @@
 							aria-pressed={isSelected}
 							aria-label="Score {i} out of 10"
 							class="flex h-10 w-full items-center justify-center rounded-lg border-2 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-60 {isSelected
-								? buttonColors + ' shadow-md'
+								? buttonColors + ' anim-pop shadow-md'
 								: 'border-border-default bg-surface-raised text-text-secondary ' +
 									hoverColors} focus:ring-2 focus:outline-none {focusRing} focus:ring-offset-2"
 						>
@@ -448,7 +449,7 @@
 							aria-pressed={isSelected}
 							aria-label="Score {i} out of 10"
 							class="flex h-10 w-full items-center justify-center rounded-lg border-2 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-60 {isSelected
-								? buttonColors + ' shadow-md'
+								? buttonColors + ' anim-pop shadow-md'
 								: 'border-border-default bg-surface-raised text-text-secondary ' +
 									hoverColors} focus:ring-2 focus:outline-none {focusRing} focus:ring-offset-2"
 						>
@@ -496,10 +497,11 @@
 					placeholder={notePrompt()}
 				></textarea>
 				<div class="mt-2 flex items-center justify-between">
-					<p class="text-xs text-text-tertiary">
+					<p class="flex items-center gap-1.5 text-xs text-text-tertiary">
+						<Lock class="h-3 w-3 shrink-0 text-text-muted" />
 						Only visible to you and your coach. Notes feed your weekly AI insights.
 					</p>
-					<p class="text-right text-xs text-text-muted">{notes.length}/500</p>
+					<p class="shrink-0 text-right text-xs text-text-muted">{notes.length}/500</p>
 				</div>
 			</div>
 
