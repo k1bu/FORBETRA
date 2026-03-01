@@ -98,6 +98,20 @@
 			<input type="hidden" name="effortScore" value={effortScore} />
 			<input type="hidden" name="performanceScore" value={performanceScore} />
 
+			<!-- Effort-Performance Gap Explanation (before scales for context) -->
+			<div class="rounded-xl border border-accent/30 bg-accent-muted px-6 py-5">
+				<p class="mb-1 text-sm font-semibold text-accent">Why two scores?</p>
+				<p class="text-sm leading-relaxed text-text-secondary">
+					We track both effort and results because the gap between them is the most powerful growth
+					signal — where effort isn't translating to performance, and where results come easier than
+					expected.
+				</p>
+				<p class="mt-2 text-xs text-text-muted">
+					Most people starting a new development goal rate themselves 4–6. There are no right
+					answers — just an honest starting point.
+				</p>
+			</div>
+
 			<!-- Focused Effort Rating -->
 			<div class="rounded-2xl border border-border-default bg-surface-raised p-8">
 				<div class="mb-6">
@@ -147,16 +161,6 @@
 					</div>
 					<span class="text-xs font-medium text-text-tertiary">Relentless commitment</span>
 				</div>
-			</div>
-
-			<!-- Effort-Performance Gap Explanation -->
-			<div class="rounded-xl border border-accent/30 bg-accent-muted px-6 py-5">
-				<p class="mb-1 text-sm font-semibold text-accent">Why two scores?</p>
-				<p class="text-sm leading-relaxed text-text-secondary">
-					The gap between effort and results is the most powerful growth signal. We track both so
-					patterns become visible — where effort isn't translating to performance, and where results
-					come easier than expected.
-				</p>
 			</div>
 
 			<!-- Performance Rating -->

@@ -3,6 +3,7 @@
 	import { page } from '$app/stores';
 	import { resolve } from '$app/paths';
 	import { Home, Users, Mail, BarChart3, Settings, MoreHorizontal, X } from 'lucide-svelte';
+	import { coachAlertCount } from '$lib/stores/coachAlerts.svelte';
 
 	const { children }: { children: Snippet } = $props();
 
@@ -77,6 +78,13 @@
 					>
 						<item.icon class="h-4 w-4 shrink-0" />
 						{item.label}
+						{#if item.href === '/coach' && coachAlertCount.value > 0}
+							<span
+								class="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-error px-1 text-[10px] font-bold text-white"
+							>
+								{coachAlertCount.value}
+							</span>
+						{/if}
 					</a>
 				{/each}
 			</nav>
@@ -102,7 +110,16 @@
 						{isActive(item.href) ? 'text-accent' : 'text-text-muted'}"
 					aria-current={isActive(item.href) ? 'page' : undefined}
 				>
-					<item.icon class="h-5 w-5" />
+					<span class="relative">
+						<item.icon class="h-5 w-5" />
+						{#if item.href === '/coach' && coachAlertCount.value > 0}
+							<span
+								class="absolute -top-1 -right-1.5 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-error px-0.5 text-[8px] font-bold text-white"
+							>
+								{coachAlertCount.value}
+							</span>
+						{/if}
+					</span>
 					<span>{item.label}</span>
 				</a>
 			{/each}

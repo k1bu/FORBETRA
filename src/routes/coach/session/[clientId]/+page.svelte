@@ -3,7 +3,7 @@
 	import { enhance } from '$app/forms';
 	import PerformanceEffortChart from '$lib/components/PerformanceEffortChart.svelte';
 	import { addToast } from '$lib/stores/toasts.svelte';
-	import { Target, Sparkles, AlertTriangle } from 'lucide-svelte';
+	import { Target, Sparkles, AlertTriangle, TrendingUp, TrendingDown, Minus } from 'lucide-svelte';
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
 
@@ -150,6 +150,18 @@
 					<Target class="h-4 w-4 text-accent" />
 					<span class="text-sm font-medium text-text-secondary">{data.client.objective.title}</span>
 				</div>
+				{#if data.subgoals.length > 0}
+					<div class="mt-1.5 flex flex-wrap gap-1.5 pl-6">
+						{#each data.subgoals as subgoal (subgoal.id)}
+							<span
+								class="rounded-full bg-surface-subtle px-2.5 py-0.5 text-xs text-text-muted"
+								title={subgoal.description ?? subgoal.label}
+							>
+								{subgoal.label}
+							</span>
+						{/each}
+					</div>
+				{/if}
 			{/if}
 		</div>
 		{#if data.client.objective?.cycle}
@@ -331,9 +343,42 @@
 				<h2 class="mb-4 text-lg font-bold text-text-primary">Stakeholder Feedback</h2>
 				<div class="grid gap-3 sm:grid-cols-2">
 					{#each data.client.stakeholders as stakeholder (stakeholder.email)}
+						{@const trend = data.stakeholderTrends.find((t) => t.name === stakeholder.name)}
+						{@const effortDiff =
+							trend?.latestEffort != null && trend?.previousEffort != null
+								? trend.latestEffort - trend.previousEffort
+								: null}
+						{@const perfDiff =
+							trend?.latestPerformance != null && trend?.previousPerformance != null
+								? trend.latestPerformance - trend.previousPerformance
+								: null}
 						<div class="glass rounded-xl border border-border-default p-3">
-							<p class="text-sm font-semibold text-text-primary">{stakeholder.name}</p>
-							<p class="text-xs text-text-tertiary">{stakeholder.email}</p>
+							<div class="flex items-center justify-between">
+								<div>
+									<p class="text-sm font-semibold text-text-primary">{stakeholder.name}</p>
+									<p class="text-xs text-text-tertiary">{stakeholder.email}</p>
+								</div>
+								{#if effortDiff !== null || perfDiff !== null}
+									{@const avgDiff =
+										((effortDiff ?? 0) + (perfDiff ?? 0)) /
+										((effortDiff !== null ? 1 : 0) + (perfDiff !== null ? 1 : 0) || 1)}
+									<span
+										class="flex items-center gap-0.5 text-xs {avgDiff > 0.5
+											? 'text-success'
+											: avgDiff < -0.5
+												? 'text-error'
+												: 'text-text-muted'}"
+									>
+										{#if avgDiff > 0.5}
+											<TrendingUp class="h-3.5 w-3.5" />
+										{:else if avgDiff < -0.5}
+											<TrendingDown class="h-3.5 w-3.5" />
+										{:else}
+											<Minus class="h-3.5 w-3.5" />
+										{/if}
+									</span>
+								{/if}
+							</div>
 							{#if stakeholder.lastFeedback}
 								<div class="mt-2 flex gap-3 text-xs">
 									{#if stakeholder.lastFeedback.effortScore !== null}

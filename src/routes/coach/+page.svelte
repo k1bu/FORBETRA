@@ -12,8 +12,12 @@
 		TrendingDown,
 		Minus
 	} from 'lucide-svelte';
+	import { coachAlertCount } from '$lib/stores/coachAlerts.svelte';
 
 	const { data }: { data: PageData } = $props();
+
+	// Populate the layout-wide alert badge
+	coachAlertCount.value = data.analytics.totalAlerts;
 
 	const greeting = $derived(() => {
 		const hour = new Date().getHours();

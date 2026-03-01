@@ -557,12 +557,52 @@ No Phase B changes affected stakeholder screens.
 
 ---
 
-## 9. Score Update Log
+## 9. Phase D Results
 
-| Date       | Phase          | Platform | Individual | Coach | Stakeholder | Notes                                   |
-| ---------- | -------------- | :------: | :--------: | :---: | :---------: | --------------------------------------- |
-| 2026-02-28 | Baseline       |   6.87   |    6.73    | 6.27  |    7.84     | Full codebase walkthrough, all personas |
-| 2026-02-28 | Phase A actual |   7.27   |    7.20    | 6.85  |    7.89     | 8 fixes shipped, 2 vetoed. +0.40 lift.  |
-| 2026-02-28 | Phase B actual |   7.39   |    7.44    | 6.89  |    7.89     | 3 fixes + landing copy. +0.12 lift.     |
-| 2026-02-28 | Phase C actual |   7.42   |    7.45    | 6.91  |    7.97     | 4 fixes, 2 resolved/N/A. +0.03 lift.    |
-|            | Phase D target |   9.3+   |    9.3+    | 9.0+  |    9.5+     | Final goal                              |
+### Delivered
+
+- [x] **Coach dashboard enrichment** — Sparse stats page → personalized morning briefing. Personalized greeting ("Good morning, Sarah"), portfolio insight subtitle ("5 active clients — 3 trending up, 1 stable, 1 needs attention"), "Clients Needing Attention" section (top 5 at-risk with severity dot, trajectory icon, completion %, top alert, objective — all clickable to session view), portfolio snapshot cards (improving/stable/declining counts), actionable alert links to session view.
+- [x] **Dynamic check-in note prompts** — Textarea placeholder adapts in real-time to selected effort/performance scores. Change-based prompts (priority): detects 3+ point swings from previous week ("Both scores dropped this week. What changed?", "A big leap forward! What made the difference?"). Score-based prompts (fallback): responds to extreme combinations ("You're putting in the work but results aren't there yet. What's getting in the way?"). Default generic prompt for mid-range scores.
+
+### Phase D Dimension Scores
+
+#### Individual (was 7.45 → 7.50, +0.05)
+
+| #   | Dimension                 | Phase C | Phase D | Delta | Evidence                                                                                             |
+| --- | ------------------------- | :-----: | :-----: | :---: | ---------------------------------------------------------------------------------------------------- |
+| 4   | Core Task Flow (CT)       |   7.5   | **7.6** | +0.1  | Dynamic prompt guides reflection — reduces "what do I write?" paralysis. James Okafor benefits most. |
+| 6   | Feedback & Progress (FP)  |   7.8   | **7.9** | +0.1  | Placeholder responds in real-time to score selections. App acknowledges user's input.                |
+| 9   | Emotional Engagement (EE) |   6.9   | **7.1** | +0.2  | App "notices" score changes — "Both scores dropped. What changed?" feels responsive and personal.    |
+| 10  | Value Perception (VP)     |   7.4   | **7.5** | +0.1  | Guided reflection > blank box. Structured prompting drives better journal entries.                   |
+|     | All others                |    —    |    —    |   0   | FI, CP, OE, IA, CL, TC unchanged.                                                                    |
+
+#### Coach (was 6.91 → 7.23, +0.32)
+
+| #   | Dimension                 | Phase C | Phase D | Delta | Evidence                                                                                                   |
+| --- | ------------------------- | :-----: | :-----: | :---: | ---------------------------------------------------------------------------------------------------------- |
+| 1   | First Impression (FI)     |   7.0   | **7.5** | +0.5  | Personalized greeting + portfolio context + at-risk clients. Dashboard feels premium vs clinical.          |
+| 2   | Clarity of Purpose (CP)   |   7.5   | **7.8** | +0.3  | "5 clients — 3 trending up, 1 stable, 1 needs attention" — instant situation awareness.                    |
+| 4   | Core Task Flow (CT)       |   7.7   | **8.0** | +0.3  | C-2 scenario (Monday review) now < 2 min. One click from at-risk client → session view.                    |
+| 5   | Info Architecture (IA)    |   7.0   | **7.3** | +0.3  | Dashboard hierarchy: greeting → stats → at-risk → portfolio snapshot → navigation.                         |
+| 6   | Feedback & Progress (FP)  |   6.0   | **6.5** | +0.5  | Portfolio snapshot (improving/stable/declining). Trajectory icons + completion % on at-risk clients.       |
+| 7   | Cognitive Load (CL)       |   6.5   | **7.0** | +0.5  | Pre-curated at-risk list vs scanning every client. Coach sees the 5 clients that need them most.           |
+| 9   | Emotional Engagement (EE) |   5.0   | **5.8** | +0.8  | Biggest lift. Personalized greeting transforms clinical tool to personal assistant. Still no celebrations. |
+| 10  | Value Perception (VP)     |   7.3   | **7.6** | +0.3  | Dashboard surfaces intelligence: at-risk clients with severity, trajectory, completion — actionable intel. |
+|     | All others                |    —    |    —    |   0   | OE, TC unchanged.                                                                                          |
+
+#### Stakeholder (was 7.97 → 7.97, 0)
+
+No Phase D changes affected stakeholder screens.
+
+---
+
+## 10. Score Update Log
+
+| Date       | Phase          | Platform | Individual | Coach | Stakeholder | Notes                                    |
+| ---------- | -------------- | :------: | :--------: | :---: | :---------: | ---------------------------------------- |
+| 2026-02-28 | Baseline       |   6.87   |    6.73    | 6.27  |    7.84     | Full codebase walkthrough, all personas  |
+| 2026-02-28 | Phase A actual |   7.27   |    7.20    | 6.85  |    7.89     | 8 fixes shipped, 2 vetoed. +0.40 lift.   |
+| 2026-02-28 | Phase B actual |   7.39   |    7.44    | 6.89  |    7.89     | 3 fixes + landing copy. +0.12 lift.      |
+| 2026-02-28 | Phase C actual |   7.42   |    7.45    | 6.91  |    7.97     | 4 fixes, 2 resolved/N/A. +0.03 lift.     |
+| 2026-02-28 | Phase D actual |   7.54   |    7.50    | 7.23  |    7.97     | Dashboard overhaul + note prompts. +0.12 |
+|            | Target         |   9.3+   |    9.3+    | 9.0+  |    9.5+     | Final goal. Remaining gap: 1.76 pts.     |

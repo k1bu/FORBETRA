@@ -173,8 +173,26 @@ export const load: PageServerLoad = async (event) => {
 			}))
 		: [];
 
+	// Extract subgoals from objective
+	const subgoals = individual.objectives[0]?.subgoals ?? [];
+
+	// Extract stakeholder feedback trends (last 2 per stakeholder)
+	const stakeholderTrends = (individual.objectives[0]?.stakeholders ?? []).map((s) => {
+		const latest = s.feedbacks[0] ?? null;
+		const previous = s.feedbacks[1] ?? null;
+		return {
+			name: s.name,
+			latestEffort: latest?.effortScore ?? null,
+			latestPerformance: latest?.performanceScore ?? null,
+			previousEffort: previous?.effortScore ?? null,
+			previousPerformance: previous?.performanceScore ?? null
+		};
+	});
+
 	return {
 		client,
+		subgoals,
+		stakeholderTrends,
 		coachPrep: coachPrep
 			? {
 					id: coachPrep.id,
