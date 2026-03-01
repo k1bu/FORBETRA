@@ -52,6 +52,30 @@
 <section class="mx-auto flex max-w-6xl flex-col gap-8 p-4 pb-12">
 	<!-- Header -->
 	<header>
+		<!-- eslint-disable svelte/no-navigation-without-resolve -->
+		<nav aria-label="Breadcrumb" class="mb-2">
+			<ol class="flex items-center gap-1.5 text-sm text-text-tertiary">
+				<li>
+					<a
+						href="/individual"
+						class="rounded transition-colors hover:text-text-primary focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
+						>Hub</a
+					>
+				</li>
+				<li aria-hidden="true" class="text-text-muted">
+					<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+						><path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M9 5l7 7-7 7"
+						/></svg
+					>
+				</li>
+				<li><span class="font-medium text-text-primary">Stakeholders</span></li>
+			</ol>
+		</nav>
+		<!-- eslint-enable svelte/no-navigation-without-resolve -->
 		<h1 class="text-3xl font-bold text-text-primary">Stakeholders</h1>
 		<p class="mt-1 text-text-secondary">Manage the people who provide feedback on your progress</p>
 	</header>

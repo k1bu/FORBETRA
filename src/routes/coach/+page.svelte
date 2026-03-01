@@ -217,6 +217,30 @@
 		</div>
 	</div>
 
+	<!-- Quick Actions -->
+	{#if data.rosterSummary.active > 0}
+		<div class="flex gap-2 overflow-x-auto">
+			<a
+				href="/coach/roster"
+				class="flex items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-accent/30 hover:text-accent"
+			>
+				<Users class="h-3 w-3" /> Roster
+			</a>
+			<a
+				href="/coach/analytics"
+				class="flex items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-accent/30 hover:text-accent"
+			>
+				<BarChart3 class="h-3 w-3" /> Analytics
+			</a>
+			<a
+				href="/coach/invitations"
+				class="flex items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-accent/30 hover:text-accent"
+			>
+				<Mail class="h-3 w-3" /> Invite Client
+			</a>
+		</div>
+	{/if}
+
 	<!-- First-Visit Guidance -->
 	{#if data.rosterSummary.active === 0}
 		<section class="rounded-xl border border-border-default bg-surface-raised p-5">

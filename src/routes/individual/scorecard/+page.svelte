@@ -40,8 +40,31 @@
 	<title>Scorecard | Forbetra</title>
 </svelte:head>
 
+<!-- eslint-disable svelte/no-navigation-without-resolve -->
 <section class="mx-auto flex max-w-5xl flex-col gap-6 p-4 pb-12">
 	<!-- Header + week navigator -->
+	<nav aria-label="Breadcrumb" class="mb--2">
+		<ol class="flex items-center gap-1.5 text-sm text-text-tertiary">
+			<li>
+				<a
+					href="/individual"
+					class="rounded transition-colors hover:text-text-primary focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
+					>Hub</a
+				>
+			</li>
+			<li aria-hidden="true" class="text-text-muted">
+				<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+					><path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M9 5l7 7-7 7"
+					/></svg
+				>
+			</li>
+			<li><span class="font-medium text-text-primary">Scorecard</span></li>
+		</ol>
+	</nav>
 	<div class="flex items-center justify-between">
 		<div>
 			<h1 class="text-lg font-bold text-text-primary">Scorecard</h1>

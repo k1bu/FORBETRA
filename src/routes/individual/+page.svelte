@@ -650,6 +650,70 @@
 		<!-- eslint-enable svelte/no-navigation-without-resolve -->
 	{/if}
 
+	<!-- ═══ ZONE 3a+: Weekly Focus ═══ -->
+	{#if data.isOnboardingComplete && data.currentWeek && data.currentWeek > 1}
+		{@const gaps = data.perceptionGaps ?? []}
+		{@const bigGaps = gaps.filter((g) => g.maxAbsGap > 2)}
+		{@const rate = data.summary?.completionRate ?? 0}
+		{@const streak = data.summary?.currentStreak ?? 0}
+		{@const stkCount = data.summary?.totalStakeholders ?? 0}
+		{@const focusItem = (() => {
+			if (rate < 50 && data.currentWeek > 2)
+				return {
+					icon: 'catch-up',
+					text: "Your completion rate is low — prioritize this week's check-in to build momentum."
+				};
+			if (bigGaps.length > 0)
+				return {
+					icon: 'gap',
+					text: `You have a large perception gap with ${bigGaps[0].stakeholderName}. Consider discussing this in your next coaching session.`
+				};
+			if (stkCount === 0)
+				return {
+					icon: 'stakeholder',
+					text: 'Add stakeholders to get 360 feedback — outside perspectives reveal blind spots.'
+				};
+			if (streak === 0 && data.currentWeek > 2)
+				return {
+					icon: 'restart',
+					text: 'Your streak reset. One check-in this week starts a new one.'
+				};
+			if (streak >= 3)
+				return {
+					icon: 'momentum',
+					text: `${streak}-check-in streak — you're building strong data. Keep it going.`
+				};
+			return null;
+		})()}
+		{#if focusItem}
+			<div
+				class="flex items-start gap-3 rounded-xl border border-accent/15 bg-gradient-to-r from-accent/5 to-transparent px-4 py-3"
+			>
+				<div
+					class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent/10"
+				>
+					{#if focusItem.icon === 'catch-up'}
+						<AlertTriangle class="h-3.5 w-3.5 text-warning" />
+					{:else if focusItem.icon === 'gap'}
+						<ArrowUpDown class="h-3.5 w-3.5 text-accent" />
+					{:else if focusItem.icon === 'stakeholder'}
+						<User class="h-3.5 w-3.5 text-accent" />
+					{:else if focusItem.icon === 'restart'}
+						<Flame class="h-3.5 w-3.5 text-warning" />
+					{:else}
+						<TrendingUp class="h-3.5 w-3.5 text-success" />
+					{/if}
+				</div>
+				<div>
+					<p class="text-[10px] font-semibold tracking-wide text-accent uppercase">
+						Focus this week
+					</p>
+					<p class="text-sm text-text-secondary">{focusItem.text}</p>
+				</div>
+			</div>
+		{/if}
+	{/if}
+
 	<!-- ═══ ZONE 3b: Perception Gaps ═══ -->
 	{#if data.perceptionGaps && data.perceptionGaps.length > 0}
 		{@const significantGaps = data.perceptionGaps.filter((g) => g.maxAbsGap > 1)}
