@@ -253,7 +253,7 @@
 
 <section class="mx-auto flex max-w-3xl flex-col gap-5 p-4 pb-12">
 	<!-- ═══ ZONE 1: Top Bar — Welcome + Objective + Week + Streak ═══ -->
-	<div class="flex flex-col gap-1">
+	<div class="anim-stagger flex flex-col gap-1" style="--stagger: 0">
 		<div class="flex items-center justify-between">
 			<div>
 				<p class="text-sm text-text-tertiary">
@@ -499,7 +499,8 @@
 	<!-- ═══ ZONE 3: At-a-Glance (compact row) ═══ -->
 	{#if data.isOnboardingComplete && (data.myLastRatings || data.stakeholdersLastRatings || data.summary)}
 		<div
-			class="rounded-xl border border-border-default bg-surface-raised p-4"
+			class="anim-stagger rounded-xl border border-border-default bg-surface-raised p-4"
+			style="--stagger: 1"
 			role="region"
 			aria-label="Weekly metrics at a glance"
 		>
@@ -612,11 +613,14 @@
 						<span>Week {data.currentWeek} of {data.totalWeeks}</span>
 						<span class="font-semibold">{data.summary.completionRate}% completed</span>
 					</div>
-					<div class="mt-1 h-1.5 rounded-full bg-surface-subtle">
+					<div class="relative mt-1 h-1.5 rounded-full bg-surface-subtle">
 						<div
 							class="h-full rounded-full bg-accent transition-all"
 							style="width: {Math.min(data.summary.completionRate, 100)}%"
 						></div>
+						<div class="pointer-events-none absolute inset-y-0 left-1/4 w-px bg-white/10"></div>
+						<div class="pointer-events-none absolute inset-y-0 left-1/2 w-px bg-white/10"></div>
+						<div class="pointer-events-none absolute inset-y-0 left-3/4 w-px bg-white/10"></div>
 					</div>
 				</div>
 			{/if}
@@ -626,7 +630,7 @@
 	<!-- ═══ ZONE 3a: Quick Nav ═══ -->
 	{#if data.isOnboardingComplete}
 		<!-- eslint-disable svelte/no-navigation-without-resolve -->
-		<div class="flex gap-2 overflow-x-auto">
+		<div class="anim-stagger flex gap-2 overflow-x-auto" style="--stagger: 2">
 			<a
 				href="/individual/scorecard"
 				class="flex items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-accent/30 hover:text-accent"
@@ -787,7 +791,7 @@
 
 	<!-- ═══ ZONE 4: Quick Insight (single) + AI Insight Teaser ═══ -->
 	{#if quickInsights.length > 0 || data.latestInsight}
-		<div class="flex flex-col gap-2">
+		<div class="anim-stagger flex flex-col gap-2" style="--stagger: 3">
 			<div class="flex items-center gap-2">
 				<p class="text-[10px] font-semibold tracking-widest text-text-muted uppercase">Insights</p>
 				<Lock class="h-3 w-3 text-text-muted" />

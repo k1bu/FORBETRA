@@ -206,11 +206,21 @@
 							{data.cycle.weeksElapsed}/{data.cycle.totalWeeks} weeks
 						</p>
 					</div>
-					<div class="h-3 w-full overflow-hidden rounded-full bg-surface-subtle">
+					<div class="relative h-3 w-full rounded-full bg-surface-subtle">
 						<div
 							class="h-full rounded-full bg-accent transition-all duration-500"
 							style={`width: ${data.cycle.completion}%`}
 						></div>
+						<div class="pointer-events-none absolute inset-y-0 left-[25%] w-px bg-white/10"></div>
+						<div class="pointer-events-none absolute inset-y-0 left-[50%] w-px bg-white/10"></div>
+						<div class="pointer-events-none absolute inset-y-0 left-[75%] w-px bg-white/10"></div>
+					</div>
+					<div class="mt-0.5 flex justify-between text-[9px] text-text-muted" aria-hidden="true">
+						<span>0</span>
+						<span>25%</span>
+						<span>50%</span>
+						<span>75%</span>
+						<span>100%</span>
 					</div>
 				</div>
 				<p class="text-xs text-text-secondary">

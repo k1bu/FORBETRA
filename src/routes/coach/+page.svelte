@@ -151,7 +151,7 @@
 	{/if}
 
 	<!-- Stat Cards -->
-	<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+	<div class="anim-stagger grid gap-4 md:grid-cols-2 lg:grid-cols-4" style="--stagger: 0">
 		<a
 			href="/coach/roster"
 			class="anim-lift rounded-lg border border-border-default bg-surface-raised p-4 transition-colors hover:border-accent/30"
