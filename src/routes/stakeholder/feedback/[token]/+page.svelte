@@ -22,7 +22,8 @@
 		CircleCheck,
 		Target,
 		Lightbulb,
-		Send
+		Send,
+		Shield
 	} from 'lucide-svelte';
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
@@ -338,9 +339,34 @@
 					class="animate-in fade-in slide-in-from-top-2 rounded-xl border border-success-muted bg-success-muted p-6 text-center"
 				>
 					<CircleCheck class="mx-auto mb-2 h-10 w-10 text-success" />
-					<p class="text-lg font-semibold text-success">Feedback submitted!</p>
+					<p class="text-lg font-semibold text-success">
+						Thank you, {data.stakeholder.name}!
+					</p>
 					<p class="mt-1 text-sm text-success">
-						Thank you for sharing your perspective. Your feedback has been recorded.
+						Your perspective helps {data.reflection.participantName} see what they can't see themselves.
+					</p>
+				</div>
+
+				<!-- What happens next -->
+				<div class="rounded-xl border border-border-default bg-surface-raised p-5">
+					<p class="mb-3 text-sm font-semibold text-text-primary">What happens next</p>
+					<ul class="space-y-2 text-xs text-text-secondary">
+						<li class="flex items-start gap-2">
+							<span class="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent"></span>
+							Your ratings are combined with other stakeholder perspectives
+						</li>
+						<li class="flex items-start gap-2">
+							<span class="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent"></span>
+							{data.reflection.participantName} and their coach will review insights this week
+						</li>
+						<li class="flex items-start gap-2">
+							<span class="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent"></span>
+							You'll be invited to share feedback again next cycle
+						</li>
+					</ul>
+					<p class="mt-3 text-[10px] text-text-muted">
+						Your feedback is shared with {data.reflection.participantName} and their coach. Your name
+						is attached to your ratings.
 					</p>
 				</div>
 
@@ -828,9 +854,9 @@
 					>
 						<div class="flex-1">
 							<p class="font-semibold text-text-primary">Ready to submit your feedback?</p>
-							<p class="mt-1 text-xs text-text-secondary">
-								After submitting, you'll see how {data.reflection.participantName} rated themselves —
-								a chance to compare perspectives.
+							<p class="mt-1 flex items-center gap-1.5 text-xs text-text-secondary">
+								<Shield class="h-3.5 w-3.5 shrink-0 text-success" />
+								Shared only with {data.reflection.participantName} and their coach.
 							</p>
 						</div>
 						<div class="flex items-center gap-3">

@@ -252,10 +252,12 @@
 			<div class="rounded-lg border border-border-default bg-surface-raised px-3 py-2">
 				<p class="text-[10px] font-medium tracking-wider text-text-muted uppercase">Effort</p>
 				<p class="text-lg font-bold text-cyan-400 tabular-nums">{ins.avgEffort ?? '—'}</p>
+				<p class="text-[9px] text-text-muted">Self-reported avg</p>
 			</div>
 			<div class="rounded-lg border border-border-default bg-surface-raised px-3 py-2">
 				<p class="text-[10px] font-medium tracking-wider text-text-muted uppercase">Performance</p>
 				<p class="text-lg font-bold text-amber-400 tabular-nums">{ins.avgProgress ?? '—'}</p>
+				<p class="text-[9px] text-text-muted">Self-reported avg</p>
 			</div>
 			<div class="rounded-lg border border-border-default bg-surface-raised px-3 py-2">
 				<p class="text-[10px] font-medium tracking-wider text-text-muted uppercase">Trajectory</p>
@@ -275,12 +277,14 @@
 						<span class="text-lg font-bold text-text-muted">—</span>
 					{/if}
 				</div>
+				<p class="text-[9px] text-text-muted">Week-over-week trend</p>
 			</div>
 			<div class="rounded-lg border border-border-default bg-surface-raised px-3 py-2">
 				<p class="text-[10px] font-medium tracking-wider text-text-muted uppercase">Completion</p>
 				<p class="text-lg font-bold text-accent tabular-nums">
 					{cycle ? `${Math.round(cycle.completion * 100)}%` : '—'}
 				</p>
+				<p class="text-[9px] text-text-muted">Cycle progress</p>
 			</div>
 		</div>
 	{/if}
@@ -474,12 +478,15 @@
 										class="flex items-start gap-3 rounded-lg bg-surface-raised px-3 py-2 text-sm"
 									>
 										<span
-											class="shrink-0 rounded bg-accent-muted px-1.5 py-0.5 text-[10px] font-semibold text-accent"
+											class="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold {r.reflectionType ===
+											'STAKEHOLDER'
+												? 'bg-success/10 text-success'
+												: 'bg-accent-muted text-accent'}"
 										>
-											{r.reflectionType === 'RATING_A'
-												? 'Check-in'
-												: r.reflectionType === 'RATING_B'
-													? 'Check-in'
+											{r.reflectionType === 'RATING_A' || r.reflectionType === 'RATING_B'
+												? 'Self-Report'
+												: r.reflectionType === 'STAKEHOLDER'
+													? '360 Feedback'
 													: r.reflectionType}
 										</span>
 										<div class="min-w-0 flex-1">

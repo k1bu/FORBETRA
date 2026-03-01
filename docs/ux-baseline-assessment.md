@@ -952,7 +952,8 @@ Phase J broke the "Coach dimensions stuck at 7.3" pattern — IA and TC both jum
 | 2026-03-01 | Phase N actual |   7.95   |    7.89    | 7.89  |    8.11     | Archive confirm, AI retry, metric defs. +0.02                               |
 | 2026-03-01 | Phase O actual |   7.98   |    7.93    | 7.94  |    8.11     | Onboarding reframe, completion ceremony, coaching moments, streaks. +0.03   |
 | 2026-03-01 | Phase P actual |   8.00   |    7.95    | 7.98  |    8.11     | Dashboard polish, check-in flow, session summary. +0.02. **8.0 milestone!** |
-|            | Target         |   9.3+   |    9.3+    | 9.0+  |    9.5+     | Final goal. Remaining gap: 1.30 pts.                                        |
+| 2026-03-01 | Phase Q actual |   8.04   |    8.00    | 8.01  |    8.14     | Privacy footer, nav descriptions, data source labels, stakeholder UX. +0.04 |
+|            | Target         |   9.3+   |    9.3+    | 9.0+  |    9.5+     | Final goal. Remaining gap: 1.26 pts.                                        |
 
 ---
 
@@ -1455,3 +1456,71 @@ No Phase P changes affected stakeholder screens.
 **The optimization profile has shifted.** We're no longer fixing outliers or breaking plateaus. The remaining dimensions form a smooth gradient from 7.8 to 7.9, with the biggest gaps on Individual IA/TC (7.8) and Coach FP/TC (7.8). These are "depth" dimensions that require genuine capability improvements rather than surface polish.
 
 **Next levers:** The path from 8.0 to 8.5 requires structural improvements: Individual IA needs better navigation or information surfacing. Individual TC needs stronger privacy/data messaging. Coach FP needs richer progress visibility beyond the current prep/alert system. Coach TC could benefit from data provenance improvements. Stakeholder experience (8.11) is stable but needs attention to reach 9.5+ target — the least-touched user type since Phase F.
+
+---
+
+## 26. Phase Q Results (Privacy, navigation, data provenance, stakeholder UX)
+
+**What shipped:**
+
+1. **Privacy footer + data visibility labels** — Root layout now includes a persistent footer with Privacy/Terms links and "Your data is encrypted and stored securely" message (excluded from stakeholder pages). Check-in notes area now says "Only visible to you and your coach" instead of generic copy.
+2. **Navigation descriptions** — Desktop sidebar and mobile More menu now show descriptive subtitles for every nav item (e.g., "Today" → "Next action & status", "Ask" → "AI coaching chat"). Users understand destination pages without trial-and-error.
+3. **Data source labels in coach session** — Timeline reflections now display "Self-Report" (accent) vs "360 Feedback" (green) labels instead of generic "Check-in". Quick summary metric cards show provenance subtitles: "Self-reported avg", "Week-over-week trend", "Cycle progress".
+4. **Stakeholder post-submission enhancement** — Personalized thank-you with stakeholder name. "What happens next" section with 3 contextual bullet points. Shield icon trust badge: "Shared only with [person] and their coach." Data sharing scope clearly stated in post-submission context.
+
+### Score Movement
+
+```
+Platform: 8.00 → 8.04 (+0.04)
+Individual: 7.95 → 8.00 (+0.05)
+Coach: 7.98 → 8.01 (+0.03)
+Stakeholder: 8.11 → 8.14 (+0.03) ← first Stakeholder lift since Phase F
+```
+
+#### Individual (was 7.95 → 8.00, +0.05)
+
+| #   | Dimension                | Phase P | Phase Q | Delta | Evidence                                                                                            |
+| --- | ------------------------ | :-----: | :-----: | :---: | --------------------------------------------------------------------------------------------------- |
+| 5   | Info Architecture (IA)   |   7.8   | **8.0** | +0.2  | Nav descriptions eliminate guesswork. Users see "Charts & trends" vs "AI analysis" before clicking. |
+| 8   | Trust & Credibility (TC) |   7.8   | **8.0** | +0.2  | Privacy footer with links to policy/terms. "Only visible to you and your coach" on check-in notes.  |
+|     | All others               |    —    |    —    |   0   | FI, CP, OE, CT, FP, CL, EE, VP unchanged.                                                           |
+
+#### Coach (was 7.98 → 8.01, +0.03)
+
+| #   | Dimension                | Phase P | Phase Q | Delta | Evidence                                                                                             |
+| --- | ------------------------ | :-----: | :-----: | :---: | ---------------------------------------------------------------------------------------------------- |
+| 6   | Feedback & Progress (FP) |   7.8   | **7.9** | +0.1  | Metric definition subtitles ("Self-reported avg", "Week-over-week trend") clarify what numbers mean. |
+| 8   | Trust & Credibility (TC) |   7.8   | **8.0** | +0.2  | "Self-Report" vs "360 Feedback" labels. Coach sees data provenance at a glance, no guessing source.  |
+|     | All others               |    —    |    —    |   0   | FI, CP, OE, CT, IA, CL, EE, VP unchanged.                                                            |
+
+#### Stakeholder (was 8.11 → 8.14, +0.03)
+
+| #   | Dimension                 | Phase P | Phase Q | Delta | Evidence                                                                                                 |
+| --- | ------------------------- | :-----: | :-----: | :---: | -------------------------------------------------------------------------------------------------------- |
+| 6   | Feedback & Progress (FP)  |   7.8   | **7.9** | +0.1  | "What happens next" section post-submission creates clear feedback loop and progress narrative.          |
+| 8   | Trust & Credibility (TC)  |   8.0   | **8.2** | +0.2  | Shield icon + "Shared only with [person] and their coach" explicit scope. Privacy at moment of decision. |
+| 9   | Emotional Engagement (EE) |   7.5   | **7.7** | +0.2  | Personalized thank-you by name. No longer generic "Feedback submitted" — personal acknowledgment.        |
+| 10  | Value Perception (VP)     |   7.8   | **8.0** | +0.2  | "What happens next" (insights, coach review, future invite) creates narrative of contribution value.     |
+
+### Lowest Remaining Dimensions
+
+| Rank | User Type  | Dimension                 | Score | Gap to 8.5 |
+| ---- | ---------- | ------------------------- | :---: | :--------: |
+| 1    | Individual | First Impression (FI)     |  7.9  |    0.6     |
+| 2    | Individual | Onboarding Ease (OE)      |  7.9  |    0.6     |
+| 3    | Individual | Core Task Flow (CT)       |  7.9  |    0.6     |
+| 4    | Individual | Cognitive Load (CL)       |  7.9  |    0.6     |
+| 5    | Individual | Emotional Engagement (EE) |  7.9  |    0.6     |
+| 6    | Individual | Value Perception (VP)     |  7.9  |    0.6     |
+| 7    | Coach      | First Impression (FI)     |  7.9  |    0.6     |
+| 8    | Coach      | Onboarding Ease (OE)      |  7.9  |    0.6     |
+
+### Phase Q Commentary
+
+**All three user types now above 8.0.** Individual hit 8.0 (from 6.73 baseline, +1.27). Stakeholder moved for the first time since Phase F — the thank-you/trust/provenance changes broke a 12-phase plateau.
+
+**The 7.8 cluster is dissolved.** The four dimensions at 7.8 (Individual IA, Individual TC, Coach FP, Coach TC) have all been lifted. The remaining floor is now uniformly 7.9 across most dimensions. No single dimension drags the score down — the challenge is broad uplift.
+
+**Stakeholder experience needs deeper structural work.** The Phase Q changes improved the post-submission experience, but the core task flow (11-button rating grid) remains the stakeholder's biggest bottleneck (CT at ~8.0, CL at ~8.0). The next Stakeholder gains require either structured qualitative prompts, scoring calibration, or progressive disclosure patterns.
+
+**Next levers for 8.5+:** The broad 7.9 floor means each dimension needs ~0.6 uplift. Key strategies: (1) Individual first impression polish — visual refinement of hub/dashboard; (2) Cognitive load reduction — progressive disclosure, smart defaults; (3) Onboarding tightening — reduce steps or add skip logic; (4) Coach FI — session view visual hierarchy; (5) Stakeholder CT/CL — scoring guide, step indicator.

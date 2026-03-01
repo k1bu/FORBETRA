@@ -489,9 +489,7 @@
 					placeholder={notePrompt()}
 				></textarea>
 				<div class="mt-2 flex items-center justify-between">
-					<p class="text-xs text-text-tertiary">
-						Your reflections help you and your coach see the full picture of your growth.
-					</p>
+					<p class="text-xs text-text-tertiary">Only visible to you and your coach.</p>
 					<p class="text-right text-xs text-text-muted">{notes.length}/500</p>
 				</div>
 			</div>

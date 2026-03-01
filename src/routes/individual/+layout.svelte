@@ -52,19 +52,62 @@
 	});
 
 	const navItems = [
-		{ href: '/individual', label: 'Today', icon: CalendarDays, mobileVisible: true },
+		{
+			href: '/individual',
+			label: 'Today',
+			desc: 'Next action & status',
+			icon: CalendarDays,
+			mobileVisible: true
+		},
 		{
 			href: '/individual/dashboard',
 			label: 'Dashboard',
+			desc: 'Charts & trends',
 			icon: LayoutDashboard,
 			mobileVisible: true
 		},
-		{ href: '/individual/scorecard', label: 'Scorecard', icon: BarChart3, mobileVisible: true },
-		{ href: '/individual/stakeholders', label: 'Stakeholders', icon: Users, mobileVisible: true },
-		{ href: '/individual/insights', label: 'Insights', icon: Lightbulb, mobileVisible: true },
-		{ href: '/individual/history', label: 'History', icon: History, mobileVisible: false },
-		{ href: '/individual/ask', label: 'Ask', icon: MessageSquare, mobileVisible: false },
-		{ href: '/individual/settings', label: 'Settings', icon: Settings, mobileVisible: false }
+		{
+			href: '/individual/scorecard',
+			label: 'Scorecard',
+			desc: 'Perception gaps',
+			icon: BarChart3,
+			mobileVisible: true
+		},
+		{
+			href: '/individual/stakeholders',
+			label: 'Stakeholders',
+			desc: 'Your feedback team',
+			icon: Users,
+			mobileVisible: true
+		},
+		{
+			href: '/individual/insights',
+			label: 'Insights',
+			desc: 'AI analysis',
+			icon: Lightbulb,
+			mobileVisible: true
+		},
+		{
+			href: '/individual/history',
+			label: 'History',
+			desc: 'Past check-ins',
+			icon: History,
+			mobileVisible: false
+		},
+		{
+			href: '/individual/ask',
+			label: 'Ask',
+			desc: 'AI coaching chat',
+			icon: MessageSquare,
+			mobileVisible: false
+		},
+		{
+			href: '/individual/settings',
+			label: 'Settings',
+			desc: 'Profile & cycle',
+			icon: Settings,
+			mobileVisible: false
+		}
 	];
 
 	const mobileItems = navItems.filter((item) => item.mobileVisible);
@@ -95,7 +138,10 @@
 						aria-current={isActive(item.href) ? 'page' : undefined}
 					>
 						<item.icon class="h-4 w-4 shrink-0" />
-						{item.label}
+						<div class="min-w-0">
+							<span class="block">{item.label}</span>
+							<span class="block text-[10px] font-normal text-text-muted">{item.desc}</span>
+						</div>
 					</a>
 				{/each}
 			</nav>
@@ -185,7 +231,10 @@
 									: 'text-text-secondary hover:bg-surface-subtle hover:text-text-primary'}"
 							>
 								<item.icon class="h-4 w-4 shrink-0" />
-								{item.label}
+								<div>
+									<span class="block">{item.label}</span>
+									<span class="block text-[10px] font-normal text-text-muted">{item.desc}</span>
+								</div>
 							</a>
 						{/each}
 					</div>
