@@ -11,7 +11,8 @@
 		TrendingUp,
 		TrendingDown,
 		Minus,
-		Star
+		Star,
+		Lightbulb
 	} from 'lucide-svelte';
 	import { coachAlertCount } from '$lib/stores/coachAlerts.svelte';
 
@@ -70,7 +71,12 @@
 				{portfolioLine()}
 			</p>
 			{#if momentumLine()}
-				<p class="mt-0.5 text-xs text-text-tertiary">{momentumLine()} (week-over-week avg)</p>
+				{@const m = data.portfolioMomentum}
+				{@const isPositive = m && ((m.effortDelta ?? 0) > 0 || (m.perfDelta ?? 0) > 0)}
+				<p class="mt-0.5 text-xs {isPositive ? 'text-success' : 'text-text-tertiary'}">
+					{momentumLine()} (week-over-week avg){#if isPositive}
+						— portfolio gaining momentum{/if}
+				</p>
 			{/if}
 		{:else}
 			<p class="mt-1 text-text-secondary">
@@ -182,6 +188,35 @@
 				Your coaching footprint: {n} note{n !== 1 ? 's' : ''} written
 			{/if}
 		</p>
+	{/if}
+
+	<!-- Coaching Moments -->
+	{#if data.coachingMoments.length > 0}
+		<section
+			class="rounded-xl border border-accent/20 bg-gradient-to-b from-accent-muted/30 to-surface-raised p-4"
+		>
+			<div class="mb-3 flex items-center gap-2">
+				<Lightbulb class="h-4 w-4 text-accent" />
+				<h2 class="text-sm font-semibold text-text-primary">Coaching Moments</h2>
+			</div>
+			<div class="divide-y divide-border-default">
+				{#each data.coachingMoments as moment (moment.clientId)}
+					<a
+						href="/coach/session/{moment.clientId}"
+						class="group -mx-4 flex items-start gap-3 px-4 py-3 transition-colors first:pt-0 last:pb-0 hover:bg-surface-subtle"
+					>
+						<span class="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-accent"></span>
+						<div class="min-w-0 flex-1">
+							<p class="text-sm text-text-primary">{moment.message}</p>
+							<p class="mt-0.5 text-xs font-medium text-accent">{moment.action}</p>
+						</div>
+						<ChevronRight
+							class="h-4 w-4 shrink-0 text-text-muted opacity-0 transition-opacity group-hover:opacity-100"
+						/>
+					</a>
+				{/each}
+			</div>
+		</section>
 	{/if}
 
 	<!-- Clients Needing Attention -->

@@ -55,7 +55,7 @@
 	);
 	let isSubmitting = $state(false);
 
-	const stepLabels = ['Welcome', 'How It Works', 'Invite Client'];
+	const stepLabels = ['Welcome', 'Your Edge', 'Invite Client'];
 
 	// Handle successful invite creation — redirect to coach hub
 	$effect(() => {
@@ -119,7 +119,8 @@
 				</div>
 				<h1 class="text-4xl font-bold text-text-primary">Welcome to Forbetra, {data.coach.name}</h1>
 				<p class="mx-auto max-w-lg text-lg text-text-secondary">
-					Your coaching hub for guiding individuals through structured development cycles.
+					Prep faster, spot blind spots earlier, and see the impact of your coaching — all in one
+					place.
 				</p>
 			</div>
 
@@ -157,25 +158,25 @@
 				onclick={goNext}
 				class="inline-flex items-center gap-2 rounded-xl bg-accent px-8 py-3.5 font-semibold text-white transition-all hover:bg-accent-hover"
 			>
-				See How It Works
+				See Your Coaching Edge
 				<span>&#8594;</span>
 			</button>
 		</div>
 	{/if}
 
-	<!-- Step 2: How It Works -->
+	<!-- Step 2: Your Coaching Edge -->
 	{#if currentStep === 'how-it-works'}
 		<div class="w-full space-y-8 text-center">
 			<div class="space-y-3">
-				<h1 class="text-3xl font-bold text-text-primary">How Forbetra Works</h1>
+				<h1 class="text-3xl font-bold text-text-primary">Your Coaching Edge</h1>
 				<p class="mx-auto max-w-md text-base text-text-secondary">
-					A continuous cycle of reflection, feedback, and insight — powered by the people around
-					your client.
+					Imagine walking into every session already knowing what matters most. Here's how Forbetra
+					makes that happen.
 				</p>
 			</div>
 
 			<div class="mx-auto max-w-xl space-y-3">
-				{#each [{ num: 1, icon: Target, title: 'Individual sets an objective', desc: 'They define what they want to improve and break it into observable behaviors.' }, { num: 2, icon: PenLine, title: 'Weekly check-ins', desc: 'Self-rated effort and performance scores (0-10) with reflection notes.' }, { num: 3, icon: Users, title: 'Stakeholders rate the same dimensions', desc: 'External perspectives reveal blind spots between self-perception and reality.' }, { num: 4, icon: BrainCircuit, title: 'AI analyzes patterns', desc: 'Weekly synthesis, trend detection, and actionable coaching prep.' }, { num: 5, icon: Compass, title: 'You see everything', desc: 'Alerts, trends, stakeholder feedback, and AI insights — all in one dashboard.' }] as card (card.num)}
+				{#each [{ num: 1, icon: BrainCircuit, title: 'Arrive at sessions already prepared', desc: 'AI-generated prep highlights talking points, blind spots, and momentum shifts — ready every Monday morning.' }, { num: 2, icon: Users, title: "Spot what they can't see", desc: 'Stakeholders rate the same dimensions your client does. Perception gaps surface the coaching conversations that matter.' }, { num: 3, icon: Target, title: 'Track real momentum, not just intentions', desc: 'Weekly effort and performance data shows whether change is happening — so you can adjust your approach in real time.' }, { num: 4, icon: PenLine, title: 'Scale without losing depth', desc: 'Alerts flag who needs attention. Your notes feed directly into AI analysis. Manage 5 or 30 clients with the same quality.' }, { num: 5, icon: Compass, title: 'See your impact with evidence', desc: 'Watch trajectories shift over weeks and cycles. Know exactly when your coaching is moving the needle.' }] as card (card.num)}
 					<div
 						class="flex items-start gap-4 rounded-xl border border-border-default bg-surface-raised p-5 text-left transition-all hover:border-accent/30"
 					>

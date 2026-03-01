@@ -26,6 +26,38 @@
 
 	let showRecentActivity = $state(false);
 
+	// Streak milestone detection
+	const streakMilestone = $derived(
+		(() => {
+			const streak = data.summary?.currentStreak ?? 0;
+			if (streak >= 50)
+				return {
+					level: 50,
+					label: 'Extraordinary',
+					message: `${streak} check-ins in a row. You've built a practice that most people only talk about.`
+				};
+			if (streak >= 20)
+				return {
+					level: 20,
+					label: 'Dedicated',
+					message: `${streak}-check-in streak. This level of consistency is changing how you lead.`
+				};
+			if (streak >= 10)
+				return {
+					level: 10,
+					label: 'Committed',
+					message: `${streak} in a row. Consistency is your superpower — the data proves it.`
+				};
+			if (streak >= 5)
+				return {
+					level: 5,
+					label: 'Building',
+					message: `${streak}-check-in streak. Real patterns are forming in your data.`
+				};
+			return null;
+		})()
+	);
+
 	// Milestone-aware subtitle
 	const milestoneMessage = $derived(
 		(() => {
@@ -37,9 +69,8 @@
 			const total = data.totalWeeks;
 			const streak = data.summary?.currentStreak ?? 0;
 
-			// Streak milestones
-			if (streak >= 10) return `${streak} check-ins in a row. Consistency is your superpower.`;
-			if (streak >= 5) return `${streak}-check-in streak. The data is building.`;
+			// Streak milestones — handled by streakMilestone card now
+			if (streak >= 5) return null;
 
 			// Cycle completion milestones
 			if (data.cycle?.isCycleCompleted) return null; // handled by hero card
@@ -299,6 +330,25 @@
 			{/if}
 		{/if}
 	</div>
+
+	<!-- Streak Milestone Card -->
+	{#if streakMilestone}
+		<div
+			class="flex items-center gap-3 rounded-xl border border-warning/20 bg-gradient-to-r from-warning/5 to-transparent px-4 py-3"
+		>
+			<span
+				class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-warning/10 text-lg"
+			>
+				<Flame class="h-4 w-4 text-warning" />
+			</span>
+			<div class="min-w-0 flex-1">
+				<p class="text-xs font-semibold tracking-wide text-warning uppercase">
+					{streakMilestone.label} — {streakMilestone.level}+ streak
+				</p>
+				<p class="text-sm text-text-secondary">{streakMilestone.message}</p>
+			</div>
+		</div>
+	{/if}
 
 	<!-- ═══ ZONE 2: Next Action (Hero) ═══ -->
 	<!-- This is the FIRST thing the user should focus on. Absorbs all status banners. -->

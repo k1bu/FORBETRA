@@ -163,12 +163,27 @@
 					</p>
 				{/if}
 				{#if form.streak && form.streak >= 3}
-					<p class="mt-1 text-sm font-semibold text-warning">
-						{form.streak} check-ins in a row{#if form.streak >= 12}
-							— incredible consistency{:else if form.streak >= 9}
-							— outstanding{:else if form.streak >= 6}
-							— keep it going{/if}
-					</p>
+					{#if form.streak >= 20}
+						<div class="mt-2 rounded-lg bg-warning/10 px-3 py-2">
+							<p class="text-sm font-semibold text-warning">
+								{form.streak}-check-in streak — this kind of consistency changes how you lead.
+							</p>
+						</div>
+					{:else if form.streak >= 10}
+						<div class="mt-2 rounded-lg bg-warning/10 px-3 py-2">
+							<p class="text-sm font-semibold text-warning">
+								{form.streak} in a row. You've built a real practice. The data shows it.
+							</p>
+						</div>
+					{:else if form.streak >= 5}
+						<p class="mt-1 text-sm font-semibold text-warning">
+							{form.streak}-check-in streak — real patterns are forming.
+						</p>
+					{:else}
+						<p class="mt-1 text-sm font-semibold text-warning">
+							{form.streak} check-ins in a row — keep building.
+						</p>
+					{/if}
 				{/if}
 				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<a

@@ -298,6 +298,78 @@ export const load: PageServerLoad = async (event) => {
 		})
 		.slice(0, 3);
 
+	// Coaching moments — proactive, action-oriented insights
+	const coachingMoments: Array<{
+		clientName: string;
+		clientId: string;
+		type: 'perception_gap' | 'score_jump' | 'consistency' | 'new_feedback';
+		message: string;
+		action: string;
+	}> = [];
+
+	for (const client of activeSummaries) {
+		const refs = client.objective?.cycle?.recentReflections;
+
+		// Perception gap: self-score vs stakeholder score diverges by 2+
+		for (const sh of client.stakeholders) {
+			if (!sh.lastFeedback || !refs || refs.length === 0) continue;
+			const latestRef = refs[0];
+			if (
+				latestRef.effortScore !== null &&
+				sh.lastFeedback.effortScore !== null &&
+				sh.lastFeedback.weekNumber === latestRef.weekNumber
+			) {
+				const gap = latestRef.effortScore - sh.lastFeedback.effortScore;
+				if (Math.abs(gap) >= 2) {
+					coachingMoments.push({
+						clientName: client.name,
+						clientId: client.id,
+						type: 'perception_gap',
+						message: `${client.name} rated effort ${latestRef.effortScore}, but ${sh.name} sees ${sh.lastFeedback.effortScore}`,
+						action: 'Explore the gap in your next session'
+					});
+					break; // one gap per client
+				}
+			}
+		}
+
+		// Big score jump (effort or performance changed by 3+)
+		if (refs && refs.length >= 2) {
+			const curr = refs[0];
+			const prev = refs[1];
+			if (curr.effortScore !== null && prev.effortScore !== null) {
+				const delta = curr.effortScore - prev.effortScore;
+				if (delta >= 3) {
+					coachingMoments.push({
+						clientName: client.name,
+						clientId: client.id,
+						type: 'score_jump',
+						message: `${client.name}'s effort jumped from ${prev.effortScore} to ${curr.effortScore}`,
+						action: 'Find out what clicked'
+					});
+				} else if (delta <= -3) {
+					coachingMoments.push({
+						clientName: client.name,
+						clientId: client.id,
+						type: 'score_jump',
+						message: `${client.name}'s effort dropped from ${prev.effortScore} to ${curr.effortScore}`,
+						action: 'Worth a check-in this week'
+					});
+				}
+			}
+		}
+	}
+
+	// Deduplicate by client, keep first moment per client, limit to 3
+	const seenMomentClients = new Set<string>();
+	const topMoments = coachingMoments
+		.filter((m) => {
+			if (seenMomentClients.has(m.clientId)) return false;
+			seenMomentClients.add(m.clientId);
+			return true;
+		})
+		.slice(0, 3);
+
 	return {
 		coach: {
 			name: dbUser.name ?? 'Coach'
@@ -326,6 +398,7 @@ export const load: PageServerLoad = async (event) => {
 		},
 		portfolioMomentum,
 		portfolioWins: topWins,
+		coachingMoments: topMoments,
 		coachActivity: { noteCount }
 	};
 };
