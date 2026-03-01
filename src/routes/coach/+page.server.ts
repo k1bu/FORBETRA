@@ -201,6 +201,35 @@ export const load: PageServerLoad = async (event) => {
 		(c) => (c.objective?.insights?.trajectoryScore ?? 0) < -5
 	).length;
 
+	// Portfolio momentum — week-over-week avg effort/perf change
+	const effortDeltas: number[] = [];
+	const perfDeltas: number[] = [];
+	for (const client of activeSummaries) {
+		const refs = client.objective?.cycle?.recentReflections;
+		if (!refs || refs.length < 2) continue;
+		const curr = refs[0];
+		const prev = refs[1];
+		if (curr.effortScore !== null && prev.effortScore !== null) {
+			effortDeltas.push(curr.effortScore - prev.effortScore);
+		}
+		if (curr.performanceScore !== null && prev.performanceScore !== null) {
+			perfDeltas.push(curr.performanceScore - prev.performanceScore);
+		}
+	}
+	const portfolioMomentum =
+		effortDeltas.length > 0 || perfDeltas.length > 0
+			? {
+					effortDelta:
+						effortDeltas.length > 0
+							? Number((effortDeltas.reduce((s, d) => s + d, 0) / effortDeltas.length).toFixed(1))
+							: null,
+					perfDelta:
+						perfDeltas.length > 0
+							? Number((perfDeltas.reduce((s, d) => s + d, 0) / perfDeltas.length).toFixed(1))
+							: null
+				}
+			: null;
+
 	return {
 		coach: {
 			name: dbUser.name ?? 'Coach'
@@ -226,6 +255,7 @@ export const load: PageServerLoad = async (event) => {
 			declining,
 			stable: activeSummaries.length - improving - declining,
 			total: activeSummaries.length
-		}
+		},
+		portfolioMomentum
 	};
 };

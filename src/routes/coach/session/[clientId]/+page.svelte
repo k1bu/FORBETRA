@@ -88,7 +88,7 @@
 			submittingNote = false;
 		}
 		if (form?.noteSuccess) {
-			addToast('Note saved', 'success');
+			addToast(`Note saved — shapes ${data.client.name.split(' ')[0]}'s Monday prompt`, 'success');
 			noteContent = '';
 		}
 	});

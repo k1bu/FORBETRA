@@ -428,23 +428,19 @@
 												{formatAverage(client.objective.insights.avgProgress)}
 											</p>
 										</div>
-										<div
-											class="rounded-lg border border-border-default bg-surface-raised p-2"
-											title="How consistent scores are week to week"
-										>
+										<div class="rounded-lg border border-border-default bg-surface-raised p-2">
 											<p class="text-text-tertiary">Stability</p>
 											<p class="text-lg font-bold text-accent">
 												{formatScore(client.objective.insights.stabilityScore)}
 											</p>
+											<p class="text-[10px] text-text-muted">Week-to-week consistency</p>
 										</div>
-										<div
-											class="rounded-lg border border-border-default bg-surface-raised p-2"
-											title="% of stakeholders who responded this week"
-										>
+										<div class="rounded-lg border border-border-default bg-surface-raised p-2">
 											<p class="text-text-tertiary">Alignment</p>
 											<p class="text-lg font-bold text-success">
 												{formatPercent(client.objective.insights.alignmentRatio)}
 											</p>
+											<p class="text-[10px] text-text-muted">Stakeholder response rate</p>
 										</div>
 									</div>
 									<div
@@ -744,7 +740,7 @@
 					<div class="flex items-center gap-2">
 						<Sparkles class="h-4 w-4 text-success" />
 						<p class="font-semibold">
-							Note saved successfully! It will appear in their next Monday prompt.
+							Note saved — shapes {client?.name.split(' ')[0]}'s Monday AI prompt.
 						</p>
 					</div>
 				</div>

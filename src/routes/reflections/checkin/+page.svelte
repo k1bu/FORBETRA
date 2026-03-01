@@ -148,17 +148,26 @@
 				class="animate-in fade-in slide-in-from-top-2 mx-auto max-w-2xl rounded-xl border border-success/30 bg-success-muted p-6 text-center"
 			>
 				<CircleCheck class="mx-auto mb-2 h-10 w-10 text-success" />
-				<p class="text-lg font-semibold text-success">Check-in saved!</p>
+				<p class="text-lg font-semibold text-success">Week {data.currentWeek} check-in saved</p>
+				{#if data.previousRatings}
+					{@const eDiff = effortScore - (data.previousRatings.effortScore ?? effortScore)}
+					{@const pDiff =
+						performanceScore - (data.previousRatings.performanceScore ?? performanceScore)}
+					<p class="mt-1 text-sm text-text-secondary">
+						Effort {effortScore}{#if eDiff > 0}
+							<span class="text-success">(↑{eDiff})</span>{:else if eDiff < 0}
+							<span class="text-error">(↓{Math.abs(eDiff)})</span>{/if}
+						· Performance {performanceScore}{#if pDiff > 0}
+							<span class="text-success">(↑{pDiff})</span>{:else if pDiff < 0}
+							<span class="text-error">(↓{Math.abs(pDiff)})</span>{/if}
+					</p>
+				{/if}
 				{#if form.streak && form.streak >= 3}
 					<p class="mt-1 text-sm font-semibold text-warning">
-						You're on a {form.streak} check-in streak!{#if form.streak >= 12}
-							Incredible consistency!{:else if form.streak >= 9}
-							Outstanding!{:else if form.streak >= 6}
-							Keep it going!{/if}
-					</p>
-				{:else}
-					<p class="mt-1 text-sm text-success">
-						Your reflection has been recorded. Keep up the great work!
+						{form.streak} check-ins in a row{#if form.streak >= 12}
+							— incredible consistency{:else if form.streak >= 9}
+							— outstanding{:else if form.streak >= 6}
+							— keep it going{/if}
 					</p>
 				{/if}
 				<!-- eslint-disable svelte/no-navigation-without-resolve -->

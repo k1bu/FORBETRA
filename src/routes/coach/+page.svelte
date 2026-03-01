@@ -35,6 +35,21 @@
 		if (declining > 0) parts.push(`${declining} needs attention`);
 		return parts.join(', ');
 	});
+
+	const momentumLine = $derived(() => {
+		const m = data.portfolioMomentum;
+		if (!m) return null;
+		const parts: string[] = [];
+		if (m.effortDelta !== null) {
+			const sign = m.effortDelta > 0 ? '+' : '';
+			parts.push(`effort ${sign}${m.effortDelta}`);
+		}
+		if (m.perfDelta !== null) {
+			const sign = m.perfDelta > 0 ? '+' : '';
+			parts.push(`performance ${sign}${m.perfDelta}`);
+		}
+		return parts.length > 0 ? `Week-over-week: ${parts.join(', ')}` : null;
+	});
 </script>
 
 <svelte:head>
@@ -53,6 +68,9 @@
 				{data.portfolioInsight.total} active client{data.portfolioInsight.total !== 1 ? 's' : ''} &mdash;
 				{portfolioLine()}
 			</p>
+			{#if momentumLine()}
+				<p class="mt-0.5 text-xs text-text-tertiary">{momentumLine()}</p>
+			{/if}
 		{:else}
 			<p class="mt-1 text-text-secondary">
 				Monitor client progress, track insights, and guide your practice.
