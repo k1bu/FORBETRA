@@ -948,7 +948,8 @@ Phase J broke the "Coach dimensions stuck at 7.3" pattern — IA and TC both jum
 | 2026-02-28 | Phase J actual |   7.82   |    7.74    | 7.69  |    8.11     | Mobile nav, cadence toast, AI explain, prep ctx. +0.02             |
 | 2026-03-01 | Phase K actual |   7.86   |    7.82    | 7.71  |    8.11     | Settings overhaul, onboarding polish, comprehensive re-eval. +0.04 |
 | 2026-03-01 | Phase L actual |   7.90   |    7.86    | 7.78  |    8.11     | Timeline deltas, tab badges, hub compaction. +0.04                 |
-|            | Target         |   9.3+   |    9.3+    | 9.0+  |    9.5+     | Final goal. Remaining gap: 1.40 pts.                               |
+| 2026-03-01 | Phase M actual |   7.93   |    7.89    | 7.84  |    8.11     | Milestones, impact language, onboarding labels, gap card. +0.03    |
+|            | Target         |   9.3+   |    9.3+    | 9.0+  |    9.5+     | Final goal. Remaining gap: 1.37 pts.                               |
 
 ---
 
@@ -1210,3 +1211,64 @@ Phase L delivered the largest Coach lift since Phase I (+0.07) by targeting the 
 **Coach CL is no longer at the bottom.** After 11 phases at 7.3 or below, Coach CL jumped to 7.7, overtaking EE (7.4), OE (7.5), and TC (7.5). The new floor is Coach EE at 7.4. Platform crossed 7.9 for the first time.
 
 **Next levers:** Coach EE (7.4) remains the persistent bottleneck — needs coach-specific progression mechanics (streaks, milestones, impact trails). Individual EE (7.5) could benefit from perception gap surfacing on the hub. Coach OE (7.5) needs onboarding step labels.
+
+---
+
+## 22. Phase M Results (Milestones, impact language, onboarding labels, perception gap card)
+
+**What shipped:**
+
+1. **Coach milestone engine + impact language** — Milestone-aware coaching footprint (thresholds at 5/10/25/50 notes with progression language). Portfolio wins reframed with coach attribution ("your coaching is resonating", "your guidance is landing"). Analytics narrative uses impact framing ("gaining momentum", "your portfolio is thriving"). Session note toast detects milestones ("Your 10th note for Alex — you're deeply invested"). AI prep toast enhanced ("coaching opportunities surfaced").
+2. **Coach onboarding step labels** — Progress dots now include labels ("Welcome", "How It Works", "Invite Client") below each dot, with color-coded active/completed/upcoming states. Pre-fill section expanded by default (was hidden behind toggle).
+3. **Individual hub perception gap card** — Compact card between metrics and insights zones showing significant perception gaps (>1 point). Color-coded severity (amber 1-2, red >2), trend badges (closing/widening), and "Details →" link to scorecard. Uses existing server data — no backend changes needed.
+
+### Score Movement
+
+```
+Platform: 7.90 → 7.93 (+0.03)
+Individual: 7.86 → 7.89 (+0.03)
+Coach: 7.78 → 7.84 (+0.06)
+Stakeholder: 8.11 → 8.11 (unchanged)
+```
+
+#### Individual (was 7.86 → 7.89, +0.03)
+
+| #   | Dimension                 | Phase L | Phase M | Delta | Evidence                                                                                                         |
+| --- | ------------------------- | :-----: | :-----: | :---: | ---------------------------------------------------------------------------------------------------------------- |
+| 9   | Emotional Engagement (EE) |   7.5   | **7.7** | +0.2  | Perception gap card creates curiosity and engagement. Color severity + trend badges create ongoing narrative.    |
+| 10  | Value Perception (VP)     |   7.7   | **7.9** | +0.2  | Gaps on hub demonstrate platform's unique value — self-awareness through external feedback — without navigating. |
+|     | All others                |    —    |    —    |   0   | FI, CP, OE, CT, IA, FP, CL, TC unchanged.                                                                        |
+
+#### Coach (was 7.78 → 7.84, +0.06)
+
+| #   | Dimension                 | Phase L | Phase M | Delta | Evidence                                                                                                      |
+| --- | ------------------------- | :-----: | :-----: | :---: | ------------------------------------------------------------------------------------------------------------- |
+| 2   | Clarity of Purpose (CP)   |   8.0   | **8.1** | +0.1  | Step labels on onboarding dots — coach knows what's ahead at each stage.                                      |
+| 3   | Onboarding Ease (OE)      |   7.5   | **7.7** | +0.2  | Pre-fill expanded by default (was hidden in toggle). Step labels reduce confusion. Top friction points fixed. |
+| 9   | Emotional Engagement (EE) |   7.4   | **7.7** | +0.3  | Milestone note toasts, coach-attributed wins, impact-framed narrative, progression language throughout.       |
+|     | All others                |    —    |    —    |   0   | FI, CT, IA, FP, CL, TC, VP unchanged.                                                                         |
+
+#### Stakeholder (unchanged)
+
+No Phase M changes affected stakeholder screens.
+
+### Lowest Remaining Dimensions
+
+| Rank | User Type  | Dimension            | Score | Gap to 8.5 |
+| ---- | ---------- | -------------------- | :---: | :--------: |
+| 1    | Coach      | Trust & Credibility  |  7.5  |    1.0     |
+| 2    | Coach      | Info Architecture    |  7.6  |    0.9     |
+| 3    | Coach      | Emotional Engagement |  7.7  |    0.8     |
+| 4    | Coach      | Onboarding Ease      |  7.7  |    0.8     |
+| 5    | Coach      | Cognitive Load       |  7.7  |    0.8     |
+| 6    | Coach      | Feedback & Progress  |  7.7  |    0.8     |
+| 7    | Individual | Emotional Engagement |  7.7  |    0.8     |
+| 8    | Individual | Onboarding Ease      |  7.7  |    0.8     |
+
+### Phase M Commentary
+
+Phase M directly addressed all three bottlenecks identified in Phase L's commentary: Coach EE (+0.3 via milestones and impact language), Coach OE (+0.2 via step labels and pre-fill expansion), and Individual EE (+0.2 via perception gap card). Coach EE finally broke out of the 7.3-7.4 range to reach 7.7 — a +0.3 jump from milestone detection and coach-attributive language that transforms the clinical tone into acknowledgment of coach effort.
+
+**Coach TC (7.5) is now the single lowest dimension** across all user types. It was overlooked while EE, CL, and OE were being addressed. TC for coaches means: "Does the system feel trustworthy and professional? Does it handle errors well? Does the coach feel confident in the data?"
+
+**Next levers:** Coach TC (7.5) — needs archive confirmation dialog, error recovery for AI prep, and data provenance signals. Coach IA (7.6) — could benefit from roster visual hierarchy or tab organization improvements.
