@@ -496,7 +496,11 @@
 
 	<!-- ═══ ZONE 3: At-a-Glance (compact row) ═══ -->
 	{#if data.isOnboardingComplete && (data.myLastRatings || data.stakeholdersLastRatings || data.summary)}
-		<div class="rounded-xl border border-border-default bg-surface-raised p-4">
+		<div
+			class="rounded-xl border border-border-default bg-surface-raised p-4"
+			role="region"
+			aria-label="Weekly metrics at a glance"
+		>
 			<p class="mb-3 text-[10px] font-semibold tracking-widest text-text-muted uppercase">
 				This week
 			</p>
@@ -505,6 +509,7 @@
 					<span class="text-[10px] font-medium tracking-wider text-text-muted uppercase"
 						>Effort</span
 					>
+					<p class="text-[9px] text-text-tertiary">Your self-rating</p>
 					{#if data.myLastRatings?.effort !== null && data.myLastRatings?.effort !== undefined}
 						<div class="flex items-baseline gap-1">
 							<span class="text-xl font-bold text-cyan-400 tabular-nums"
@@ -532,6 +537,7 @@
 					<span class="text-[10px] font-medium tracking-wider text-text-muted uppercase"
 						>Performance</span
 					>
+					<p class="text-[9px] text-text-tertiary">Your self-rating</p>
 					{#if data.myLastRatings?.effort !== null && data.myLastRatings?.effort !== undefined}
 						<div class="flex items-baseline gap-1">
 							<span class="text-xl font-bold text-amber-400 tabular-nums"
@@ -559,6 +565,7 @@
 					<span class="text-[10px] font-medium tracking-wider text-text-muted uppercase"
 						>Stakeholder</span
 					>
+					<p class="text-[9px] text-text-tertiary">Others' average</p>
 					{#if data.stakeholdersLastRatings?.effort !== null && data.stakeholdersLastRatings?.effort !== undefined}
 						<div class="flex items-baseline gap-1.5">
 							<span class="text-xl font-bold text-cyan-400 tabular-nums"
@@ -586,6 +593,7 @@
 					<span class="text-[10px] font-medium tracking-wider text-text-muted uppercase"
 						>Completion</span
 					>
+					<p class="text-[9px] text-text-tertiary">Check-in rate</p>
 					{#if data.summary?.completionRate !== null && data.summary?.completionRate !== undefined}
 						<p class="text-xl font-bold text-accent tabular-nums">{data.summary.completionRate}%</p>
 					{:else}
@@ -623,6 +631,9 @@
 				<div class="min-w-0 flex-1">
 					<p class="text-sm font-medium text-text-primary">
 						{significantGaps.length} perception gap{significantGaps.length !== 1 ? 's' : ''}
+					</p>
+					<p class="mt-0.5 text-[10px] text-text-tertiary">
+						+ means you rate higher than others · − means others rate higher
 					</p>
 					<div class="mt-1 flex flex-wrap gap-x-4 gap-y-1">
 						{#each significantGaps.slice(0, 3) as gap (gap.stakeholderId)}

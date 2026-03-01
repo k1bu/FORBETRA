@@ -198,6 +198,13 @@
 				You've already submitted your feedback for {data.reflection?.participantName ??
 					'this person'}. Thank you for your input!
 			</p>
+			{#if data.historicRatings && data.historicRatings.length > 0}
+				<p class="mt-2 text-xs text-text-muted">
+					You've contributed {data.historicRatings.length} time{data.historicRatings.length !== 1
+						? 's'
+						: ''} this cycle — that consistency makes a real difference.
+				</p>
+			{/if}
 		</div>
 	</div>
 {:else}
@@ -238,11 +245,20 @@
 			</div>
 		{/if}
 		<header class="space-y-3 text-center">
-			<div
-				class="inline-flex items-center gap-2 rounded-full bg-accent-muted px-4 py-1.5 text-xs font-medium text-accent"
-			>
-				<span class="h-2 w-2 rounded-full bg-accent"></span>
-				Week {data.reflection.weekNumber} Check-in
+			<div class="flex items-center justify-center gap-2">
+				<div
+					class="inline-flex items-center gap-2 rounded-full bg-accent-muted px-4 py-1.5 text-xs font-medium text-accent"
+				>
+					<span class="h-2 w-2 rounded-full bg-accent"></span>
+					Week {data.reflection.weekNumber} Check-in
+				</div>
+				{#if !data.isFirstFeedback && data.historicRatings && data.historicRatings.length > 0}
+					<span
+						class="rounded-full bg-success-muted px-3 py-1.5 text-[10px] font-semibold text-success"
+					>
+						Contribution #{data.historicRatings.length + 1}
+					</span>
+				{/if}
 			</div>
 			<h1 class="text-3xl font-bold text-text-primary">
 				Share feedback for {data.reflection.participantName}
@@ -345,6 +361,12 @@
 					<p class="mt-1 text-sm text-success">
 						Your perspective helps {data.reflection.participantName} see what they can't see themselves.
 					</p>
+					{#if data.historicRatings && data.historicRatings.length > 0}
+						<p class="mt-2 text-xs text-success/80">
+							Contribution #{data.historicRatings.length + 1} this cycle — your consistency amplifies
+							impact.
+						</p>
+					{/if}
 				</div>
 
 				<!-- What happens next -->
@@ -842,6 +864,19 @@
 							<strong>7–10</strong> Clear, consistent results
 						</p>
 					</div>
+
+					<!-- Impact reinforcement (appears after both scores are filled) -->
+					{#if effortScore !== null && performanceScore !== null}
+						<div
+							class="flex items-center gap-2.5 rounded-xl border border-success/10 bg-gradient-to-r from-success/5 to-transparent px-4 py-2.5"
+						>
+							<CircleCheck class="h-4 w-4 shrink-0 text-success" />
+							<p class="text-xs text-text-secondary">
+								Both scores recorded. Your perspective helps {data.reflection.participantName} see blind
+								spots they can't see alone.
+							</p>
+						</div>
+					{/if}
 
 					<!-- Notes with Better UX -->
 					<div

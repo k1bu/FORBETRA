@@ -86,6 +86,38 @@
 		{/if}
 	</header>
 
+	<!-- Portfolio Health Bar -->
+	{#if data.portfolioInsight.total > 0}
+		{@const pct = data.portfolioInsight.improving / data.portfolioInsight.total}
+		<div
+			class="flex items-center gap-3 rounded-lg border border-border-default bg-surface-subtle px-3 py-2"
+		>
+			<div class="flex h-2 flex-1 gap-0.5 overflow-hidden rounded-full">
+				{#if data.portfolioInsight.improving > 0}
+					<div
+						class="h-full rounded-l-full bg-success"
+						style="width: {(data.portfolioInsight.improving / data.portfolioInsight.total) * 100}%"
+					></div>
+				{/if}
+				{#if data.portfolioInsight.stable > 0}
+					<div
+						class="h-full bg-accent"
+						style="width: {(data.portfolioInsight.stable / data.portfolioInsight.total) * 100}%"
+					></div>
+				{/if}
+				{#if data.portfolioInsight.declining > 0}
+					<div
+						class="h-full rounded-r-full bg-error"
+						style="width: {(data.portfolioInsight.declining / data.portfolioInsight.total) * 100}%"
+					></div>
+				{/if}
+			</div>
+			<span class="shrink-0 text-[10px] text-text-muted">
+				{Math.round(pct * 100)}% improving
+			</span>
+		</div>
+	{/if}
+
 	<!-- Stat Cards -->
 	<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 		<div class="rounded-xl border border-border-default bg-surface-raised p-4">
@@ -93,7 +125,7 @@
 				<Users class="h-4 w-4 text-accent" />
 				<p class="text-xs font-medium text-text-tertiary">Active Clients</p>
 			</div>
-			<p class="text-3xl font-bold text-text-primary tabular-nums">{data.rosterSummary.active}</p>
+			<p class="text-2xl font-bold text-text-primary tabular-nums">{data.rosterSummary.active}</p>
 			{#if data.rosterSummary.pendingInvites > 0}
 				<p class="mt-1 text-xs text-accent">
 					{data.rosterSummary.pendingInvites} invite{data.rosterSummary.pendingInvites !== 1
@@ -117,7 +149,7 @@
 				/>
 				<p class="text-xs font-medium text-text-tertiary">Alerts</p>
 			</div>
-			<p class="text-3xl font-bold text-text-primary tabular-nums">{data.analytics.totalAlerts}</p>
+			<p class="text-2xl font-bold text-text-primary tabular-nums">{data.analytics.totalAlerts}</p>
 			{#if data.analytics.highPriorityAlerts > 0}
 				<p class="mt-1 text-xs font-semibold text-error">
 					{data.analytics.highPriorityAlerts} high priority
@@ -131,7 +163,7 @@
 				<BarChart3 class="h-4 w-4 text-cyan-400" />
 				<p class="text-xs font-medium text-text-tertiary">Avg. Stability</p>
 			</div>
-			<p class="text-3xl font-bold text-text-primary tabular-nums">
+			<p class="text-2xl font-bold text-text-primary tabular-nums">
 				{data.analytics.avgStability !== null ? `${data.analytics.avgStability}/100` : '\u2014'}
 			</p>
 			<p class="mt-1 text-[10px] text-text-muted">Week-to-week score consistency</p>
@@ -141,7 +173,7 @@
 				<Target class="h-4 w-4 text-amber-400" />
 				<p class="text-xs font-medium text-text-tertiary">Avg. Alignment</p>
 			</div>
-			<p class="text-3xl font-bold text-text-primary tabular-nums">
+			<p class="text-2xl font-bold text-text-primary tabular-nums">
 				{data.analytics.avgAlignment !== null ? `${data.analytics.avgAlignment}%` : '\u2014'}
 			</p>
 			<p class="mt-1 text-[10px] text-text-muted">Stakeholder response rate</p>
