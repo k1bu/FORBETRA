@@ -557,6 +557,38 @@
 
 		{#if !form?.success && !(data.isPreview && showReveal) && !showWelcome}
 			<div class="mx-auto w-full max-w-2xl space-y-6">
+				<!-- Step indicator -->
+				<div class="flex items-center justify-center gap-2">
+					<div class="flex items-center gap-1.5">
+						<span
+							class="flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold {effortScore !==
+							null
+								? 'bg-accent text-white'
+								: 'bg-surface-subtle text-text-muted'}">1</span
+						>
+						<span class="text-[10px] text-text-muted">Effort</span>
+					</div>
+					<div class="h-px w-6 bg-border-default"></div>
+					<div class="flex items-center gap-1.5">
+						<span
+							class="flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold {performanceScore !==
+							null
+								? 'bg-accent text-white'
+								: 'bg-surface-subtle text-text-muted'}">2</span
+						>
+						<span class="text-[10px] text-text-muted">Performance</span>
+					</div>
+					<div class="h-px w-6 bg-border-default"></div>
+					<div class="flex items-center gap-1.5">
+						<span
+							class="flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold {notes.trim()
+								? 'bg-accent text-white'
+								: 'bg-surface-subtle text-text-muted'}">3</span
+						>
+						<span class="text-[10px] text-text-muted">Comment</span>
+					</div>
+				</div>
+
 				<form method="post" onsubmit={handleSubmit} class="space-y-6">
 					<input type="hidden" name="token" value={data.token} />
 					<!-- Hidden inputs for form submission (only included when a score is selected) -->
@@ -717,7 +749,8 @@
 							<span class="text-xs font-medium text-text-tertiary">Relentless commitment</span>
 						</div>
 						<p class="text-xs text-text-muted italic">
-							Consider attention, preparation, and prioritization toward the objective.
+							<strong>0–3</strong> Rarely visible · <strong>4–6</strong> Some attention ·
+							<strong>7–10</strong> Proactive, consistent effort
 						</p>
 					</div>
 
@@ -805,7 +838,8 @@
 							<span class="text-xs font-medium text-text-tertiary">Transformative impact</span>
 						</div>
 						<p class="text-xs text-text-muted italic">
-							Consider outcomes, behavior change, and visible impact related to the objective.
+							<strong>0–3</strong> No visible change · <strong>4–6</strong> Some improvement ·
+							<strong>7–10</strong> Clear, consistent results
 						</p>
 					</div>
 

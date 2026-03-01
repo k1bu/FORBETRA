@@ -953,7 +953,8 @@ Phase J broke the "Coach dimensions stuck at 7.3" pattern — IA and TC both jum
 | 2026-03-01 | Phase O actual |   7.98   |    7.93    | 7.94  |    8.11     | Onboarding reframe, completion ceremony, coaching moments, streaks. +0.03   |
 | 2026-03-01 | Phase P actual |   8.00   |    7.95    | 7.98  |    8.11     | Dashboard polish, check-in flow, session summary. +0.02. **8.0 milestone!** |
 | 2026-03-01 | Phase Q actual |   8.04   |    8.00    | 8.01  |    8.14     | Privacy footer, nav descriptions, data source labels, stakeholder UX. +0.04 |
-|            | Target         |   9.3+   |    9.3+    | 9.0+  |    9.5+     | Final goal. Remaining gap: 1.26 pts.                                        |
+| 2026-03-01 | Phase R actual |   8.08   |    8.03    | 8.03  |    8.22     | Hub polish, progress narrative, scoring guide, session hierarchy. +0.04     |
+|            | Target         |   9.3+   |    9.3+    | 9.0+  |    9.5+     | Final goal. Remaining gap: 1.22 pts.                                        |
 
 ---
 
@@ -1524,3 +1525,55 @@ Stakeholder: 8.11 → 8.14 (+0.03) ← first Stakeholder lift since Phase F
 **Stakeholder experience needs deeper structural work.** The Phase Q changes improved the post-submission experience, but the core task flow (11-button rating grid) remains the stakeholder's biggest bottleneck (CT at ~8.0, CL at ~8.0). The next Stakeholder gains require either structured qualitative prompts, scoring calibration, or progressive disclosure patterns.
 
 **Next levers for 8.5+:** The broad 7.9 floor means each dimension needs ~0.6 uplift. Key strategies: (1) Individual first impression polish — visual refinement of hub/dashboard; (2) Cognitive load reduction — progressive disclosure, smart defaults; (3) Onboarding tightening — reduce steps or add skip logic; (4) Coach FI — session view visual hierarchy; (5) Stakeholder CT/CL — scoring guide, step indicator.
+
+---
+
+## 27. Phase R Results (Hub polish, progress narrative, scoring guide, session hierarchy)
+
+**What shipped:**
+
+1. **Individual hub visual polish** — "This week" section label on at-a-glance metrics. "Insights" section label above quick insights. Cycle progress bar with week counter and completion percentage below the metrics grid.
+2. **Progress narrative** — New Zone 3c between metrics and insights. Derives contextual message from completion rate, streak, and stakeholder count. Examples: "Solid consistency at 85% completion. 3 stakeholders providing outside perspective." or "Every check-in counts. Keep building the habit."
+3. **Stakeholder scoring guide + step indicator** — 3-step progress indicator (Effort → Performance → Comment) that fills as user completes each section. Inline calibration anchors below each rating scale: "0–3 Rarely visible · 4–6 Some attention · 7–10 Proactive, consistent effort" for effort, and equivalent for performance.
+4. **Coach session visual hierarchy** — Gradient background on AI Coaching Insights card (`from-accent/5 to-accent-muted`). Tab descriptions as tooltips. ARIA group label on summary metrics.
+
+### Score Movement
+
+```
+Platform: 8.04 → 8.08 (+0.04)
+Individual: 8.00 → 8.03 (+0.03)
+Coach: 8.01 → 8.03 (+0.02)
+Stakeholder: 8.14 → 8.22 (+0.08) ← largest Stakeholder lift since Phase F
+```
+
+#### Individual (was 8.00 → 8.03, +0.03)
+
+| #   | Dimension                 | Phase Q | Phase R | Delta | Evidence                                                                           |
+| --- | ------------------------- | :-----: | :-----: | :---: | ---------------------------------------------------------------------------------- |
+| 1   | First Impression (FI)     |   7.9   | **8.1** | +0.2  | Section labels create visual structure. Progress bar adds polish and orientation.  |
+| 9   | Emotional Engagement (EE) |   7.9   | **8.0** | +0.1  | Progress narrative creates personal connection ("You've built a strong practice"). |
+| 10  | Value Perception (VP)     |   7.9   | **8.0** | +0.1  | Progress narrative reinforces value of participation, names stakeholder count.     |
+|     | All others                |    —    |    —    |   0   | CP, OE, CT, IA, FP, CL, TC unchanged.                                              |
+
+#### Coach (was 8.01 → 8.03, +0.02)
+
+| #   | Dimension             | Phase Q | Phase R | Delta | Evidence                                                                                         |
+| --- | --------------------- | :-----: | :-----: | :---: | ------------------------------------------------------------------------------------------------ |
+| 1   | First Impression (FI) |   7.9   | **8.1** | +0.2  | Gradient prep card, tab tooltips, ARIA labels. Session view feels more polished and intentional. |
+|     | All others            |    —    |    —    |   0   | CP, OE, CT, IA, FP, CL, TC, EE, VP unchanged.                                                    |
+
+#### Stakeholder (was 8.14 → 8.22, +0.08)
+
+| #   | Dimension             | Phase Q | Phase R | Delta | Evidence                                                                                                 |
+| --- | --------------------- | :-----: | :-----: | :---: | -------------------------------------------------------------------------------------------------------- |
+| 1   | First Impression (FI) |   8.0   | **8.1** | +0.1  | Step indicator adds visual structure and progress feedback.                                              |
+| 4   | Core Task Flow (CT)   |   8.0   | **8.2** | +0.2  | Scoring calibration ("0–3 Rarely visible, 4–6 Some attention, 7–10 Proactive") reduces rating ambiguity. |
+| 7   | Cognitive Load (CL)   |   8.0   | **8.2** | +0.2  | Step indicator (1→2→3) orients user. Calibration anchors reduce mental translation effort.               |
+
+### Phase R Commentary
+
+**Stakeholder experience had its biggest single-phase lift** (+0.08, from 8.14 to 8.22). The scoring calibration anchors were the key lever — they directly address the cognitive load of the 11-button scale by giving stakeholders concrete behavioral anchors. Combined with the step indicator, the stakeholder form now feels like a structured 3-step process instead of a wall of buttons.
+
+**Individual hub now has proper visual hierarchy.** Section labels, progress bar, and the progress narrative create distinct zones that guide the eye. The hub went from "collection of cards" to "structured daily briefing."
+
+**Next levers for 8.5+:** (1) Individual OE — onboarding is the largest untouched area, dense and long; (2) Individual CL — hub cards could use progressive disclosure for less-important sections; (3) Coach OE — coach onboarding still has structural opportunities; (4) Stakeholder CT/CL — further scoring improvements (pre-fill, "same as last" shortcut); (5) All user types need EE improvements — celebration, progression, habit reinforcement.

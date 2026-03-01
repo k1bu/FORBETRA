@@ -33,11 +33,11 @@
 	// Tab navigation
 	type SessionTab = 'prep' | 'timeline' | 'notes' | 'chart';
 	let activeTab = $state<SessionTab>('prep');
-	const tabs: { id: SessionTab; label: string }[] = [
-		{ id: 'prep', label: 'Prep' },
-		{ id: 'timeline', label: 'Timeline' },
-		{ id: 'notes', label: 'Notes' },
-		{ id: 'chart', label: 'Chart' }
+	const tabs: { id: SessionTab; label: string; desc: string }[] = [
+		{ id: 'prep', label: 'Prep', desc: 'AI insights & alerts' },
+		{ id: 'timeline', label: 'Timeline', desc: 'Weekly reflections' },
+		{ id: 'notes', label: 'Notes', desc: 'Your observations' },
+		{ id: 'chart', label: 'Chart', desc: 'Trends over time' }
 	];
 
 	const formatDate = (value: string | null | undefined) => {
@@ -248,7 +248,11 @@
 	{#if data.client.objective?.insights}
 		{@const ins = data.client.objective.insights}
 		{@const cycle = data.client.objective.cycle}
-		<div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+		<div
+			class="grid grid-cols-2 gap-3 sm:grid-cols-4"
+			role="group"
+			aria-label="Client summary metrics"
+		>
 			<div class="rounded-lg border border-border-default bg-surface-raised px-3 py-2">
 				<p class="text-[10px] font-medium tracking-wider text-text-muted uppercase">Effort</p>
 				<p class="text-lg font-bold text-cyan-400 tabular-nums">{ins.avgEffort ?? '—'}</p>
@@ -299,6 +303,7 @@
 				type="button"
 				role="tab"
 				aria-selected={activeTab === tab.id}
+				title={tab.desc}
 				onclick={() => (activeTab = tab.id)}
 				class="flex-1 rounded-lg px-4 py-2 text-sm font-semibold transition-all {activeTab ===
 				tab.id
@@ -323,7 +328,9 @@
 	<!-- ═══ TAB: Prep ═══ -->
 	{#if activeTab === 'prep'}
 		<!-- AI Coaching Insights -->
-		<div class="rounded-2xl border border-accent/30 bg-accent-muted p-6">
+		<div
+			class="rounded-2xl border border-accent/30 bg-gradient-to-br from-accent/5 to-accent-muted p-6"
+		>
 			<div class="mb-4 flex items-center justify-between">
 				<div class="flex items-center gap-2">
 					<Sparkles class="h-5 w-5 text-accent" />

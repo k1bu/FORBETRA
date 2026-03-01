@@ -497,6 +497,9 @@
 	<!-- ═══ ZONE 3: At-a-Glance (compact row) ═══ -->
 	{#if data.isOnboardingComplete && (data.myLastRatings || data.stakeholdersLastRatings || data.summary)}
 		<div class="rounded-xl border border-border-default bg-surface-raised p-4">
+			<p class="mb-3 text-[10px] font-semibold tracking-widest text-text-muted uppercase">
+				This week
+			</p>
 			<div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
 				<div>
 					<span class="text-[10px] font-medium tracking-wider text-text-muted uppercase"
@@ -590,6 +593,20 @@
 					{/if}
 				</div>
 			</div>
+			{#if data.summary?.completionRate !== null && data.summary?.completionRate !== undefined && data.currentWeek && data.totalWeeks}
+				<div class="mt-3 border-t border-border-default pt-3">
+					<div class="flex items-center justify-between text-[10px] text-text-muted">
+						<span>Week {data.currentWeek} of {data.totalWeeks}</span>
+						<span class="font-semibold">{data.summary.completionRate}% completed</span>
+					</div>
+					<div class="mt-1 h-1.5 rounded-full bg-surface-subtle">
+						<div
+							class="h-full rounded-full bg-accent transition-all"
+							style="width: {Math.min(data.summary.completionRate, 100)}%"
+						></div>
+					</div>
+				</div>
+			{/if}
 		</div>
 	{/if}
 
@@ -636,9 +653,30 @@
 		{/if}
 	{/if}
 
+	<!-- ═══ ZONE 3c: Progress Narrative ═══ -->
+	{#if data.isOnboardingComplete && data.summary && data.currentWeek && data.currentWeek > 1}
+		{@const rate = data.summary.completionRate ?? 0}
+		{@const streak = data.summary.currentStreak ?? 0}
+		{@const stk = data.summary.totalStakeholders ?? 0}
+		<div
+			class="flex items-start gap-2.5 rounded-xl border border-accent/10 bg-gradient-to-r from-accent/5 to-transparent px-4 py-3"
+		>
+			<Sparkles class="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+			<p class="text-sm text-text-secondary">
+				{#if rate >= 90 && streak >= 5}You've built a strong practice — {rate}% completion with a {streak}-check-in
+					streak.{:else if rate >= 80}Solid consistency at {rate}% completion.{#if stk > 0}
+						{stk} stakeholder{stk !== 1 ? 's' : ''} providing outside perspective.{/if}{:else if rate >= 50}Building
+					momentum at {rate}% completion.{#if streak >= 3}
+						Your {streak}-check-in streak shows commitment.{/if}{:else}Every check-in counts. Keep
+					building the habit.{/if}
+			</p>
+		</div>
+	{/if}
+
 	<!-- ═══ ZONE 4: Quick Insight (single) + AI Insight Teaser ═══ -->
 	{#if quickInsights.length > 0 || data.latestInsight}
 		<div class="flex flex-col gap-2">
+			<p class="text-[10px] font-semibold tracking-widest text-text-muted uppercase">Insights</p>
 			{#if quickInsights.length > 0}
 				{@const insight = quickInsights[0]}
 				<div
