@@ -13,7 +13,8 @@
 		MessageSquare,
 		User,
 		Sparkles,
-		ChevronRight
+		ChevronRight,
+		ChevronDown
 	} from 'lucide-svelte';
 
 	const { data }: { data: PageData } = $props();
@@ -21,6 +22,8 @@
 	if (!data) {
 		throw new Error('Page data is missing');
 	}
+
+	let showRecentActivity = $state(false);
 
 	// Milestone-aware subtitle
 	const milestoneMessage = $derived(
@@ -440,115 +443,99 @@
 		{/if}
 	{/if}
 
-	<!-- ═══ ZONE 3: At-a-Glance (2 cards instead of 4) ═══ -->
+	<!-- ═══ ZONE 3: At-a-Glance (compact row) ═══ -->
 	{#if data.isOnboardingComplete && (data.myLastRatings || data.stakeholdersLastRatings || data.summary)}
-		<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-			<!-- Card 1: Your Ratings -->
-			<div class="rounded-xl border border-border-default bg-surface-raised p-4">
-				<p class="mb-3 text-[10px] font-semibold tracking-wider text-text-muted uppercase">
-					Your Ratings
-				</p>
-				{#if data.myLastRatings?.effort !== null && data.myLastRatings?.effort !== undefined}
-					<div class="flex items-baseline gap-6">
-						<div>
-							<span class="text-[10px] font-medium tracking-wider text-text-muted uppercase"
-								>Effort</span
+		<div class="rounded-xl border border-border-default bg-surface-raised p-4">
+			<div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+				<div>
+					<span class="text-[10px] font-medium tracking-wider text-text-muted uppercase"
+						>Effort</span
+					>
+					{#if data.myLastRatings?.effort !== null && data.myLastRatings?.effort !== undefined}
+						<div class="flex items-baseline gap-1">
+							<span class="text-xl font-bold text-cyan-400 tabular-nums"
+								>{data.myLastRatings.effort}</span
 							>
-							<div class="flex items-baseline gap-1.5">
-								<span class="text-2xl font-bold text-cyan-400 tabular-nums"
-									>{data.myLastRatings.effort}</span
+							{#if data.myLastRatings.effortChange !== null && data.myLastRatings.effortChange !== undefined}
+								<span
+									class="text-xs font-medium {data.myLastRatings.effortChange > 0
+										? 'text-success'
+										: data.myLastRatings.effortChange < 0
+											? 'text-error'
+											: 'text-text-muted'}"
 								>
-								{#if data.myLastRatings.effortChange !== null && data.myLastRatings.effortChange !== undefined}
-									<span
-										class="text-xs font-medium {data.myLastRatings.effortChange > 0
-											? 'text-success'
-											: data.myLastRatings.effortChange < 0
-												? 'text-error'
-												: 'text-text-muted'}"
-									>
-										{data.myLastRatings.effortChange > 0
-											? '+'
-											: ''}{data.myLastRatings.effortChange.toFixed(1)}
-									</span>
-								{/if}
-							</div>
+									{data.myLastRatings.effortChange > 0
+										? '+'
+										: ''}{data.myLastRatings.effortChange.toFixed(1)}
+								</span>
+							{/if}
 						</div>
-						<div>
-							<span class="text-[10px] font-medium tracking-wider text-text-muted uppercase"
-								>Performance</span
+					{:else}
+						<p class="text-xl font-bold text-text-muted">--</p>
+					{/if}
+				</div>
+				<div>
+					<span class="text-[10px] font-medium tracking-wider text-text-muted uppercase"
+						>Performance</span
+					>
+					{#if data.myLastRatings?.effort !== null && data.myLastRatings?.effort !== undefined}
+						<div class="flex items-baseline gap-1">
+							<span class="text-xl font-bold text-amber-400 tabular-nums"
+								>{data.myLastRatings.performance ?? '--'}</span
 							>
-							<div class="flex items-baseline gap-1.5">
-								<span class="text-2xl font-bold text-amber-400 tabular-nums"
-									>{data.myLastRatings.performance ?? '--'}</span
+							{#if data.myLastRatings.performanceChange !== null && data.myLastRatings.performanceChange !== undefined}
+								<span
+									class="text-xs font-medium {data.myLastRatings.performanceChange > 0
+										? 'text-success'
+										: data.myLastRatings.performanceChange < 0
+											? 'text-error'
+											: 'text-text-muted'}"
 								>
-								{#if data.myLastRatings.performanceChange !== null && data.myLastRatings.performanceChange !== undefined}
-									<span
-										class="text-xs font-medium {data.myLastRatings.performanceChange > 0
-											? 'text-success'
-											: data.myLastRatings.performanceChange < 0
-												? 'text-error'
-												: 'text-text-muted'}"
-									>
-										{data.myLastRatings.performanceChange > 0
-											? '+'
-											: ''}{data.myLastRatings.performanceChange.toFixed(1)}
-									</span>
-								{/if}
-							</div>
+									{data.myLastRatings.performanceChange > 0
+										? '+'
+										: ''}{data.myLastRatings.performanceChange.toFixed(1)}
+								</span>
+							{/if}
 						</div>
-					</div>
-				{:else}
-					<p class="text-lg font-bold text-text-muted">--</p>
-					<p class="text-[10px] text-text-muted">Appears after your first check-in</p>
-				{/if}
-			</div>
-
-			<!-- Card 2: Stakeholder View + Completion -->
-			<div class="rounded-xl border border-border-default bg-surface-raised p-4">
-				<p class="mb-3 text-[10px] font-semibold tracking-wider text-text-muted uppercase">
-					Stakeholder View
-				</p>
-				<div class="flex items-baseline gap-6">
-					<div>
-						{#if data.stakeholdersLastRatings?.effort !== null && data.stakeholdersLastRatings?.effort !== undefined}
-							<span class="text-[10px] font-medium tracking-wider text-text-muted uppercase"
-								>Avg</span
+					{:else}
+						<p class="text-xl font-bold text-text-muted">--</p>
+					{/if}
+				</div>
+				<div>
+					<span class="text-[10px] font-medium tracking-wider text-text-muted uppercase"
+						>Stakeholder</span
+					>
+					{#if data.stakeholdersLastRatings?.effort !== null && data.stakeholdersLastRatings?.effort !== undefined}
+						<div class="flex items-baseline gap-1.5">
+							<span class="text-xl font-bold text-cyan-400 tabular-nums"
+								>{data.stakeholdersLastRatings.effort}<span
+									class="text-[10px] font-normal text-text-muted"
+								>
+									E</span
+								></span
 							>
-							<div class="flex items-baseline gap-2">
-								<span class="text-lg font-bold text-cyan-400 tabular-nums"
-									>{data.stakeholdersLastRatings.effort}<span
+							{#if data.stakeholdersLastRatings?.performance !== null && data.stakeholdersLastRatings?.performance !== undefined}
+								<span class="text-xl font-bold text-amber-400 tabular-nums"
+									>{data.stakeholdersLastRatings.performance}<span
 										class="text-[10px] font-normal text-text-muted"
 									>
-										E</span
+										P</span
 									></span
 								>
-								{#if data.stakeholdersLastRatings?.performance !== null && data.stakeholdersLastRatings?.performance !== undefined}
-									<span class="text-lg font-bold text-amber-400 tabular-nums"
-										>{data.stakeholdersLastRatings.performance}<span
-											class="text-[10px] font-normal text-text-muted"
-										>
-											P</span
-										></span
-									>
-								{/if}
-							</div>
-						{:else}
-							<span class="text-[10px] font-medium tracking-wider text-text-muted uppercase"
-								>Avg</span
-							>
-							<p class="text-lg font-bold text-text-muted">--</p>
-							<p class="text-[10px] text-text-muted">Appears when stakeholders respond</p>
-						{/if}
-					</div>
-					{#if data.summary?.completionRate !== null && data.summary?.completionRate !== undefined}
-						<div class="ml-auto text-right">
-							<span class="text-[10px] font-medium tracking-wider text-text-muted uppercase"
-								>Completion</span
-							>
-							<p class="text-2xl font-bold text-accent tabular-nums">
-								{data.summary.completionRate}%
-							</p>
+							{/if}
 						</div>
+					{:else}
+						<p class="text-xl font-bold text-text-muted">--</p>
+					{/if}
+				</div>
+				<div>
+					<span class="text-[10px] font-medium tracking-wider text-text-muted uppercase"
+						>Completion</span
+					>
+					{#if data.summary?.completionRate !== null && data.summary?.completionRate !== undefined}
+						<p class="text-xl font-bold text-accent tabular-nums">{data.summary.completionRate}%</p>
+					{:else}
+						<p class="text-xl font-bold text-text-muted">--</p>
 					{/if}
 				</div>
 			</div>
@@ -580,10 +567,16 @@
 					class="group flex items-center gap-2.5 rounded-xl border border-border-default bg-surface-raised px-4 py-3 transition-all hover:border-accent/30"
 				>
 					<Sparkles class="h-4 w-4 shrink-0 text-accent" />
-					<p class="flex-1 truncate text-sm text-text-secondary">
-						{#if data.latestInsight.weekNumber}Week {data.latestInsight.weekNumber} AI insight available{:else}AI
-							insight available{/if}
-					</p>
+					<div class="min-w-0 flex-1">
+						<p class="truncate text-sm text-text-secondary">
+							{#if data.latestInsight.weekNumber}Week {data.latestInsight.weekNumber}{/if} AI Insight
+						</p>
+						{#if data.latestInsight.content}
+							<p class="mt-0.5 truncate text-xs text-text-muted">
+								{data.latestInsight.content.slice(0, 80)}…
+							</p>
+						{/if}
+					</div>
 					<span
 						class="shrink-0 text-xs font-semibold text-accent transition-transform group-hover:translate-x-0.5"
 						>Read →</span
@@ -594,29 +587,42 @@
 		</div>
 	{/if}
 
-	<!-- ═══ ZONE 5: Recent Activity ═══ -->
+	<!-- ═══ ZONE 5: Recent Activity (collapsible) ═══ -->
 	{#if data.recentNotes && data.recentNotes.length > 0}
 		<div class="rounded-xl border border-border-default bg-surface-raised p-4">
-			<p class="mb-3 text-[10px] font-semibold tracking-wider text-text-muted uppercase">
-				Recent Activity
-			</p>
-			<div class="flex flex-col gap-3">
-				{#each data.recentNotes as note, i (i)}
-					<div class="flex items-start gap-2">
-						{#if note.source === 'self'}
-							<User class="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent" />
-						{:else}
-							<MessageSquare class="mt-0.5 h-3.5 w-3.5 shrink-0 text-teal-400" />
-						{/if}
-						<div class="min-w-0 flex-1">
-							<p class="text-sm text-text-secondary">{note.text}</p>
-							<p class="mt-0.5 text-[10px] text-text-muted">
-								{#if note.source === 'self'}You{:else}{note.name}{/if} &middot; Week {note.weekNumber}
-							</p>
+			<button
+				type="button"
+				onclick={() => (showRecentActivity = !showRecentActivity)}
+				class="flex w-full items-center justify-between"
+			>
+				<span class="text-[10px] font-semibold tracking-wider text-text-muted uppercase">
+					Recent Activity ({data.recentNotes.length})
+				</span>
+				<ChevronDown
+					class="h-3.5 w-3.5 text-text-muted transition-transform {showRecentActivity
+						? 'rotate-180'
+						: ''}"
+				/>
+			</button>
+			{#if showRecentActivity}
+				<div class="mt-3 flex flex-col gap-3">
+					{#each data.recentNotes as note, i (i)}
+						<div class="flex items-start gap-2">
+							{#if note.source === 'self'}
+								<User class="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent" />
+							{:else}
+								<MessageSquare class="mt-0.5 h-3.5 w-3.5 shrink-0 text-teal-400" />
+							{/if}
+							<div class="min-w-0 flex-1">
+								<p class="text-sm text-text-secondary">{note.text}</p>
+								<p class="mt-0.5 text-[10px] text-text-muted">
+									{#if note.source === 'self'}You{:else}{note.name}{/if} &middot; Week {note.weekNumber}
+								</p>
+							</div>
 						</div>
-					</div>
-				{/each}
-			</div>
+					{/each}
+				</div>
+			{/if}
 		</div>
 	{/if}
 </section>

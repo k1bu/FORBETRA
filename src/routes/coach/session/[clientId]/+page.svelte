@@ -97,6 +97,53 @@
 		})()
 	);
 
+	// Week summaries with deltas for timeline
+	const weekSummaries = $derived(
+		(() => {
+			const weeks = reflectionsByWeek;
+			const avg = (nums: number[]) =>
+				nums.length > 0
+					? Math.round((nums.reduce((a, b) => a + b, 0) / nums.length) * 10) / 10
+					: null;
+			// eslint-disable-next-line svelte/prefer-svelte-reactivity
+			const result = new Map<
+				number,
+				{
+					avgEffort: number | null;
+					avgPerf: number | null;
+					effortDelta: number | null;
+					perfDelta: number | null;
+				}
+			>();
+			for (let i = 0; i < weeks.length; i++) {
+				const [weekNum, refs] = weeks[i];
+				const avgEffort = avg(
+					refs.map((r) => r.effortScore).filter((s): s is number => s !== null)
+				);
+				const avgPerf = avg(
+					refs.map((r) => r.performanceScore).filter((s): s is number => s !== null)
+				);
+				let effortDelta: number | null = null;
+				let perfDelta: number | null = null;
+				if (i + 1 < weeks.length) {
+					const [, prevRefs] = weeks[i + 1];
+					const prevEffort = avg(
+						prevRefs.map((r) => r.effortScore).filter((s): s is number => s !== null)
+					);
+					const prevPerf = avg(
+						prevRefs.map((r) => r.performanceScore).filter((s): s is number => s !== null)
+					);
+					if (avgEffort !== null && prevEffort !== null)
+						effortDelta = Math.round((avgEffort - prevEffort) * 10) / 10;
+					if (avgPerf !== null && prevPerf !== null)
+						perfDelta = Math.round((avgPerf - prevPerf) * 10) / 10;
+				}
+				result.set(weekNum, { avgEffort, avgPerf, effortDelta, perfDelta });
+			}
+			return result;
+		})()
+	);
+
 	$effect(() => {
 		if (form) {
 			submittingNote = false;
@@ -202,8 +249,15 @@
 					: 'text-text-tertiary hover:bg-surface-raised hover:text-text-secondary'}"
 			>
 				{tab.label}
-				{#if tab.id === 'prep' && (data.alerts.length > 0 || data.client.alerts.length > 0)}
-					<span class="ml-1 inline-flex h-2 w-2 rounded-full bg-warning"></span>
+				{#if tab.id === 'prep' && data.alerts.length + data.client.alerts.length > 0}
+					<span class="ml-1 rounded-full bg-warning px-1.5 text-[10px] font-bold text-white"
+						>{data.alerts.length + data.client.alerts.length}</span
+					>
+				{/if}
+				{#if tab.id === 'notes' && data.allCoachNotes.length > 0}
+					<span class="ml-1 text-[10px] font-normal text-text-muted"
+						>{data.allCoachNotes.length}</span
+					>
 				{/if}
 			</button>
 		{/each}
@@ -318,8 +372,37 @@
 				<h2 class="mb-4 text-lg font-bold text-text-primary">Reflections Timeline</h2>
 				<div class="space-y-4">
 					{#each reflectionsByWeek as [weekNumber, reflections] (weekNumber)}
+						{@const ws = weekSummaries.get(weekNumber)}
 						<div class="rounded-xl border border-border-default bg-surface-subtle p-4">
-							<p class="mb-2 text-sm font-bold text-text-secondary">Week {weekNumber}</p>
+							<div class="mb-2 flex items-baseline gap-3">
+								<p class="text-sm font-bold text-text-secondary">Week {weekNumber}</p>
+								{#if ws}
+									<div class="flex gap-3 text-xs">
+										{#if ws.avgEffort !== null}
+											<span class="text-warning">
+												Effort {ws.avgEffort}{#if ws.effortDelta !== null && ws.effortDelta !== 0}
+													{#if ws.effortDelta > 0}
+														<span class="text-success"> ↑{ws.effortDelta}</span>
+													{:else}
+														<span class="text-error"> ↓{Math.abs(ws.effortDelta)}</span>
+													{/if}
+												{/if}
+											</span>
+										{/if}
+										{#if ws.avgPerf !== null}
+											<span class="text-accent">
+												Perf {ws.avgPerf}{#if ws.perfDelta !== null && ws.perfDelta !== 0}
+													{#if ws.perfDelta > 0}
+														<span class="text-success"> ↑{ws.perfDelta}</span>
+													{:else}
+														<span class="text-error"> ↓{Math.abs(ws.perfDelta)}</span>
+													{/if}
+												{/if}
+											</span>
+										{/if}
+									</div>
+								{/if}
+							</div>
 							<div class="space-y-2">
 								{#each reflections as r, i (i)}
 									<div
