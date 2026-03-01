@@ -817,7 +817,66 @@ Another +0.03 platform lift from 4 targeted S-effort changes. Coach EE moved fro
 
 ---
 
-## 15. Score Update Log
+## 16. Phase I Results (Portfolio wins, coach activity, empty-state guidance, relationship presets)
+
+**What shipped:**
+
+1. **Portfolio wins section** — New dashboard section showing positive milestones: clients hitting personal bests in effort/performance (highest in 4-week window) and clients near cycle completion (90%+). Green dot + Star icon. Up to 3 wins, deduplicated by client. Links to session view.
+2. **Coach activity stat** — "Your coaching footprint: X notes written" line below stat cards. Total note count via DB query. Makes coach's own engagement visible.
+3. **Empty-state first-visit guidance** — When dashboard has 0 active clients, shows "Get started" section with contextual messaging ("Your invite is on its way" if pending, "Invite your first client" if not) and CTA buttons to Invitations and Roster.
+4. **Stakeholder relationship presets** — Replaced free-text relationship input with `<select>` dropdown (Direct Manager, Skip-Level Manager, Peer, Direct Report, Cross-Functional Partner, HR Partner, Other) on both onboarding wizard and individual stakeholders page.
+
+### Score Movement
+
+```
+Platform: 7.77 → 7.80 (+0.03)
+Individual: 7.72 → 7.74 (+0.02)
+Coach: 7.57 → 7.63 (+0.06)
+Stakeholder: 8.11 → 8.11 (unchanged)
+```
+
+#### Individual (was 7.72 → 7.74, +0.02)
+
+| #   | Dimension            | Phase H | Phase I | Delta | Evidence                                                                                                    |
+| --- | -------------------- | :-----: | :-----: | :---: | ----------------------------------------------------------------------------------------------------------- |
+| 3   | Onboarding Ease (OE) |   7.5   | **7.6** | +0.1  | Relationship dropdown eliminates typing + terminology guessing. 7 presets cover 95%+ of real relationships. |
+| 7   | Cognitive Load (CL)  |   7.5   | **7.6** | +0.1  | Select is faster than free-text. No "what should I type?" decision. Consistent data for downstream display. |
+|     | All others           |    —    |    —    |   0   | FI, CP, CT, IA, FP, TC, EE, VP unchanged.                                                                   |
+
+#### Coach (was 7.57 → 7.63, +0.06)
+
+| #   | Dimension                 | Phase H | Phase I | Delta | Evidence                                                                                                                      |
+| --- | ------------------------- | :-----: | :-----: | :---: | ----------------------------------------------------------------------------------------------------------------------------- |
+| 1   | First Impression (FI)     |   7.6   | **7.7** | +0.1  | Wins section adds positive visual variety — green dots + star icon break the alert-heavy dashboard pattern.                   |
+| 3   | Onboarding Ease (OE)      |   7.3   | **7.5** | +0.2  | Empty-state guidance answers "did it work?" and "what's next?" — Dr. Kim no longer stares at zeros wondering.                 |
+| 9   | Emotional Engagement (EE) |   6.8   | **7.1** | +0.3  | Portfolio wins + activity stat = dashboard reacts to the coach's work. Personal bests celebrated, coaching effort quantified. |
+| 10  | Value Perception (VP)     |   8.1   | **8.2** | +0.1  | "Your coaching footprint: 12 notes written" gives tangible evidence of engagement. Coach sees their impact.                   |
+|     | All others                |    —    |    —    |   0   | CP, CT, IA, CL, FP, TC unchanged.                                                                                             |
+
+#### Stakeholder (was 8.11 → 8.11, 0)
+
+No Phase I changes affected stakeholder screens.
+
+### Lowest Remaining Dimensions
+
+| Rank | User Type  | Dimension            | Score | Gap to 8.5 |
+| ---- | ---------- | -------------------- | :---: | :--------: |
+| 1    | Coach      | Emotional Engagement |  7.1  |    1.4     |
+| 2    | Coach      | Cognitive Load       |  7.3  |    1.2     |
+| 3    | Coach      | Feedback & Progress  |  7.3  |    1.2     |
+| 4    | Coach      | Trust & Credibility  |  7.3  |    1.2     |
+| 5    | Coach      | Info Architecture    |  7.3  |    1.2     |
+| 6    | Coach      | Onboarding Ease      |  7.5  |    1.0     |
+| 7    | Individual | Onboarding Ease      |  7.6  |    0.9     |
+| 8    | Individual | Cognitive Load       |  7.6  |    0.9     |
+
+### Phase I Commentary
+
+Biggest Coach EE jump so far (+0.3, from 6.8 → 7.1). The portfolio wins section is the first dashboard element that _celebrates_ client progress rather than just flagging problems. Combined with "coaching footprint" visibility and first-visit guidance, the coach dashboard now has positive emotional signals at three touchpoints: arrival (guidance), engagement (activity stat), and outcomes (wins). **Coach EE (7.1) is still the weakest dimension** but has closed from 1.7 to 1.4 gap — trajectory is right. Next EE lever: coach-specific streaks/milestones (e.g. "You've coached every Monday for 6 weeks") or session impact trails ("Your notes shaped 4 AI insights"). The relationship dropdown is a simple win for Individual OE/CL — eliminates a micro-decision during onboarding.
+
+---
+
+## 17. Score Update Log
 
 | Date       | Phase          | Platform | Individual | Coach | Stakeholder | Notes                                                |
 | ---------- | -------------- | :------: | :--------: | :---: | :---------: | ---------------------------------------------------- |
@@ -830,4 +889,5 @@ Another +0.03 platform lift from 4 targeted S-effort changes. Coach EE moved fro
 | 2026-02-28 | Phase F actual |   7.71   |    7.66    | 7.46  |    8.11     | Prep freshness, modal streamline, milestones. +0.08  |
 | 2026-02-28 | Phase G actual |   7.74   |    7.69    | 7.52  |    8.11     | Scoring anchors, tabs, narrative, roster. +0.03      |
 | 2026-02-28 | Phase H actual |   7.77   |    7.72    | 7.57  |    8.11     | Check-in context, subtitles, toasts, momentum. +0.03 |
-|            | Target         |   9.3+   |    9.3+    | 9.0+  |    9.5+     | Final goal. Remaining gap: 1.53 pts.                 |
+| 2026-02-28 | Phase I actual |   7.80   |    7.74    | 7.63  |    8.11     | Portfolio wins, activity, guidance, presets. +0.03   |
+|            | Target         |   9.3+   |    9.3+    | 9.0+  |    9.5+     | Final goal. Remaining gap: 1.50 pts.                 |
