@@ -16,8 +16,7 @@
 		Dumbbell,
 		TrendingUp,
 		PenLine,
-		Send,
-		Lock
+		Send
 	} from 'lucide-svelte';
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
@@ -35,6 +34,16 @@
 	// Auto-expand on first check-in, collapse thereafter
 	const isFirstCheckin = !data.previousEntry && data.currentWeek <= 1;
 	let showBehavioralIndicators = $state(isFirstCheckin);
+	// Notes collapsed by default (except first check-in or midpoint)
+	let showNotes = $state(isFirstCheckin || (data.isMidpoint && !!data.identityAnchor));
+	let submitBtnEl = $state<HTMLElement | undefined>(undefined);
+	// Emphasize submit when both scores are selected
+	const bothScoresSelected = $derived(effortScore !== null && performanceScore !== null);
+	$effect(() => {
+		if (bothScoresSelected && !showNotes && submitBtnEl) {
+			submitBtnEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+		}
+	});
 
 	// Update scores when previousEntry changes
 	$effect(() => {
@@ -48,6 +57,10 @@
 		new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(new Date(value));
 
 	const notePrompt = $derived(() => {
+		// Midpoint identity reflection override
+		if (data.isMidpoint && data.identityAnchor) {
+			return `In Week 1, you said you were becoming: "${data.identityAnchor}". Halfway through your journey \u2014 does that still feel true? Has it evolved? Write what feels right now.`;
+		}
 		const prev = data.previousRatings;
 		if (prev?.effortScore != null && prev?.performanceScore != null) {
 			const eDiff = effortScore - prev.effortScore;
@@ -397,22 +410,21 @@
 					{/each}
 				</div>
 
-				<div class="hidden justify-between px-0.5 sm:flex" aria-hidden="true">
-					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted">None</span>
-					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted"></span>
-					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted"></span>
-					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted">Low</span>
-					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted"></span>
-					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted">Moderate</span>
-					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted"></span>
-					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted">High</span>
-					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted"></span>
-					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted"></span>
-					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted">Total</span>
+				<div class="flex items-center justify-between text-[10px] text-text-muted">
+					<span>Not at all</span>
+					<span>Moderately</span>
+					<span>Exceptionally</span>
 				</div>
-				<p class="mt-2 text-xs text-text-muted italic">
-					Consider attention, preparation, and prioritization toward the objective.
-				</p>
+				{#if data.previousRatings?.effortScore != null}
+					<button
+						type="button"
+						onclick={() => (effortScore = data.previousRatings!.effortScore!)}
+						disabled={!data.isAvailable || data.isLocked}
+						class="mt-2 rounded-full border border-accent/30 bg-accent-muted px-3 py-1 text-xs font-medium text-accent transition-colors hover:bg-accent/20 disabled:opacity-60"
+					>
+						Same as last week: {data.previousRatings.effortScore}
+					</button>
+				{/if}
 			</div>
 
 			<!-- Progress Score with Enhanced UI -->
@@ -476,52 +488,61 @@
 					{/each}
 				</div>
 
-				<div class="hidden justify-between px-0.5 sm:flex" aria-hidden="true">
-					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted">None</span>
-					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted"></span>
-					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted"></span>
-					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted">Low</span>
-					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted"></span>
-					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted">Moderate</span>
-					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted"></span>
-					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted">High</span>
-					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted"></span>
-					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted"></span>
-					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted">Total</span>
+				<div class="flex items-center justify-between text-[10px] text-text-muted">
+					<span>Not at all</span>
+					<span>Moderately</span>
+					<span>Exceptionally</span>
 				</div>
-				<p class="mt-2 text-xs text-text-muted italic">
-					Consider outcomes, behavior change, and visible impact related to the objective.
-				</p>
+				{#if data.previousRatings?.performanceScore != null}
+					<button
+						type="button"
+						onclick={() => (performanceScore = data.previousRatings!.performanceScore!)}
+						disabled={!data.isAvailable || data.isLocked}
+						class="mt-2 rounded-full border border-accent/30 bg-accent-muted px-3 py-1 text-xs font-medium text-accent transition-colors hover:bg-accent/20 disabled:opacity-60"
+					>
+						Same as last week: {data.previousRatings.performanceScore}
+					</button>
+				{/if}
 			</div>
 
-			<!-- Notes with Better UX -->
-			<div
-				class="rounded-2xl border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30"
-			>
-				<div class="mb-3 flex items-center gap-2">
-					<PenLine class="h-5 w-5 text-accent" />
-					<label for="notes" class="text-base font-semibold text-text-primary">
-						Reflect on your week
-					</label>
+			<!-- Notes (collapsed by default) -->
+			{#if showNotes}
+				<div
+					class="rounded-2xl border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30"
+				>
+					<div class="mb-3 flex items-center gap-2">
+						<PenLine class="h-5 w-5 text-accent" />
+						<label for="notes" class="text-base font-semibold text-text-primary">
+							{data.isMidpoint && data.identityAnchor
+								? 'Midpoint Reflection'
+								: 'Reflect on your week'}
+						</label>
+					</div>
+					<textarea
+						name="notes"
+						id="notes"
+						rows="3"
+						maxlength="500"
+						bind:value={notes}
+						disabled={!data.isAvailable || data.isLocked}
+						class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:bg-surface-raised focus:ring-2 focus:ring-accent/30 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+						placeholder={notePrompt()}
+					></textarea>
+					<div class="mt-2 flex items-center justify-between">
+						<p class="text-xs text-text-tertiary">Only you and your coach can see this.</p>
+						<p class="shrink-0 text-right text-xs text-text-muted">{notes.length}/500</p>
+					</div>
 				</div>
-				<textarea
-					name="notes"
-					id="notes"
-					rows="4"
-					maxlength="500"
-					bind:value={notes}
-					disabled={!data.isAvailable || data.isLocked}
-					class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:bg-surface-raised focus:ring-2 focus:ring-accent/30 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
-					placeholder={notePrompt()}
-				></textarea>
-				<div class="mt-2 flex items-center justify-between">
-					<p class="flex items-center gap-1.5 text-xs text-text-tertiary">
-						<Lock class="h-3 w-3 shrink-0 text-text-muted" />
-						Only visible to you and your coach. Notes feed your weekly AI insights.
-					</p>
-					<p class="shrink-0 text-right text-xs text-text-muted">{notes.length}/500</p>
-				</div>
-			</div>
+			{:else}
+				<button
+					type="button"
+					onclick={() => (showNotes = true)}
+					class="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-border-default py-3 text-sm font-medium text-text-muted transition-colors hover:border-accent/30 hover:text-accent"
+				>
+					<PenLine class="h-4 w-4" />
+					Add a note (optional)
+				</button>
+			{/if}
 
 			<!-- Submit Button with Enhanced Design -->
 			<div
@@ -552,6 +573,7 @@
 					<!-- eslint-enable svelte/no-navigation-without-resolve -->
 					<button
 						type="submit"
+						bind:this={submitBtnEl}
 						disabled={!data.isAvailable || data.isLocked || isSubmitting}
 						title={data.isLocked
 							? 'Check-in already submitted'
@@ -560,7 +582,10 @@
 								: isSubmitting
 									? 'Submitting...'
 									: undefined}
-						class="group relative overflow-hidden rounded-xl bg-accent px-8 py-3.5 font-semibold text-white shadow-lg transition-all hover:bg-accent-hover hover:shadow-xl focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+						class="group relative overflow-hidden rounded-xl bg-accent px-8 py-3.5 font-semibold text-white shadow-lg transition-all hover:bg-accent-hover hover:shadow-xl focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 {bothScoresSelected &&
+						!data.isLocked
+							? 'animate-pulse'
+							: ''}"
 					>
 						<span class="relative z-10 flex items-center gap-2">
 							{#if isSubmitting}

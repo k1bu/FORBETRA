@@ -71,7 +71,7 @@
 		<div class="rounded-xl border border-border-default bg-surface-raised p-4">
 			<div class="flex items-center justify-between">
 				<h2 class="text-sm font-bold tracking-wide text-text-tertiary uppercase">
-					{cycle.label ?? 'Cycle'}
+					{cycle.label ?? 'Journey'}
 				</h2>
 				<span class="rounded bg-surface-subtle px-2 py-0.5 text-xs font-semibold uppercase"
 					>{cycle.status}</span
@@ -79,7 +79,7 @@
 			</div>
 			<p class="mt-1 text-xs text-text-tertiary">
 				{formatDate(cycle.startDate)} &mdash; {formatDate(cycle.endDate)} &middot;
-				{cycle._count.reflections} reflections &middot; {cycle._count.coachNotes} notes
+				{cycle._count.reflections} check-ins &middot; {cycle._count.coachNotes} notes
 			</p>
 
 			{#if cycle.reflections.length > 0}

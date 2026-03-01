@@ -21,7 +21,7 @@
 	<title>Forbetra — Real Growth, Real Feedback</title>
 	<meta
 		name="description"
-		content="Forbetra helps professionals grow through structured reflection and honest feedback from the people who see them in action."
+		content="Forbetra helps professionals grow through structured check-ins and honest feedback from the people who see them in action."
 	/>
 </svelte:head>
 

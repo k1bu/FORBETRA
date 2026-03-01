@@ -43,7 +43,7 @@
 			<ul class="ml-4 list-disc space-y-1">
 				<li>Feedback request invitations.</li>
 				<li>Coaching invitations and onboarding.</li>
-				<li>Stakeholder welcome notifications.</li>
+				<li>Rater welcome notifications.</li>
 			</ul>
 			<p class="mt-3">
 				<strong>Message frequency:</strong> Message frequency varies based on coaching activity (typically
@@ -75,7 +75,7 @@
 		</div>
 
 		<div>
-			<h2 class="mb-2 text-lg font-semibold text-text-primary">6. Stakeholder Invitations</h2>
+			<h2 class="mb-2 text-lg font-semibold text-text-primary">6. Rater Invitations</h2>
 			<p>
 				When you invite stakeholders, you represent that you have a legitimate relationship with
 				those individuals and that they would reasonably expect to receive communications from you

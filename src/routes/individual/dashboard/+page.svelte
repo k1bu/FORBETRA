@@ -320,7 +320,7 @@
 			<div class="rounded-xl border border-border-default bg-surface-raised p-6">
 				<div class="mb-4 flex items-center gap-2">
 					<Calendar class="h-4 w-4 text-text-muted" />
-					<h2 class="text-lg font-bold text-text-primary">Cycle Details</h2>
+					<h2 class="text-lg font-bold text-text-primary">Journey Details</h2>
 				</div>
 				<div class="mb-4 flex flex-wrap items-center gap-3 text-sm text-text-secondary">
 					<span class="font-semibold text-text-primary">{data.cycle.label}</span>

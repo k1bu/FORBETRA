@@ -313,8 +313,8 @@
 						Add 3&#8211;5 stakeholders to unlock 360 insights
 					</h3>
 					<p class="mb-4 text-center text-xs text-text-secondary">
-						Stakeholder feedback reveals perception gaps — the differences between how you see
-						yourself and how others experience you.
+						Rater feedback reveals perception gaps — the differences between how you see yourself
+						and how others experience you.
 					</p>
 					<div class="space-y-2 text-xs text-text-secondary">
 						<p class="font-semibold text-text-primary">Who to invite:</p>
@@ -346,7 +346,7 @@
 
 		<!-- Add Stakeholder Form -->
 		<div class="space-y-4">
-			<h2 class="text-lg font-bold text-text-primary">Add a Stakeholder</h2>
+			<h2 class="text-lg font-bold text-text-primary">Add a Rater</h2>
 			<div class="rounded-2xl border border-border-default bg-surface-raised p-6">
 				<p class="mb-4 text-sm text-text-secondary">
 					Invite 3&#8211;5 people who regularly observe your development.
@@ -362,7 +362,7 @@
 						<div
 							class="mb-3 rounded-lg border border-success/20 bg-success-muted px-3 py-2 text-xs text-success"
 						>
-							<CheckCircle class="inline h-3.5 w-3.5" /> Stakeholder added successfully!
+							<CheckCircle class="inline h-3.5 w-3.5" /> Rater added successfully!
 						</div>
 					{/if}
 				</div>
@@ -442,7 +442,7 @@
 						type="submit"
 						class="w-full rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-accent-hover"
 					>
-						Add Stakeholder
+						Add Rater
 					</button>
 				</form>
 			</div>

@@ -290,7 +290,7 @@
 				<p class="text-lg font-bold text-accent tabular-nums">
 					{cycle ? `${Math.round(cycle.completion * 100)}%` : '—'}
 				</p>
-				<p class="text-[9px] text-text-muted">Cycle progress</p>
+				<p class="text-[9px] text-text-muted">Journey progress</p>
 			</div>
 		</div>
 	{/if}
@@ -419,9 +419,7 @@
 					>
 					<span>{data.allCoachNotes.length} note{data.allCoachNotes.length !== 1 ? 's' : ''}</span>
 					<span
-						>{stakeholdersWithData.length} stakeholder{stakeholdersWithData.length !== 1
-							? 's'
-							: ''}</span
+						>{stakeholdersWithData.length} rater{stakeholdersWithData.length !== 1 ? 's' : ''}</span
 					>
 					{#if prepData}
 						<span class="ml-auto">Generated {formatRelativeDays(prepData.createdAt)}</span>
@@ -454,7 +452,7 @@
 					>
 					<span
 						><strong class="text-text-primary">{stakeholderCount}</strong>
-						stakeholder{stakeholderCount !== 1 ? 's' : ''} contributing</span
+						rater{stakeholderCount !== 1 ? 's' : ''} contributing</span
 					>
 					{#if data.client.objective?.insights?.trajectoryScore !== null && data.client.objective?.insights?.trajectoryScore !== undefined}
 						<span
@@ -626,7 +624,7 @@
 		<!-- Stakeholder Feedback Summary -->
 		{#if data.client.stakeholders.length > 0}
 			<div class="rounded-2xl border border-border-strong bg-success-muted p-6">
-				<h2 class="mb-4 text-lg font-bold text-text-primary">Stakeholder Feedback</h2>
+				<h2 class="mb-4 text-lg font-bold text-text-primary">Rater Feedback</h2>
 				<div class="grid gap-3 sm:grid-cols-2">
 					{#each data.client.stakeholders as stakeholder (stakeholder.email)}
 						{@const trend = data.stakeholderTrends.find((t) => t.name === stakeholder.name)}

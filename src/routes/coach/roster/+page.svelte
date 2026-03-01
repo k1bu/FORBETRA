@@ -475,9 +475,7 @@
 								<section class="rounded-lg border border-border-default bg-surface-raised p-4">
 									<div class="mb-3 flex items-center gap-2">
 										<Inbox class="h-4 w-4 text-text-muted" />
-										<h3 class="text-sm font-semibold text-text-primary">
-											Stakeholder Feedback Cadence
-										</h3>
+										<h3 class="text-sm font-semibold text-text-primary">Feedback Frequency</h3>
 									</div>
 									<p class="mb-3 text-xs text-text-secondary">
 										How often should stakeholders be asked to rate {client.name.split(' ')[0]}?
@@ -531,9 +529,7 @@
 										</label>
 									</form>
 									<p class="mt-2 text-xs text-text-muted">
-										{client.stakeholders.length} stakeholder{client.stakeholders.length === 1
-											? ''
-											: 's'} linked
+										{client.stakeholders.length} rater{client.stakeholders.length === 1 ? '' : 's'} linked
 									</p>
 								</section>
 							{/if}
@@ -561,7 +557,7 @@
 									</button>
 								</div>
 								<p class="mb-3 text-[10px] text-text-muted">
-									Synthesizes check-ins, notes, and stakeholder feedback
+									Synthesizes check-ins, notes, and rater feedback
 								</p>
 								{#if data.alertMap[client.id]?.length}
 									<div class="mb-3 rounded-lg border border-border-default bg-surface-raised p-2">

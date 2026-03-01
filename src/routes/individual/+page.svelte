@@ -59,6 +59,7 @@
 	}
 
 	let showRecentActivity = $state(false);
+	let showHeatMap = $state(false);
 
 	// Streak milestone detection
 	const streakMilestone = $derived(
@@ -465,7 +466,7 @@
 			</div>
 			<div class="min-w-0 flex-1">
 				<p class="text-base font-semibold text-text-primary">Complete your setup</p>
-				<p class="text-sm text-text-tertiary">Set your objective and start your first cycle</p>
+				<p class="text-sm text-text-tertiary">Set your objective and start your first journey</p>
 			</div>
 			<ChevronRight
 				class="h-5 w-5 shrink-0 text-accent transition-transform group-hover:translate-x-0.5"
@@ -482,7 +483,7 @@
 					<CircleCheck class="h-5 w-5 text-success" />
 				</div>
 				<div class="min-w-0 flex-1">
-					<p class="text-base font-semibold text-text-primary">Cycle complete!</p>
+					<p class="text-base font-semibold text-text-primary">Journey complete!</p>
 					<p class="text-sm text-text-tertiary">Your growth report is ready</p>
 				</div>
 			</div>
@@ -498,7 +499,7 @@
 					href="/individual/new-cycle"
 					class="rounded-lg border border-success/20 bg-surface-raised px-4 py-1.5 text-xs font-semibold text-success transition-colors hover:bg-success-muted"
 				>
-					Start New Cycle
+					Start New Journey
 				</a>
 			</div>
 			<!-- eslint-enable svelte/no-navigation-without-resolve -->
@@ -512,7 +513,7 @@
 				<AlertTriangle class="h-5 w-5 text-warning" />
 			</div>
 			<div class="min-w-0 flex-1">
-				<p class="text-base font-semibold text-text-primary">Cycle has passed its end date</p>
+				<p class="text-base font-semibold text-text-primary">Journey has passed its end date</p>
 				<p class="text-sm text-text-tertiary">Extend to keep tracking, or wrap up</p>
 				{#if extendError}
 					<p class="mt-1 text-xs text-error">{extendError}</p>
@@ -531,7 +532,7 @@
 			class="flex items-center gap-3 rounded-xl border border-success/20 bg-success-muted px-5 py-4"
 		>
 			<CircleCheck class="h-5 w-5 text-success" />
-			<span class="text-sm font-semibold text-success">Cycle extended! Reloading...</span>
+			<span class="text-sm font-semibold text-success">Journey extended! Reloading...</span>
 		</div>
 	{:else if data.nextAction}
 		<!-- Regular next action -->
@@ -609,8 +610,9 @@
 			</div>
 			<div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
 				<div>
-					<span class="text-[10px] font-medium tracking-wider text-text-muted uppercase"
-						>Effort</span
+					<span
+						class="flex items-center gap-1 text-[10px] font-medium tracking-wider text-text-muted uppercase"
+						>Effort <InfoTip text="How much intentional effort you put in this week" /></span
 					>
 					<p class="text-[9px] text-text-tertiary">Your self-rating</p>
 					{#if data.myLastRatings?.effort !== null && data.myLastRatings?.effort !== undefined}
@@ -637,8 +639,10 @@
 					{/if}
 				</div>
 				<div>
-					<span class="text-[10px] font-medium tracking-wider text-text-muted uppercase"
-						>Performance</span
+					<span
+						class="flex items-center gap-1 text-[10px] font-medium tracking-wider text-text-muted uppercase"
+						>Performance
+						<InfoTip text="How effectively you performed on your objective this week" /></span
 					>
 					<p class="text-[9px] text-text-tertiary">Your self-rating</p>
 					{#if data.myLastRatings?.effort !== null && data.myLastRatings?.effort !== undefined}
@@ -665,8 +669,9 @@
 					{/if}
 				</div>
 				<div>
-					<span class="text-[10px] font-medium tracking-wider text-text-muted uppercase"
-						>Stakeholder</span
+					<span
+						class="flex items-center gap-1 text-[10px] font-medium tracking-wider text-text-muted uppercase"
+						>Rater <InfoTip text="Average scores from your raters this week" /></span
 					>
 					<p class="text-[9px] text-text-tertiary">Others' average</p>
 					{#if data.stakeholdersLastRatings?.effort !== null && data.stakeholdersLastRatings?.effort !== undefined}
@@ -693,8 +698,10 @@
 					{/if}
 				</div>
 				<div>
-					<span class="text-[10px] font-medium tracking-wider text-text-muted uppercase"
-						>Completion</span
+					<span
+						class="flex items-center gap-1 text-[10px] font-medium tracking-wider text-text-muted uppercase"
+						>Completion
+						<InfoTip text="How many check-ins you've completed this journey" /></span
 					>
 					<p class="text-[9px] text-text-tertiary">Check-in rate</p>
 					{#if data.summary?.completionRate !== null && data.summary?.completionRate !== undefined}
@@ -718,6 +725,62 @@
 						<div class="pointer-events-none absolute inset-y-0 left-1/4 w-px bg-white/10"></div>
 						<div class="pointer-events-none absolute inset-y-0 left-1/2 w-px bg-white/10"></div>
 						<div class="pointer-events-none absolute inset-y-0 left-3/4 w-px bg-white/10"></div>
+					</div>
+				</div>
+			{/if}
+		</div>
+	{/if}
+
+	<!-- ═══ ZONE 3 Heat Map (collapsed by default) ═══ -->
+	{#if isGrowingPlus && data.heatMapWeeks && data.heatMapWeeks.length > 1}
+		<div class="rounded-xl border border-border-default bg-surface-raised">
+			<button
+				type="button"
+				onclick={() => (showHeatMap = !showHeatMap)}
+				class="flex w-full items-center justify-between px-4 py-3"
+			>
+				<span class="text-[10px] font-semibold tracking-wider text-text-muted uppercase"
+					>Weekly heat map</span
+				>
+				<ChevronRight
+					class="h-3.5 w-3.5 text-text-muted transition-transform {showHeatMap ? 'rotate-90' : ''}"
+				/>
+			</button>
+			{#if showHeatMap}
+				<div class="overflow-x-auto border-t border-border-default px-4 pt-3 pb-4">
+					<div class="flex gap-1">
+						{#each data.heatMapWeeks as week (week.weekNumber)}
+							{@const avg =
+								week.effort !== null && week.performance !== null
+									? (week.effort + week.performance) / 2
+									: (week.effort ?? week.performance)}
+							<div class="flex flex-col items-center gap-1" title="Week {week.weekNumber}">
+								<div
+									class="h-6 w-6 rounded {avg !== null
+										? avg >= 7
+											? 'bg-success/60'
+											: avg >= 4
+												? 'bg-warning/60'
+												: 'bg-error/60'
+										: 'bg-surface-subtle'}"
+								></div>
+								<span class="text-[8px] text-text-muted">{week.weekNumber}</span>
+							</div>
+						{/each}
+					</div>
+					<div class="mt-2 flex items-center gap-3 text-[8px] text-text-muted">
+						<span class="flex items-center gap-1"
+							><span class="inline-block h-2 w-2 rounded bg-success/60"></span> 7+</span
+						>
+						<span class="flex items-center gap-1"
+							><span class="inline-block h-2 w-2 rounded bg-warning/60"></span> 4–6</span
+						>
+						<span class="flex items-center gap-1"
+							><span class="inline-block h-2 w-2 rounded bg-error/60"></span> 0–3</span
+						>
+						<span class="flex items-center gap-1"
+							><span class="inline-block h-2 w-2 rounded bg-surface-subtle"></span> No data</span
+						>
 					</div>
 				</div>
 			{/if}
@@ -880,7 +943,7 @@
 			<p class="text-sm text-text-secondary">
 				{#if rate >= 90 && streak >= 5}You've built a strong practice — {rate}% completion with a {streak}-check-in
 					streak.{:else if rate >= 80}Solid consistency at {rate}% completion.{#if stk > 0}
-						{stk} stakeholder{stk !== 1 ? 's' : ''} providing outside perspective.{/if}{:else if rate >= 50}Building
+						{stk} rater{stk !== 1 ? 's' : ''} providing outside perspective.{/if}{:else if rate >= 50}Building
 					momentum at {rate}% completion.{#if streak >= 3}
 						Your {streak}-check-in streak shows commitment.{/if}{:else}Every check-in counts. Keep
 					building the habit.{/if}

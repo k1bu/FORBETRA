@@ -359,7 +359,7 @@
 										class="flex items-center gap-1"
 										onclick={() => toggleSort('completionRate')}
 									>
-										<span title="Cycle progress based on weeks elapsed">Completion</span
+										<span title="Journey progress based on weeks elapsed">Completion</span
 										>{sortIndicator('completionRate')}
 									</button>
 								</th>

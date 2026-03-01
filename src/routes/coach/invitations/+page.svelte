@@ -654,7 +654,7 @@
 								<div class="space-y-1">
 									<label
 										for="prefillStakeholderCadence"
-										class="text-xs font-semibold text-text-secondary">Stakeholder Cadence</label
+										class="text-xs font-semibold text-text-secondary">Feedback Frequency</label
 									>
 									<select
 										id="prefillStakeholderCadence"

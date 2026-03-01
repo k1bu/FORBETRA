@@ -5,7 +5,11 @@ import { z } from 'zod';
 import type { Actions, PageServerLoad } from './$types';
 
 const newCycleSchema = z.object({
-	cycleLabel: z.string().trim().min(1, 'Cycle name is required').max(80, 'Keep it under 80 characters'),
+	cycleLabel: z
+		.string()
+		.trim()
+		.min(1, 'Cycle name is required')
+		.max(80, 'Keep it under 80 characters'),
 	cycleStartDate: z
 		.string()
 		.refine((value) => value.length > 0, 'Start date is required')
@@ -71,11 +75,15 @@ export const load: PageServerLoad = async (event) => {
 				}
 			: null,
 		defaults: {
-			cycleLabel: `Cycle ${cycleCount + 1}`,
+			cycleLabel: `Journey ${cycleCount + 1}`,
 			startDate: defaultStartDate,
-			durationWeeks: lastCycle?.endDate && lastCycle?.startDate
-				? Math.round((lastCycle.endDate.getTime() - lastCycle.startDate.getTime()) / (7 * 24 * 60 * 60 * 1000))
-				: 12,
+			durationWeeks:
+				lastCycle?.endDate && lastCycle?.startDate
+					? Math.round(
+							(lastCycle.endDate.getTime() - lastCycle.startDate.getTime()) /
+								(7 * 24 * 60 * 60 * 1000)
+						)
+					: 12,
 			checkInFrequency: lastCycle?.checkInFrequency ?? '3x',
 			stakeholderCadence: lastCycle?.stakeholderCadence ?? 'weekly'
 		}
@@ -94,7 +102,10 @@ export const actions: Actions = {
 		const parsed = newCycleSchema.safeParse({
 			cycleLabel: (formData.get('cycleLabel') ?? '').toString().trim(),
 			cycleStartDate: (formData.get('cycleStartDate') ?? '').toString(),
-			cycleDurationWeeks: Number.parseInt((formData.get('cycleDurationWeeks') ?? '').toString(), 10),
+			cycleDurationWeeks: Number.parseInt(
+				(formData.get('cycleDurationWeeks') ?? '').toString(),
+				10
+			),
 			checkInFrequency: (formData.get('checkInFrequency') ?? '3x').toString(),
 			stakeholderCadence: (formData.get('stakeholderCadence') ?? 'weekly').toString(),
 			reminderDays
@@ -103,10 +114,11 @@ export const actions: Actions = {
 		if (!parsed.success) {
 			const errors = parsed.error.flatten();
 			return fail(400, {
-				error: errors.fieldErrors.cycleLabel?.[0]
-					?? errors.fieldErrors.cycleStartDate?.[0]
-					?? errors.fieldErrors.cycleDurationWeeks?.[0]
-					?? 'Invalid input',
+				error:
+					errors.fieldErrors.cycleLabel?.[0] ??
+					errors.fieldErrors.cycleStartDate?.[0] ??
+					errors.fieldErrors.cycleDurationWeeks?.[0] ??
+					'Invalid input',
 				values: Object.fromEntries(formData) as Record<string, string>
 			});
 		}
@@ -122,10 +134,15 @@ export const actions: Actions = {
 			if (cycleMode === 'fresh') {
 				// Create a new objective (mark old ones as inactive)
 				const freshTitle = (formData.get('freshObjectiveTitle') ?? '').toString().trim();
-				const freshDescription = (formData.get('freshObjectiveDescription') ?? '').toString().trim();
+				const freshDescription = (formData.get('freshObjectiveDescription') ?? '')
+					.toString()
+					.trim();
 
 				if (freshTitle.length < 3) {
-					return fail(400, { error: 'Objective title must be at least 3 characters.', values: Object.fromEntries(formData) as Record<string, string> });
+					return fail(400, {
+						error: 'Objective title must be at least 3 characters.',
+						values: Object.fromEntries(formData) as Record<string, string>
+					});
 				}
 
 				// Deactivate all existing active objectives

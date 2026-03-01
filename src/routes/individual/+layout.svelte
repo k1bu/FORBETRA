@@ -145,7 +145,7 @@
 		{
 			href: '/individual/settings',
 			label: 'Settings',
-			desc: 'Profile & cycle',
+			desc: 'Profile & journey',
 			icon: Settings,
 			mobileVisible: false,
 			minStage: 0

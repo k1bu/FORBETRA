@@ -94,6 +94,11 @@ export const load: PageServerLoad = async (event) => {
 	const computedWeek = computeWeekNumber(cycle.startDate);
 	const checkInFrequency = cycle.checkInFrequency ?? '3x';
 
+	// Compute total weeks and midpoint for identity reflection
+	const totalWeeks = cycle.endDate
+		? Math.round((cycle.endDate.getTime() - cycle.startDate.getTime()) / (7 * 24 * 60 * 60 * 1000))
+		: 12;
+
 	// Support ?week=N for catch-up on previous weeks
 	const weekParam = event.url.searchParams.get('week');
 	let currentWeek = computedWeek;
@@ -223,6 +228,7 @@ export const load: PageServerLoad = async (event) => {
 		isLocked: false,
 		isPreview,
 		identityAnchor,
+		isMidpoint: currentWeek === Math.ceil(totalWeeks / 2) && currentWeek > 1,
 		objective: {
 			id: objective.id,
 			title: objective.title,

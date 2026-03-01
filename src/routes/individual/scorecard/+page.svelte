@@ -157,7 +157,7 @@
 		{/if}
 		<div class="flex items-center justify-between px-1 text-[10px] text-text-muted">
 			<span>Your self-rating</span>
-			<span>Stakeholder rating</span>
+			<span>Rater</span>
 		</div>
 		<div class="grid gap-3 sm:grid-cols-2">
 			{#each data.scorecard as row (row.stakeholderId)}
@@ -375,7 +375,7 @@
 	<!-- Legend -->
 	<div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-text-muted">
 		<span
-			>You <span class="font-bold">[ score ]</span>——gap——<span class="font-bold">[ score ]</span> Stakeholder</span
+			>You <span class="font-bold">[ score ]</span>——gap——<span class="font-bold">[ score ]</span> Rater</span
 		>
 		<span class="text-success">Green = aligned (&le;1)</span>
 		<span class="text-warning">Amber = moderate (1-2)</span>

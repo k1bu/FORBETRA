@@ -977,19 +977,19 @@
 									<!-- Cycle Settings -->
 									<div class="space-y-4">
 										<p class="text-xs font-semibold tracking-wider text-text-muted uppercase">
-											Cycle Settings
+											Journey Settings
 										</p>
 										<div class="grid gap-4 md:grid-cols-2">
 											<div class="space-y-2">
 												<label
 													class="block text-sm font-semibold text-text-secondary"
-													for="cycleLabel">Cycle Name</label
+													for="cycleLabel">Journey Name</label
 												>
 												<input
 													id="cycleLabel"
 													name="cycleLabel"
 													type="text"
-													placeholder="e.g. Q1 2026 Leadership Cycle"
+													placeholder="e.g. Q1 2026 Leadership Journey"
 													class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-text-primary transition-all focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
 													value={cycleLabel}
 													oninput={(event) => {

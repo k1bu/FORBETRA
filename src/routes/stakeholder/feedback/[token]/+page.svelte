@@ -1,13 +1,11 @@
 <script lang="ts">
 	import type { ActionData, PageData } from './$types';
-	import HistoricRatingsChart from '$lib/components/HistoricRatingsChart.svelte';
 	import {
 		getScoreColor,
 		getScoreBgColor,
 		getButtonSelectedColors,
 		getButtonHoverColors,
-		getFocusRing,
-		getScoreLabel
+		getFocusRing
 	} from '$lib/utils/scoreColors';
 
 	import { onMount } from 'svelte';
@@ -21,7 +19,6 @@
 		PenLine,
 		CircleCheck,
 		Target,
-		Lightbulb,
 		Send,
 		Shield
 	} from 'lucide-svelte';
@@ -34,9 +31,10 @@
 	let showWelcome = $state(data.isFirstFeedback);
 	let draftRestored = $state(false);
 
-	let effortScore = $state<number | null>(null);
-	let performanceScore = $state<number | null>(null);
+	let effortScore = $state<number | null>(data.previousRatings?.effortScore ?? null);
+	let performanceScore = $state<number | null>(data.previousRatings?.performanceScore ?? null);
 	let notes = $state('');
+	let showComment = $state(false);
 	let isSubmitting = $state(false);
 	let showReveal = $state(false);
 	let scoresRequired = $state(false);
@@ -202,7 +200,7 @@
 				<p class="mt-2 text-xs text-text-muted">
 					You've contributed {data.historicRatings.length} time{data.historicRatings.length !== 1
 						? 's'
-						: ''} this cycle — that consistency makes a real difference.
+						: ''} this journey — that consistency makes a real difference.
 				</p>
 			{/if}
 		</div>
@@ -261,11 +259,9 @@
 				{/if}
 			</div>
 			<h1 class="text-3xl font-bold text-text-primary">
-				Share feedback for {data.reflection.participantName}
+				Help {data.reflection.participantName} see what you see.
 			</h1>
-			<p class="text-base text-text-secondary">
-				Cycle: {data.reflection.cycleLabel}. Your perspective helps keep progress aligned.
-			</p>
+			<p class="text-base text-text-secondary">This takes about 60 seconds.</p>
 		</header>
 
 		<div aria-live="polite">
@@ -366,12 +362,10 @@
 					<p class="text-lg font-semibold text-success">
 						Thank you, {data.stakeholder.name}!
 					</p>
-					<p class="mt-1 text-sm text-success">
-						Your perspective helps {data.reflection.participantName} see what they can't see themselves.
-					</p>
+					<p class="mt-1 text-sm text-success">Your perspective matters more than you know.</p>
 					{#if data.historicRatings && data.historicRatings.length > 0}
 						<p class="mt-2 text-xs text-success/80">
-							Contribution #{data.historicRatings.length + 1} this cycle — your consistency amplifies
+							Contribution #{data.historicRatings.length + 1} this journey — your consistency amplifies
 							impact.
 						</p>
 					{/if}
@@ -759,39 +753,11 @@
 					{/if}
 
 					{#if data.previousRatings && (data.previousRatings.effortScore !== null || data.previousRatings.performanceScore !== null)}
-						{@const historicRatings = data.historicRatings ?? []}
-						<div class="rounded-xl border border-accent/30 bg-accent-muted p-4">
-							<div class="mb-3">
-								<p class="text-sm font-semibold text-accent">
-									Your last ratings for {data.reflection.participantName}:
-								</p>
-							</div>
-							<div class="flex gap-6 text-sm">
-								{#if data.previousRatings.effortScore !== null}
-									<div class="flex items-center gap-2">
-										<span class="text-accent">Effort:</span>
-										<span class="text-lg font-bold text-accent"
-											>{data.previousRatings.effortScore}</span
-										>
-									</div>
-								{/if}
-								{#if data.previousRatings.performanceScore !== null}
-									<div class="flex items-center gap-2">
-										<span class="text-accent">Performance:</span>
-										<span class="text-lg font-bold text-accent"
-											>{data.previousRatings.performanceScore}</span
-										>
-									</div>
-								{/if}
-							</div>
-							<p class="mt-2 text-xs text-accent">
-								Use this as context - adjust freely based on this week.
+						<div class="rounded-xl border border-accent/30 bg-accent-muted px-4 py-3">
+							<p class="text-sm text-accent">
+								Your ratings from last time are shown below. Adjust anything that's changed, or tap
+								Submit if things look about the same.
 							</p>
-							{#if historicRatings.length > 1}
-								<div class="mt-4">
-									<HistoricRatingsChart {historicRatings} />
-								</div>
-							{/if}
 						</div>
 					{/if}
 
@@ -807,13 +773,9 @@
 										Focused Effort
 									</label>
 									<p class="text-xs text-text-tertiary">
-										{#if data.subgoals && data.subgoals.length > 0}
-											How much focused effort did {data.reflection.participantName} invest in the behaviors
-											listed above this week?
-										{:else}
-											How much attention did {data.reflection.participantName} give to their objective:
-											"{data.reflection.objectiveTitle || 'the objective'}" this week?
-										{/if}
+										How much intentional effort have you noticed from {data.reflection
+											.participantName} on "{data.reflection.objectiveTitle || 'their objective'}"
+										recently?
 									</p>
 								</div>
 							</div>
@@ -857,30 +819,11 @@
 							{/each}
 						</div>
 
-						<div class="mb-2 flex items-center justify-between">
-							<span class="text-xs font-medium text-text-tertiary">Rarely intentional</span>
-							{#if effortScore !== null}
-								<div
-									class="rounded-full px-3 py-1 text-xs font-semibold {getScoreBgColor(
-										effortScore,
-										'effort'
-									)} {getScoreColor(effortScore, 'effort')}"
-								>
-									{getScoreLabel(effortScore, 'effort')}
-								</div>
-							{:else}
-								<div
-									class="rounded-full bg-surface-subtle px-3 py-1 text-xs font-semibold text-text-muted"
-								>
-									Select a score
-								</div>
-							{/if}
-							<span class="text-xs font-medium text-text-tertiary">Relentless commitment</span>
+						<div class="flex items-center justify-between text-[10px] text-text-muted">
+							<span>Not at all</span>
+							<span>Moderately</span>
+							<span>Exceptionally</span>
 						</div>
-						<p class="text-xs text-text-muted italic">
-							<strong>0–3</strong> Rarely visible · <strong>4–6</strong> Some attention ·
-							<strong>7–10</strong> Proactive, consistent effort
-						</p>
 					</div>
 
 					<!-- Progress Score with Enhanced UI -->
@@ -895,14 +838,8 @@
 										Performance
 									</label>
 									<p class="text-xs text-text-tertiary">
-										{#if data.subgoals && data.subgoals.length > 0}
-											How visible were the results of these behaviors from your perspective this
-											week?
-										{:else}
-											How effective was {data.reflection.participantName}'s performance related to
-											their objective: "{data.reflection.objectiveTitle || 'the objective'}" this
-											week?
-										{/if}
+										How effectively is {data.reflection.participantName} performing on "{data
+											.reflection.objectiveTitle || 'their objective'}" from your perspective?
 									</p>
 								</div>
 							</div>
@@ -946,30 +883,11 @@
 							{/each}
 						</div>
 
-						<div class="mb-2 flex items-center justify-between">
-							<span class="text-xs font-medium text-text-tertiary">Not yet visible</span>
-							{#if performanceScore !== null}
-								<div
-									class="rounded-full px-3 py-1 text-xs font-semibold {getScoreBgColor(
-										performanceScore,
-										'performance'
-									)} {getScoreColor(performanceScore, 'performance')}"
-								>
-									{getScoreLabel(performanceScore, 'performance')}
-								</div>
-							{:else}
-								<div
-									class="rounded-full bg-surface-subtle px-3 py-1 text-xs font-semibold text-text-muted"
-								>
-									Select a score
-								</div>
-							{/if}
-							<span class="text-xs font-medium text-text-tertiary">Transformative impact</span>
+						<div class="flex items-center justify-between text-[10px] text-text-muted">
+							<span>Not at all</span>
+							<span>Moderately</span>
+							<span>Exceptionally</span>
 						</div>
-						<p class="text-xs text-text-muted italic">
-							<strong>0–3</strong> No visible change · <strong>4–6</strong> Some improvement ·
-							<strong>7–10</strong> Clear, consistent results
-						</p>
 					</div>
 
 					<!-- Impact reinforcement (appears after both scores are filled) -->
@@ -985,34 +903,37 @@
 						</div>
 					{/if}
 
-					<!-- Notes with Better UX -->
-					<div
-						class="rounded-2xl border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30"
-					>
-						<div class="mb-3 flex items-center gap-2">
-							<PenLine class="h-5 w-5 text-accent" />
-							<label for="comment" class="text-base font-semibold text-text-primary">
-								Share your observations
-							</label>
+					<!-- Comment (collapsed by default) -->
+					{#if showComment}
+						<div
+							class="rounded-2xl border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30"
+						>
+							<textarea
+								name="comment"
+								id="comment"
+								rows="3"
+								maxlength="500"
+								bind:value={notes}
+								class="w-full rounded-xl border border-border-default bg-surface-subtle px-4 py-3 text-sm text-text-secondary placeholder:text-text-muted focus:border-accent focus:bg-surface-raised focus:ring-2 focus:ring-accent/30 focus:outline-none"
+								placeholder="Anything specific you've noticed? (optional, 1-2 sentences is plenty)"
+							></textarea>
+							<div class="mt-2 flex items-center justify-between">
+								<p class="text-xs text-text-tertiary">
+									Shared with {data.reflection.participantName} and their coach.
+								</p>
+								<span class="text-xs text-text-muted">{notes.length} / 500</span>
+							</div>
 						</div>
-						<textarea
-							name="comment"
-							id="comment"
-							rows="4"
-							maxlength="500"
-							bind:value={notes}
-							class="w-full rounded-xl border border-border-default bg-surface-subtle px-4 py-3 text-sm text-text-secondary placeholder:text-text-muted focus:border-accent focus:bg-surface-raised focus:ring-2 focus:ring-accent/30 focus:outline-none"
-							placeholder="Share a specific example — something {data.reflection
-								.participantName} did well, or an area where they could grow."
-						></textarea>
-						<div class="mt-2 flex items-center justify-between">
-							<p class="text-xs text-text-tertiary">
-								<Lightbulb class="inline h-3.5 w-3.5 text-text-tertiary" /> Tip: Your observations help
-								{data.reflection.participantName} and their coach see the full picture of their growth.
-							</p>
-							<span class="text-xs text-text-muted">{notes.length} / 500</span>
-						</div>
-					</div>
+					{:else}
+						<button
+							type="button"
+							onclick={() => (showComment = true)}
+							class="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-border-default py-3 text-sm font-medium text-text-muted transition-colors hover:border-accent/30 hover:text-accent"
+						>
+							<PenLine class="h-4 w-4" />
+							Add a comment
+						</button>
+					{/if}
 
 					<!-- Validation message -->
 					{#if scoresRequired}

@@ -214,13 +214,13 @@
 				<Target class="h-4 w-4 text-amber-400" />
 				<p class="text-xs font-medium text-text-tertiary">Avg. Alignment</p>
 				<InfoTip
-					text="How closely self-ratings match stakeholder feedback. Higher alignment means the client's self-perception matches how others see them."
+					text="How closely self-ratings match rater feedback. Higher alignment means the client's self-perception matches how others see them."
 				/>
 			</div>
 			<p class="text-2xl font-bold text-text-primary tabular-nums">
 				{data.analytics.avgAlignment !== null ? `${data.analytics.avgAlignment}%` : '\u2014'}
 			</p>
-			<p class="mt-1 text-[10px] text-text-muted">Stakeholder response rate</p>
+			<p class="mt-1 text-[10px] text-text-muted">Rater response rate</p>
 		</div>
 	</div>
 

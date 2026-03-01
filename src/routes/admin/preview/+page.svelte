@@ -85,7 +85,7 @@
 		},
 		{
 			label: 'Insights',
-			description: 'AI-generated analysis and cycle reports',
+			description: 'AI-generated analysis and journey reports',
 			action: () => impersonateAndOpen(selectedIndividualId, '/individual/insights')
 		}
 	]);
@@ -101,7 +101,7 @@
 				}
 			},
 			disabled: !selectedStakeholder?.feedbackUrl,
-			disabledReason: "No active feedback token — generate one from the individual's cycle first"
+			disabledReason: "No active feedback token — generate one from the individual's journey first"
 		},
 		{
 			label: 'Feedback Form (Demo)',

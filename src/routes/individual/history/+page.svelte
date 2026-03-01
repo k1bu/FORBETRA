@@ -28,7 +28,7 @@
 			case 'RATING_B':
 				return 'Check-in';
 			default:
-				return 'Reflection';
+				return 'Check-in';
 		}
 	};
 
@@ -79,7 +79,7 @@
 <!-- eslint-disable svelte/no-navigation-without-resolve -->
 <section class="mx-auto flex max-w-4xl flex-col gap-6 p-4 pb-12">
 	<div class="text-center">
-		<h1 class="text-2xl font-bold text-text-primary">Reflection History</h1>
+		<h1 class="text-2xl font-bold text-text-primary">Check-in History</h1>
 		<p class="mt-1 text-sm text-text-tertiary">
 			{data.cycleLabel} &middot; {data.objectiveTitle}
 		</p>
@@ -215,7 +215,7 @@
 														<p
 															class="mb-2 text-xs font-semibold tracking-wider text-text-muted uppercase"
 														>
-															Stakeholder Feedback
+															Rater Feedback
 														</p>
 														<div class="space-y-2">
 															{#each reflection.feedbacks as feedback (feedback.stakeholderName)}

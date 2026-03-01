@@ -157,7 +157,7 @@ export const emailTemplates = {
 				</div>
 				<div style="background: white; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
 					<p style="font-size: 16px; margin-top: 0;">Hi ${shName},</p>
-					<p style="font-size: 16px;"><strong>${indName}</strong> just completed a reflection and would love your feedback.</p>
+					<p style="font-size: 16px;"><strong>${indName}</strong> just completed a check-in and would love your feedback.</p>
 					${objTitle ? `<p style="font-size: 14px; color: #64748b; background: #f1f5f9; padding: 12px; border-radius: 6px; margin: 20px 0;"><strong>Objective:</strong> ${objTitle}</p>` : ''}
 					<p style="font-size: 16px;">This will take less than 60 seconds — just two quick questions about effort and progress.</p>
 					<div style="text-align: center; margin: 30px 0;">
@@ -169,15 +169,15 @@ export const emailTemplates = {
 			</body>
 			</html>
 		`,
-			text: `60-Second Feedback: How's ${data.individualName || 'Your Participant'} Doing?\n\nHi ${data.stakeholderName || 'there'},\n\n${data.individualName || 'Your participant'} just completed a reflection and would love your feedback.\n\n${data.objectiveTitle ? `Objective: ${data.objectiveTitle}\n\n` : ''}This will take less than 60 seconds — just two quick questions about effort and progress.\n\nShare feedback: ${data.feedbackLink}\n\nThis link expires in 10 days${textFooter()}`
+			text: `60-Second Feedback: How's ${data.individualName || 'Your Participant'} Doing?\n\nHi ${data.stakeholderName || 'there'},\n\n${data.individualName || 'Your participant'} just completed a check-in and would love your feedback.\n\n${data.objectiveTitle ? `Objective: ${data.objectiveTitle}\n\n` : ''}This will take less than 60 seconds — just two quick questions about effort and progress.\n\nShare feedback: ${data.feedbackLink}\n\nThis link expires in 10 days${textFooter()}`
 		};
 	},
 
 	stakeholderFeedbackReceived: (data: EmailTemplateData) => {
 		const indName = escapeHtml(data.individualName || 'there');
-		const shName = escapeHtml(data.stakeholderName || 'A stakeholder');
+		const shName = escapeHtml(data.stakeholderName || 'A rater');
 		return {
-			subject: `${data.stakeholderName || 'A stakeholder'} shared feedback on your progress`,
+			subject: `${data.stakeholderName || 'A rater'} shared feedback on your progress`,
 			html: `
 			<!DOCTYPE html>
 			<html>
@@ -203,7 +203,7 @@ export const emailTemplates = {
 			</body>
 			</html>
 		`,
-			text: `${data.stakeholderName || 'A stakeholder'} shared feedback on your progress\n\nHi ${data.individualName || 'there'},\n\n${data.stakeholderName || 'A stakeholder'} just shared feedback on your progress.\n\nView your updated insights and see how your self-assessment aligns with their perspective.\n\nView insights: ${data.appUrl || baseUrl}/individual/insights\n\nKeep up the great work!${textFooter()}`
+			text: `${data.stakeholderName || 'A rater'} shared feedback on your progress\n\nHi ${data.individualName || 'there'},\n\n${data.stakeholderName || 'A rater'} just shared feedback on your progress.\n\nView your updated insights and see how your self-assessment aligns with their perspective.\n\nView insights: ${data.appUrl || baseUrl}/individual/insights\n\nKeep up the great work!${textFooter()}`
 		};
 	},
 
@@ -221,7 +221,7 @@ export const emailTemplates = {
 					<meta name="viewport" content="width=device-width, initial-scale=1.0">
 				</head>
 				<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #334155; max-width: 600px; margin: 0 auto; padding: 20px;">
-					<div style="display: none; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #ffffff;">A quick reflection on your progress</div>
+					<div style="display: none; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #ffffff;">A quick check-in on your progress</div>
 					<div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
 						<h1 style="color: white; margin: 0; font-size: 24px; font-weight: 600;">Time for Your Check-in</h1>
 					</div>
@@ -305,21 +305,20 @@ export const emailTemplates = {
 					<div style="text-align: center; margin: 30px 0;">
 						<a href="${data.appUrl || baseUrl}/individual/insights" style="display: inline-block; background: #10b981; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">See Your Growth Report</a>
 					</div>
-					<p style="font-size: 14px; color: #64748b; margin-top: 30px;">When you're ready, start a new cycle to keep growing.</p>
+					<p style="font-size: 14px; color: #64748b; margin-top: 30px;">When you're ready, start a new journey to keep growing.</p>
 				</div>
 			${emailFooter()}
 			</body>
 			</html>
 		`,
-			text: `Your cycle is complete — your growth report is ready\n\nHi ${data.individualName || 'there'},\n\nCongratulations — you've completed your cycle${data.cycleLabel ? ` "${data.cycleLabel}"` : ''}!\n\n${data.objectiveTitle ? `Objective: ${data.objectiveTitle}\n\n` : ''}Your growth report is ready — it summarizes your progress, key patterns, and areas for continued development.\n\nSee your growth report: ${data.appUrl || baseUrl}/individual/insights\n\nWhen you're ready, start a new cycle to keep growing.${textFooter()}`
+			text: `Your cycle is complete — your growth report is ready\n\nHi ${data.individualName || 'there'},\n\nCongratulations — you've completed your cycle${data.cycleLabel ? ` "${data.cycleLabel}"` : ''}!\n\n${data.objectiveTitle ? `Objective: ${data.objectiveTitle}\n\n` : ''}Your growth report is ready — it summarizes your progress, key patterns, and areas for continued development.\n\nSee your growth report: ${data.appUrl || baseUrl}/individual/insights\n\nWhen you're ready, start a new journey to keep growing.${textFooter()}`
 		};
 	},
 
 	reminderStakeholderFeedback: (data: EmailTemplateData) => {
 		const indName = escapeHtml(data.individualName || 'your participant');
-		const shName = escapeHtml(data.stakeholderName || 'there');
 		return {
-			subject: `Reminder: Feedback request for ${data.individualName || 'your participant'}`,
+			subject: `Quick feedback for ${data.individualName || 'your participant'}`,
 			html: `
 			<!DOCTYPE html>
 			<html>
@@ -328,24 +327,18 @@ export const emailTemplates = {
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 			</head>
 			<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #334155; max-width: 600px; margin: 0 auto; padding: 20px;">
-				<div style="display: none; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #ffffff;">Quick two-question feedback</div>
-				<div style="background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
-					<h1 style="color: white; margin: 0; font-size: 24px; font-weight: 600;">Feedback Reminder</h1>
-				</div>
-				<div style="background: white; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
-					<p style="font-size: 16px; margin-top: 0;">Hi ${shName},</p>
-					<p style="font-size: 16px;">You have a pending feedback request from <strong>${indName}</strong>.</p>
-					<p style="font-size: 16px;">This will take less than 60 seconds — just two quick questions.</p>
-					<div style="text-align: center; margin: 30px 0;">
-						<a href="${data.feedbackLink}" style="display: inline-block; background: #3b82f6; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Share Feedback</a>
+				<div style="background: white; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px;">
+					<p style="font-size: 16px; margin: 0 0 16px 0;">${indName} would value your perspective this week.</p>
+					<div style="text-align: center; margin: 16px 0;">
+						<a href="${data.feedbackLink}" style="display: inline-block; background: #3b82f6; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Rate now &rarr;</a>
 					</div>
-					<p style="font-size: 12px; color: #94a3b8; text-align: center; margin-top: 20px;">This link expires soon</p>
+					<p style="font-size: 12px; color: #94a3b8; text-align: center; margin: 8px 0 0 0;">Takes ~30 seconds</p>
 				</div>
 			${emailFooter()}
 			</body>
 			</html>
 		`,
-			text: `Reminder: Feedback request for ${data.individualName || 'your participant'}\n\nHi ${data.stakeholderName || 'there'},\n\nYou have a pending feedback request from ${data.individualName || 'your participant'}.\n\nThis will take less than 60 seconds — just two quick questions.\n\nShare feedback: ${data.feedbackLink}\n\nThis link expires soon${textFooter()}`
+			text: `Quick feedback for ${data.individualName || 'your participant'}\n\n${data.individualName || 'Your participant'} would value your perspective this week.\n\nRate now: ${data.feedbackLink}\n\nTakes ~30 seconds${textFooter()}`
 		};
 	},
 
@@ -525,10 +518,10 @@ export const emailTemplates = {
 	coachStakeholderFeedbackReceived: (data: CoachStakeholderFeedbackReceivedData) => {
 		const coach = escapeHtml(data.coachName);
 		const client = escapeHtml(data.individualName);
-		const stakeholder = escapeHtml(data.stakeholderName || 'A stakeholder');
+		const stakeholder = escapeHtml(data.stakeholderName || 'A rater');
 		const week = data.weekNumber ? ` (Week ${data.weekNumber})` : '';
 		return {
-			subject: `Stakeholder feedback received for ${data.individualName}${week}`,
+			subject: `Rater feedback received for ${data.individualName}${week}`,
 			html: `
 			<!DOCTYPE html>
 			<html>
@@ -537,9 +530,9 @@ export const emailTemplates = {
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 			</head>
 			<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #334155; max-width: 600px; margin: 0 auto; padding: 20px;">
-				<div style="display: none; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #ffffff;">New stakeholder feedback for your client</div>
+				<div style="display: none; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #ffffff;">New rater feedback for your client</div>
 				<div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
-					<h1 style="color: white; margin: 0; font-size: 24px; font-weight: 600;">Stakeholder Feedback Received</h1>
+					<h1 style="color: white; margin: 0; font-size: 24px; font-weight: 600;">Rater Feedback Received</h1>
 				</div>
 				<div style="background: white; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
 					<p style="font-size: 16px; margin-top: 0;">Hi ${coach},</p>
@@ -553,7 +546,7 @@ export const emailTemplates = {
 			</body>
 			</html>
 		`,
-			text: `Stakeholder feedback received for ${data.individualName}${week}\n\nHi ${data.coachName},\n\n${data.stakeholderName || 'A stakeholder'} just submitted feedback for your client ${data.individualName}${week}.\n\nCheck your coaching dashboard to review updated insights and identify coaching opportunities.\n\nView dashboard: ${data.appUrl || baseUrl}/coach/roster${textFooter()}`
+			text: `Rater feedback received for ${data.individualName}${week}\n\nHi ${data.coachName},\n\n${data.stakeholderName || 'A rater'} just submitted feedback for your client ${data.individualName}${week}.\n\nCheck your coaching dashboard to review updated insights and identify coaching opportunities.\n\nView dashboard: ${data.appUrl || baseUrl}/coach/roster${textFooter()}`
 		};
 	}
 };

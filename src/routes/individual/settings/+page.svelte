@@ -785,7 +785,7 @@
 					<div class="flex items-center gap-2">
 						<Calendar class="h-4 w-4 text-accent" />
 						<h2 class="text-sm font-semibold tracking-wide text-text-tertiary uppercase">
-							Cycle & Schedule
+							Journey & Schedule
 						</h2>
 					</div>
 					{#if expandedSections.cycle}
@@ -810,7 +810,7 @@
 								<div>
 									<label
 										for="cycleLabel"
-										class="mb-1.5 block text-sm font-medium text-text-secondary">Cycle Name</label
+										class="mb-1.5 block text-sm font-medium text-text-secondary">Journey Name</label
 									>
 									<input
 										id="cycleLabel"
@@ -876,9 +876,7 @@
 
 							<!-- Stakeholder Cadence -->
 							<div class="border-t border-border-default pt-4">
-								<p class="mb-2 text-sm font-medium text-text-secondary">
-									Stakeholder Feedback Cadence
-								</p>
+								<p class="mb-2 text-sm font-medium text-text-secondary">Feedback Frequency</p>
 								<div class="flex flex-wrap gap-2">
 									{#each [{ key: 'weekly', label: 'Weekly' }, { key: 'biweekly', label: 'Every 2 weeks' }, { key: 'custom', label: 'Custom' }] as { key, label } (key)}
 										<button

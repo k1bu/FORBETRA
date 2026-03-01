@@ -207,14 +207,14 @@
 			{#each objective.cycles as cycle (cycle.id)}
 				<div class="mt-3 rounded-lg border border-border-default bg-surface-subtle p-3">
 					<div class="flex items-center justify-between text-sm">
-						<span class="font-medium">{cycle.label ?? 'Cycle'}</span>
+						<span class="font-medium">{cycle.label ?? 'Journey'}</span>
 						<span class="rounded bg-surface-subtle px-2 py-0.5 text-xs font-semibold uppercase"
 							>{cycle.status}</span
 						>
 					</div>
 					<p class="text-xs text-text-tertiary">
 						{formatDate(cycle.startDate)} &mdash; {formatDate(cycle.endDate)} &middot;
-						{cycle._count.reflections} reflections
+						{cycle._count.reflections} check-ins
 					</p>
 
 					<!-- Recent Reflections -->

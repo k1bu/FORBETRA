@@ -157,20 +157,11 @@
 
 	const reportSections = $derived(reportContent ? parseReportSections(reportContent) : []);
 
-	const sectionColors: Record<string, string> = {
-		'Executive Summary': 'border-l-purple-500',
-		'Progress Trajectory': 'border-l-purple-500',
-		'Perception Analysis': 'border-l-amber-500',
-		'Key Strengths': 'border-l-emerald-500',
-		'Growth Opportunities': 'border-l-amber-500',
-		Recommendations: 'border-l-emerald-500'
-	};
-
 	function getSectionColor(title: string): string {
-		for (const [key, color] of Object.entries(sectionColors)) {
-			if (title.toLowerCase().includes(key.toLowerCase())) return color;
-		}
-		return 'border-l-border-strong';
+		const t = title.toLowerCase();
+		if (t.includes('strengths') || t.includes('recommendations')) return 'border-l-emerald-500';
+		if (t.includes('growth') || t.includes('perception')) return 'border-l-amber-500';
+		return 'border-l-accent';
 	}
 
 	async function submitReportFeedback(thumbs: number) {
@@ -319,8 +310,8 @@
 			<!-- Empty state -->
 			<div class="py-8 text-center">
 				<p class="mb-2 text-sm text-text-secondary">
-					Get a comprehensive AI analysis of your full cycle — progress trajectory, perception gaps,
-					strengths, and actionable recommendations.
+					Get a comprehensive AI analysis of your full journey — progress trajectory, perception
+					gaps, strengths, and actionable recommendations.
 				</p>
 				{#if generateError}
 					<p class="mb-3 text-xs text-error">{generateError}</p>
@@ -340,7 +331,7 @@
 		<div class="rounded-lg border border-border-default bg-surface-raised p-6">
 			<div class="mb-4 flex items-center gap-2">
 				<TrendingUp class="h-4 w-4 text-text-muted" />
-				<h2 class="text-lg font-bold text-text-primary">Reflection Trend (Last 4 Weeks)</h2>
+				<h2 class="text-lg font-bold text-text-primary">Check-in Trend (Last 4 Weeks)</h2>
 			</div>
 			<div class="overflow-x-auto">
 				<table class="min-w-full text-sm">
@@ -486,7 +477,7 @@
 				</div>
 				<div class="rounded-lg border border-border-default bg-surface-subtle p-4">
 					<p class="mb-1 text-xs font-semibold tracking-wide text-text-tertiary uppercase">
-						Stakeholder Alignment
+						Rater Alignment
 					</p>
 					<p class="text-2xl font-bold text-success">
 						{formatPercent(data.insights.alignmentRatio)}
