@@ -472,8 +472,11 @@
 										action="?/updateCadence"
 										class="space-y-3"
 										use:enhance={() => {
-											return async ({ update }) => {
+											return async ({ result, update }) => {
 												await update();
+												if (result.type === 'success') {
+													addToast('Cadence updated', 'success');
+												}
 											};
 										}}
 									>
@@ -525,7 +528,7 @@
 						{#if !client.archived && data.coachPrepMap[client.id]}
 							{@const prep = data.coachPrepMap[client.id]}
 							<section class="rounded-lg border border-border-default bg-surface-raised p-4">
-								<div class="mb-3 flex items-center justify-between">
+								<div class="mb-1 flex items-center justify-between">
 									<div class="flex items-center gap-2">
 										<Sparkles class="h-4 w-4 text-text-muted" />
 										<h3 class="text-sm font-semibold text-text-primary">AI Coaching Insights</h3>
@@ -542,6 +545,9 @@
 										{generatingPrepFor === client.id ? 'Generating...' : 'Refresh Insights'}
 									</button>
 								</div>
+								<p class="mb-3 text-[10px] text-text-muted">
+									Synthesizes check-ins, notes, and stakeholder feedback
+								</p>
 								{#if data.alertMap[client.id]?.length}
 									<div class="mb-3 rounded-lg border border-border-default bg-surface-raised p-2">
 										<p class="text-xs font-bold text-error">AI Alerts:</p>
@@ -582,6 +588,9 @@
 										{generatingPrepFor === client.id ? 'Generating...' : 'Generate Insights'}
 									</button>
 								</div>
+								<p class="mt-1 text-[10px] text-text-muted">
+									Synthesizes check-ins, notes, and stakeholder feedback
+								</p>
 								{#if generatingPrepFor === client.id}
 									<div class="mt-4 animate-pulse space-y-3">
 										<div class="h-4 w-3/4 rounded bg-surface-subtle"></div>

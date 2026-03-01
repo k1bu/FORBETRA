@@ -15,6 +15,20 @@
 
 	const prepData = $derived(freshPrep ?? data.coachPrep);
 
+	const prepContext = $derived(() => {
+		if (!prepData) return null;
+		const prepTime = new Date(prepData.createdAt).getTime();
+		const notesBefore = data.allCoachNotes.filter(
+			(n) => new Date(n.createdAt).getTime() <= prepTime
+		).length;
+		const reflectionCount = data.allReflections?.length ?? 0;
+		const parts: string[] = [];
+		if (notesBefore > 0) parts.push(`${notesBefore} note${notesBefore !== 1 ? 's' : ''}`);
+		if (reflectionCount > 0)
+			parts.push(`${reflectionCount} check-in${reflectionCount !== 1 ? 's' : ''}`);
+		return parts.length > 0 ? `Based on your ${parts.join(' and ')}` : null;
+	});
+
 	// Tab navigation
 	type SessionTab = 'prep' | 'timeline' | 'notes' | 'chart';
 	let activeTab = $state<SessionTab>('prep');
@@ -205,7 +219,8 @@
 					<div>
 						<h2 class="text-lg font-bold text-text-primary">AI Coaching Insights</h2>
 						<p class="text-xs text-text-tertiary">
-							AI-generated analysis based on your client's reflection and feedback data
+							Synthesizes check-ins, notes, and stakeholder feedback to surface coaching
+							opportunities
 						</p>
 					</div>
 					{#if prepData}
@@ -241,6 +256,9 @@
 				<div class="prose prose-sm max-w-none whitespace-pre-line text-text-secondary">
 					{prepData.content}
 				</div>
+				{#if prepContext()}
+					<p class="mt-3 text-[10px] text-text-muted">{prepContext()}</p>
+				{/if}
 			{:else}
 				<p class="text-sm text-text-tertiary">No prep generated yet. Click above to generate.</p>
 			{/if}
