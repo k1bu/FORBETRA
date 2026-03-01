@@ -876,18 +876,74 @@ Biggest Coach EE jump so far (+0.3, from 6.8 → 7.1). The portfolio wins sectio
 
 ---
 
-## 17. Score Update Log
+## 18. Phase J Results (Mobile nav, cadence toast, AI explanation, prep context)
 
-| Date       | Phase          | Platform | Individual | Coach | Stakeholder | Notes                                                |
-| ---------- | -------------- | :------: | :--------: | :---: | :---------: | ---------------------------------------------------- |
-| 2026-02-28 | Baseline       |   6.87   |    6.73    | 6.27  |    7.84     | Full codebase walkthrough, all personas              |
-| 2026-02-28 | Phase A actual |   7.27   |    7.20    | 6.85  |    7.89     | 8 fixes shipped, 2 vetoed. +0.40 lift.               |
-| 2026-02-28 | Phase B actual |   7.39   |    7.44    | 6.89  |    7.89     | 3 fixes + landing copy. +0.12 lift.                  |
-| 2026-02-28 | Phase C actual |   7.42   |    7.45    | 6.91  |    7.97     | 4 fixes, 2 resolved/N/A. +0.03 lift.                 |
-| 2026-02-28 | Phase D actual |   7.54   |    7.50    | 7.23  |    7.97     | Dashboard overhaul + note prompts. +0.12             |
-| 2026-02-28 | Phase E actual |   7.63   |    7.62    | 7.35  |    7.97     | History, scoring guide, alerts, session. +0.09       |
-| 2026-02-28 | Phase F actual |   7.71   |    7.66    | 7.46  |    8.11     | Prep freshness, modal streamline, milestones. +0.08  |
-| 2026-02-28 | Phase G actual |   7.74   |    7.69    | 7.52  |    8.11     | Scoring anchors, tabs, narrative, roster. +0.03      |
-| 2026-02-28 | Phase H actual |   7.77   |    7.72    | 7.57  |    8.11     | Check-in context, subtitles, toasts, momentum. +0.03 |
-| 2026-02-28 | Phase I actual |   7.80   |    7.74    | 7.63  |    8.11     | Portfolio wins, activity, guidance, presets. +0.03   |
-|            | Target         |   9.3+   |    9.3+    | 9.0+  |    9.5+     | Final goal. Remaining gap: 1.50 pts.                 |
+**What shipped:**
+
+1. **Analytics promoted to mobile nav** — Changed Analytics from hidden "More" menu to visible mobile tab bar (4 items: Dashboard, Roster, Invitations, Analytics). Settings remains in "More". Monday morning portfolio review no longer requires desktop switch.
+2. **Cadence change toast confirmation** — Roster page cadence radio buttons now trigger "Cadence updated" toast on successful submit. Eliminates silent auto-submit gap.
+3. **AI insights explanation line** — Visible "Synthesizes check-ins, notes, and stakeholder feedback" subtitle on both roster (generated + not-yet-generated states) and session Prep tab. Replaces vague "AI-generated analysis" with specific data sources.
+4. **Notes-shaped-prep indicator** — Session Prep tab shows "Based on your X notes and Y check-ins" below AI prep content. Computed client-side from existing data. Coach sees their notes directly feed the AI.
+
+### Score Movement
+
+```
+Platform: 7.80 → 7.82 (+0.02)
+Individual: 7.74 → 7.74 (unchanged)
+Coach: 7.63 → 7.69 (+0.06)
+Stakeholder: 8.11 → 8.11 (unchanged)
+```
+
+#### Individual (unchanged)
+
+No Phase J changes affected individual screens.
+
+#### Coach (was 7.63 → 7.69, +0.06)
+
+| #   | Dimension                 | Phase I | Phase J | Delta | Evidence                                                                                                      |
+| --- | ------------------------- | :-----: | :-----: | :---: | ------------------------------------------------------------------------------------------------------------- |
+| 5   | Info Architecture (IA)    |   7.3   | **7.5** | +0.2  | Analytics 1-tap accessible on mobile. Monday portfolio review doesn't require desktop or hidden menu.         |
+| 6   | Feedback & Progress (FP)  |   7.3   | **7.4** | +0.1  | Cadence changes now confirmed via toast. No more silent auto-submit.                                          |
+| 8   | Trust & Credibility (TC)  |   7.3   | **7.5** | +0.2  | AI explanation reveals data sources. Prep context shows notes contributed. Coach understands the AI pipeline. |
+| 9   | Emotional Engagement (EE) |   7.1   | **7.3** | +0.2  | "Based on your 3 notes and 8 check-ins" — coach sees their work shaped the AI output. Effort feels valued.    |
+|     | All others                |    —    |    —    |   0   | FI, CP, OE, CT, CL, VP unchanged.                                                                             |
+
+#### Stakeholder (unchanged)
+
+No Phase J changes affected stakeholder screens.
+
+### Lowest Remaining Dimensions
+
+| Rank | User Type  | Dimension            | Score | Gap to 8.5 |
+| ---- | ---------- | -------------------- | :---: | :--------: |
+| 1    | Coach      | Emotional Engagement |  7.3  |    1.2     |
+| 2    | Coach      | Cognitive Load       |  7.3  |    1.2     |
+| 3    | Coach      | Feedback & Progress  |  7.4  |    1.1     |
+| 4    | Coach      | Onboarding Ease      |  7.5  |    1.0     |
+| 5    | Coach      | Info Architecture    |  7.5  |    1.0     |
+| 6    | Coach      | Trust & Credibility  |  7.5  |    1.0     |
+| 7    | Individual | Onboarding Ease      |  7.6  |    0.9     |
+| 8    | Individual | Cognitive Load       |  7.6  |    0.9     |
+
+### Phase J Commentary
+
+Phase J broke the "Coach dimensions stuck at 7.3" pattern — IA and TC both jumped to 7.5, and FP moved to 7.4. Coach EE moved to 7.3, finally matching the cluster instead of dragging behind. The mobile nav fix is the kind of structural IA change that has outsized impact — it changes _every_ mobile session, not just one screen. AI transparency (explanation + prep context) moved TC meaningfully because it addresses a fundamental trust question: "what goes into this AI?" Now 6 Coach dimensions are at 7.3-7.5, with EE and CL tied at the bottom. Next levers: **Coach CL** needs session view simplification (tab summaries, visual hierarchy) and **Coach EE** needs coach-specific progression mechanics.
+
+---
+
+## 19. Score Update Log
+
+| Date       | Phase          | Platform | Individual | Coach | Stakeholder | Notes                                                  |
+| ---------- | -------------- | :------: | :--------: | :---: | :---------: | ------------------------------------------------------ |
+| 2026-02-28 | Baseline       |   6.87   |    6.73    | 6.27  |    7.84     | Full codebase walkthrough, all personas                |
+| 2026-02-28 | Phase A actual |   7.27   |    7.20    | 6.85  |    7.89     | 8 fixes shipped, 2 vetoed. +0.40 lift.                 |
+| 2026-02-28 | Phase B actual |   7.39   |    7.44    | 6.89  |    7.89     | 3 fixes + landing copy. +0.12 lift.                    |
+| 2026-02-28 | Phase C actual |   7.42   |    7.45    | 6.91  |    7.97     | 4 fixes, 2 resolved/N/A. +0.03 lift.                   |
+| 2026-02-28 | Phase D actual |   7.54   |    7.50    | 7.23  |    7.97     | Dashboard overhaul + note prompts. +0.12               |
+| 2026-02-28 | Phase E actual |   7.63   |    7.62    | 7.35  |    7.97     | History, scoring guide, alerts, session. +0.09         |
+| 2026-02-28 | Phase F actual |   7.71   |    7.66    | 7.46  |    8.11     | Prep freshness, modal streamline, milestones. +0.08    |
+| 2026-02-28 | Phase G actual |   7.74   |    7.69    | 7.52  |    8.11     | Scoring anchors, tabs, narrative, roster. +0.03        |
+| 2026-02-28 | Phase H actual |   7.77   |    7.72    | 7.57  |    8.11     | Check-in context, subtitles, toasts, momentum. +0.03   |
+| 2026-02-28 | Phase I actual |   7.80   |    7.74    | 7.63  |    8.11     | Portfolio wins, activity, guidance, presets. +0.03     |
+| 2026-02-28 | Phase J actual |   7.82   |    7.74    | 7.69  |    8.11     | Mobile nav, cadence toast, AI explain, prep ctx. +0.02 |
+|            | Target         |   9.3+   |    9.3+    | 9.0+  |    9.5+     | Final goal. Remaining gap: 1.48 pts.                   |
