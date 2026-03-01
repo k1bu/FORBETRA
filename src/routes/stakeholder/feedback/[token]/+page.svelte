@@ -824,8 +824,8 @@
 							maxlength="500"
 							bind:value={notes}
 							class="w-full rounded-xl border border-border-default bg-surface-subtle px-4 py-3 text-sm text-text-secondary placeholder:text-text-muted focus:border-accent focus:bg-surface-raised focus:ring-2 focus:ring-accent/30 focus:outline-none"
-							placeholder="What have you noticed about {data.reflection
-								.participantName}'s effort or growth?"
+							placeholder="Share a specific example — something {data.reflection
+								.participantName} did well, or an area where they could grow."
 						></textarea>
 						<div class="mt-2 flex items-center justify-between">
 							<p class="text-xs text-text-tertiary">
@@ -853,7 +853,8 @@
 						<div class="flex-1">
 							<p class="font-semibold text-text-primary">Ready to submit your feedback?</p>
 							<p class="mt-1 text-xs text-text-secondary">
-								Your perspective helps track progress and keeps {data.reflection.participantName} accountable.
+								After submitting, you'll see how {data.reflection.participantName} rated themselves —
+								a chance to compare perspectives.
 							</p>
 						</div>
 						<div class="flex items-center gap-3">

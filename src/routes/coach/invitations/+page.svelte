@@ -379,6 +379,17 @@
 							return;
 						}
 						await update();
+						if (result.type === 'success') {
+							showPrefill = false;
+							prefillObjectiveTitle = '';
+							prefillObjectiveDescription = '';
+							prefillSubgoals = [{ label: '', description: '' }];
+							prefillStakeholders = [{ name: '', email: '' }];
+							prefillCycleDurationWeeks = '12';
+							prefillCheckInFrequency = '3x';
+							prefillStakeholderCadence = 'weekly';
+							emailError = '';
+						}
 					};
 				}}
 				class="space-y-4"
@@ -394,7 +405,7 @@
 								: 'border-border-default'}"
 							placeholder="alex@example.com"
 							required
-							value={form?.values?.email ?? ''}
+							value={form?.success ? '' : (form?.values?.email ?? '')}
 							onblur={(e) => validateEmail(e.currentTarget.value)}
 							oninput={(e) => {
 								if (emailError) validateEmail(e.currentTarget.value);
@@ -411,7 +422,7 @@
 							name="name"
 							class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm text-text-primary transition-all focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
 							placeholder="Alex Jensen"
-							value={form?.values?.name ?? ''}
+							value={form?.success ? '' : (form?.values?.name ?? '')}
 						/>
 					</label>
 				</div>
@@ -460,7 +471,7 @@
 								name="phone"
 								class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm text-text-primary transition-all focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
 								placeholder="+1 555 123 4567"
-								value={form?.values?.phone ?? ''}
+								value={form?.success ? '' : (form?.values?.phone ?? '')}
 								required
 							/>
 						</label>
@@ -473,7 +484,9 @@
 						rows="3"
 						class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm text-text-primary transition-all focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
 						placeholder="Add context for why you're inviting them."
-						>{form?.values?.message ?? defaultInviteMessage}</textarea
+						>{form?.success
+							? defaultInviteMessage
+							: (form?.values?.message ?? defaultInviteMessage)}</textarea
 					>
 				</label>
 				<!-- Pre-fill Client's Setup -->

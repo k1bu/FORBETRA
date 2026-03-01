@@ -349,32 +349,32 @@ _None found._ No task is fully blocked. The app is functional.
 | 3   | ~~**Coach session page: no tabs/sections**~~ — **FIXED Phase A.** 4 tabs added.                     |     C      | CL, IA, CT |  3   |  M(2)  |     0.158      |
 | 4   | **No celebration/feedback after key milestones** — **VETOED (animations).** Replaced with empties.  |    All     |   EE, FP   |  2   |  S(1)  |     0.132      |
 | 5   | ~~**Coach pre-fill feature hidden in accordion**~~ — **FIXED Phase A.** Toggle switch + onboarding. |     C      |   OE, CT   |  2   |  S(1)  |     0.108      |
-| 6   | **New Cycle form: too long, no steps/progress** — 5+ sections in one scroll                         |     I      |   CL, CT   |  1   |  M(2)  |     0.101      |
+| 6   | ~~**New Cycle form: too long, no steps/progress**~~ — **FIXED Phase B.** 3-step wizard.             |     I      |   CL, CT   |  1   |  M(2)  |     0.101      |
 | 7   | ~~**Coach roster: no risk/urgency sort**~~ — **FIXED Phase A.** 3-way sort dropdown.                |     C      |   CT, IA   |  3   |  M(2)  |     0.095      |
 | 8   | ~~**No guidance when no action available**~~ — **FIXED Phase A.** Adaptive empty states.            |     I      | FP, EE, VP |  2   |  S(1)  |     0.090      |
 | 9   | ~~**Metrics unexplained everywhere**~~ — **FIXED Phase A.** One-line definitions + tooltips.        |    I, C    |   CL, CP   |  2   |  S(1)  |     0.087      |
-| 10  | **Insights: 6 section colors** — cognitive overload, unmemorable mapping                            |     I      |   CL, FI   |  2   |  S(1)  |     0.081      |
+| 10  | ~~**Insights: 6 section colors**~~ — **FIXED Phase B.** Consolidated to 3 semantic groups.          |     I      |   CL, FI   |  2   |  S(1)  |     0.081      |
 | 11  | ~~**No privacy statement on stakeholder form**~~ — **FIXED Phase A.** Added to welcome modal.       |     S      |     TC     |  1   |  S(1)  |     0.075      |
-| 12  | **Coach analytics: no export** — Scale-Focused Coach (Amara) blocked                                |     C      |   VP, CT   |  2   |  L(3)  |     0.065      |
+| 12  | ~~**Coach analytics: no export**~~ — **FIXED Phase B.** CSV export button.                          |     C      |   VP, CT   |  2   |  L(3)  |     0.065      |
 | 13  | **No bulk invite for coaches** — one-at-a-time paradigm for 30+ clients                             |     C      |     CT     |  1   |  L(3)  |     0.045      |
 
 ### Minor Issues (P2) — Score Impact: -1 to -2
 
-| #   | Issue                                                                                              | User Types | Dimensions | Freq | Effort | Priority Score |
-| --- | -------------------------------------------------------------------------------------------------- | :--------: | :--------: | :--: | :----: | :------------: |
-| 14  | ~~Behavioral indicators collapsed by default~~ — **FIXED Phase A.** Auto-expand on first check-in. |     I      |   CT, CL   |  3   |  S(1)  |     0.068      |
-| 15  | Mobile tab bar hides History, Ask, Settings in "More"                                              |     I      |     IA     |  3   |  S(1)  |     0.054      |
-| 16  | Relationship field on stakeholder form has no examples                                             |     I      |   CP, CT   |  2   |  S(1)  |     0.045      |
-| 17  | Chat loses history on page refresh (state only)                                                    |     I      |   FP, VP   |  2   |  M(2)  |     0.038      |
-| 18  | Stakeholder comment placeholder is vague                                                           |     S      |   CT, VP   |  2   |  S(1)  |     0.038      |
-| 19  | Coach notes week number requires manual entry                                                      |     C      |   CT, CL   |  3   |  S(1)  |     0.036      |
-| 20  | Score reveal not signposted before submission                                                      |     S      |   TC, EE   |  1   |  S(1)  |     0.035      |
-| 21  | History page: all weeks expanded, no search/filter                                                 |     I      |   IA, CL   |  1   |  M(2)  |     0.030      |
-| 22  | Read-only check-in shows disabled form instead of summary                                          |     I      |   FP, CL   |  1   |  M(2)  |     0.028      |
-| 23  | No loading skeletons on hub/roster initial load                                                    |    I, C    |     FP     |  3   |  S(1)  |     0.027      |
-| 24  | Hub/Dashboard distinction unclear                                                                  |     I      |   CP, IA   |  2   |  L(3)  |     0.023      |
-| 25  | Invite form doesn't clear after success                                                            |     C      |     CT     |  2   |  S(1)  |     0.022      |
-| 26  | Desktop sidebar color contrast may be low                                                          |     I      |   FI, TC   |  3   |  S(1)  |     0.020      |
+| #   | Issue                                                                                                | User Types | Dimensions | Freq | Effort | Priority Score |
+| --- | ---------------------------------------------------------------------------------------------------- | :--------: | :--------: | :--: | :----: | :------------: |
+| 14  | ~~Behavioral indicators collapsed by default~~ — **FIXED Phase A.** Auto-expand on first check-in.   |     I      |   CT, CL   |  3   |  S(1)  |     0.068      |
+| 15  | Mobile tab bar hides History, Ask, Settings in "More"                                                |     I      |     IA     |  3   |  S(1)  |     0.054      |
+| 16  | ~~Relationship field on stakeholder form has no examples~~ — **FIXED Phase C.** Placeholder updated. |     I      |   CP, CT   |  2   |  S(1)  |     0.045      |
+| 17  | Chat loses history on page refresh (state only)                                                      |     I      |   FP, VP   |  2   |  M(2)  |     0.038      |
+| 18  | ~~Stakeholder comment placeholder is vague~~ — **FIXED Phase C.** Structured prompt.                 |     S      |   CT, VP   |  2   |  S(1)  |     0.038      |
+| 19  | ~~Coach notes week number requires manual entry~~ — **RESOLVED.** Already auto-populates.            |     C      |   CT, CL   |  3   |  S(1)  |     0.036      |
+| 20  | ~~Score reveal not signposted before submission~~ — **FIXED Phase C.** Signpost added.               |     S      |   TC, EE   |  1   |  S(1)  |     0.035      |
+| 21  | History page: all weeks expanded, no search/filter                                                   |     I      |   IA, CL   |  1   |  M(2)  |     0.030      |
+| 22  | Read-only check-in shows disabled form instead of summary                                            |     I      |   FP, CL   |  1   |  M(2)  |     0.028      |
+| 23  | ~~No loading skeletons on hub/roster initial load~~ — **N/A.** SSR renders with data.                |    I, C    |     FP     |  3   |  S(1)  |     0.027      |
+| 24  | Hub/Dashboard distinction unclear                                                                    |     I      |   CP, IA   |  2   |  L(3)  |     0.023      |
+| 25  | ~~Invite form doesn't clear after success~~ — **FIXED Phase C.** Form + prefill reset on success.    |     C      |     CT     |  2   |  S(1)  |     0.022      |
+| 26  | Desktop sidebar color contrast may be low                                                            |     I      |   FI, TC   |  3   |  S(1)  |     0.020      |
 
 ### Polish Issues (P3) — Score Impact: -0.5 to -1
 
@@ -412,9 +412,9 @@ Sorted by Priority Score (descending). These are the fixes that will move the pl
 |  13  | Expand behavioral indicators on first check-in                      |     0.068      |       +0.06        |   A   |
 |  14  | Coach bulk invite capability                                        |     0.045      |       +0.04        |   C   |
 
-**Phase A total estimated lift: +0.97** → Target score: ~7.8
-**Phase B total estimated lift: +0.25** → Target score: ~8.1
-**Phase C-D: Remaining polish and differentiation**
+**Phase A actual lift: +0.40** (6.87 → 7.27, 2 items vetoed)
+**Phase B actual lift: +0.12** (7.27 → 7.39, 3 fixes + landing copy)
+**Remaining gap: 1.91 points to 9.3 target**
 
 ---
 
@@ -474,13 +474,51 @@ Sorted by Priority Score (descending). These are the fixes that will move the pl
 | --- | ------------------------ | :------: | :-----: | :---: | ------------------------------------------------------------------------------------ |
 | 8   | Trust & Credibility (TC) |   8.0    | **8.5** | +0.5  | Privacy statement addresses Linda Park's hesitation. All other dimensions unchanged. |
 
+## 7. Phase B Results
+
+### Delivered
+
+- [x] **New Cycle wizard** — 13+ fields in one scroll → 3-step wizard (Objective → Schedule → Settings). Progress dots with back-navigation, per-step validation, review summary card before submit.
+- [x] **Insight color consolidation** — 6 distinct colors → 3 semantic groups: purple (Executive Summary, Progress Trajectory = overview), emerald (Key Strengths, Recommendations = positive/action), amber (Perception Analysis, Growth Opportunities = attention).
+- [x] **Coach analytics CSV export** — "Export CSV" button in header, downloads full client comparison table (Name, Objective, Effort, Performance, Stability, Trajectory, Completion %, Alerts).
+- [x] **Landing page copy** — Rewrote marketing copy with grounded language. Removed jargon ("behavioral science", "cognitive clarity"). Added clearer value propositions.
+
+### Phase B Dimension Scores
+
+#### Individual (was 7.20 → 7.44, +0.24)
+
+| #   | Dimension                 | Phase A | Phase B | Delta | Evidence                                                                                           |
+| --- | ------------------------- | :-----: | :-----: | :---: | -------------------------------------------------------------------------------------------------- |
+| 1   | First Impression (FI)     |   7.5   | **7.7** | +0.2  | Insight colors coherent (3 semantic groups). Wizard progress dots polished. Low-frequency screens. |
+| 2   | Clarity of Purpose (CP)   |   8.0   | **8.2** | +0.2  | Wizard step labels make purpose instant. Review summary confirms intent before submit.             |
+| 3   | Onboarding Ease (OE)      |   6.8   | **7.0** | +0.2  | Wizard reduces new-cycle setup anxiety. Guided 3-step flow vs wall of fields.                      |
+| 4   | Core Task Flow (CT)       |   7.3   | **7.5** | +0.2  | Per-step validation prevents errors. But new-cycle is 1x per cycle (low frequency).                |
+| 5   | Info Architecture (IA)    |   7.0   | **7.3** | +0.3  | 13 fields → 3 logical groups. Insight colors semantically grouped.                                 |
+| 6   | Feedback & Progress (FP)  |   7.5   | **7.8** | +0.3  | Progress dots + step validation + review summary = strong progress visibility.                     |
+| 7   | Cognitive Load (CL)       |   6.5   | **7.0** | +0.5  | Biggest win. 13→4 fields per step. 6→3 colors. Both directly reduce cognitive overhead.            |
+| 8   | Trust & Credibility (TC)  |   7.5   | **7.7** | +0.2  | Review summary before "Start Cycle" lets user confirm choices.                                     |
+| 9   | Emotional Engagement (EE) |   6.8   | **6.9** | +0.1  | Wizard feels guided. No celebrations (vetoed). Marginal.                                           |
+| 10  | Value Perception (VP)     |   7.3   | **7.4** | +0.1  | Wizard doesn't change value proposition, just delivery. Marginal.                                  |
+
+#### Coach (was 6.85 → 6.89, +0.04)
+
+| #   | Dimension             | Phase A | Phase B | Delta | Evidence                                                                       |
+| --- | --------------------- | :-----: | :-----: | :---: | ------------------------------------------------------------------------------ |
+| 4   | Core Task Flow (CT)   |   7.5   | **7.6** | +0.1  | Export adds capability but isn't the core repeated task (session prep).        |
+| 10  | Value Perception (VP) |   7.0   | **7.3** | +0.3  | CSV export resolves "no export" issue. Amara can pull data into own reporting. |
+|     | All others            |    —    |    —    |   0   | No changes to coach screens beyond analytics export.                           |
+
+#### Stakeholder (was 7.89 → 7.89, 0)
+
+No Phase B changes affected stakeholder screens.
+
 ---
 
-## 7. Score Update Log
+## 8. Score Update Log
 
 | Date       | Phase          | Platform | Individual | Coach | Stakeholder | Notes                                   |
 | ---------- | -------------- | :------: | :--------: | :---: | :---------: | --------------------------------------- |
 | 2026-02-28 | Baseline       |   6.87   |    6.73    | 6.27  |    7.84     | Full codebase walkthrough, all personas |
 | 2026-02-28 | Phase A actual |   7.27   |    7.20    | 6.85  |    7.89     | 8 fixes shipped, 2 vetoed. +0.40 lift.  |
-|            | Phase B target |   ~7.7   |    ~7.5    | ~7.3  |    ~8.2     | New Cycle wizard, colors, export        |
+| 2026-02-28 | Phase B actual |   7.39   |    7.44    | 6.89  |    7.89     | 3 fixes + landing copy. +0.12 lift.     |
 |            | Phase D target |   9.3+   |    9.3+    | 9.0+  |    9.5+     | Final goal                              |
