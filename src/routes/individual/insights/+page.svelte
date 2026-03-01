@@ -375,9 +375,16 @@
 	<!-- Weekly Insights -->
 	{#if data.insights}
 		<div class="rounded-lg border border-border-default bg-surface-raised p-6">
-			<div class="mb-4 flex items-center gap-2">
-				<Sparkles class="h-4 w-4 text-text-muted" />
-				<h2 class="text-lg font-bold text-text-primary">Weekly Insights</h2>
+			<div class="mb-4 flex items-center justify-between">
+				<div class="flex items-center gap-2">
+					<Sparkles class="h-4 w-4 text-text-muted" />
+					<h2 class="text-lg font-bold text-text-primary">Weekly Insights</h2>
+				</div>
+				<span class="text-[10px] text-text-muted">
+					Based on {data.reflectionTrend.weeks.length} week{data.reflectionTrend.weeks.length !== 1
+						? 's'
+						: ''} of data
+				</span>
 			</div>
 			<div class="grid gap-4 md:grid-cols-2">
 				<div class="rounded-lg border border-border-default bg-surface-subtle p-4">
@@ -387,6 +394,12 @@
 					<p class="text-2xl font-bold {getScoreColor(data.insights.avgEffort, 'effort')}">
 						{formatAverage(data.insights.avgEffort)}
 					</p>
+					{#if data.insights.avgEffort !== null && data.insights.avgEffort !== undefined}
+						<p class="mt-1 text-[10px] text-text-muted">
+							{#if data.insights.avgEffort >= 8}Strong commitment level{:else if data.insights.avgEffort >= 6}Moderate
+								effort — room to push{:else}Below average — worth exploring{/if}
+						</p>
+					{/if}
 				</div>
 				<div class="rounded-lg border border-border-default bg-surface-subtle p-4">
 					<p class="mb-1 text-xs font-semibold tracking-wide text-text-tertiary uppercase">
@@ -395,6 +408,12 @@
 					<p class="text-2xl font-bold {getScoreColor(data.insights.avgProgress, 'performance')}">
 						{formatAverage(data.insights.avgProgress)}
 					</p>
+					{#if data.insights.avgProgress !== null && data.insights.avgProgress !== undefined}
+						<p class="mt-1 text-[10px] text-text-muted">
+							{#if data.insights.avgProgress >= 8}High-performing trajectory{:else if data.insights.avgProgress >= 6}Solid
+								— keep building{:else}Growing — each week counts{/if}
+						</p>
+					{/if}
 				</div>
 				<div class="rounded-lg border border-border-default bg-surface-subtle p-4">
 					<p class="mb-1 text-xs font-semibold tracking-wide text-text-tertiary uppercase">

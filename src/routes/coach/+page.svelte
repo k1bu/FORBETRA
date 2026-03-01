@@ -151,7 +151,10 @@
 
 	<!-- Stat Cards -->
 	<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-		<div class="rounded-xl border border-border-default bg-surface-raised p-4">
+		<a
+			href="/coach/roster"
+			class="rounded-xl border border-border-default bg-surface-raised p-4 transition-colors hover:border-accent/30"
+		>
 			<div class="mb-1 flex items-center gap-1.5">
 				<Users class="h-4 w-4 text-accent" />
 				<p class="text-xs font-medium text-text-tertiary">Active Clients</p>
@@ -168,8 +171,11 @@
 					{data.rosterSummary.archived} archived
 				</p>
 			{/if}
-		</div>
-		<div class="rounded-xl border border-border-default bg-surface-raised p-4">
+		</a>
+		<a
+			href="/coach/analytics"
+			class="rounded-xl border border-border-default bg-surface-raised p-4 transition-colors hover:border-accent/30"
+		>
 			<div class="mb-1 flex items-center gap-1.5">
 				<AlertTriangle
 					class="h-4 w-4 {data.analytics.highPriorityAlerts > 0
@@ -188,7 +194,7 @@
 			{:else if data.analytics.totalAlerts === 0}
 				<p class="mt-1 text-xs text-success">All clear</p>
 			{/if}
-		</div>
+		</a>
 		<div class="rounded-xl border border-border-default bg-surface-raised p-4">
 			<div class="mb-1 flex items-center gap-1.5">
 				<BarChart3 class="h-4 w-4 text-cyan-400" />

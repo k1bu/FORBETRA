@@ -296,8 +296,9 @@
 						</div>
 						<h2 class="text-2xl font-bold text-text-primary">Welcome, {data.stakeholder.name}</h2>
 						<p class="mt-2 text-base text-text-secondary">
-							<strong>{data.reflection.participantName}</strong> has invited you to share your perspective
-							on their development. Your outside view reveals blind spots they can't see themselves.
+							<strong>{data.reflection.participantName}</strong> is working on their growth and values
+							your honest perspective. What takes you 60 seconds gives them insights they can't get any
+							other way.
 						</p>
 					</div>
 
@@ -310,28 +311,31 @@
 
 					<div class="mb-5 rounded-lg border border-border-default bg-surface-raised p-4">
 						<p class="mb-2 text-xs font-semibold tracking-wide text-text-primary uppercase">
-							You'll be asked to
+							Three quick steps
 						</p>
 						<ul class="space-y-1.5 text-sm text-text-secondary">
 							<li class="flex items-center gap-2">
 								<Dumbbell class="h-4 w-4 shrink-0 text-accent" />
-								Rate their <strong>effort</strong> (0-10)
+								Rate their <strong>effort</strong> — how much energy are they investing?
 							</li>
 							<li class="flex items-center gap-2">
 								<TrendingUp class="h-4 w-4 shrink-0 text-accent" />
-								Rate their <strong>performance</strong> (0-10)
+								Rate their <strong>performance</strong> — what results are you seeing?
 							</li>
 							<li class="flex items-center gap-2">
 								<PenLine class="h-4 w-4 shrink-0 text-accent" />
-								Optionally share a brief observation
+								Add a quick note if anything stands out
 							</li>
 						</ul>
 					</div>
 
-					<p class="mb-5 text-xs text-text-muted">
-						Your feedback is shared with {data.reflection.participantName} and their coach. Your name
-						is attached to your ratings.
-					</p>
+					<div class="mb-5 flex items-center gap-2 text-xs text-text-muted">
+						<Shield class="h-3.5 w-3.5 shrink-0" />
+						<span
+							>Your feedback goes to {data.reflection.participantName} and their coach. No anonymous
+							aggregation — your name is attached, which keeps feedback honest and actionable.</span
+						>
+					</div>
 
 					<div class="text-center">
 						<button
