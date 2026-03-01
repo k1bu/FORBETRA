@@ -954,7 +954,11 @@ Phase J broke the "Coach dimensions stuck at 7.3" pattern — IA and TC both jum
 | 2026-03-01 | Phase P actual |   8.00   |    7.95    | 7.98  |    8.11     | Dashboard polish, check-in flow, session summary. +0.02. **8.0 milestone!** |
 | 2026-03-01 | Phase Q actual |   8.04   |    8.00    | 8.01  |    8.14     | Privacy footer, nav descriptions, data source labels, stakeholder UX. +0.04 |
 | 2026-03-01 | Phase R actual |   8.08   |    8.03    | 8.03  |    8.22     | Hub polish, progress narrative, scoring guide, session hierarchy. +0.04     |
-|            | Target         |   9.3+   |    9.3+    | 9.0+  |    9.5+     | Final goal. Remaining gap: 1.22 pts.                                        |
+| 2026-03-01 | Phase S actual |   8.10   |    8.06    | 8.05  |    8.24     | Metric definitions, portfolio health, stakeholder engagement. +0.02         |
+| 2026-03-01 | Phase T actual |   8.10   |    8.08    | 8.04  |    8.21     | Tab labels, dashboard disclosure, onboarding progress. +0.00                |
+| 2026-03-01 | Phase U actual |   8.12   |    8.11    | 8.07  |    8.21     | Check-in messaging, scorecard gaps, coach nav/roster. +0.02                 |
+| 2026-03-01 | Phase V actual |   8.15   |    8.13    | 8.10  |    8.23     | Stakeholder impact summary, quick-nav, prep provenance. +0.03               |
+|            | Target         |   9.3+   |    9.3+    | 9.0+  |    9.5+     | Final goal. Remaining gap: 1.15 pts.                                        |
 
 ---
 
@@ -1577,3 +1581,107 @@ Stakeholder: 8.14 → 8.22 (+0.08) ← largest Stakeholder lift since Phase F
 **Individual hub now has proper visual hierarchy.** Section labels, progress bar, and the progress narrative create distinct zones that guide the eye. The hub went from "collection of cards" to "structured daily briefing."
 
 **Next levers for 8.5+:** (1) Individual OE — onboarding is the largest untouched area, dense and long; (2) Individual CL — hub cards could use progressive disclosure for less-important sections; (3) Coach OE — coach onboarding still has structural opportunities; (4) Stakeholder CT/CL — further scoring improvements (pre-fill, "same as last" shortcut); (5) All user types need EE improvements — celebration, progression, habit reinforcement.
+
+## 28. Phase S Results (Metric definitions, portfolio health, stakeholder engagement)
+
+**What shipped:**
+
+1. **Coach dashboard portfolio health bar** — Stacked bar showing improving/stable/declining client proportions. Stat card value sizing standardized to `text-2xl`.
+2. **Individual metric definitions** — Subtitle labels under each at-a-glance metric ("Your self-rating", "Others' average", "Check-in rate"). Perception gap explainer ("+ means you rate higher · − means others rate higher"). ARIA region label on metrics section.
+3. **Stakeholder engagement reinforcement** — Contribution counter badge ("Contribution #3") for returning stakeholders. Inline impact reinforcement after both scores filled. Contribution count in already-submitted and post-submission messaging.
+
+### Score Movement
+
+```
+Platform: 8.08 → 8.10 (+0.02)
+Individual: 8.03 → 8.06 (+0.03)
+Coach: 8.03 → 8.05 (+0.02)
+Stakeholder: 8.22 → 8.24 (+0.02)
+```
+
+#### Individual (was 8.03 → 8.06, +0.03)
+
+| #   | Dimension                | Phase R | Phase S | Delta | Evidence                                                                               |
+| --- | ------------------------ | :-----: | :-----: | :---: | -------------------------------------------------------------------------------------- |
+| 4   | Core Task Flow (CT)      |   7.9   | **8.0** | +0.1  | Perception gap explainer removes interpretation guesswork.                             |
+| 5   | Information Architecture |   8.0   | **8.1** | +0.1  | ARIA region label, metric definitions orient screen readers and visual users alike.    |
+| 7   | Cognitive Load (CL)      |   7.9   | **8.0** | +0.1  | Metric subtitles ("Your self-rating", "Others' average") eliminate mental translation. |
+|     | All others               |    —    |    —    |   0   | FI, CP, OE, FP, TC, EE, VP unchanged.                                                  |
+
+#### Coach (was 8.03 → 8.05, +0.02)
+
+| #   | Dimension                 | Phase R | Phase S | Delta | Evidence                                                    |
+| --- | ------------------------- | :-----: | :-----: | :---: | ----------------------------------------------------------- |
+| 6   | Feedback & Patterns (FP)  |   7.9   | **8.0** | +0.1  | Portfolio health bar surfaces data patterns at a glance.    |
+| 9   | Emotional Engagement (EE) |   7.9   | **8.0** | +0.1  | Portfolio overview creates engagement with caseload health. |
+|     | All others                |    —    |    —    |   0   | FI, CP, OE, CT, IA, CL, TC, VP unchanged.                   |
+
+#### Stakeholder (was 8.22 → 8.24, +0.02)
+
+| #   | Dimension                 | Phase R | Phase S | Delta | Evidence                                                                                     |
+| --- | ------------------------- | :-----: | :-----: | :---: | -------------------------------------------------------------------------------------------- |
+| 9   | Emotional Engagement (EE) |   7.7   | **7.9** | +0.2  | Contribution counter + impact reinforcement + warmer post-submission create engagement loop. |
+| 6   | Feedback & Patterns (FP)  |   7.9   | **8.0** | +0.1  | Inline impact preview after scoring shows contribution matters.                              |
+|     | All others                |    —    |    —    |   0   | FI, CP, OE, CT, IA, CL, TC, VP unchanged.                                                    |
+
+### Phase S Commentary
+
+**Diminishing returns territory.** +0.02 lift with targeted changes across all three user types. The lowest dimensions are now clustering at 7.9–8.0 — no more obvious outliers to fix. Future phases need bigger structural changes (onboarding overhaul, progressive disclosure, engagement systems) rather than micro-polish to unlock the next scoring tier.
+
+**Current score floor: 7.9** (Individual OE, Coach OE/IA/CL). The path to 8.5+ requires:
+
+- Onboarding restructuring (Individual OE, Coach OE)
+- Progressive disclosure in dense screens (Individual CL, Coach CL)
+- Micro-interactions and celebration systems (all types EE)
+- Deeper AI-powered insights surface area (all types VP/FP)
+
+## 29. Phase V Results (Stakeholder impact, quick-nav, prep provenance)
+
+**What shipped:**
+
+1. **Stakeholder return-visit impact summary** — "Your impact so far" card for returning stakeholders showing contribution count, average effort/performance scores, and value message. Targets EE/VP.
+2. **Individual hub quick-nav row** — Horizontal action buttons (Scorecard, Insights, Stakeholders, Check-in) after at-a-glance metrics. Reduces navigation friction for key pages.
+3. **Coach session prep data provenance** — "Sources analyzed" card below AI prep content showing check-in count, coach note count, stakeholder count, and generation timestamp. Replaced inline text with structured provenance.
+
+### Score Movement
+
+```
+Platform: 8.12 → 8.15 (+0.03)
+Individual: 8.11 → 8.13 (+0.02)
+Coach: 8.07 → 8.10 (+0.03)
+Stakeholder: 8.21 → 8.23 (+0.02)
+```
+
+#### Individual (was 8.11 → 8.13, +0.02)
+
+| #   | Dimension                | Phase U | Phase V | Delta | Evidence                                                                     |
+| --- | ------------------------ | :-----: | :-----: | :---: | ---------------------------------------------------------------------------- |
+| 7   | Cognitive Load (CL)      |   8.0   | **8.1** | +0.1  | Quick-nav row provides clear wayfinding, reduces full-page scanning.         |
+| 8   | Trust & Credibility (TC) |   8.0   | **8.1** | +0.1  | Quick-nav gives structured access to key pages, reinforcing task confidence. |
+|     | All others               |    —    |    —    |   0   | FI, CP, OE, CT, IA, FP, EE, VP unchanged.                                    |
+
+#### Coach (was 8.07 → 8.10, +0.03)
+
+| #   | Dimension                | Phase U | Phase V | Delta | Evidence                                                                                    |
+| --- | ------------------------ | :-----: | :-----: | :---: | ------------------------------------------------------------------------------------------- |
+| 4   | Core Task Flow (CT)      |   8.0   | **8.1** | +0.1  | Data provenance card shows exactly what the AI analyzed, builds trust in the prep workflow. |
+| 6   | Feedback & Patterns (FP) |   8.0   | **8.1** | +0.1  | Explicit source counts and timestamp provide process transparency.                          |
+|     | All others               |    —    |    —    |   0   | FI, CP, OE, IA, CL, TC, EE, VP unchanged.                                                   |
+
+#### Stakeholder (was 8.21 → 8.23, +0.02)
+
+| #   | Dimension                 | Phase U | Phase V | Delta | Evidence                                                                                               |
+| --- | ------------------------- | :-----: | :-----: | :---: | ------------------------------------------------------------------------------------------------------ |
+| 9   | Emotional Engagement (EE) |   7.9   | **8.0** | +0.1  | Returning stakeholders see "Your impact so far" with concrete metrics, reinforcing contribution value. |
+| 10  | Value Perception (VP)     |   8.0   | **8.1** | +0.1  | Impact summary + "helps coach track real progress" message makes return value tangible.                |
+|     | All others                |    —    |    —    |   0   | FI, CP, OE, CT, IA, FP, CL, TC unchanged.                                                              |
+
+### Phase V Commentary
+
+**All dimensions now at 8.0+.** The last sub-8.0 holdout (Stakeholder EE at 7.9) has been resolved. Current score floor is 8.0 (Coach CL, Coach TC). Remaining gap to target: 1.15 points.
+
+**Current dimension scores:**
+
+- Individual (8.13): FI:8.1 CP:8.3 OE:8.1 CT:8.1 IA:8.1 FP:8.2 CL:8.1 TC:8.1 EE:8.1 VP:8.1
+- Coach (8.10): FI:8.1 CP:8.1 OE:8.1 CT:8.1 IA:8.1 FP:8.1 CL:8.0 TC:8.0 EE:8.1 VP:8.2
+- Stakeholder (8.23): FI:8.1 CP:8.5 OE:8.5 CT:8.2 IA:8.5 FP:8.0 CL:8.2 TC:8.2 EE:8.0 VP:8.1

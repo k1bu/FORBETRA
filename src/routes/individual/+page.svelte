@@ -618,6 +618,38 @@
 		</div>
 	{/if}
 
+	<!-- ═══ ZONE 3a: Quick Nav ═══ -->
+	{#if data.isOnboardingComplete}
+		<!-- eslint-disable svelte/no-navigation-without-resolve -->
+		<div class="flex gap-2 overflow-x-auto">
+			<a
+				href="/individual/scorecard"
+				class="flex items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-accent/30 hover:text-accent"
+			>
+				<ArrowUpDown class="h-3 w-3" /> Scorecard
+			</a>
+			<a
+				href="/individual/insights"
+				class="flex items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-accent/30 hover:text-accent"
+			>
+				<Sparkles class="h-3 w-3" /> Insights
+			</a>
+			<a
+				href="/individual/stakeholders"
+				class="flex items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-accent/30 hover:text-accent"
+			>
+				<User class="h-3 w-3" /> Stakeholders
+			</a>
+			<a
+				href="/reflections/checkin"
+				class="flex items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-accent/30 hover:text-accent"
+			>
+				<Calendar class="h-3 w-3" /> Check-in
+			</a>
+		</div>
+		<!-- eslint-enable svelte/no-navigation-without-resolve -->
+	{/if}
+
 	<!-- ═══ ZONE 3b: Perception Gaps ═══ -->
 	{#if data.perceptionGaps && data.perceptionGaps.length > 0}
 		{@const significantGaps = data.perceptionGaps.filter((g) => g.maxAbsGap > 1)}

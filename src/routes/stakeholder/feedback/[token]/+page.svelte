@@ -579,6 +579,65 @@
 
 		{#if !form?.success && !(data.isPreview && showReveal) && !showWelcome}
 			<div class="mx-auto w-full max-w-2xl space-y-6">
+				<!-- Returning stakeholder impact summary -->
+				{#if !data.isFirstFeedback && data.historicRatings && data.historicRatings.length > 0}
+					{@const avgEffort =
+						data.historicRatings.filter((r) => r.effortScore !== null).length > 0
+							? Math.round(
+									(data.historicRatings
+										.filter((r) => r.effortScore !== null)
+										.reduce((sum, r) => sum + (r.effortScore ?? 0), 0) /
+										data.historicRatings.filter((r) => r.effortScore !== null).length) *
+										10
+								) / 10
+							: null}
+					{@const avgPerf =
+						data.historicRatings.filter((r) => r.performanceScore !== null).length > 0
+							? Math.round(
+									(data.historicRatings
+										.filter((r) => r.performanceScore !== null)
+										.reduce((sum, r) => sum + (r.performanceScore ?? 0), 0) /
+										data.historicRatings.filter((r) => r.performanceScore !== null).length) *
+										10
+								) / 10
+							: null}
+					<div
+						class="rounded-xl border border-accent/20 bg-gradient-to-r from-accent/5 to-transparent p-4"
+					>
+						<p class="mb-2 text-xs font-semibold tracking-wide text-accent uppercase">
+							Your impact so far
+						</p>
+						<div class="flex flex-wrap items-center gap-x-5 gap-y-2">
+							<div class="flex items-center gap-1.5">
+								<span
+									class="flex h-6 w-6 items-center justify-center rounded-full bg-accent/20 text-[10px] font-bold text-accent"
+								>
+									{data.historicRatings.length}
+								</span>
+								<span class="text-xs text-text-secondary"
+									>week{data.historicRatings.length !== 1 ? 's' : ''} of feedback</span
+								>
+							</div>
+							{#if avgEffort !== null}
+								<div class="flex items-center gap-1.5">
+									<span class="text-xs text-text-muted">Avg effort:</span>
+									<span class="text-xs font-bold text-cyan-300">{avgEffort}</span>
+								</div>
+							{/if}
+							{#if avgPerf !== null}
+								<div class="flex items-center gap-1.5">
+									<span class="text-xs text-text-muted">Avg perf:</span>
+									<span class="text-xs font-bold text-amber-300">{avgPerf}</span>
+								</div>
+							{/if}
+						</div>
+						<p class="mt-2 text-[10px] text-text-tertiary">
+							Your ongoing perspective helps {data.reflection.participantName}'s coach track real
+							progress over time.
+						</p>
+					</div>
+				{/if}
+
 				<!-- Step indicator -->
 				<div class="flex items-center justify-center gap-2">
 					<div class="flex items-center gap-1.5">
