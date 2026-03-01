@@ -309,19 +309,21 @@
 				<p class="mb-4 text-sm text-text-secondary">
 					Invite 3&#8211;5 people who regularly observe your development.
 				</p>
-				{#if stakeholderError}
-					<div
-						class="mb-3 rounded-lg border border-error/20 bg-error-muted px-3 py-2 text-xs text-error"
-					>
-						{stakeholderError}
-					</div>
-				{:else if stakeholderSuccess}
-					<div
-						class="mb-3 rounded-lg border border-success/20 bg-success-muted px-3 py-2 text-xs text-success"
-					>
-						<CheckCircle class="inline h-3.5 w-3.5" /> Stakeholder added successfully!
-					</div>
-				{/if}
+				<div aria-live="polite" role="status">
+					{#if stakeholderError}
+						<div
+							class="mb-3 rounded-lg border border-error/20 bg-error-muted px-3 py-2 text-xs text-error"
+						>
+							{stakeholderError}
+						</div>
+					{:else if stakeholderSuccess}
+						<div
+							class="mb-3 rounded-lg border border-success/20 bg-success-muted px-3 py-2 text-xs text-success"
+						>
+							<CheckCircle class="inline h-3.5 w-3.5" /> Stakeholder added successfully!
+						</div>
+					{/if}
+				</div>
 				<form method="post" action="?/addStakeholder" class="space-y-3">
 					<div>
 						<label for="stakeholder-name" class="mb-1.5 block text-sm font-medium text-text-primary"
@@ -332,7 +334,7 @@
 							name="name"
 							type="text"
 							class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
-							placeholder="Name"
+							placeholder="e.g. Jane Smith"
 							value={stakeholderFormValues.name}
 							required
 						/>
@@ -347,10 +349,13 @@
 							name="email"
 							type="email"
 							class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
-							placeholder="Email"
+							placeholder="jane@company.com"
 							value={stakeholderFormValues.email}
 							required
 						/>
+						<p class="mt-1 text-[10px] text-text-muted">
+							They'll receive a link to provide anonymous feedback
+						</p>
 					</div>
 					<div>
 						<label

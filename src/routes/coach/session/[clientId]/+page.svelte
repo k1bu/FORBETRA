@@ -296,7 +296,9 @@
 			<button
 				type="button"
 				role="tab"
+				id="tab-{tab.id}"
 				aria-selected={activeTab === tab.id}
+				aria-controls="panel-{tab.id}"
 				title="{tab.desc} (press {tabIdx + 1})"
 				onclick={() => (activeTab = tab.id)}
 				class="flex flex-1 flex-col items-center gap-0.5 rounded-lg px-4 py-2 transition-all {activeTab ===
@@ -556,8 +558,19 @@
 				</div>
 			</div>
 		{:else}
-			<div class="rounded-2xl border border-border-default bg-surface-raised p-6 text-center">
-				<p class="text-sm text-text-tertiary">No reflections yet.</p>
+			<div
+				class="rounded-2xl border border-dashed border-border-strong bg-surface-raised p-8 text-center"
+			>
+				<div class="mb-3 flex justify-center">
+					<div class="flex h-12 w-12 items-center justify-center rounded-full bg-accent-muted">
+						<Target class="h-6 w-6 text-accent" />
+					</div>
+				</div>
+				<h3 class="mb-1 text-sm font-semibold text-text-primary">No reflections yet</h3>
+				<p class="text-xs text-text-secondary">
+					Once {data.client.name.split(' ')[0]} completes their first check-in, their reflections will
+					appear here in chronological order.
+				</p>
 			</div>
 		{/if}
 
@@ -637,7 +650,10 @@
 	<!-- ═══ TAB: Notes ═══ -->
 	{#if activeTab === 'notes'}
 		<div class="rounded-2xl border border-border-default bg-surface-raised p-6">
-			<h2 class="mb-4 text-lg font-bold text-text-primary">Coach Notes</h2>
+			<div class="mb-4 flex items-baseline justify-between">
+				<h2 class="text-lg font-bold text-text-primary">Coach Notes</h2>
+				<p class="text-[10px] text-text-muted">Notes shape AI-generated prompts and insights</p>
+			</div>
 
 			<!-- Inline add note form -->
 			<form
@@ -728,9 +744,18 @@
 				/>
 			</div>
 		{:else}
-			<div class="rounded-2xl border border-border-default bg-surface-raised p-6 text-center">
-				<p class="text-sm text-text-tertiary">
-					No data available yet. Charts will appear after check-ins begin.
+			<div
+				class="rounded-2xl border border-dashed border-border-strong bg-surface-raised p-8 text-center"
+			>
+				<div class="mb-3 flex justify-center">
+					<div class="flex h-12 w-12 items-center justify-center rounded-full bg-accent-muted">
+						<TrendingUp class="h-6 w-6 text-accent" />
+					</div>
+				</div>
+				<h3 class="mb-1 text-sm font-semibold text-text-primary">Charts coming soon</h3>
+				<p class="text-xs text-text-secondary">
+					Effort and performance trends will appear here after {data.client.name.split(' ')[0]} completes
+					their first few check-ins.
 				</p>
 			</div>
 		{/if}

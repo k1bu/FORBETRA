@@ -497,11 +497,11 @@
 			/>
 		</div>
 	{:else}
-		<div class="rounded-lg border border-border-default bg-surface-raised p-6">
+		<div class="rounded-lg border border-dashed border-border-strong bg-surface-raised p-6">
 			<h2 class="mb-2 text-lg font-bold text-text-primary">Correlation View</h2>
 			<p class="text-sm text-text-secondary">
-				Not enough data yet. Complete more check-ins to see how your effort and performance relate
-				over time.
+				Shows how your effort and performance relate over time. Complete 3+ check-ins to unlock this
+				view.
 			</p>
 		</div>
 	{/if}
@@ -516,11 +516,11 @@
 			/>
 		</div>
 	{:else}
-		<div class="rounded-lg border border-border-default bg-surface-raised p-6">
+		<div class="rounded-lg border border-dashed border-border-strong bg-surface-raised p-6">
 			<h2 class="mb-2 text-lg font-bold text-text-primary">Gap Lens</h2>
 			<p class="text-sm text-text-secondary">
-				Not enough data yet. Complete more check-ins and gather stakeholder feedback to see
-				perception gaps.
+				Reveals differences between how you see yourself and how others see you. Add stakeholders
+				and complete check-ins to unlock this view.
 			</p>
 		</div>
 	{/if}
