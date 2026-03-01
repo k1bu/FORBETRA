@@ -22,6 +22,36 @@
 		throw new Error('Page data is missing');
 	}
 
+	// Milestone-aware subtitle
+	const milestoneMessage = $derived(
+		(() => {
+			if (!data.isOnboardingComplete) return null;
+			if (!data.currentWeek || !data.totalWeeks) return null;
+
+			const pct = data.summary?.completionRate ?? 0;
+			const week = data.currentWeek;
+			const total = data.totalWeeks;
+			const streak = data.summary?.currentStreak ?? 0;
+
+			// Streak milestones
+			if (streak >= 10) return `${streak} check-ins in a row. Consistency is your superpower.`;
+			if (streak >= 5) return `${streak}-check-in streak. The data is building.`;
+
+			// Cycle completion milestones
+			if (data.cycle?.isCycleCompleted) return null; // handled by hero card
+			if (week === 1) return 'Week 1 — your baseline is being set.';
+			if (pct >= 90 && week >= total - 1) return 'Final stretch. Strong finish ahead.';
+			if (week === Math.ceil(total / 2)) return `Halfway through — week ${week} of ${total}.`;
+			if (week === total) return `Last week of your cycle. Make it count.`;
+
+			// General progress
+			if (pct >= 80) return "You're keeping a strong pace.";
+			if (pct < 40 && week > 2) return 'A few missed check-ins. Jump back in.';
+
+			return null;
+		})()
+	);
+
 	// Stakeholder detail expansion
 	let showSubgoals = $state(false);
 
@@ -188,9 +218,14 @@
 	<!-- ═══ ZONE 1: Top Bar — Welcome + Objective + Week + Streak ═══ -->
 	<div class="flex flex-col gap-1">
 		<div class="flex items-center justify-between">
-			<p class="text-sm text-text-tertiary">
-				{#if data.isFirstVisit}Welcome to Forbetra{:else}Welcome back{/if}
-			</p>
+			<div>
+				<p class="text-sm text-text-tertiary">
+					{#if data.isFirstVisit}Welcome to Forbetra{:else}Welcome back{/if}
+				</p>
+				{#if milestoneMessage}
+					<p class="text-xs text-text-muted">{milestoneMessage}</p>
+				{/if}
+			</div>
 			<div class="flex items-center gap-2">
 				{#if data.summary?.currentStreak && data.summary.currentStreak > 0}
 					<span

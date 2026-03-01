@@ -48,10 +48,26 @@ export const actions: Actions = {
 		const { dbUser } = requireRole(event, 'COACH');
 
 		const formData = await event.request.formData();
-		const email = String(formData.get('email') ?? '').trim().toLowerCase();
+		const email = String(formData.get('email') ?? '')
+			.trim()
+			.toLowerCase();
 		const name = String(formData.get('name') ?? '').trim();
 		const phone = String(formData.get('phone') ?? '').trim();
 		const message = String(formData.get('message') ?? '').trim();
+
+		// Parse optional pre-fill payload
+		const objectiveTitle = String(formData.get('prefillObjectiveTitle') ?? '').trim();
+		const stakeholdersJson = String(formData.get('prefillStakeholders') ?? '').trim();
+
+		let payload: Record<string, unknown> | null = null;
+		if (objectiveTitle.length > 0) {
+			payload = { objectiveTitle };
+			try {
+				if (stakeholdersJson) payload.stakeholders = JSON.parse(stakeholdersJson);
+			} catch {
+				/* intentionally empty */
+			}
+		}
 
 		if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
 			return fail(400, {
@@ -128,6 +144,7 @@ export const actions: Actions = {
 							name: name.length > 0 ? name : null,
 							phone: normalizedPhone,
 							message: message.length > 0 ? message : null,
+							payload,
 							tokenHash,
 							expiresAt
 						}

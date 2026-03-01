@@ -210,6 +210,22 @@
 					</div>
 					{#if prepData}
 						<span class="text-xs text-text-tertiary">{formatRelativeDays(prepData.createdAt)}</span>
+						{#if data.prepFreshness?.isStale}
+							<span
+								class="rounded-full bg-warning/10 px-2 py-0.5 text-[10px] font-semibold text-warning"
+							>
+								{data.prepFreshness.newDataSince} new data point{data.prepFreshness.newDataSince ===
+								1
+									? ''
+									: 's'}
+							</span>
+						{:else if data.prepFreshness}
+							<span
+								class="rounded-full bg-success/10 px-2 py-0.5 text-[10px] font-semibold text-success"
+							>
+								Up to date
+							</span>
+						{/if}
 					{/if}
 				</div>
 				<button

@@ -596,13 +596,51 @@ No Phase D changes affected stakeholder screens.
 
 ---
 
-## 10. Score Update Log
+## 10. Phase E Results
 
-| Date       | Phase          | Platform | Individual | Coach | Stakeholder | Notes                                    |
-| ---------- | -------------- | :------: | :--------: | :---: | :---------: | ---------------------------------------- |
-| 2026-02-28 | Baseline       |   6.87   |    6.73    | 6.27  |    7.84     | Full codebase walkthrough, all personas  |
-| 2026-02-28 | Phase A actual |   7.27   |    7.20    | 6.85  |    7.89     | 8 fixes shipped, 2 vetoed. +0.40 lift.   |
-| 2026-02-28 | Phase B actual |   7.39   |    7.44    | 6.89  |    7.89     | 3 fixes + landing copy. +0.12 lift.      |
-| 2026-02-28 | Phase C actual |   7.42   |    7.45    | 6.91  |    7.97     | 4 fixes, 2 resolved/N/A. +0.03 lift.     |
-| 2026-02-28 | Phase D actual |   7.54   |    7.50    | 7.23  |    7.97     | Dashboard overhaul + note prompts. +0.12 |
-|            | Target         |   9.3+   |    9.3+    | 9.0+  |    9.5+     | Final goal. Remaining gap: 1.76 pts.     |
+### Delivered
+
+- [x] **History page overhaul** — All weeks collapsed by default → only latest 2 expanded. Added text search input filtering across reflection notes, stakeholder feedback comments, and stakeholder names. Auto-expands matching weeks during search. Check-in count badge per week header. Used `SvelteSet` for reactive state.
+- [x] **Initial ratings scoring guide** — Moved "Why two scores?" gap explanation from between effort/performance to before both scales. Added anchoring context: "Most people starting a new development goal rate themselves 4–6. There are no right answers — just an honest starting point."
+- [x] **Coach layout alert badge** — New `coachAlertCount` store populated from dashboard page load. Red badge with alert count on Dashboard nav item in both desktop sidebar and mobile bottom bar. Only appears when alerts > 0.
+- [x] **Coach session enrichment** — Subgoal pills displayed under objective title in session header (with description tooltip on hover). Stakeholder feedback cards show trend arrows (TrendingUp/TrendingDown/Minus) comparing latest vs previous feedback scores.
+
+### Phase E Dimension Scores
+
+#### Individual (was 7.50 → 7.62, +0.12)
+
+| #   | Dimension              | Phase D | Phase E | Delta | Evidence                                                                                                         |
+| --- | ---------------------- | :-----: | :-----: | :---: | ---------------------------------------------------------------------------------------------------------------- |
+| 3   | Onboarding Ease (OE)   |   7.0   | **7.4** | +0.4  | Gap explanation before rating. "Most people rate 4–6" reduces anchoring anxiety. James and Priya benefit most.   |
+| 4   | Core Task Flow (CT)    |   7.6   | **7.7** | +0.1  | History search enables "find that feedback where my manager said..." Low frequency but removes friction.         |
+| 5   | Info Architecture (IA) |   7.3   | **7.6** | +0.3  | History navigable at scale. Collapsed weeks prevent wall-of-text. Text search finds specific feedback instantly. |
+| 7   | Cognitive Load (CL)    |   7.0   | **7.3** | +0.3  | History: 2 expanded weeks vs 12. Onboarding: anchoring context reduces decision paralysis on 11-button grid.     |
+|     | All others             |    —    |    —    |   0   | FI, CP, FP, TC, EE, VP unchanged.                                                                                |
+
+#### Coach (was 7.23 → 7.35, +0.12)
+
+| #   | Dimension                 | Phase D | Phase E | Delta | Evidence                                                                                                            |
+| --- | ------------------------- | :-----: | :-----: | :---: | ------------------------------------------------------------------------------------------------------------------- |
+| 2   | Clarity of Purpose (CP)   |   7.8   | **8.0** | +0.2  | Subgoal pills give instant behavioral context. Coach walks into session knowing the focus areas.                    |
+| 6   | Feedback & Progress (FP)  |   6.5   | **7.0** | +0.5  | Alert badge = persistent indicator across all pages. Stakeholder trend arrows show feedback trajectory at a glance. |
+| 9   | Emotional Engagement (EE) |   5.8   | **6.2** | +0.4  | Alert badge creates a "live" feel — nav responds to client state. Tool feels active, not static.                    |
+| 10  | Value Perception (VP)     |   7.6   | **7.8** | +0.2  | Trend arrows give genuinely new intelligence. Subgoals provide prep context without extra clicks.                   |
+|     | All others                |    —    |    —    |   0   | FI, OE, CT, IA, CL, TC unchanged.                                                                                   |
+
+#### Stakeholder (was 7.97 → 7.97, 0)
+
+No Phase E changes affected stakeholder screens.
+
+---
+
+## 11. Score Update Log
+
+| Date       | Phase          | Platform | Individual | Coach | Stakeholder | Notes                                          |
+| ---------- | -------------- | :------: | :--------: | :---: | :---------: | ---------------------------------------------- |
+| 2026-02-28 | Baseline       |   6.87   |    6.73    | 6.27  |    7.84     | Full codebase walkthrough, all personas        |
+| 2026-02-28 | Phase A actual |   7.27   |    7.20    | 6.85  |    7.89     | 8 fixes shipped, 2 vetoed. +0.40 lift.         |
+| 2026-02-28 | Phase B actual |   7.39   |    7.44    | 6.89  |    7.89     | 3 fixes + landing copy. +0.12 lift.            |
+| 2026-02-28 | Phase C actual |   7.42   |    7.45    | 6.91  |    7.97     | 4 fixes, 2 resolved/N/A. +0.03 lift.           |
+| 2026-02-28 | Phase D actual |   7.54   |    7.50    | 7.23  |    7.97     | Dashboard overhaul + note prompts. +0.12       |
+| 2026-02-28 | Phase E actual |   7.63   |    7.62    | 7.35  |    7.97     | History, scoring guide, alerts, session. +0.09 |
+|            | Target         |   9.3+   |    9.3+    | 9.0+  |    9.5+     | Final goal. Remaining gap: 1.67 pts.           |

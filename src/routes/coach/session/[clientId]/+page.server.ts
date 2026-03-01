@@ -141,6 +141,29 @@ export const load: PageServerLoad = async (event) => {
 		}
 	});
 
+	// Determine AI prep freshness (has new data arrived since prep was generated?)
+	let prepFreshness: { isStale: boolean; newDataSince: number } | null = null;
+	if (coachPrep) {
+		const prepTime = coachPrep.createdAt.getTime();
+		const reflections = individual.objectives[0]?.cycles[0]?.reflections ?? [];
+		const stakeholders = individual.objectives[0]?.stakeholders ?? [];
+
+		const newReflections = reflections.filter(
+			(r) => r.submittedAt && r.submittedAt.getTime() > prepTime
+		).length;
+		const newFeedbacks = stakeholders.reduce((count, s) => {
+			return (
+				count +
+				s.feedbacks.filter((f) => f.submittedAt && f.submittedAt.getTime() > prepTime).length
+			);
+		}, 0);
+
+		prepFreshness = {
+			isStale: newReflections + newFeedbacks > 0,
+			newDataSince: newReflections + newFeedbacks
+		};
+	}
+
 	// Load ALL coach notes (not limited to 3)
 	const cycle = individual.objectives[0]?.cycles[0] ?? null;
 	const allCoachNotes = cycle
@@ -200,6 +223,7 @@ export const load: PageServerLoad = async (event) => {
 					createdAt: coachPrep.createdAt.toISOString()
 				}
 			: null,
+		prepFreshness,
 		alerts: alerts
 			.filter((a) => a.content)
 			.map((a) => ({

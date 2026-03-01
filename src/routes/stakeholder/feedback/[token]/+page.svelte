@@ -261,86 +261,62 @@
 			{/if}
 		</div>
 
+		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 		{#if showWelcome && !form?.success}
-			<div class="mx-auto max-w-2xl space-y-6">
+			<div
+				class="mx-auto max-w-2xl space-y-6"
+				role="region"
+				onkeydown={(e) => {
+					if (e.key === 'Escape') showWelcome = false;
+				}}
+			>
 				<div class="rounded-2xl border border-accent/30 bg-surface-base p-8">
-					<div class="mb-6 text-center">
+					<div class="mb-5 text-center">
 						<div
-							class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent"
+							class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-accent"
 						>
-							<Hand class="h-8 w-8 text-white" />
+							<Hand class="h-7 w-7 text-white" />
 						</div>
 						<h2 class="text-2xl font-bold text-text-primary">Welcome, {data.stakeholder.name}</h2>
 						<p class="mt-2 text-base text-text-secondary">
-							<strong>{data.reflection.participantName}</strong> has invited you to help track their
-							development.
+							<strong>{data.reflection.participantName}</strong> has invited you to share your perspective
+							on their development. Your outside view reveals blind spots they can't see themselves.
 						</p>
 					</div>
 
-					<div class="mb-6 rounded-xl border border-accent/30 bg-surface-raised p-5">
+					<div class="mb-5 rounded-xl border border-accent/30 bg-surface-raised p-4">
 						<p class="mb-1 text-xs font-semibold tracking-wide text-accent uppercase">
-							What they're working on
+							Their objective
 						</p>
-						<p class="text-lg font-bold text-text-primary">{data.reflection.objectiveTitle}</p>
+						<p class="text-base font-bold text-text-primary">{data.reflection.objectiveTitle}</p>
 					</div>
 
-					<div class="mb-6 space-y-3">
-						<p class="text-sm font-semibold text-text-primary">What you'll do:</p>
-						<div class="space-y-2">
-							<div
-								class="flex items-start gap-3 rounded-lg border border-border-default bg-surface-raised p-3"
-							>
-								<Dumbbell class="mt-0.5 h-5 w-5 text-accent" />
-								<div>
-									<p class="text-sm font-semibold text-text-primary">Rate their effort</p>
-									<p class="text-xs text-text-secondary">
-										How intentional and consistent their focus has been (0-10)
-									</p>
-								</div>
-							</div>
-							<div
-								class="flex items-start gap-3 rounded-lg border border-border-default bg-surface-raised p-3"
-							>
-								<TrendingUp class="mt-0.5 h-5 w-5 text-accent" />
-								<div>
-									<p class="text-sm font-semibold text-text-primary">Rate their performance</p>
-									<p class="text-xs text-text-secondary">
-										How visible the results are from your perspective (0-10)
-									</p>
-								</div>
-							</div>
-							<div
-								class="flex items-start gap-3 rounded-lg border border-border-default bg-surface-raised p-3"
-							>
-								<PenLine class="mt-0.5 h-5 w-5 text-accent" />
-								<div>
-									<p class="text-sm font-semibold text-text-primary">
-										Optionally share observations
-									</p>
-									<p class="text-xs text-text-secondary">
-										A sentence or two about what you've noticed
-									</p>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<div class="mb-6 rounded-lg border border-accent/30 bg-accent-muted p-4">
-						<p class="text-sm leading-relaxed text-accent">
-							<strong>Why it matters:</strong> Your perspective reveals blind spots. The gap between
-							self-perception and external feedback is the most powerful growth signal.
+					<div class="mb-5 rounded-lg border border-border-default bg-surface-raised p-4">
+						<p class="mb-2 text-xs font-semibold tracking-wide text-text-primary uppercase">
+							You'll be asked to
 						</p>
+						<ul class="space-y-1.5 text-sm text-text-secondary">
+							<li class="flex items-center gap-2">
+								<Dumbbell class="h-4 w-4 shrink-0 text-accent" />
+								Rate their <strong>effort</strong> (0-10)
+							</li>
+							<li class="flex items-center gap-2">
+								<TrendingUp class="h-4 w-4 shrink-0 text-accent" />
+								Rate their <strong>performance</strong> (0-10)
+							</li>
+							<li class="flex items-center gap-2">
+								<PenLine class="h-4 w-4 shrink-0 text-accent" />
+								Optionally share a brief observation
+							</li>
+						</ul>
 					</div>
 
-					<div class="mb-6 rounded-lg border border-border-default bg-surface-raised p-4">
-						<p class="text-xs leading-relaxed text-text-secondary">
-							<strong class="text-text-primary">Privacy:</strong> Your feedback is shared with {data
-								.reflection.participantName} and their coach. Your name is attached to your ratings.
-						</p>
-					</div>
+					<p class="mb-5 text-xs text-text-muted">
+						Your feedback is shared with {data.reflection.participantName} and their coach. Your name
+						is attached to your ratings.
+					</p>
 
-					<div class="space-y-3 text-center">
-						<p class="text-xs text-text-tertiary">Takes about 60 seconds</p>
+					<div class="text-center">
 						<button
 							type="button"
 							onclick={() => {
@@ -348,7 +324,7 @@
 							}}
 							class="inline-flex items-center gap-2 rounded-xl bg-accent px-8 py-3.5 font-semibold text-white transition-all hover:bg-accent-hover"
 						>
-							Got it, let's go
+							Rate now &middot; ~60 sec
 							<span>&#8594;</span>
 						</button>
 					</div>

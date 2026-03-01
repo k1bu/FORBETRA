@@ -31,6 +31,21 @@
 		if (prev) currentStep = prev;
 	}
 
+	// Pre-fill state
+	type PrefillStakeholder = { name: string; email: string };
+	let showPrefill = $state(false);
+	let prefillObjectiveTitle = $state('');
+	let prefillStakeholders = $state<PrefillStakeholder[]>([{ name: '', email: '' }]);
+
+	function addPrefillStakeholder() {
+		if (prefillStakeholders.length < 3) {
+			prefillStakeholders = [...prefillStakeholders, { name: '', email: '' }];
+		}
+	}
+	function removePrefillStakeholder(index: number) {
+		prefillStakeholders = prefillStakeholders.filter((_, i) => i !== index);
+	}
+
 	// Form state for invite step
 	let email = $state('');
 	let name = $state('');
@@ -200,9 +215,7 @@
 					objective and stakeholders.
 				</p>
 				<p class="mx-auto max-w-md text-xs text-text-tertiary">
-					Want to pre-fill their objective and stakeholders? You can do this from the
-					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-					<a href="/coach/invitations" class="text-accent hover:underline">Invitations</a> page later.
+					You can optionally pre-fill their objective and stakeholders below.
 				</p>
 			</div>
 
@@ -288,6 +301,97 @@
 						class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
 						placeholder="Add a personal note to your invitation..."
 					></textarea>
+				</div>
+
+				<!-- Pre-fill toggle -->
+				<div class="rounded-xl border border-border-default bg-surface-subtle p-4">
+					<div class="flex items-center justify-between">
+						<div>
+							<p class="text-sm font-semibold text-text-primary">Pre-fill client's setup</p>
+							<p class="text-xs text-text-tertiary">
+								Save them time by pre-filling their objective and stakeholders
+							</p>
+						</div>
+						<button
+							type="button"
+							onclick={() => (showPrefill = !showPrefill)}
+							class="relative ml-3 inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors {showPrefill
+								? 'bg-accent'
+								: 'border border-border-default bg-surface-subtle'}"
+							role="switch"
+							aria-checked={showPrefill}
+						>
+							<span
+								class="inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform {showPrefill
+									? 'translate-x-5'
+									: 'translate-x-1'}"
+							></span>
+						</button>
+					</div>
+					{#if showPrefill}
+						<div class="mt-4 space-y-4">
+							<div>
+								<label for="prefillObjectiveTitle" class="text-xs font-semibold text-text-secondary"
+									>Objective title</label
+								>
+								<input
+									id="prefillObjectiveTitle"
+									type="text"
+									name="prefillObjectiveTitle"
+									bind:value={prefillObjectiveTitle}
+									placeholder="e.g. Improve executive presence"
+									class="mt-1 w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent/30 focus:outline-none"
+								/>
+							</div>
+
+							<div>
+								<p class="text-xs font-semibold text-text-secondary">Stakeholders</p>
+								{#each prefillStakeholders as sh, i (i)}
+									<div class="mt-1.5 flex items-center gap-2">
+										<input
+											type="text"
+											bind:value={sh.name}
+											placeholder="Name"
+											class="flex-1 rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none"
+										/>
+										<input
+											type="email"
+											bind:value={sh.email}
+											placeholder="Email"
+											class="flex-1 rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none"
+										/>
+										{#if prefillStakeholders.length > 1}
+											<button
+												type="button"
+												onclick={() => removePrefillStakeholder(i)}
+												class="text-xs text-text-muted hover:text-error"
+											>
+												&times;
+											</button>
+										{/if}
+									</div>
+								{/each}
+								{#if prefillStakeholders.length < 3}
+									<button
+										type="button"
+										onclick={addPrefillStakeholder}
+										class="mt-1.5 text-xs font-medium text-accent hover:underline"
+									>
+										+ Add stakeholder
+									</button>
+								{/if}
+							</div>
+
+							<!-- Hidden serialized fields -->
+							<input
+								type="hidden"
+								name="prefillStakeholders"
+								value={JSON.stringify(
+									prefillStakeholders.filter((s) => s.name.trim() && s.email.trim())
+								)}
+							/>
+						</div>
+					{/if}
 				</div>
 
 				<div class="flex flex-col gap-3 pt-2">
