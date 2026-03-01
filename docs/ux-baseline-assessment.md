@@ -697,7 +697,67 @@ Stakeholder: 7.97 → 8.11 (+0.14) ← first movement since Phase C
 
 ---
 
-## 12. Score Update Log
+## 12. Phase G Results (Scoring anchors, session tabs, analytics narrative, roster enrichment)
+
+**What shipped:**
+
+1. **Check-in scoring anchor labels** — Replaced dynamic score badge + subjective endpoint labels with positional anchors (None/Low/Moderate/High/Total) at 0/3/5/7/10 under both effort and performance 11-button grids. Visible on desktop, hidden on mobile for space.
+2. **Coach session tab prominence** — Active tab changed from subtle `bg-surface-raised` to `bg-accent text-white` for unmistakable visual distinction. Added hover state on inactive tabs.
+3. **Analytics portfolio narrative** — Derived insight sentence below page title: "X of Y clients trending up · Z need attention · avg completion N%". Computed from existing client comparison data.
+4. **Roster card enrichment** — Each client list item now shows avg effort (warning color) / avg performance (accent color) inline after week number. Coaches can scan portfolio health without clicking into each client.
+
+### Score Movement
+
+```
+Platform: 7.71 → 7.74 (+0.03)
+Individual: 7.66 → 7.69 (+0.03)
+Coach: 7.46 → 7.52 (+0.06)
+Stakeholder: 8.11 → 8.11 (unchanged)
+```
+
+#### Individual (was 7.66 → 7.69, +0.03)
+
+| #   | Dimension            | Phase F | Phase G | Delta | Evidence                                                                                                                          |
+| --- | -------------------- | :-----: | :-----: | :---: | --------------------------------------------------------------------------------------------------------------------------------- |
+| 3   | Onboarding Ease (OE) |   7.4   | **7.5** | +0.1  | Anchor labels help new users during initial ratings — "Moderate" at 5 reduces "what's a good starting point?" anxiety.            |
+| 7   | Cognitive Load (CL)  |   7.3   | **7.5** | +0.2  | Positional anchors at 0/3/5/7/10 replace subjective endpoints. Full-scale reference points, not just extremes.                    |
+|     | All others           |    —    |    —    |   0   | FI, CP, CT, IA, FP, TC, EE, VP unchanged. Dynamic score badge removed — traded personality for clarity. Circle still shows color. |
+
+#### Coach (was 7.46 → 7.52, +0.06)
+
+| #   | Dimension                 | Phase F | Phase G | Delta | Evidence                                                                                                            |
+| --- | ------------------------- | :-----: | :-----: | :---: | ------------------------------------------------------------------------------------------------------------------- |
+| 1   | First Impression (FI)     |   7.5   | **7.6** | +0.1  | Session tabs with accent active state look polished and intentional. Clearer visual hierarchy.                      |
+| 2   | Clarity of Purpose (CP)   |   8.0   | **8.1** | +0.1  | Analytics narrative clarifies portfolio purpose in human language before the data table.                            |
+| 7   | Cognitive Load (CL)       |   7.0   | **7.2** | +0.2  | Session tab active state unmistakable (accent bg + white text). No more "which section am I viewing?" confusion.    |
+| 9   | Emotional Engagement (EE) |   6.4   | **6.6** | +0.2  | Narrative transforms data dump into story. Roster effort/perf pulse per client — roster feels alive vs spreadsheet. |
+| 10  | Value Perception (VP)     |   7.9   | **8.0** | +0.1  | Narrative makes analytics feel like intelligence. Roster scan-level scores reduce clicks to assess portfolio.       |
+|     | All others                |    —    |    —    |   0   | OE, CT, IA, FP, TC unchanged.                                                                                       |
+
+#### Stakeholder (was 8.11 → 8.11, 0)
+
+No Phase G changes affected stakeholder screens.
+
+### Lowest Remaining Dimensions
+
+| Rank | User Type  | Dimension            | Score | Gap to 8.5 |
+| ---- | ---------- | -------------------- | :---: | :--------: |
+| 1    | Coach      | Emotional Engagement |  6.6  |    1.9     |
+| 2    | Coach      | Cognitive Load       |  7.2  |    1.3     |
+| 3    | Coach      | Feedback & Progress  |  7.2  |    1.3     |
+| 4    | Coach      | Trust & Credibility  |  7.2  |    1.3     |
+| 5    | Coach      | Onboarding Ease      |  7.3  |    1.2     |
+| 6    | Coach      | Info Architecture    |  7.3  |    1.2     |
+| 7    | Individual | Emotional Engagement |  7.3  |    1.2     |
+| 8    | Individual | Onboarding Ease      |  7.5  |    1.0     |
+
+### Phase G Commentary
+
+Smallest lift tied with Phase C (+0.03). Expected — Phase G was 4 quick S-effort refinements, not structural redesigns. The anchor labels and tab styling are real quality-of-life wins but they're polish, not transformation. **Coach EE (6.6) remains the weakest dimension by far** and needs fundamentally new interaction patterns (coach milestones, portfolio sentiment, client journey visualization) rather than data formatting to move significantly.
+
+---
+
+## 13. Score Update Log
 
 | Date       | Phase          | Platform | Individual | Coach | Stakeholder | Notes                                               |
 | ---------- | -------------- | :------: | :--------: | :---: | :---------: | --------------------------------------------------- |
@@ -708,4 +768,5 @@ Stakeholder: 7.97 → 8.11 (+0.14) ← first movement since Phase C
 | 2026-02-28 | Phase D actual |   7.54   |    7.50    | 7.23  |    7.97     | Dashboard overhaul + note prompts. +0.12            |
 | 2026-02-28 | Phase E actual |   7.63   |    7.62    | 7.35  |    7.97     | History, scoring guide, alerts, session. +0.09      |
 | 2026-02-28 | Phase F actual |   7.71   |    7.66    | 7.46  |    8.11     | Prep freshness, modal streamline, milestones. +0.08 |
-|            | Target         |   9.3+   |    9.3+    | 9.0+  |    9.5+     | Final goal. Remaining gap: 1.59 pts.                |
+| 2026-02-28 | Phase G actual |   7.74   |    7.69    | 7.52  |    8.11     | Scoring anchors, tabs, narrative, roster. +0.03     |
+|            | Target         |   9.3+   |    9.3+    | 9.0+  |    9.5+     | Final goal. Remaining gap: 1.56 pts.                |
