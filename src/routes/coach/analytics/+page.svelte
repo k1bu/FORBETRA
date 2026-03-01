@@ -279,7 +279,8 @@
 										class="flex items-center gap-1"
 										onclick={() => toggleSort('avgEffort')}
 									>
-										Effort{sortIndicator('avgEffort')}
+										<span title="Average self-rated effort (last 4 weeks)">Effort</span
+										>{sortIndicator('avgEffort')}
 									</button>
 								</th>
 								<th
@@ -295,7 +296,8 @@
 										class="flex items-center gap-1"
 										onclick={() => toggleSort('avgProgress')}
 									>
-										Performance{sortIndicator('avgProgress')}
+										<span title="Average self-rated performance (last 4 weeks)">Performance</span
+										>{sortIndicator('avgProgress')}
 									</button>
 								</th>
 								<th
@@ -311,7 +313,8 @@
 										class="flex items-center gap-1"
 										onclick={() => toggleSort('stability')}
 									>
-										Stability{sortIndicator('stability')}
+										<span title="Week-to-week score consistency (0-100)">Stability</span
+										>{sortIndicator('stability')}
 									</button>
 								</th>
 								<th
@@ -327,7 +330,8 @@
 										class="flex items-center gap-1"
 										onclick={() => toggleSort('trajectory')}
 									>
-										Trajectory{sortIndicator('trajectory')}
+										<span title="Performance trend over recent weeks (+/-)">Trajectory</span
+										>{sortIndicator('trajectory')}
 									</button>
 								</th>
 								<th
@@ -343,7 +347,8 @@
 										class="flex items-center gap-1"
 										onclick={() => toggleSort('completionRate')}
 									>
-										Completion{sortIndicator('completionRate')}
+										<span title="Cycle progress based on weeks elapsed">Completion</span
+										>{sortIndicator('completionRate')}
 									</button>
 								</th>
 								<th

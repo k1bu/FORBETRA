@@ -70,7 +70,7 @@
 				{portfolioLine()}
 			</p>
 			{#if momentumLine()}
-				<p class="mt-0.5 text-xs text-text-tertiary">{momentumLine()}</p>
+				<p class="mt-0.5 text-xs text-text-tertiary">{momentumLine()} (week-over-week avg)</p>
 			{/if}
 		{:else}
 			<p class="mt-1 text-text-secondary">
@@ -121,6 +121,7 @@
 			<p class="text-3xl font-bold text-text-primary tabular-nums">
 				{data.analytics.avgStability !== null ? `${data.analytics.avgStability}/100` : '\u2014'}
 			</p>
+			<p class="mt-1 text-[10px] text-text-muted">Week-to-week score consistency</p>
 		</div>
 		<div class="rounded-xl border border-border-default bg-surface-raised p-4">
 			<div class="mb-1 flex items-center gap-1.5">
@@ -130,6 +131,7 @@
 			<p class="text-3xl font-bold text-text-primary tabular-nums">
 				{data.analytics.avgAlignment !== null ? `${data.analytics.avgAlignment}%` : '\u2014'}
 			</p>
+			<p class="mt-1 text-[10px] text-text-muted">Stakeholder response rate</p>
 		</div>
 	</div>
 

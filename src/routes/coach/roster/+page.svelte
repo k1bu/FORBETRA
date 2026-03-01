@@ -117,6 +117,7 @@
 
 	let selectedClientId = $state<string | null>(null);
 	let detailPanelEl = $state<HTMLElement | undefined>(undefined);
+	let confirmArchiveId = $state<string | null>(null);
 
 	function selectClient(id: string) {
 		selectedClientId = id;
@@ -670,25 +671,86 @@
 						{/if}
 
 						<div class="flex gap-2">
-							<form
-								method="post"
-								action="?/archiveClient"
-								class="flex-1"
-								use:enhance={() => {
-									return async ({ update }) => {
-										await update();
-									};
-								}}
-							>
-								<input type="hidden" name="individualId" value={client.id} />
-								<input type="hidden" name="archive" value={client.archived ? 'false' : 'true'} />
-								<button
-									type="submit"
-									class="w-full rounded-lg border border-border-default bg-surface-raised px-4 py-2 text-xs font-semibold text-text-secondary transition-all hover:border-border-strong hover:bg-surface-subtle"
+							{#if confirmArchiveId === client.id && !client.archived}
+								<div
+									class="flex w-full flex-col gap-2 rounded-lg border border-warning/30 bg-warning/5 p-3"
 								>
-									{client.archived ? 'Unarchive' : 'Archive'}
-								</button>
-							</form>
+									<p class="text-xs font-medium text-text-secondary">
+										Archive {client.name.split(' ')[0]}? They'll be hidden from your active roster.
+										Data is preserved and you can unarchive anytime.
+									</p>
+									<div class="flex gap-2">
+										<form
+											method="post"
+											action="?/archiveClient"
+											class="flex-1"
+											use:enhance={() => {
+												return async ({ result, update }) => {
+													await update();
+													if (result.type === 'success') {
+														addToast(`${client.name.split(' ')[0]} archived`, 'success');
+														confirmArchiveId = null;
+													}
+												};
+											}}
+										>
+											<input type="hidden" name="individualId" value={client.id} />
+											<input type="hidden" name="archive" value="true" />
+											<button
+												type="submit"
+												class="w-full rounded-lg bg-warning/10 px-3 py-1.5 text-xs font-semibold text-warning transition-colors hover:bg-warning/20"
+											>
+												Confirm archive
+											</button>
+										</form>
+										<button
+											type="button"
+											onclick={() => (confirmArchiveId = null)}
+											class="rounded-lg border border-border-default px-3 py-1.5 text-xs font-semibold text-text-secondary transition-colors hover:bg-surface-subtle"
+										>
+											Cancel
+										</button>
+									</div>
+								</div>
+							{:else}
+								<form
+									method="post"
+									action="?/archiveClient"
+									class="flex-1"
+									use:enhance={() => {
+										return async ({ result, update }) => {
+											await update();
+											if (result.type === 'success') {
+												addToast(
+													client.archived
+														? `${client.name.split(' ')[0]} unarchived`
+														: `${client.name.split(' ')[0]} archived`,
+													'success'
+												);
+											}
+										};
+									}}
+								>
+									<input type="hidden" name="individualId" value={client.id} />
+									<input type="hidden" name="archive" value={client.archived ? 'false' : 'true'} />
+									{#if client.archived}
+										<button
+											type="submit"
+											class="w-full rounded-lg border border-border-default bg-surface-raised px-4 py-2 text-xs font-semibold text-text-secondary transition-all hover:border-border-strong hover:bg-surface-subtle"
+										>
+											Unarchive
+										</button>
+									{:else}
+										<button
+											type="button"
+											onclick={() => (confirmArchiveId = client.id)}
+											class="w-full rounded-lg border border-border-default bg-surface-raised px-4 py-2 text-xs font-semibold text-text-secondary transition-all hover:border-border-strong hover:bg-surface-subtle"
+										>
+											Archive
+										</button>
+									{/if}
+								</form>
+							{/if}
 						</div>
 					</div>
 				{:else}

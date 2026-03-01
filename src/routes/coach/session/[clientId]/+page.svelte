@@ -8,6 +8,7 @@
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
 
 	let generatingPrep = $state(false);
+	let prepError = $state<string | null>(null);
 	let freshPrep = $state<{ id: string; content: string | null; createdAt: string } | null>(null);
 	let noteContent = $state('');
 	let noteWeek = $state(data.client.objective?.cycle?.currentWeek?.toString() ?? '');
@@ -59,6 +60,7 @@
 
 	async function generatePrep() {
 		generatingPrep = true;
+		prepError = null;
 		try {
 			const res = await fetch('/api/insights/coach-prep', {
 				method: 'POST',
@@ -74,10 +76,10 @@
 				};
 				addToast('Session prep ready — coaching opportunities surfaced', 'success');
 			} else {
-				addToast('Failed to generate insights', 'error');
+				prepError = result.error || 'Could not generate insights. Try again in a moment.';
 			}
 		} catch {
-			addToast('Failed to generate insights', 'error');
+			prepError = 'Connection issue — check your network and try again.';
 		} finally {
 			generatingPrep = false;
 		}
@@ -316,6 +318,18 @@
 					{generatingPrep ? 'Generating...' : prepData ? 'Refresh Insights' : 'Generate Insights'}
 				</button>
 			</div>
+			{#if prepError}
+				<div class="flex items-start gap-2 rounded-lg border border-error/20 bg-error/5 px-3 py-2">
+					<p class="flex-1 text-xs text-error">{prepError}</p>
+					<button
+						type="button"
+						onclick={generatePrep}
+						class="shrink-0 text-xs font-semibold text-accent hover:underline"
+					>
+						Retry
+					</button>
+				</div>
+			{/if}
 			{#if prepData?.content}
 				<div class="prose prose-sm max-w-none whitespace-pre-line text-text-secondary">
 					{prepData.content}
