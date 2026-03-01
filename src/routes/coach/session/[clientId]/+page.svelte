@@ -567,10 +567,7 @@
 										class="flex items-start gap-3 rounded-lg bg-surface-raised px-3 py-2 text-sm"
 									>
 										<span
-											class="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold {r.reflectionType ===
-											'STAKEHOLDER'
-												? 'bg-success/10 text-success'
-												: 'bg-accent-muted text-accent'}"
+											class="shrink-0 rounded bg-accent-muted px-1.5 py-0.5 text-[10px] font-semibold text-accent"
 										>
 											{r.reflectionType === 'RATING_A' || r.reflectionType === 'RATING_B'
 												? 'Self-Report'

@@ -174,7 +174,7 @@ export const actions: Actions = {
 							name: name.length > 0 ? name : existingInvite.name,
 							phone: normalizedPhone ?? existingInvite.phone,
 							message: message.length > 0 ? message : existingInvite.message,
-							payload: payload ?? undefined,
+							payload: (payload ?? undefined) as Prisma.InputJsonValue | undefined,
 							tokenHash,
 							expiresAt,
 							acceptedAt: null,
@@ -202,7 +202,7 @@ export const actions: Actions = {
 						name: name.length > 0 ? name : null,
 						phone: normalizedPhone,
 						message: message.length > 0 ? message : null,
-						payload: payload ?? undefined,
+						payload: (payload ?? undefined) as Prisma.InputJsonValue | undefined,
 						tokenHash,
 						expiresAt
 					}

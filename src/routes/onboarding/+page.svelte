@@ -182,7 +182,7 @@
 			name: values.stakeholders[index]?.name ?? '',
 			email: values.stakeholders[index]?.email ?? '',
 			relationship: values.stakeholders[index]?.relationship ?? '',
-			phone: values.stakeholders[index]?.phone ?? ''
+			phone: (values.stakeholders[index] as StakeholderFormValue | undefined)?.phone ?? ''
 		})
 	);
 

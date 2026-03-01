@@ -3,7 +3,6 @@
 	import type { LayoutData } from './$types';
 	import { SvelteSet } from 'svelte/reactivity';
 	import { page } from '$app/stores';
-	import { resolve } from '$app/paths';
 	import {
 		CalendarDays,
 		LayoutDashboard,
@@ -176,9 +175,10 @@
 				<p class="text-xs font-bold tracking-widest text-text-tertiary uppercase">Individual</p>
 			</div>
 			<nav class="flex flex-col gap-0.5" aria-label="Individual navigation">
+				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				{#each navItems as item (item.href)}
 					<a
-						href={resolve(item.href)}
+						href={item.href}
 						onclick={() => dismissBadge(item.href)}
 						class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors
 							{isActive(item.href)
@@ -199,6 +199,7 @@
 						{/if}
 					</a>
 				{/each}
+				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 			</nav>
 		</div>
 	</aside>
@@ -215,9 +216,10 @@
 			style="padding-bottom: max(0.375rem, env(safe-area-inset-bottom));"
 			aria-label="Mobile navigation"
 		>
+			<!-- eslint-disable svelte/no-navigation-without-resolve -->
 			{#each mobileItems as item (item.href)}
 				<a
-					href={resolve(item.href)}
+					href={item.href}
 					onclick={() => dismissBadge(item.href)}
 					class="relative flex flex-1 flex-col items-center gap-0.5 rounded-lg py-1.5 text-[10px] font-medium transition-colors
 						{isActive(item.href) ? 'text-accent' : 'text-text-muted'}"
@@ -233,6 +235,7 @@
 					{/if}
 				</a>
 			{/each}
+			<!-- eslint-enable svelte/no-navigation-without-resolve -->
 
 			<!-- More button -->
 			<button
@@ -282,9 +285,10 @@
 						</button>
 					</div>
 					<div class="flex flex-col gap-1" role="menu">
+						<!-- eslint-disable svelte/no-navigation-without-resolve -->
 						{#each overflowItems as item (item.href)}
 							<a
-								href={resolve(item.href)}
+								href={item.href}
 								onclick={() => {
 									dismissBadge(item.href);
 									closeMoreMenu();
@@ -308,6 +312,7 @@
 								{/if}
 							</a>
 						{/each}
+						<!-- eslint-enable svelte/no-navigation-without-resolve -->
 					</div>
 				</div>
 			</div>

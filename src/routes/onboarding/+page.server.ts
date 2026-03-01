@@ -2,6 +2,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import { onboardingContexts } from '$lib/content/onboardingTemplates';
 import { requireRole } from '$lib/server/auth';
 import prisma from '$lib/server/prisma';
+import { Prisma } from '@prisma/client';
 import { onboardingSchema } from '$lib/validation/onboarding';
 import { sendEmail } from '$lib/notifications/email';
 import { emailTemplates } from '$lib/notifications/emailTemplates';
@@ -97,7 +98,7 @@ export const load: PageServerLoad = async (event) => {
 			where: {
 				email: dbUser.email.toLowerCase(),
 				acceptedAt: { not: null },
-				payload: { not: null as unknown }
+				payload: { not: Prisma.DbNull }
 			},
 			orderBy: { updatedAt: 'desc' },
 			select: { payload: true }

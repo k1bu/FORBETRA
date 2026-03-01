@@ -15,7 +15,8 @@
 		} else {
 			url.searchParams.set('week', String(week));
 		}
-		goto(resolve(url.pathname + url.search), { replaceState: true });
+		// eslint-disable-next-line svelte/no-navigation-without-resolve -- resolve() is used but concatenated with search params
+		goto(resolve('/individual/scorecard') + url.search, { replaceState: true });
 	}
 
 	// Color helpers

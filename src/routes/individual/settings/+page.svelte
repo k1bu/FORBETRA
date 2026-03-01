@@ -268,6 +268,7 @@
 		role="dialog"
 		aria-modal="true"
 		aria-labelledby="objective-warning-title"
+		tabindex="-1"
 		onkeydown={(e) => {
 			if (e.key === 'Escape') {
 				showObjectiveWarning = false;

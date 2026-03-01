@@ -336,6 +336,7 @@
 								: 'border border-border-default bg-surface-subtle'}"
 							role="switch"
 							aria-checked={showPrefill}
+							aria-label="Pre-fill onboarding"
 						>
 							<span
 								class="inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform {showPrefill

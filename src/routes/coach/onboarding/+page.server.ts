@@ -8,6 +8,7 @@ import { trySendSms } from '$lib/notifications/sms';
 import { smsTemplates } from '$lib/notifications/smsTemplates';
 import { validatePhone, normalizePhone } from '$lib/utils/phone';
 import type { Actions, PageServerLoad } from './$types';
+import { Prisma } from '@prisma/client';
 import type { TokenType } from '@prisma/client';
 
 const generateTokenHash = (token: string) => createHash('sha256').update(token).digest('hex');
@@ -144,7 +145,7 @@ export const actions: Actions = {
 							name: name.length > 0 ? name : null,
 							phone: normalizedPhone,
 							message: message.length > 0 ? message : null,
-							payload,
+							payload: payload ? (payload as Prisma.InputJsonValue) : Prisma.JsonNull,
 							tokenHash,
 							expiresAt
 						}

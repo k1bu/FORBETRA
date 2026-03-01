@@ -872,7 +872,9 @@
 						minlength="10"
 						class="w-full rounded-lg border border-border-default bg-surface-raised px-4 py-2.5 text-sm text-text-primary transition-all focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
 						placeholder="This note will appear in the client's Monday prompt..."
-						>{form?.values?.content ?? ''}</textarea
+						>{(form && 'values' in form && form.values
+							? (form.values as Record<string, string>).content
+							: undefined) ?? ''}</textarea
 					>
 					<p class="text-xs text-text-tertiary">Minimum 10 characters.</p>
 				</label>

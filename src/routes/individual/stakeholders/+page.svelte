@@ -80,7 +80,7 @@
 		<p class="mt-1 text-text-secondary">Manage the people who provide feedback on your progress</p>
 	</header>
 
-	{#if form?.action === 'feedback' && !form?.phonePromptFor}
+	{#if form?.action === 'feedback' && !('phonePromptFor' in form)}
 		{#if form.error}
 			<div class="rounded-xl border border-error/20 bg-error-muted p-4 text-sm text-error">
 				{form.error}
@@ -155,7 +155,7 @@
 										Add {stakeholder.name}'s phone to also send an SMS invite (98% open rate vs 20%
 										for email)
 									</p>
-									{#if form?.action === 'feedback' && form?.error && form?.phonePromptFor === stakeholder.id}
+									{#if form?.action === 'feedback' && form?.error && 'phonePromptFor' in form && form.phonePromptFor === stakeholder.id}
 										<div
 											class="mb-3 rounded-lg border border-error/20 bg-error-muted px-3 py-2 text-xs text-error"
 										>

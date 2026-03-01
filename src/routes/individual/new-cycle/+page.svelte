@@ -7,13 +7,17 @@
 	const formValues = (form as { values?: Record<string, string> } | null)?.values;
 	let cycleLabel = $state(formValues?.cycleLabel ?? data.defaults.cycleLabel);
 	let cycleStartDate = $state(formValues?.cycleStartDate ?? data.defaults.startDate);
-	let cycleDurationWeeks = $state(
-		String(formValues?.cycleDurationWeeks ?? data.defaults.durationWeeks)
+	const initialDurationWeeks = String(
+		formValues?.cycleDurationWeeks ?? data.defaults.durationWeeks
 	);
-	let cycleDurationMode: 'preset' | 'custom' = $state(
-		[8, 12, 16].includes(Number(cycleDurationWeeks)) ? 'preset' : 'custom'
-	);
-	let customDurationWeeks = $state(cycleDurationMode === 'custom' ? cycleDurationWeeks : '');
+	let cycleDurationWeeks = $state(initialDurationWeeks);
+	const initialDurationMode: 'preset' | 'custom' = [8, 12, 16].includes(
+		Number(initialDurationWeeks)
+	)
+		? 'preset'
+		: 'custom';
+	let cycleDurationMode: 'preset' | 'custom' = $state(initialDurationMode);
+	let customDurationWeeks = $state(initialDurationMode === 'custom' ? initialDurationWeeks : '');
 	// Day picker for unified check-ins
 	const allDays = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
 	const dayLabels: Record<string, string> = {

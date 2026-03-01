@@ -283,9 +283,7 @@ export const actions: Actions = {
 			const errors = parsed.error.flatten();
 			return fail(400, {
 				error:
-					errors.fieldErrors._form?.[0] ??
-					errors.fieldErrors.comment?.[0] ??
-					'Invalid feedback submission.'
+					errors.formErrors[0] ?? errors.fieldErrors.comment?.[0] ?? 'Invalid feedback submission.'
 			});
 		}
 
