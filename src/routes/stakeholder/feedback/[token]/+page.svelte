@@ -358,7 +358,11 @@
 					aria-live="polite"
 					class="animate-in fade-in slide-in-from-top-2 rounded-xl border border-success-muted bg-success-muted p-6 text-center"
 				>
-					<CircleCheck class="mx-auto mb-2 h-10 w-10 text-success" />
+					<div
+						class="success-pulse mx-auto mb-2 flex h-14 w-14 items-center justify-center rounded-full bg-success/20"
+					>
+						<CircleCheck class="h-8 w-8 text-success" />
+					</div>
 					<p class="text-lg font-semibold text-success">
 						Thank you, {data.stakeholder.name}!
 					</p>
@@ -374,30 +378,31 @@
 				</div>
 
 				<!-- What happens next -->
-				<div class="rounded-xl border border-border-default bg-surface-raised p-5">
-					<p class="mb-3 text-sm font-semibold text-text-primary">How your feedback gets used</p>
+				<div class="anim-slide-up rounded-xl border border-border-default bg-surface-raised p-5">
+					<p class="mb-3 text-sm font-semibold text-text-primary">What you just unlocked</p>
 					<ul class="space-y-2.5 text-xs text-text-secondary">
-						<li class="flex items-start gap-2">
+						<li class="anim-stagger flex items-start gap-2" style="--stagger: 0">
 							<span
 								class="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-accent/10 text-[9px] font-bold text-accent"
 								>1</span
 							>
-							Your scores are compared against {data.reflection.participantName}'s self-ratings to
-							reveal blind spots
+							A blind-spot comparison — your scores vs. {data.reflection.participantName}'s
+							self-ratings reveal gaps they can't see alone
 						</li>
-						<li class="flex items-start gap-2">
+						<li class="anim-stagger flex items-start gap-2" style="--stagger: 1">
 							<span
 								class="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-accent/10 text-[9px] font-bold text-accent"
 								>2</span
 							>
-							AI synthesizes all perspectives into actionable coaching insights by Sunday evening
+							AI-synthesized coaching insights — your input shapes personalized recommendations by Sunday
+							evening
 						</li>
-						<li class="flex items-start gap-2">
+						<li class="anim-stagger flex items-start gap-2" style="--stagger: 2">
 							<span
 								class="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-accent/10 text-[9px] font-bold text-accent"
 								>3</span
 							>
-							Their coach uses your input to guide the next session
+							A better coaching session — their coach uses your perspective to guide the next conversation
 						</li>
 					</ul>
 					<p class="mt-3 text-[10px] text-text-muted">
@@ -1069,9 +1074,28 @@
 			slide-in-from-bottom-4 0.5s ease-out;
 	}
 
+	@keyframes success-pulse {
+		0% {
+			transform: scale(0.8);
+			opacity: 0;
+		}
+		50% {
+			transform: scale(1.1);
+		}
+		100% {
+			transform: scale(1);
+			opacity: 1;
+		}
+	}
+
+	.success-pulse {
+		animation: success-pulse 0.4s ease-out;
+	}
+
 	@media (prefers-reduced-motion: reduce) {
 		.animate-in,
-		.slide-in-from-bottom-4 {
+		.slide-in-from-bottom-4,
+		.success-pulse {
 			animation: none;
 		}
 	}

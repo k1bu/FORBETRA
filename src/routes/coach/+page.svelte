@@ -15,6 +15,7 @@
 		Lightbulb,
 		PenLine
 	} from 'lucide-svelte';
+	import InfoTip from '$lib/components/InfoTip.svelte';
 	import { coachAlertCount } from '$lib/stores/coachAlerts.svelte';
 
 	const { data }: { data: PageData } = $props();
@@ -153,7 +154,7 @@
 	<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 		<a
 			href="/coach/roster"
-			class="rounded-lg border border-border-default bg-surface-raised p-4 transition-colors hover:border-accent/30"
+			class="anim-lift rounded-lg border border-border-default bg-surface-raised p-4 transition-colors hover:border-accent/30"
 		>
 			<div class="mb-1 flex items-center gap-1.5">
 				<Users class="h-4 w-4 text-accent" />
@@ -174,7 +175,7 @@
 		</a>
 		<a
 			href="/coach/analytics"
-			class="rounded-lg border border-border-default bg-surface-raised p-4 transition-colors hover:border-accent/30"
+			class="anim-lift rounded-lg border border-border-default bg-surface-raised p-4 transition-colors hover:border-accent/30"
 		>
 			<div class="mb-1 flex items-center gap-1.5">
 				<AlertTriangle
@@ -199,6 +200,9 @@
 			<div class="mb-1 flex items-center gap-1.5">
 				<BarChart3 class="h-4 w-4 text-cyan-400" />
 				<p class="text-xs font-medium text-text-tertiary">Avg. Stability</p>
+				<InfoTip
+					text="How consistent each client's scores are week to week. Higher = steadier trajectory, lower = more volatile swings."
+				/>
 			</div>
 			<p class="text-2xl font-bold text-text-primary tabular-nums">
 				{data.analytics.avgStability !== null ? `${data.analytics.avgStability}/100` : '\u2014'}
@@ -209,6 +213,9 @@
 			<div class="mb-1 flex items-center gap-1.5">
 				<Target class="h-4 w-4 text-amber-400" />
 				<p class="text-xs font-medium text-text-tertiary">Avg. Alignment</p>
+				<InfoTip
+					text="How closely self-ratings match stakeholder feedback. Higher alignment means the client's self-perception matches how others see them."
+				/>
 			</div>
 			<p class="text-2xl font-bold text-text-primary tabular-nums">
 				{data.analytics.avgAlignment !== null ? `${data.analytics.avgAlignment}%` : '\u2014'}
@@ -303,12 +310,16 @@
 			<div class="mb-3 flex items-center gap-2">
 				<Lightbulb class="h-4 w-4 text-accent" />
 				<h2 class="text-sm font-semibold text-text-primary">Coaching Moments</h2>
+				<InfoTip
+					text="Automatically surfaced when a client's data shows a notable pattern — score drops, streaks, perception gaps, or trend changes worth discussing."
+				/>
 			</div>
 			<div class="divide-y divide-border-default">
-				{#each data.coachingMoments as moment (moment.clientId)}
+				{#each data.coachingMoments as moment, i (moment.clientId)}
 					<a
 						href="/coach/session/{moment.clientId}"
-						class="group -mx-4 flex items-start gap-3 px-4 py-3 transition-colors first:pt-0 last:pb-0 hover:bg-surface-subtle"
+						class="anim-stagger group -mx-4 flex items-start gap-3 px-4 py-3 transition-colors first:pt-0 last:pb-0 hover:bg-surface-subtle"
+						style="--stagger: {i}"
 					>
 						<span class="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-accent"></span>
 						<div class="min-w-0 flex-1">
@@ -340,10 +351,11 @@
 				</a>
 			</div>
 			<div class="divide-y divide-border-default">
-				{#each data.atRiskClients as client (client.id)}
+				{#each data.atRiskClients as client, i (client.id)}
 					<a
 						href="/coach/session/{client.id}"
-						class="group -mx-4 flex items-center gap-3 px-4 py-3 transition-colors first:pt-0 last:pb-0 hover:bg-surface-subtle"
+						class="anim-stagger group -mx-4 flex items-center gap-3 px-4 py-3 transition-colors first:pt-0 last:pb-0 hover:bg-surface-subtle"
+						style="--stagger: {i}"
 					>
 						<span
 							class="mt-0.5 h-2 w-2 shrink-0 rounded-full {client.topAlert.severity === 'high'

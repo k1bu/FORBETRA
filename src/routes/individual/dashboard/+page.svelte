@@ -216,10 +216,9 @@
 				<p class="text-xs text-text-secondary">
 					<span class="font-semibold">{data.cycle.reflectionsRecorded}</span> reflections submitted
 				</p>
-				{@const expectedPct = Math.round((data.cycle.weeksElapsed / data.cycle.totalWeeks) * 100)}
-				{#if data.cycle.completion >= expectedPct}
+				{#if data.cycle.completion >= Math.round((data.cycle.weeksElapsed / data.cycle.totalWeeks) * 100)}
 					<p class="mt-1 text-[10px] text-success">On pace or ahead</p>
-				{:else if data.cycle.completion >= expectedPct - 15}
+				{:else if data.cycle.completion >= Math.round((data.cycle.weeksElapsed / data.cycle.totalWeeks) * 100) - 15}
 					<p class="mt-1 text-[10px] text-text-muted">Slightly behind pace</p>
 				{:else}
 					<p class="mt-1 text-[10px] text-warning">Behind pace — catch up this week</p>

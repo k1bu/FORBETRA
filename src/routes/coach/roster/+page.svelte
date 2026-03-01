@@ -48,6 +48,9 @@
 		return new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(created);
 	};
 
+	const activeCount = $derived(data.clients.filter((c) => !c.archived).length);
+	const archivedCount = $derived(data.clients.filter((c) => c.archived).length);
+
 	let searchTerm = $state('');
 	let showArchived = $state(false);
 	type SortOption = 'name' | 'alerts' | 'recent';
@@ -215,8 +218,6 @@
 			</nav>
 			<div class="flex items-center gap-3">
 				<h1 class="text-3xl font-bold text-text-primary">Client Roster</h1>
-				{@const activeCount = data.clients.filter((c) => !c.archived).length}
-				{@const archivedCount = data.clients.filter((c) => c.archived).length}
 				<span class="rounded-full bg-accent-muted px-2.5 py-0.5 text-xs font-semibold text-accent">
 					{activeCount} active{#if archivedCount > 0}<span class="text-text-muted">
 							· {archivedCount} archived</span
