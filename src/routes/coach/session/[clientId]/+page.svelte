@@ -305,22 +305,33 @@
 				aria-selected={activeTab === tab.id}
 				title={tab.desc}
 				onclick={() => (activeTab = tab.id)}
-				class="flex-1 rounded-lg px-4 py-2 text-sm font-semibold transition-all {activeTab ===
+				class="flex flex-1 flex-col items-center gap-0.5 rounded-lg px-4 py-2 transition-all {activeTab ===
 				tab.id
 					? 'bg-accent text-white shadow-sm'
 					: 'text-text-tertiary hover:bg-surface-raised hover:text-text-secondary'}"
 			>
-				{tab.label}
-				{#if tab.id === 'prep' && data.alerts.length + data.client.alerts.length > 0}
-					<span class="ml-1 rounded-full bg-warning px-1.5 text-[10px] font-bold text-white"
-						>{data.alerts.length + data.client.alerts.length}</span
-					>
-				{/if}
-				{#if tab.id === 'notes' && data.allCoachNotes.length > 0}
-					<span class="ml-1 text-[10px] font-normal text-text-muted"
-						>{data.allCoachNotes.length}</span
-					>
-				{/if}
+				<span class="text-sm font-semibold">
+					{tab.label}
+					{#if tab.id === 'prep' && data.alerts.length + data.client.alerts.length > 0}
+						<span class="ml-1 rounded-full bg-warning px-1.5 text-[10px] font-bold text-white"
+							>{data.alerts.length + data.client.alerts.length}</span
+						>
+					{/if}
+					{#if tab.id === 'notes' && data.allCoachNotes.length > 0}
+						<span
+							class="ml-1 text-[10px] font-normal {activeTab === tab.id
+								? 'text-white/70'
+								: 'text-text-muted'}">{data.allCoachNotes.length}</span
+						>
+					{/if}
+				</span>
+				<span
+					class="hidden text-[9px] font-normal sm:block {activeTab === tab.id
+						? 'text-white/70'
+						: 'text-text-muted'}"
+				>
+					{tab.desc}
+				</span>
 			</button>
 		{/each}
 	</div>

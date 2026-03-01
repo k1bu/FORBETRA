@@ -512,10 +512,17 @@
 	<section class="mx-auto max-w-5xl space-y-8 pt-8 pb-12">
 		<!-- Progress Bar -->
 		{#if currentStep !== 'welcome'}
+			{@const stepNames = {
+				welcome: 'Welcome',
+				objective: 'Objective',
+				subgoals: 'Behaviors',
+				cycle: 'Schedule',
+				stakeholders: 'Stakeholders'
+			}}
 			<div class="mb-8">
-				<div class="mb-3 flex items-center justify-between text-sm text-text-secondary">
+				<div class="mb-2 flex items-center justify-between text-sm text-text-secondary">
 					<span class="font-medium"
-						>Step {allSteps.indexOf(currentStep) + 1} of {allSteps.length}</span
+						>Step {allSteps.indexOf(currentStep) + 1}: {stepNames[currentStep]}</span
 					>
 					<span class="text-text-muted">{Math.round(stepProgress)}% complete</span>
 				</div>
@@ -524,6 +531,19 @@
 						class="h-full rounded-full bg-accent transition-all duration-500 ease-out"
 						style="width: {stepProgress}%"
 					></div>
+				</div>
+				<div class="mt-2 hidden items-center justify-between sm:flex">
+					{#each allSteps.filter((s) => s !== 'welcome') as step (step)}
+						{@const stepIdx = allSteps.indexOf(step)}
+						{@const currentIdx = allSteps.indexOf(currentStep)}
+						<span
+							class="text-[10px] {stepIdx <= currentIdx
+								? 'font-semibold text-accent'
+								: 'text-text-muted'}"
+						>
+							{stepNames[step]}
+						</span>
+					{/each}
 				</div>
 			</div>
 		{/if}
@@ -1089,7 +1109,10 @@
 										</div>
 
 										<!-- Delivery Method -->
-										<div class="space-y-3">
+										<div class="space-y-3 border-t border-border-default pt-6">
+											<p class="text-xs font-semibold tracking-wider text-text-muted uppercase">
+												Delivery Method
+											</p>
 											<p class="text-sm font-semibold text-text-secondary">
 												How should we remind you?
 											</p>

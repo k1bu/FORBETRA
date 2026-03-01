@@ -22,6 +22,8 @@
 	// Populate the layout-wide alert badge
 	coachAlertCount.value = data.analytics.totalAlerts;
 
+	let showPortfolioBreakdown = $state(false);
+
 	const greeting = $derived(() => {
 		const hour = new Date().getHours();
 		if (hour < 12) return 'Good morning';
@@ -112,10 +114,39 @@
 					></div>
 				{/if}
 			</div>
-			<span class="shrink-0 text-[10px] text-text-muted">
-				{Math.round(pct * 100)}% improving
-			</span>
+			<button
+				type="button"
+				onclick={() => (showPortfolioBreakdown = !showPortfolioBreakdown)}
+				class="shrink-0 text-[10px] text-text-muted transition-colors hover:text-text-secondary"
+			>
+				{Math.round(pct * 100)}% improving {showPortfolioBreakdown ? '▲' : '▼'}
+			</button>
 		</div>
+		{#if showPortfolioBreakdown}
+			<div class="mt-2 grid gap-2 sm:grid-cols-3">
+				<div class="flex items-center gap-2 rounded-lg bg-surface-raised px-3 py-2">
+					<TrendingUp class="h-3.5 w-3.5 shrink-0 text-success" />
+					<span class="text-sm font-semibold text-text-primary tabular-nums"
+						>{data.portfolioInsight.improving}</span
+					>
+					<span class="text-xs text-text-tertiary">Improving</span>
+				</div>
+				<div class="flex items-center gap-2 rounded-lg bg-surface-raised px-3 py-2">
+					<Minus class="h-3.5 w-3.5 shrink-0 text-text-muted" />
+					<span class="text-sm font-semibold text-text-primary tabular-nums"
+						>{data.portfolioInsight.stable}</span
+					>
+					<span class="text-xs text-text-tertiary">Stable</span>
+				</div>
+				<div class="flex items-center gap-2 rounded-lg bg-surface-raised px-3 py-2">
+					<TrendingDown class="h-3.5 w-3.5 shrink-0 text-error" />
+					<span class="text-sm font-semibold text-text-primary tabular-nums"
+						>{data.portfolioInsight.declining}</span
+					>
+					<span class="text-xs text-text-tertiary">Declining</span>
+				</div>
+			</div>
+		{/if}
 	{/if}
 
 	<!-- Stat Cards -->
@@ -401,45 +432,6 @@
 				{/each}
 			</div>
 		</section>
-	{/if}
-
-	<!-- Portfolio Snapshot -->
-	{#if data.portfolioInsight.total > 0}
-		<div class="grid gap-3 sm:grid-cols-3">
-			<div
-				class="flex items-center gap-3 rounded-xl border border-border-default bg-surface-raised px-4 py-3"
-			>
-				<TrendingUp class="h-4 w-4 shrink-0 text-success" />
-				<div>
-					<p class="text-lg font-bold text-text-primary tabular-nums">
-						{data.portfolioInsight.improving}
-					</p>
-					<p class="text-xs text-text-tertiary">Improving</p>
-				</div>
-			</div>
-			<div
-				class="flex items-center gap-3 rounded-xl border border-border-default bg-surface-raised px-4 py-3"
-			>
-				<Minus class="h-4 w-4 shrink-0 text-text-muted" />
-				<div>
-					<p class="text-lg font-bold text-text-primary tabular-nums">
-						{data.portfolioInsight.stable}
-					</p>
-					<p class="text-xs text-text-tertiary">Stable</p>
-				</div>
-			</div>
-			<div
-				class="flex items-center gap-3 rounded-xl border border-border-default bg-surface-raised px-4 py-3"
-			>
-				<TrendingDown class="h-4 w-4 shrink-0 text-error" />
-				<div>
-					<p class="text-lg font-bold text-text-primary tabular-nums">
-						{data.portfolioInsight.declining}
-					</p>
-					<p class="text-xs text-text-tertiary">Declining</p>
-				</div>
-			</div>
-		</div>
 	{/if}
 
 	<!-- Navigation Links -->
