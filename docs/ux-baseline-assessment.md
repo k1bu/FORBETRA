@@ -514,11 +514,55 @@ No Phase B changes affected stakeholder screens.
 
 ---
 
-## 8. Score Update Log
+## 8. Phase C Results
+
+### Delivered
+
+- [x] **Stakeholder comment prompt** — Replaced vague placeholder with structured prompt: "Share a specific example — something [Name] did well, or an area where they could grow."
+- [x] **Score reveal signposting** — Added before submit: "After submitting, you'll see how [Name] rated themselves — a chance to compare perspectives."
+- [x] **Relationship field examples** — Placeholder changed from "Relationship" to "e.g., Manager, Peer, Direct Report."
+- [x] **Invite form clear** — Form inputs + all prefill state reset on successful invite.
+
+### Also Resolved
+
+- **Coach notes week (#19)** — Already auto-populates from `data.client.objective?.cycle?.currentWeek`. Was miscategorized.
+- **Loading skeletons (#23)** — N/A for SvelteKit SSR. Pages render server-side with data already populated.
+
+### Phase C Dimension Scores
+
+#### Individual (was 7.44 → 7.45, +0.01)
+
+| #   | Dimension               | Phase B | Phase C | Delta | Evidence                                                          |
+| --- | ----------------------- | :-----: | :-----: | :---: | ----------------------------------------------------------------- |
+| 2   | Clarity of Purpose (CP) |   8.2   | **8.3** | +0.1  | Relationship placeholder with examples. One field, low frequency. |
+|     | All others              |    —    |    —    |   0   | No other individual screens changed.                              |
+
+#### Coach (was 6.89 → 6.91, +0.02)
+
+| #   | Dimension           | Phase B | Phase C | Delta | Evidence                                                                    |
+| --- | ------------------- | :-----: | :-----: | :---: | --------------------------------------------------------------------------- |
+| 4   | Core Task Flow (CT) |   7.6   | **7.7** | +0.1  | Invite form clears on success. Amara benefits most. Not core repeated task. |
+|     | All others          |    —    |    —    |   0   | No other coach screens changed.                                             |
+
+#### Stakeholder (was 7.89 → 7.97, +0.08)
+
+| #   | Dimension                 | Phase B | Phase C | Delta | Evidence                                                                                    |
+| --- | ------------------------- | :-----: | :-----: | :---: | ------------------------------------------------------------------------------------------- |
+| 4   | Core Task Flow (CT)       |   7.5   | **7.7** | +0.2  | Structured comment prompt reduces "what do I write?" paralysis.                             |
+| 7   | Cognitive Load (CL)       |   7.0   | **7.1** | +0.1  | Structured prompt means less decision-making. Minor but real for first-timers.              |
+| 8   | Trust & Credibility (TC)  |   8.5   | **8.7** | +0.2  | Reveal signposted before submit. Linda knows what to expect — collaborative framing.        |
+| 9   | Emotional Engagement (EE) |   7.0   | **7.1** | +0.1  | Reveal feels intentional rather than surprising.                                            |
+| 10  | Value Perception (VP)     |   7.5   | **7.7** | +0.2  | Structured prompt drives better feedback quality (specific examples vs vague observations). |
+|     | All others                |    —    |    —    |   0   | FI, CP, OE, IA, FP unchanged.                                                               |
+
+---
+
+## 9. Score Update Log
 
 | Date       | Phase          | Platform | Individual | Coach | Stakeholder | Notes                                   |
 | ---------- | -------------- | :------: | :--------: | :---: | :---------: | --------------------------------------- |
 | 2026-02-28 | Baseline       |   6.87   |    6.73    | 6.27  |    7.84     | Full codebase walkthrough, all personas |
 | 2026-02-28 | Phase A actual |   7.27   |    7.20    | 6.85  |    7.89     | 8 fixes shipped, 2 vetoed. +0.40 lift.  |
 | 2026-02-28 | Phase B actual |   7.39   |    7.44    | 6.89  |    7.89     | 3 fixes + landing copy. +0.12 lift.     |
+| 2026-02-28 | Phase C actual |   7.42   |    7.45    | 6.91  |    7.97     | 4 fixes, 2 resolved/N/A. +0.03 lift.    |
 |            | Phase D target |   9.3+   |    9.3+    | 9.0+  |    9.5+     | Final goal                              |

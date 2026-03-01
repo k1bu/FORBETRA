@@ -47,6 +47,31 @@
 	const formatDate = (value: string) =>
 		new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(new Date(value));
 
+	const notePrompt = $derived(() => {
+		const prev = data.previousRatings;
+		if (prev?.effortScore != null && prev?.performanceScore != null) {
+			const eDiff = effortScore - prev.effortScore;
+			const pDiff = performanceScore - prev.performanceScore;
+			if (eDiff <= -3 && pDiff <= -3) return 'Both scores dropped this week. What changed?';
+			if (eDiff >= 3 && pDiff >= 3) return 'A big leap forward! What made the difference?';
+			if (eDiff <= -3 && pDiff >= 0)
+				return 'Your effort dipped but performance held. What happened this week?';
+			if (pDiff <= -3 && eDiff >= 0)
+				return 'Despite strong effort, performance dropped. What got in the way?';
+			if (eDiff >= 3) return 'You ramped up effort this week. What are you doing differently?';
+			if (pDiff >= 3) return 'Performance jumped — what shifted?';
+		}
+		if (effortScore >= 7 && performanceScore <= 3)
+			return "You're putting in the work but results aren't there yet. What's getting in the way?";
+		if (effortScore <= 3 && performanceScore >= 7)
+			return "Results are strong despite lower effort. What's sustaining your performance?";
+		if (effortScore <= 3 && performanceScore <= 3)
+			return "A tough week. What's the one thing that could shift things next week?";
+		if (effortScore >= 7 && performanceScore >= 7)
+			return "Things are going well — what's driving your momentum?";
+		return "What went well? What's challenging? What stood out this week?";
+	});
+
 	const handleSubmit = () => {
 		isSubmitting = true;
 	};
@@ -427,7 +452,7 @@
 					bind:value={notes}
 					disabled={!data.isAvailable || data.isLocked}
 					class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:bg-surface-raised focus:ring-2 focus:ring-accent/30 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
-					placeholder="What went well? What's challenging? What stood out this week?"
+					placeholder={notePrompt()}
 				></textarea>
 				<div class="mt-2 flex items-center justify-between">
 					<p class="text-xs text-text-tertiary">

@@ -171,6 +171,36 @@ export const load: PageServerLoad = async (event) => {
 		})
 		.slice(0, 5);
 
+	// Build at-risk client list (top 5 with alerts, sorted by severity)
+	const activeSummaries = clientSummaries.filter((c) => !c.archived);
+	const severityOrder: Record<string, number> = { high: 3, medium: 2, low: 1 };
+	const atRiskClients = activeSummaries
+		.filter((c) => c.alerts.length > 0)
+		.sort((a, b) => {
+			const maxSev = (alerts: typeof a.alerts) =>
+				Math.max(0, ...alerts.map((al) => severityOrder[al.severity] ?? 0));
+			return maxSev(b.alerts) - maxSev(a.alerts) || b.alerts.length - a.alerts.length;
+		})
+		.slice(0, 5)
+		.map((c) => ({
+			id: c.id,
+			name: c.name,
+			objective: c.objective?.title ?? null,
+			topAlert: c.alerts.sort(
+				(a, b) => (severityOrder[b.severity] ?? 0) - (severityOrder[a.severity] ?? 0)
+			)[0],
+			trajectory: c.objective?.insights?.trajectoryScore ?? null,
+			completionPct: c.objective?.cycle ? Math.round(c.objective.cycle.completion * 100) : null
+		}));
+
+	// Portfolio insight — how many clients are improving/declining/stable
+	const improving = activeSummaries.filter(
+		(c) => (c.objective?.insights?.trajectoryScore ?? 0) > 5
+	).length;
+	const declining = activeSummaries.filter(
+		(c) => (c.objective?.insights?.trajectoryScore ?? 0) < -5
+	).length;
+
 	return {
 		coach: {
 			name: dbUser.name ?? 'Coach'
@@ -189,7 +219,13 @@ export const load: PageServerLoad = async (event) => {
 			avgStability,
 			avgAlignment
 		},
-		recentAlerts
+		recentAlerts,
+		atRiskClients,
+		portfolioInsight: {
+			improving,
+			declining,
+			stable: activeSummaries.length - improving - declining,
+			total: activeSummaries.length
+		}
 	};
 };
-
