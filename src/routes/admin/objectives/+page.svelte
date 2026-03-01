@@ -24,7 +24,9 @@
 
 <section class="mx-auto flex max-w-5xl flex-col gap-6 p-6">
 	<header>
-		<h1 class="text-2xl font-bold text-text-primary">Objectives & Cycles ({data.objectives.length})</h1>
+		<h1 class="text-2xl font-bold text-text-primary">
+			Objectives & Cycles ({data.objectives.length})
+		</h1>
 		<p class="text-sm text-text-secondary">All objectives across all users</p>
 	</header>
 
@@ -32,33 +34,41 @@
 		<input
 			type="search"
 			placeholder="Search by title, user name, or email..."
-			class="rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
+			class="rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
 			bind:value={searchTerm}
 		/>
 		<span class="text-xs text-text-tertiary">{filtered.length} shown</span>
 	</div>
 
+	<!-- eslint-disable svelte/no-navigation-without-resolve -->
 	<div class="space-y-3">
 		{#each filtered as obj (obj.id)}
 			<div class="rounded-xl border border-border-default bg-surface-raised p-4">
 				<div class="flex items-start justify-between gap-3">
 					<div class="flex-1">
-						<a href="/admin/objectives/{obj.id}" class="text-base font-semibold text-text-primary hover:text-accent hover:underline">
+						<a
+							href="/admin/objectives/{obj.id}"
+							class="text-base font-semibold text-text-primary hover:text-accent hover:underline"
+						>
 							{obj.title}
 						</a>
 						{#if obj.description}
-							<p class="mt-1 text-sm text-text-secondary line-clamp-2">{obj.description}</p>
+							<p class="mt-1 line-clamp-2 text-sm text-text-secondary">{obj.description}</p>
 						{/if}
 						<div class="mt-2 flex flex-wrap gap-3 text-xs text-text-tertiary">
 							<a href="/admin/users/{obj.user.id}" class="hover:text-accent">
 								{obj.user.name ?? obj.user.email}
 							</a>
-							<span>{obj._count.subgoals} sub-objectives</span>
+							<span>{obj._count.subgoals} focus areas</span>
 							<span>{obj._count.cycles} cycles</span>
 							<span>{obj._count.stakeholders} stakeholders</span>
 						</div>
 					</div>
-					<span class="shrink-0 rounded px-2 py-1 text-xs font-semibold {obj.active ? 'bg-success-muted text-success' : 'bg-surface-subtle text-text-tertiary'}">
+					<span
+						class="shrink-0 rounded px-2 py-1 text-xs font-semibold {obj.active
+							? 'bg-success-muted text-success'
+							: 'bg-surface-subtle text-text-tertiary'}"
+					>
 						{obj.active ? 'Active' : 'Inactive'}
 					</span>
 				</div>
@@ -66,9 +76,12 @@
 		{/each}
 
 		{#if filtered.length === 0}
-			<div class="rounded-xl border border-dashed border-border-strong bg-surface-raised p-8 text-center text-sm text-text-tertiary">
+			<div
+				class="rounded-xl border border-dashed border-border-strong bg-surface-raised p-8 text-center text-sm text-text-tertiary"
+			>
 				No objectives found.
 			</div>
 		{/if}
 	</div>
+	<!-- eslint-enable svelte/no-navigation-without-resolve -->
 </section>

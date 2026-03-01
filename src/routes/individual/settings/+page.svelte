@@ -680,7 +680,7 @@
 				<div class="flex items-center gap-2">
 					<ListChecks class="h-4 w-4 text-accent" />
 					<h2 class="text-sm font-semibold tracking-wide text-text-tertiary uppercase">
-						Sub-Objectives
+						Focus Areas
 					</h2>
 					<span class="text-xs text-text-muted">({subgoalForms.length})</span>
 				</div>
@@ -705,7 +705,7 @@
 							<div class="rounded-xl border border-border-default bg-surface-subtle p-4">
 								<div class="mb-3 flex items-center justify-between">
 									<span class="text-xs font-semibold tracking-wide text-text-muted uppercase"
-										>Sub-objective {index + 1}</span
+										>Focus area {index + 1}</span
 									>
 									{#if subgoalForms.length > 1}
 										<button
@@ -745,7 +745,7 @@
 								class="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-border-default py-3 text-sm font-medium text-text-muted transition-colors hover:border-accent hover:text-accent"
 							>
 								<Plus class="h-4 w-4" />
-								Add Sub-Objective
+								Add Focus Area
 							</button>
 						{/if}
 					</div>
@@ -764,7 +764,7 @@
 									Saving...
 								</span>
 							{:else}
-								Save Sub-Objectives
+								Save Focus Areas
 							{/if}
 						</button>
 					</div>

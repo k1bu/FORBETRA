@@ -132,7 +132,7 @@
 				<p class="font-medium">Check-in not yet available</p>
 				<p class="mt-1">
 					This check-in opens on {formatDate(data.availableDate)}. Check back then to record your
-					reflection.
+					response.
 				</p>
 			</div>
 		{/if}

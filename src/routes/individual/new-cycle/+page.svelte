@@ -254,7 +254,7 @@
 								<div>
 									<p class="font-semibold text-text-primary">Continue with same objective</p>
 									<p class="text-xs text-text-tertiary">
-										Keep your current objective and sub-objectives
+										Keep your current objective and focus areas
 									</p>
 								</div>
 							</button>
@@ -278,7 +278,7 @@
 								</div>
 								<div>
 									<p class="font-semibold text-text-primary">Start with a new objective</p>
-									<p class="text-xs text-text-tertiary">Set a fresh objective and sub-objectives</p>
+									<p class="text-xs text-text-tertiary">Set a fresh objective and focus areas</p>
 								</div>
 							</button>
 						</div>

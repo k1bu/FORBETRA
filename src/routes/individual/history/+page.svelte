@@ -88,7 +88,7 @@
 	{#if data.weeks.length === 0}
 		<div class="rounded-2xl border border-border-default bg-surface-raised p-8 text-center">
 			<FileText class="mx-auto mb-3 h-10 w-10 text-text-muted" />
-			<p class="text-lg font-semibold text-text-secondary">No reflections yet</p>
+			<p class="text-lg font-semibold text-text-secondary">No check-ins yet</p>
 			<p class="mt-1 text-sm text-text-tertiary">
 				Complete your first check-in to see your history here.
 			</p>

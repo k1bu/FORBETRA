@@ -29,7 +29,7 @@
 	let activeTab = $state<SessionTab>('prep');
 	const tabs: { id: SessionTab; label: string; desc: string }[] = [
 		{ id: 'prep', label: 'Prep', desc: 'AI insights & alerts' },
-		{ id: 'timeline', label: 'Timeline', desc: 'Weekly reflections' },
+		{ id: 'timeline', label: 'Timeline', desc: 'Weekly check-ins' },
 		{ id: 'notes', label: 'Notes', desc: 'Your observations' },
 		{ id: 'chart', label: 'Chart', desc: 'Trends over time' }
 	];
@@ -524,10 +524,10 @@
 
 	<!-- ═══ TAB: Timeline ═══ -->
 	{#if activeTab === 'timeline'}
-		<!-- Reflections Timeline -->
+		<!-- Check-in Timeline -->
 		{#if reflectionsByWeek.length > 0}
 			<div class="rounded-2xl border border-border-default bg-surface-raised p-6">
-				<h2 class="mb-4 text-lg font-bold text-text-primary">Reflections Timeline</h2>
+				<h2 class="mb-4 text-lg font-bold text-text-primary">Check-in Timeline</h2>
 				<div class="space-y-4">
 					{#each reflectionsByWeek as [weekNumber, reflections] (weekNumber)}
 						{@const ws = weekSummaries.get(weekNumber)}
@@ -618,10 +618,10 @@
 						<Target class="h-6 w-6 text-accent" />
 					</div>
 				</div>
-				<h3 class="mb-1 text-sm font-semibold text-text-primary">No reflections yet</h3>
+				<h3 class="mb-1 text-sm font-semibold text-text-primary">No check-ins yet</h3>
 				<p class="text-xs text-text-secondary">
-					Once {data.client.name.split(' ')[0]} completes their first check-in, their reflections will
-					appear here in chronological order.
+					Once {data.client.name.split(' ')[0]} completes their first check-in, their data will appear
+					here in chronological order.
 				</p>
 			</div>
 		{/if}

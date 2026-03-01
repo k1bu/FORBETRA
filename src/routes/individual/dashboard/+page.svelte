@@ -224,7 +224,7 @@
 					</div>
 				</div>
 				<p class="text-xs text-text-secondary">
-					<span class="font-semibold">{data.cycle.reflectionsRecorded}</span> reflections submitted
+					<span class="font-semibold">{data.cycle.reflectionsRecorded}</span> check-ins submitted
 				</p>
 				{#if data.cycle.completion >= Math.round((data.cycle.weeksElapsed / data.cycle.totalWeeks) * 100)}
 					<p class="mt-1 text-[10px] text-success">On pace or ahead</p>

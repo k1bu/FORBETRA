@@ -13,7 +13,8 @@
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
 
 	const reflectionLabel = 'Check-in';
-	const scoreType = data.reflectionType === 'RATING_A' ? 'effort' as const : 'performance' as const;
+	const scoreType =
+		data.reflectionType === 'RATING_A' ? ('effort' as const) : ('performance' as const);
 	const sliderLabel = data.reflectionType === 'RATING_A' ? 'Effort score' : 'Performance score';
 	const helperText =
 		data.reflectionType === 'RATING_A'
@@ -51,6 +52,7 @@
 
 <section class="mx-auto flex max-w-4xl flex-col gap-6 p-4 pb-12">
 	<!-- Back to Today Link -->
+	<!-- eslint-disable svelte/no-navigation-without-resolve -->
 	<div class="flex items-center justify-between">
 		<a
 			href="/individual"
@@ -69,21 +71,30 @@
 			Back to Today
 		</a>
 	</div>
+	<!-- eslint-enable svelte/no-navigation-without-resolve -->
 
 	<header class="space-y-3 text-center">
-		<div class="inline-flex items-center gap-2 rounded-full bg-accent-muted px-4 py-1.5 text-xs font-medium text-accent">
+		<div
+			class="inline-flex items-center gap-2 rounded-full bg-accent-muted px-4 py-1.5 text-xs font-medium text-accent"
+		>
 			<span class="h-2 w-2 rounded-full bg-accent"></span>
-			Week {data.currentWeek} {reflectionLabel}
+			Week {data.currentWeek}
+			{reflectionLabel}
 		</div>
 		<h1 class="text-3xl font-bold text-text-primary">{reflectionLabel}</h1>
 		<p class="text-base text-text-secondary">
-			Current cycle started on {formatDate(data.cycle.startDate)}. Submit a check-in for each
-			sub-objective below.
+			Current cycle started on {formatDate(data.cycle.startDate)}. Submit a check-in for each focus
+			area below.
 		</p>
 	</header>
 
 	{#if form?.error}
-		<div class="rounded-xl border border-error/30 bg-error-muted p-4 text-sm text-error" role="alert">{form.error}</div>
+		<div
+			class="rounded-xl border border-error/30 bg-error-muted p-4 text-sm text-error"
+			role="alert"
+		>
+			{form.error}
+		</div>
 	{/if}
 
 	<div class="space-y-6">
@@ -122,20 +133,24 @@
 							{#if previousRatings.effortScore !== null}
 								<div class="flex items-center gap-2">
 									<span class="text-accent">Effort:</span>
-									<span class="font-bold text-lg text-accent">{previousRatings.effortScore}</span>
+									<span class="text-lg font-bold text-accent">{previousRatings.effortScore}</span>
 								</div>
 							{/if}
 							{#if previousRatings.performanceScore !== null}
 								<div class="flex items-center gap-2">
 									<span class="text-accent">Performance:</span>
-									<span class="font-bold text-lg text-accent">{previousRatings.performanceScore}</span>
+									<span class="text-lg font-bold text-accent"
+										>{previousRatings.performanceScore}</span
+									>
 								</div>
 							{/if}
 						</div>
-						<p class="mt-2 text-xs text-accent">Use this as context - adjust freely based on this week.</p>
+						<p class="mt-2 text-xs text-accent">
+							Use this as context - adjust freely based on this week.
+						</p>
 						{#if historicRatings.length > 1}
 							<div class="mt-3">
-								<HistoricRatingsChart historicRatings={historicRatings} />
+								<HistoricRatingsChart {historicRatings} />
 							</div>
 						{/if}
 					</div>
@@ -147,10 +162,15 @@
 						{sliderLabel}
 					</label>
 					<div
-						class="flex h-12 w-12 items-center justify-center rounded-full border-2 transition-all {getScoreBgColor(currentScore, scoreType)}"
+						class="flex h-12 w-12 items-center justify-center rounded-full border-2 transition-all {getScoreBgColor(
+							currentScore,
+							scoreType
+						)}"
 						aria-valuetext="{sliderLabel}: {currentScore} out of 10"
 					>
-						<span class="text-lg font-bold {getScoreColor(currentScore, scoreType)}">{currentScore}</span>
+						<span class="text-lg font-bold {getScoreColor(currentScore, scoreType)}"
+							>{currentScore}</span
+						>
 					</div>
 				</div>
 
@@ -161,7 +181,7 @@
 					aria-label="{sliderLabel} selection"
 					id={`score-${subgoal.id}`}
 				>
-					{#each Array(11) as _, i}
+					{#each Array.from({ length: 11 }, (_, idx) => idx) as i (i)}
 						{@const isSelected = currentScore === i}
 						{@const buttonColors = getButtonSelectedColors(i, scoreType)}
 						{@const hoverColors = getButtonHoverColors(i, scoreType)}
@@ -173,7 +193,8 @@
 							aria-label="Score {i} out of 10"
 							class="flex h-10 w-full items-center justify-center rounded-lg border-2 text-sm font-semibold transition-all {isSelected
 								? buttonColors + ' shadow-md'
-								: 'border-border-default bg-surface-raised text-text-secondary ' + hoverColors} focus:outline-none focus:ring-2 {focusRing} focus:ring-offset-2"
+								: 'border-border-default bg-surface-raised text-text-secondary ' +
+									hoverColors} focus:ring-2 focus:outline-none {focusRing} focus:ring-offset-2"
 						>
 							{i}
 						</button>
@@ -185,7 +206,10 @@
 						{data.reflectionType === 'RATING_A' ? 'Rarely intentional' : 'Not yet visible'}
 					</span>
 					<div
-						class="rounded-full px-3 py-1 text-xs font-semibold {getScoreBgColor(currentScore, scoreType)} {getScoreColor(currentScore, scoreType)}"
+						class="rounded-full px-3 py-1 text-xs font-semibold {getScoreBgColor(
+							currentScore,
+							scoreType
+						)} {getScoreColor(currentScore, scoreType)}"
 					>
 						{getScoreLabel(currentScore, scoreType)}
 					</div>
@@ -202,9 +226,8 @@
 					name="notes"
 					id={`notes-${subgoal.id}`}
 					rows="3"
-					class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
-					placeholder="What went well? What's challenging?"
-					>{previous?.notes ?? ''}</textarea
+					class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
+					placeholder="What went well? What's challenging?">{previous?.notes ?? ''}</textarea
 				>
 
 				<div class="flex justify-end">

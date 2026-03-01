@@ -855,7 +855,7 @@
 								<div class="mb-6 space-y-2">
 									<h2 class="text-3xl font-bold text-text-primary">Break it down into behaviors</h2>
 									<p class="text-text-secondary">
-										Define 3 observable sub-objectives that others can see and provide feedback on.
+										Define 3 observable focus areas that others can see and provide feedback on.
 										Think: What would someone notice if you were succeeding?
 									</p>
 								</div>
@@ -887,7 +887,7 @@
 														{index + 1}
 													</div>
 													<h3 class="font-semibold text-text-primary">
-														Sub-objective {index + 1}
+														Focus area {index + 1}
 														{#if subgoal.label.trim().length > 0}
 															<span class="ml-2 text-success">✓</span>
 														{/if}
@@ -951,9 +951,9 @@
 									>
 										<p class="font-medium text-accent">Make it observable:</p>
 										<p class="mt-1 text-text-secondary">
-											Good sub-objectives are things others can see or measure. Instead of "be more
+											Good focus areas are things others can see or measure. Instead of "be more
 											strategic," try "document strategic implications before major decisions" —
-											stakeholders can observe and confirm this.
+											your raters can observe and confirm this.
 										</p>
 									</div>
 								</div>
@@ -1439,7 +1439,7 @@
 								<div class="mb-6 space-y-2">
 									<h2 class="text-3xl font-bold text-text-primary">Break it down into behaviors</h2>
 									<p class="text-text-secondary">
-										Define 3 observable sub-objectives that others can see and provide feedback on.
+										Define 3 observable focus areas that others can see and provide feedback on.
 										Think: What would someone notice if you were succeeding?
 									</p>
 								</div>
@@ -1471,7 +1471,7 @@
 														{index + 1}
 													</div>
 													<h3 class="font-semibold text-text-primary">
-														Sub-objective {index + 1}
+														Focus area {index + 1}
 														{#if subgoal.label.trim().length > 0}
 															<span class="ml-2 text-success">✓</span>
 														{/if}
@@ -1535,9 +1535,9 @@
 									>
 										<p class="font-medium text-accent">Make it observable:</p>
 										<p class="mt-1 text-text-secondary">
-											Good sub-objectives are things others can see or measure. Instead of "be more
+											Good focus areas are things others can see or measure. Instead of "be more
 											strategic," try "document strategic implications before major decisions" —
-											stakeholders can observe and confirm this.
+											your raters can observe and confirm this.
 										</p>
 									</div>
 								</div>
