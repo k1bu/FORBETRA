@@ -757,16 +757,77 @@ Smallest lift tied with Phase C (+0.03). Expected — Phase G was 4 quick S-effo
 
 ---
 
-## 13. Score Update Log
+## 14. Phase H Results (Check-in context, metric subtitles, contextual toasts, portfolio momentum)
 
-| Date       | Phase          | Platform | Individual | Coach | Stakeholder | Notes                                               |
-| ---------- | -------------- | :------: | :--------: | :---: | :---------: | --------------------------------------------------- |
-| 2026-02-28 | Baseline       |   6.87   |    6.73    | 6.27  |    7.84     | Full codebase walkthrough, all personas             |
-| 2026-02-28 | Phase A actual |   7.27   |    7.20    | 6.85  |    7.89     | 8 fixes shipped, 2 vetoed. +0.40 lift.              |
-| 2026-02-28 | Phase B actual |   7.39   |    7.44    | 6.89  |    7.89     | 3 fixes + landing copy. +0.12 lift.                 |
-| 2026-02-28 | Phase C actual |   7.42   |    7.45    | 6.91  |    7.97     | 4 fixes, 2 resolved/N/A. +0.03 lift.                |
-| 2026-02-28 | Phase D actual |   7.54   |    7.50    | 7.23  |    7.97     | Dashboard overhaul + note prompts. +0.12            |
-| 2026-02-28 | Phase E actual |   7.63   |    7.62    | 7.35  |    7.97     | History, scoring guide, alerts, session. +0.09      |
-| 2026-02-28 | Phase F actual |   7.71   |    7.66    | 7.46  |    8.11     | Prep freshness, modal streamline, milestones. +0.08 |
-| 2026-02-28 | Phase G actual |   7.74   |    7.69    | 7.52  |    8.11     | Scoring anchors, tabs, narrative, roster. +0.03     |
-|            | Target         |   9.3+   |    9.3+    | 9.0+  |    9.5+     | Final goal. Remaining gap: 1.56 pts.                |
+**What shipped:**
+
+1. **Check-in success score context** — Success message changed from "Check-in saved!" to "Week N check-in saved" with score deltas vs previous week (e.g. "Effort 7 (↑2) · Performance 5 (↓1)"). Turns generic confirmation into a mini-insight.
+2. **Metric explanation subtitles** — Visible "Week-to-week score consistency" under Stability and "Stakeholder response rate" under Alignment on both roster detail and analytics pages. Replaced hidden `title` attributes.
+3. **Contextual note toast** — Note save toast changed from "Note saved" to "Note saved — shapes Sarah's Monday prompt" on both session and roster pages. Connects action to downstream AI impact.
+4. **Dashboard portfolio momentum** — Server computes week-over-week avg effort/performance change across portfolio. Dashboard subtitle shows "Week-over-week: effort +0.3, performance -0.1" below the portfolio trajectory line.
+
+### Score Movement
+
+```
+Platform: 7.74 → 7.77 (+0.03)
+Individual: 7.69 → 7.72 (+0.03)
+Coach: 7.52 → 7.57 (+0.05)
+Stakeholder: 8.11 → 8.11 (unchanged)
+```
+
+#### Individual (was 7.69 → 7.72, +0.03)
+
+| #   | Dimension                 | Phase G | Phase H | Delta | Evidence                                                                                                         |
+| --- | ------------------------- | :-----: | :-----: | :---: | ---------------------------------------------------------------------------------------------------------------- |
+| 6   | Feedback & Progress (FP)  |   8.0   | **8.1** | +0.1  | Week number + score deltas = concrete progress feedback after the most frequent action.                          |
+| 9   | Emotional Engagement (EE) |   7.3   | **7.5** | +0.2  | Score deltas make check-in completion feel consequential — "my effort went up by 2" vs generic "saved!" message. |
+|     | All others                |    —    |    —    |   0   | FI, CP, OE, CT, IA, CL, TC, VP unchanged.                                                                        |
+
+#### Coach (was 7.52 → 7.57, +0.05)
+
+| #   | Dimension                 | Phase G | Phase H | Delta | Evidence                                                                                                                   |
+| --- | ------------------------- | :-----: | :-----: | :---: | -------------------------------------------------------------------------------------------------------------------------- |
+| 7   | Cognitive Load (CL)       |   7.2   | **7.3** | +0.1  | Metric subtitles eliminate "what does Stability/Alignment mean?" — one less question per page visit.                       |
+| 6   | Feedback & Progress (FP)  |   7.2   | **7.3** | +0.1  | "Shapes Sarah's Monday prompt" tells coach what the note accomplishes, not just that it was saved.                         |
+| 8   | Trust & Credibility (TC)  |   7.2   | **7.3** | +0.1  | Visible metric definitions signal the platform explains itself rather than expecting users to guess.                       |
+| 9   | Emotional Engagement (EE) |   6.6   | **6.8** | +0.2  | Contextual toasts + momentum line make the dashboard feel responsive. Coach's actions visibly move the portfolio.          |
+| 10  | Value Perception (VP)     |   8.0   | **8.1** | +0.1  | Portfolio momentum adds temporal dimension — coaches see change, not just snapshots. "Is my practice improving?" answered. |
+|     | All others                |    —    |    —    |   0   | FI, CP, OE, CT, IA unchanged.                                                                                              |
+
+#### Stakeholder (was 8.11 → 8.11, 0)
+
+No Phase H changes affected stakeholder screens.
+
+### Lowest Remaining Dimensions
+
+| Rank | User Type  | Dimension            | Score | Gap to 8.5 |
+| ---- | ---------- | -------------------- | :---: | :--------: |
+| 1    | Coach      | Emotional Engagement |  6.8  |    1.7     |
+| 2    | Coach      | Cognitive Load       |  7.3  |    1.2     |
+| 3    | Coach      | Feedback & Progress  |  7.3  |    1.2     |
+| 4    | Coach      | Trust & Credibility  |  7.3  |    1.2     |
+| 5    | Coach      | Onboarding Ease      |  7.3  |    1.2     |
+| 6    | Coach      | Info Architecture    |  7.3  |    1.2     |
+| 7    | Individual | Onboarding Ease      |  7.5  |    1.0     |
+| 8    | Individual | Emotional Engagement |  7.5  |    1.0     |
+
+### Phase H Commentary
+
+Another +0.03 platform lift from 4 targeted S-effort changes. Coach EE moved from 6.6 → 6.8 but remains the clear outlier — still 1.7 gap to 8.5 and nearly a full point below the next-weakest dimensions. The contextual toasts and momentum line are additive but fundamentally incremental. To push Coach EE past 7.5, the dashboard needs to feel like it _reacts_ to the coach's work — portfolio milestones ("3 clients hit personal bests this week"), session impact trails ("your notes influenced 4 AI prompts"), or coach-specific streak/growth mechanics. The Individual side is evening out nicely — EE now matches OE at 7.5, closing the per-dimension spread.
+
+---
+
+## 15. Score Update Log
+
+| Date       | Phase          | Platform | Individual | Coach | Stakeholder | Notes                                                |
+| ---------- | -------------- | :------: | :--------: | :---: | :---------: | ---------------------------------------------------- |
+| 2026-02-28 | Baseline       |   6.87   |    6.73    | 6.27  |    7.84     | Full codebase walkthrough, all personas              |
+| 2026-02-28 | Phase A actual |   7.27   |    7.20    | 6.85  |    7.89     | 8 fixes shipped, 2 vetoed. +0.40 lift.               |
+| 2026-02-28 | Phase B actual |   7.39   |    7.44    | 6.89  |    7.89     | 3 fixes + landing copy. +0.12 lift.                  |
+| 2026-02-28 | Phase C actual |   7.42   |    7.45    | 6.91  |    7.97     | 4 fixes, 2 resolved/N/A. +0.03 lift.                 |
+| 2026-02-28 | Phase D actual |   7.54   |    7.50    | 7.23  |    7.97     | Dashboard overhaul + note prompts. +0.12             |
+| 2026-02-28 | Phase E actual |   7.63   |    7.62    | 7.35  |    7.97     | History, scoring guide, alerts, session. +0.09       |
+| 2026-02-28 | Phase F actual |   7.71   |    7.66    | 7.46  |    8.11     | Prep freshness, modal streamline, milestones. +0.08  |
+| 2026-02-28 | Phase G actual |   7.74   |    7.69    | 7.52  |    8.11     | Scoring anchors, tabs, narrative, roster. +0.03      |
+| 2026-02-28 | Phase H actual |   7.77   |    7.72    | 7.57  |    8.11     | Check-in context, subtitles, toasts, momentum. +0.03 |
+|            | Target         |   9.3+   |    9.3+    | 9.0+  |    9.5+     | Final goal. Remaining gap: 1.53 pts.                 |
