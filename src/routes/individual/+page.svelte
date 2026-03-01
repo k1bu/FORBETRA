@@ -331,6 +331,11 @@
 				</ul>
 			{/if}
 		{/if}
+		{#if data.identityAnchor}
+			<p class="mt-1 text-sm text-text-secondary italic">
+				Becoming: "{data.identityAnchor}"
+			</p>
+		{/if}
 	</div>
 
 	<!-- Streak Milestone Card -->

@@ -212,6 +212,21 @@ function simpleHash(str: string): string {
 	return hash.toString(36);
 }
 
+// Helper to fetch the Week 1 identity anchor (notes from earliest check-in)
+async function getIdentityAnchor(cycleId: string, userId: string): Promise<string | null> {
+	const week1 = await prisma.reflection.findFirst({
+		where: {
+			cycleId,
+			userId,
+			weekNumber: 1,
+			notes: { not: null }
+		},
+		select: { notes: true },
+		orderBy: { submittedAt: 'asc' }
+	});
+	return week1?.notes?.trim() || null;
+}
+
 // Helper to get weekly averages from reflections
 function getWeeklyAverages(
 	reflections: Array<{
@@ -353,14 +368,17 @@ export async function generateWeeklySynthesis(
 
 		if (!cycle) throw new Error('Cycle not found');
 
-		const thisWeekReflections = cycle.reflections
-			.filter((r) => r.weekNumber === weekNumber)
-			.map((r) => ({
-				type: r.reflectionType,
-				effort: r.effortScore,
-				performance: r.performanceScore,
-				notes: r.notes
-			}));
+		const [thisWeekReflectionsRaw, identityAnchor] = await Promise.all([
+			Promise.resolve(cycle.reflections.filter((r) => r.weekNumber === weekNumber)),
+			getIdentityAnchor(cycleId, userId)
+		]);
+
+		const thisWeekReflections = thisWeekReflectionsRaw.map((r) => ({
+			type: r.reflectionType,
+			effort: r.effortScore,
+			performance: r.performanceScore,
+			notes: r.notes
+		}));
 
 		const weeklyAverages = getWeeklyAverages(cycle.reflections);
 		const last3 = weeklyAverages.filter((w) => w.weekNumber < weekNumber).slice(-3);
@@ -383,7 +401,7 @@ export async function generateWeeklySynthesis(
 			objectiveTitle: cycle.objective.title,
 			subgoals: cycle.objective.subgoals.map((s) => s.label),
 			currentWeek: weekNumber,
-			identityAnchor: null, // TODO: Task 3 will query and populate this
+			identityAnchor,
 			thisWeekReflections,
 			last3Weeks: last3,
 			stakeholderFeedback: feedback
@@ -620,6 +638,7 @@ async function buildCycleReportContext(userId: string, cycleId: string): Promise
 
 	if (!cycle) throw new Error('Cycle not found');
 
+	const identityAnchor = await getIdentityAnchor(cycleId, userId);
 	const currentWeek = computeWeekNumber(cycle.startDate);
 	const totalWeeks = cycle.endDate
 		? Math.max(
@@ -760,7 +779,7 @@ async function buildCycleReportContext(userId: string, cycleId: string): Promise
 		cycleStartDate: cycle.startDate.toISOString().split('T')[0],
 		currentWeek,
 		totalWeeks,
-		identityAnchor: null, // TODO: Task 3 will query and populate this
+		identityAnchor,
 		weeklyScores: weeklyAverages,
 		stakeholderFeedback: allStakeholderFeedback,
 		perceptionGaps,

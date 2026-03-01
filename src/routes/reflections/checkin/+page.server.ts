@@ -198,6 +198,22 @@ export const load: PageServerLoad = async (event) => {
 		}
 	}
 
+	// Fetch identity anchor (Week 1 notes) if past Week 1
+	let identityAnchor: string | null = null;
+	if (currentWeek > 1 && firstSubgoal) {
+		const week1 = await prisma.reflection.findFirst({
+			where: {
+				cycleId: cycle.id,
+				userId: dbUser.id,
+				weekNumber: 1,
+				notes: { not: null }
+			},
+			select: { notes: true },
+			orderBy: { submittedAt: 'asc' }
+		});
+		identityAnchor = week1?.notes?.trim() || null;
+	}
+
 	return {
 		checkInType: checkInInfo.type,
 		checkInLabel: checkInInfo.label,
@@ -206,6 +222,7 @@ export const load: PageServerLoad = async (event) => {
 		availableDate: checkInInfo.availableDate.toISOString(),
 		isLocked: false,
 		isPreview,
+		identityAnchor,
 		objective: {
 			id: objective.id,
 			title: objective.title,

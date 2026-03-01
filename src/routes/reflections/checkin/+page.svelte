@@ -215,6 +215,12 @@
 	</div>
 
 	<div class="mx-auto w-full max-w-2xl space-y-6">
+		{#if data.identityAnchor}
+			<div class="rounded-xl border border-accent/20 bg-accent-muted/50 px-5 py-3 text-center">
+				<p class="text-xs font-medium tracking-wide text-accent uppercase">Becoming</p>
+				<p class="mt-1 text-sm text-text-primary italic">"{data.identityAnchor}"</p>
+			</div>
+		{/if}
 		<!-- Interactive Check-in Form -->
 		<form method="post" onsubmit={handleSubmit} class="space-y-6">
 			<!-- Hidden inputs for form submission -->
