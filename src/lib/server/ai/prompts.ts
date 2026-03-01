@@ -16,6 +16,12 @@ Core principles:
 - Never use generic coaching platitudes like "keep going" or "believe in yourself."
 - Ground observations in performance psychology: identity, deliberate practice, feedback loops, energy management.
 
+CRITICAL: Every insight you generate MUST end with a specific, behavioral action the person can take THIS WEEK. Not "consider improving delegation" but "this week, identify one decision you currently make alone and ask your team lead to own it instead." The action must be:
+1. Specific enough to visualize doing it
+2. Small enough to do this week
+3. Connected to the data patterns you just described
+4. Phrased as an experiment, not a mandate ("Try..." or "This week, experiment with...")
+
 Respond in plain text with markdown formatting. Keep responses concise and actionable.`;
 
 type WeekScore = {
@@ -45,6 +51,7 @@ export type WeeklySynthesisContext = {
 	objectiveTitle: string;
 	subgoals: string[];
 	currentWeek: number;
+	identityAnchor: string | null;
 	thisWeekReflections: Array<{
 		type: string;
 		effort: number | null;
@@ -103,7 +110,7 @@ ${stakeholderLines}
 
 ---
 
-Provide a 2-3 sentence developmental observation. Be specific about the pattern you see. If there's an effort-performance gap, name it and explain what it might mean at this stage of their cycle. Reference the weekly theme (${context.weeklyPromptTopic}) if relevant.`;
+Provide a 2-3 sentence developmental observation. Be specific about the pattern you see. If there's an effort-performance gap, name it and explain what it might mean at this stage of their journey. Reference the weekly theme (${context.weeklyPromptTopic}) if relevant. End with a specific behavioral experiment they can try this week — something concrete enough to visualize doing it.`;
 }
 
 export function buildWeeklySynthesisPrompt(context: WeeklySynthesisContext): string {
@@ -136,11 +143,16 @@ export function buildWeeklySynthesisPrompt(context: WeeklySynthesisContext): str
 			? context.coachNotes.map((n) => `  - "${n}"`).join('\n')
 			: '  No coach notes this week.';
 
+	const identityLine = context.identityAnchor
+		? `**Identity Anchor**: "${context.identityAnchor}"`
+		: '**Identity Anchor**: Not yet set';
+
 	return `## Weekly Synthesis Request
 
 **Objective**: ${context.objectiveTitle}
 **Subgoals**: ${context.subgoals.join(', ')}
 **Week**: ${context.currentWeek}
+${identityLine}
 
 **This Week's Reflections**:
 ${reflectionLines || '  No reflections submitted.'}
@@ -156,11 +168,14 @@ ${coachNoteLines}
 
 ---
 
+Begin your synthesis by referencing the person's identity anchor (who they said they are becoming in Week 1). Connect this week's patterns to that identity. Example: "You said you're becoming a leader who trusts their team. This week's data suggests [specific pattern]."
+
 Provide a 3-5 sentence synthesis that includes:
-1. **Key observation** about this week's data
-2. **Effort-performance gap analysis** (if applicable)
-3. **Stakeholder alignment note** (do others see what the individual sees?)
-4. **One specific suggestion** for next week
+1. **Identity connection** — link this week's data to who they are becoming
+2. **Key observation** about this week's data
+3. **Effort-performance gap analysis** (if applicable)
+4. **Stakeholder alignment note** (do others see what the individual sees?)
+5. **One specific behavioral experiment** for next week (concrete enough to visualize doing it)
 
 Be concrete. Use numbers. Name patterns.`;
 }
@@ -171,6 +186,7 @@ export type CycleReportContext = {
 	cycleStartDate: string;
 	currentWeek: number;
 	totalWeeks: number;
+	identityAnchor: string | null;
 	weeklyScores: WeekScore[];
 	stakeholderFeedback: StakeholderWeekScore[];
 	perceptionGaps: Array<{
@@ -211,9 +227,13 @@ export function buildCycleReportPrompt(context: CycleReportContext): string {
 					.map((g) => {
 						const parts = [`  ${g.stakeholderName}:`];
 						if (g.latestEffortGap !== null)
-							parts.push(`Effort gap ${g.latestEffortGap > 0 ? '+' : ''}${g.latestEffortGap.toFixed(1)} (${g.effortGapTrend ?? 'unknown'})`);
+							parts.push(
+								`Effort gap ${g.latestEffortGap > 0 ? '+' : ''}${g.latestEffortGap.toFixed(1)} (${g.effortGapTrend ?? 'unknown'})`
+							);
 						if (g.latestPerformanceGap !== null)
-							parts.push(`Performance gap ${g.latestPerformanceGap > 0 ? '+' : ''}${g.latestPerformanceGap.toFixed(1)} (${g.performanceGapTrend ?? 'unknown'})`);
+							parts.push(
+								`Performance gap ${g.latestPerformanceGap > 0 ? '+' : ''}${g.latestPerformanceGap.toFixed(1)} (${g.performanceGapTrend ?? 'unknown'})`
+							);
 						return parts.join(' ');
 					})
 					.join('\n')
@@ -224,12 +244,17 @@ export function buildCycleReportPrompt(context: CycleReportContext): string {
 			? context.coachNotes.map((n) => `  - "${n}"`).join('\n')
 			: '  No coach notes.';
 
+	const identityLine = context.identityAnchor
+		? `**Identity Anchor**: "${context.identityAnchor}"`
+		: '**Identity Anchor**: Not set';
+
 	return `## Cycle Performance Report Request
 
 **Objective**: ${context.objectiveTitle}
 **Subgoals**: ${context.subgoals.join(', ')}
 **Cycle Start**: ${context.cycleStartDate}
 **Current Week**: ${context.currentWeek} of ${context.totalWeeks}
+${identityLine}
 **Key Metrics**:
   Stability: ${context.stabilityScore !== null ? `${context.stabilityScore}/100` : 'N/A'}
   Trajectory: ${context.trajectoryScore !== null ? `${context.trajectoryScore}` : 'N/A'}
@@ -252,6 +277,8 @@ ${coachNoteLines}
 
 Write a comprehensive developmental performance report. Use ## markdown headers for each section. Include exactly these six sections:
 
+If an identity anchor is provided, open the report with: "X weeks ago, you said you were becoming [identity anchor]. Here's what the data shows about that journey."
+
 ## Executive Summary
 2-3 sentences. State where this individual stands relative to their objective and overall trajectory. Reference specific metrics.
 
@@ -268,7 +295,7 @@ Name each stakeholder. Describe the direction and trend of their perception gap 
 2-3 areas for development. Ground each in specific data patterns — not generic advice.
 
 ## Recommendations
-Exactly 3 concrete, actionable recommendations. Each must tie directly to a finding from the analysis above. Be specific about what to do, not just what to think about.`;
+Exactly 3 concrete, actionable recommendations. Each must tie directly to a finding from the analysis above. Each recommendation must include a specific behavioral experiment — something concrete enough to visualize doing it this week (e.g. "In your next 1:1, ask your direct report: 'What's one decision I should hand off to you?'").`;
 }
 
 export function buildCoachPrepPrompt(context: CoachPrepContext): string {
@@ -336,7 +363,8 @@ Provide a structured coach prep briefing:
 1. **Headline** (1 sentence summary of where this client is)
 2. **Key data points** (3-4 bullet points of notable patterns)
 3. **Suggested conversation starters** (2-3 questions the coach could ask)
-4. **Risk flags** (anything concerning that needs attention)
+4. **Behavioral experiments to propose** (2-3 specific, small experiments the coach can suggest to the client for the coming week — each must be concrete enough to visualize doing it, e.g. "In your next team meeting, try waiting 10 seconds after asking a question before filling the silence")
+5. **Risk flags** (anything concerning that needs attention)
 
 Be specific and actionable. The coach needs to walk into a session prepared.`;
 }

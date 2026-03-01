@@ -48,10 +48,7 @@ function callClaudeStreaming(prompt: string, maxTokens: number = 4096): Readable
 				});
 
 				for await (const event of stream) {
-					if (
-						event.type === 'content_block_delta' &&
-						event.delta.type === 'text_delta'
-					) {
+					if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
 						controller.enqueue(event.delta.text);
 					}
 				}
@@ -129,17 +126,18 @@ export async function generateCycleReportStreaming(
 		});
 
 		return { insightId: insight.id, stream: wrappedStream };
-	} catch (error: any) {
+	} catch (error: unknown) {
+		const errMsg = error instanceof Error ? error.message : 'Unknown error';
 		console.error('[insight:error] Failed to start streaming CYCLE_REPORT', {
 			insightId: insight.id,
-			error: error.message
+			error: errMsg
 		});
 
 		await prisma.insight.update({
 			where: { id: insight.id },
 			data: {
 				status: 'FAILED',
-				metadata: { error: error.message }
+				metadata: { error: errMsg }
 			}
 		});
 
@@ -185,17 +183,18 @@ async function createAndGenerateInsight(
 		});
 
 		return insight.id;
-	} catch (error: any) {
+	} catch (error: unknown) {
+		const errMsg = error instanceof Error ? error.message : 'Unknown error';
 		console.error(`[insight:error] Failed to generate ${type} insight`, {
 			insightId: insight.id,
-			error: error.message
+			error: errMsg
 		});
 
 		await prisma.insight.update({
 			where: { id: insight.id },
 			data: {
 				status: 'FAILED',
-				metadata: { error: error.message }
+				metadata: { error: errMsg }
 			}
 		});
 
@@ -283,9 +282,7 @@ export async function generateCheckInInsight(
 
 		const weeklyAverages = getWeeklyAverages(cycle.reflections);
 		const thisWeek = weeklyAverages.find((w) => w.weekNumber === weekNumber);
-		const last3 = weeklyAverages
-			.filter((w) => w.weekNumber < weekNumber)
-			.slice(-3);
+		const last3 = weeklyAverages.filter((w) => w.weekNumber < weekNumber).slice(-3);
 
 		// Get stakeholder feedback for this week
 		const feedback = await prisma.feedback.findMany({
@@ -366,9 +363,7 @@ export async function generateWeeklySynthesis(
 			}));
 
 		const weeklyAverages = getWeeklyAverages(cycle.reflections);
-		const last3 = weeklyAverages
-			.filter((w) => w.weekNumber < weekNumber)
-			.slice(-3);
+		const last3 = weeklyAverages.filter((w) => w.weekNumber < weekNumber).slice(-3);
 
 		// Get all stakeholder feedback for this week + recent weeks
 		const feedback = await prisma.feedback.findMany({
@@ -388,6 +383,7 @@ export async function generateWeeklySynthesis(
 			objectiveTitle: cycle.objective.title,
 			subgoals: cycle.objective.subgoals.map((s) => s.label),
 			currentWeek: weekNumber,
+			identityAnchor: null, // TODO: Task 3 will query and populate this
 			thisWeekReflections,
 			last3Weeks: last3,
 			stakeholderFeedback: feedback
@@ -476,8 +472,7 @@ export async function generateCoachPrep(
 		const efStd = stdDev(effortValues);
 		const prStd = stdDev(perfValues);
 		const stds = [efStd, prStd].filter((v): v is number => v !== null);
-		const combinedStd =
-			stds.length > 0 ? stds.reduce((a, b) => a + b, 0) / stds.length : null;
+		const combinedStd = stds.length > 0 ? stds.reduce((a, b) => a + b, 0) / stds.length : null;
 		const stabilityScore =
 			combinedStd !== null ? Math.max(0, Math.round(100 - combinedStd * 10)) : null;
 
@@ -518,7 +513,8 @@ export async function generateCoachPrep(
 				if (fb.effortScore !== null) g.shEffort.push(fb.effortScore);
 				if (fb.performanceScore !== null) g.shPerf.push(fb.performanceScore);
 				if (fb.reflection.effortScore !== null) g.selfEffort.push(fb.reflection.effortScore);
-				if (fb.reflection.performanceScore !== null) g.selfPerf.push(fb.reflection.performanceScore);
+				if (fb.reflection.performanceScore !== null)
+					g.selfPerf.push(fb.reflection.performanceScore);
 			});
 		});
 
@@ -530,17 +526,10 @@ export async function generateCoachPrep(
 						? g.selfEffort.reduce((a, b) => a + b, 0) / g.selfEffort.length
 						: 0;
 				const shE =
-					g.shEffort.length > 0
-						? g.shEffort.reduce((a, b) => a + b, 0) / g.shEffort.length
-						: 0;
+					g.shEffort.length > 0 ? g.shEffort.reduce((a, b) => a + b, 0) / g.shEffort.length : 0;
 				const selfP =
-					g.selfPerf.length > 0
-						? g.selfPerf.reduce((a, b) => a + b, 0) / g.selfPerf.length
-						: 0;
-				const shP =
-					g.shPerf.length > 0
-						? g.shPerf.reduce((a, b) => a + b, 0) / g.shPerf.length
-						: 0;
+					g.selfPerf.length > 0 ? g.selfPerf.reduce((a, b) => a + b, 0) / g.selfPerf.length : 0;
+				const shP = g.shPerf.length > 0 ? g.shPerf.reduce((a, b) => a + b, 0) / g.shPerf.length : 0;
 				return {
 					weekNumber,
 					effortGap: Number((selfE - shE).toFixed(1)),
@@ -635,21 +624,20 @@ async function buildCycleReportContext(userId: string, cycleId: string): Promise
 	const totalWeeks = cycle.endDate
 		? Math.max(
 				1,
-				Math.ceil(
-					(cycle.endDate.getTime() - cycle.startDate.getTime()) / (7 * 24 * 60 * 60 * 1000)
-				)
+				Math.ceil((cycle.endDate.getTime() - cycle.startDate.getTime()) / (7 * 24 * 60 * 60 * 1000))
 			)
 		: currentWeek;
 
 	const weeklyAverages = getWeeklyAverages(cycle.reflections);
 
 	const effortValues = weeklyAverages.map((w) => w.effort).filter((v): v is number => v !== null);
-	const perfValues = weeklyAverages.map((w) => w.performance).filter((v): v is number => v !== null);
+	const perfValues = weeklyAverages
+		.map((w) => w.performance)
+		.filter((v): v is number => v !== null);
 	const efStd = stdDev(effortValues);
 	const prStd = stdDev(perfValues);
 	const stds = [efStd, prStd].filter((v): v is number => v !== null);
-	const combinedStd =
-		stds.length > 0 ? stds.reduce((a, b) => a + b, 0) / stds.length : null;
+	const combinedStd = stds.length > 0 ? stds.reduce((a, b) => a + b, 0) / stds.length : null;
 	const stabilityScore =
 		combinedStd !== null ? Math.max(0, Math.round(100 - combinedStd * 10)) : null;
 
@@ -678,7 +666,10 @@ async function buildCycleReportContext(userId: string, cycleId: string): Promise
 			.filter((r) => r.reflectionType === 'RATING_A' || r.reflectionType === 'RATING_B')
 			.map((r) => r.weekNumber)
 	);
-	const completionRate = totalWeeks > 0 ? Math.round((ratingWeeks.size / Math.min(currentWeek, totalWeeks)) * 100) : null;
+	const completionRate =
+		totalWeeks > 0
+			? Math.round((ratingWeeks.size / Math.min(currentWeek, totalWeeks)) * 100)
+			: null;
 
 	const allStakeholderFeedback: Array<{
 		weekNumber: number;
@@ -715,7 +706,9 @@ async function buildCycleReportContext(userId: string, cycleId: string): Promise
 					? Number((selfWeek.effort - fb.effortScore).toFixed(1))
 					: null;
 			const performanceGap =
-				selfWeek?.performance !== null && selfWeek?.performance !== undefined && fb.performanceScore !== null
+				selfWeek?.performance !== null &&
+				selfWeek?.performance !== undefined &&
+				fb.performanceScore !== null
 					? Number((selfWeek.performance - fb.performanceScore).toFixed(1))
 					: null;
 
@@ -728,7 +721,9 @@ async function buildCycleReportContext(userId: string, cycleId: string): Promise
 		const sorted = gaps.sort((a, b) => a.weekNumber - b.weekNumber);
 		const latest = sorted[sorted.length - 1];
 
-		const computeTrend = (getter: (g: typeof gaps[0]) => number | null): 'widening' | 'closing' | 'stable' | null => {
+		const computeTrend = (
+			getter: (g: (typeof gaps)[0]) => number | null
+		): 'widening' | 'closing' | 'stable' | null => {
 			const vals = sorted.map(getter).filter((v): v is number => v !== null);
 			if (vals.length < 2) return null;
 			const absFirst = Math.abs(vals[0]);
@@ -765,6 +760,7 @@ async function buildCycleReportContext(userId: string, cycleId: string): Promise
 		cycleStartDate: cycle.startDate.toISOString().split('T')[0],
 		currentWeek,
 		totalWeeks,
+		identityAnchor: null, // TODO: Task 3 will query and populate this
 		weeklyScores: weeklyAverages,
 		stakeholderFeedback: allStakeholderFeedback,
 		perceptionGaps,
@@ -778,11 +774,15 @@ async function buildCycleReportContext(userId: string, cycleId: string): Promise
 	return buildCycleReportPrompt(context);
 }
 
-export async function generateCycleReport(
-	userId: string,
-	cycleId: string
-): Promise<string | null> {
-	return createAndGenerateInsight(userId, cycleId, null, 'CYCLE_REPORT', async () => {
-		return buildCycleReportContext(userId, cycleId);
-	}, 4096);
+export async function generateCycleReport(userId: string, cycleId: string): Promise<string | null> {
+	return createAndGenerateInsight(
+		userId,
+		cycleId,
+		null,
+		'CYCLE_REPORT',
+		async () => {
+			return buildCycleReportContext(userId, cycleId);
+		},
+		4096
+	);
 }
