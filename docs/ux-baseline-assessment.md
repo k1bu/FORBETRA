@@ -949,7 +949,8 @@ Phase J broke the "Coach dimensions stuck at 7.3" pattern — IA and TC both jum
 | 2026-03-01 | Phase K actual |   7.86   |    7.82    | 7.71  |    8.11     | Settings overhaul, onboarding polish, comprehensive re-eval. +0.04 |
 | 2026-03-01 | Phase L actual |   7.90   |    7.86    | 7.78  |    8.11     | Timeline deltas, tab badges, hub compaction. +0.04                 |
 | 2026-03-01 | Phase M actual |   7.93   |    7.89    | 7.84  |    8.11     | Milestones, impact language, onboarding labels, gap card. +0.03    |
-|            | Target         |   9.3+   |    9.3+    | 9.0+  |    9.5+     | Final goal. Remaining gap: 1.37 pts.                               |
+| 2026-03-01 | Phase N actual |   7.95   |    7.89    | 7.89  |    8.11     | Archive confirm, AI retry, metric defs. +0.02                      |
+|            | Target         |   9.3+   |    9.3+    | 9.0+  |    9.5+     | Final goal. Remaining gap: 1.35 pts.                               |
 
 ---
 
@@ -1272,3 +1273,61 @@ Phase M directly addressed all three bottlenecks identified in Phase L's comment
 **Coach TC (7.5) is now the single lowest dimension** across all user types. It was overlooked while EE, CL, and OE were being addressed. TC for coaches means: "Does the system feel trustworthy and professional? Does it handle errors well? Does the coach feel confident in the data?"
 
 **Next levers:** Coach TC (7.5) — needs archive confirmation dialog, error recovery for AI prep, and data provenance signals. Coach IA (7.6) — could benefit from roster visual hierarchy or tab organization improvements.
+
+---
+
+## 23. Phase N Results (Archive confirmation, AI prep retry, metric definitions)
+
+**What shipped:**
+
+1. **Archive confirmation dialog + toast** — Roster archive button replaced with two-step confirmation. Warning card explains consequences ("Hidden from active roster. Data preserved. Can unarchive anytime.") with Confirm/Cancel buttons. Toast on successful archive/unarchive. Unarchive bypasses confirmation (low-consequence action).
+2. **AI prep retry with error context** — Session view AI prep failure now shows inline error with differentiated messages (API failure vs connection issue) and a Retry button. Replaces silent toast-only failure that left coaches wondering what happened.
+3. **Metric definitions and tooltips** — Dashboard: subtitle text on Stability ("Week-to-week score consistency") and Alignment ("Stakeholder response rate") stat cards. Momentum line gains "(week-over-week avg)" context. Analytics: `title` attributes on all 5 table column headers (Effort, Performance, Stability, Trajectory, Completion) with descriptions.
+
+### Score Movement
+
+```
+Platform: 7.93 → 7.95 (+0.02)
+Individual: 7.89 → 7.89 (unchanged)
+Coach: 7.84 → 7.89 (+0.05)
+Stakeholder: 8.11 → 8.11 (unchanged)
+```
+
+#### Coach (was 7.84 → 7.89, +0.05)
+
+| #   | Dimension                | Phase M | Phase N | Delta | Evidence                                                                                                                         |
+| --- | ------------------------ | :-----: | :-----: | :---: | -------------------------------------------------------------------------------------------------------------------------------- |
+| 5   | Info Architecture (IA)   |   7.6   | **7.7** | +0.1  | Metric tooltips on analytics headers — coaches can discover what columns mean without leaving the page.                          |
+| 6   | Feedback & Progress (FP) |   7.7   | **7.8** | +0.1  | Archive confirmation → toast gives clear feedback loop. Previously a silent toggle with no confirmation.                         |
+| 7   | Cognitive Load (CL)      |   7.7   | **7.8** | +0.1  | Stability/Alignment subtitles remove guesswork. Coaches no longer need to infer what metrics mean from context clues.            |
+| 8   | Trust & Credibility (TC) |   7.5   | **7.8** | +0.3  | Archive confirmation prevents accidental data loss. AI retry restores trust after failure. Metric definitions = data provenance. |
+|     | All others               |    —    |    —    |   0   | FI, CP, OE, CT, EE, VP unchanged.                                                                                                |
+
+#### Individual (unchanged)
+
+No Phase N changes affected individual screens.
+
+#### Stakeholder (unchanged)
+
+No Phase N changes affected stakeholder screens.
+
+### Lowest Remaining Dimensions
+
+| Rank | User Type  | Dimension            | Score | Gap to 8.5 |
+| ---- | ---------- | -------------------- | :---: | :--------: |
+| 1    | Coach      | Onboarding Ease      |  7.7  |    0.8     |
+| 2    | Coach      | Emotional Engagement |  7.7  |    0.8     |
+| 3    | Coach      | Info Architecture    |  7.7  |    0.8     |
+| 4    | Individual | Emotional Engagement |  7.7  |    0.8     |
+| 5    | Individual | Onboarding Ease      |  7.7  |    0.8     |
+| 6    | Coach      | Feedback & Progress  |  7.8  |    0.7     |
+| 7    | Coach      | Cognitive Load       |  7.8  |    0.7     |
+| 8    | Coach      | Trust & Credibility  |  7.8  |    0.7     |
+
+### Phase N Commentary
+
+Phase N was a surgical strike on Coach TC — the single lowest dimension at 7.5. Three complementary fixes attacked TC from three angles: safety (archive confirmation), resilience (AI error recovery), and transparency (metric definitions). The +0.3 lift on Coach TC (7.5 → 7.8) is the joint-largest single-dimension jump alongside Coach CL in Phase L, and it eliminates the "single lowest" outlier.
+
+**The floor has risen.** For the first time, no dimension across any user type scores below 7.7. The remaining gap is a broad plateau: 8 dimensions clustered at 7.7-7.8, all needing +0.7-0.8 to reach the 8.5 target. This is a different optimization challenge — instead of fixing outlier bottlenecks, the next gains require raising the entire floor.
+
+**Next levers:** The 7.7 cluster (Coach OE, Coach EE, Coach IA, Individual EE, Individual OE) is the new frontier. These dimensions share a common theme: depth of experience. OE needs onboarding to feel genuinely helpful (not just functional). EE needs the app to acknowledge the user's journey and effort. IA needs information to surface proactively, not just be findable. Broader structural changes may be needed to break through the 7.7 plateau.
