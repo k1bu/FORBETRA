@@ -6,7 +6,14 @@
 
 	import { goto } from '$app/navigation';
 
-	type SortKey = 'name' | 'avgEffort' | 'avgProgress' | 'stability' | 'trajectory' | 'completionRate' | 'alertCount';
+	type SortKey =
+		| 'name'
+		| 'avgEffort'
+		| 'avgProgress'
+		| 'stability'
+		| 'trajectory'
+		| 'completionRate'
+		| 'alertCount';
 	let sortKey = $state<SortKey>('name');
 	let sortAsc = $state(true);
 	let showAllWeeks = $state(false);
@@ -27,15 +34,20 @@
 		}
 	};
 
-	const sortedComparison = $derived([...data.clientComparison].sort((a, b) => {
-		const aVal = a[sortKey];
-		const bVal = b[sortKey];
-		if (aVal === null && bVal === null) return 0;
-		if (aVal === null) return 1;
-		if (bVal === null) return -1;
-		const cmp = typeof aVal === 'string' ? aVal.localeCompare(bVal as string) : (aVal as number) - (bVal as number);
-		return sortAsc ? cmp : -cmp;
-	}));
+	const sortedComparison = $derived(
+		[...data.clientComparison].sort((a, b) => {
+			const aVal = a[sortKey];
+			const bVal = b[sortKey];
+			if (aVal === null && bVal === null) return 0;
+			if (aVal === null) return 1;
+			if (bVal === null) return -1;
+			const cmp =
+				typeof aVal === 'string'
+					? aVal.localeCompare(bVal as string)
+					: (aVal as number) - (bVal as number);
+			return sortAsc ? cmp : -cmp;
+		})
+	);
 
 	const formatPercent = (value: number | null | undefined) => {
 		if (value === null || value === undefined) return '—';
@@ -56,6 +68,41 @@
 		if (sortKey !== key) return '';
 		return sortAsc ? ' \u2191' : ' \u2193';
 	};
+
+	function downloadCSV() {
+		const headers = [
+			'Name',
+			'Objective',
+			'Effort',
+			'Performance',
+			'Stability',
+			'Trajectory',
+			'Completion %',
+			'Alerts'
+		];
+		const rows = sortedComparison.map((row) => [
+			row.name,
+			row.objective ?? '',
+			row.avgEffort !== null ? row.avgEffort.toFixed(1) : '',
+			row.avgProgress !== null ? row.avgProgress.toFixed(1) : '',
+			row.stability !== null ? String(row.stability) : '',
+			row.trajectory !== null ? String(row.trajectory) : '',
+			row.completionRate !== null ? String(row.completionRate) : '',
+			String(row.alertCount)
+		]);
+
+		const csvContent = [headers, ...rows]
+			.map((row) => row.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(','))
+			.join('\n');
+
+		const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+		const url = URL.createObjectURL(blob);
+		const link = document.createElement('a');
+		link.href = url;
+		link.download = `forbetra-analytics-${new Date().toISOString().slice(0, 10)}.csv`;
+		link.click();
+		URL.revokeObjectURL(url);
+	}
 </script>
 
 <svelte:head>
@@ -67,15 +114,49 @@
 	<header class="flex items-center justify-between">
 		<div>
 			<nav aria-label="Breadcrumb" class="mb-2">
+				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<ol class="flex items-center gap-1.5 text-sm text-text-tertiary">
-					<li><a href="/coach" class="rounded transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">Dashboard</a></li>
-					<li aria-hidden="true" class="text-text-muted"><svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg></li>
+					<li>
+						<a
+							href="/coach"
+							class="rounded transition-colors hover:text-text-primary focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
+							>Dashboard</a
+						>
+					</li>
+					<li aria-hidden="true" class="text-text-muted">
+						<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+							><path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M9 5l7 7-7 7"
+							/></svg
+						>
+					</li>
 					<li><span class="font-medium text-text-primary">Analytics</span></li>
 				</ol>
+				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 			</nav>
 			<h1 class="text-3xl font-bold text-text-primary">Analytics Dashboard</h1>
 			<p class="mt-2 text-text-secondary">Comprehensive metrics and insights across all clients</p>
 		</div>
+		{#if data.clientComparison.length > 0}
+			<button
+				type="button"
+				onclick={downloadCSV}
+				class="inline-flex items-center gap-2 rounded-lg border border-border-default bg-surface-raised px-4 py-2 text-sm font-semibold text-text-secondary transition-all hover:border-accent/30 hover:text-accent"
+			>
+				<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+					/>
+				</svg>
+				Export CSV
+			</button>
+		{/if}
 	</header>
 
 	<!-- Overall Analytics Cards -->
@@ -85,7 +166,7 @@
 				<AlertTriangle class="h-4 w-4 text-text-muted" />
 				<p class="text-xs font-medium text-text-tertiary">Total Alerts</p>
 			</div>
-			<p class="text-3xl font-bold tabular-nums text-text-primary">{data.analytics.totalAlerts}</p>
+			<p class="text-3xl font-bold text-text-primary tabular-nums">{data.analytics.totalAlerts}</p>
 			<div class="mt-1 flex gap-2 text-xs">
 				<span class="font-semibold text-error">High: {data.analytics.highPriorityAlerts}</span>
 				<span class="text-warning">Med: {data.analytics.mediumPriorityAlerts}</span>
@@ -97,7 +178,7 @@
 				<BarChart3 class="h-4 w-4 text-text-muted" />
 				<p class="text-xs font-medium text-text-tertiary">Avg. Stability</p>
 			</div>
-			<p class="text-3xl font-bold tabular-nums text-text-primary">
+			<p class="text-3xl font-bold text-text-primary tabular-nums">
 				{formatScore(data.analytics.avgStability)}
 			</p>
 		</div>
@@ -106,7 +187,7 @@
 				<Target class="h-4 w-4 text-text-muted" />
 				<p class="text-xs font-medium text-text-tertiary">Avg. Alignment</p>
 			</div>
-			<p class="text-3xl font-bold tabular-nums text-text-primary">
+			<p class="text-3xl font-bold text-text-primary tabular-nums">
 				{formatPercent(data.analytics.avgAlignment)}
 			</p>
 		</div>
@@ -115,11 +196,13 @@
 				<TrendingUp class="h-4 w-4 text-text-muted" />
 				<p class="text-xs font-medium text-text-tertiary">Avg. Progress</p>
 			</div>
-			<p class="text-3xl font-bold tabular-nums text-text-primary">
+			<p class="text-3xl font-bold text-text-primary tabular-nums">
 				{formatAverage(data.analytics.overallAvgProgress)}/5
 			</p>
 			{#if data.analytics.overallAvgEffort !== null}
-				<p class="mt-1 text-xs text-text-muted">Effort: {formatAverage(data.analytics.overallAvgEffort)}/5</p>
+				<p class="mt-1 text-xs text-text-muted">
+					Effort: {formatAverage(data.analytics.overallAvgEffort)}/5
+				</p>
 			{/if}
 		</div>
 	</div>
@@ -131,95 +214,203 @@
 			<div class="scroll-shadow-container relative">
 				<div class="overflow-x-auto">
 					<table class="w-full border-collapse text-sm">
-					<thead>
-						<tr class="border-b border-border-default">
-							<th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-text-tertiary" aria-sort={sortKey === 'name' ? (sortAsc ? 'ascending' : 'descending') : 'none'}>
-								<button type="button" class="flex items-center gap-1" onclick={() => toggleSort('name')}>
-									Name{sortIndicator('name')}
-								</button>
-							</th>
-							<th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-text-tertiary">
-								Objective
-							</th>
-							<th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wider text-text-tertiary" aria-sort={sortKey === 'avgEffort' ? (sortAsc ? 'ascending' : 'descending') : 'none'}>
-								<button type="button" class="flex items-center gap-1" onclick={() => toggleSort('avgEffort')}>
-									Effort{sortIndicator('avgEffort')}
-								</button>
-							</th>
-							<th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wider text-text-tertiary" aria-sort={sortKey === 'avgProgress' ? (sortAsc ? 'ascending' : 'descending') : 'none'}>
-								<button type="button" class="flex items-center gap-1" onclick={() => toggleSort('avgProgress')}>
-									Performance{sortIndicator('avgProgress')}
-								</button>
-							</th>
-							<th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wider text-text-tertiary" aria-sort={sortKey === 'stability' ? (sortAsc ? 'ascending' : 'descending') : 'none'}>
-								<button type="button" class="flex items-center gap-1" onclick={() => toggleSort('stability')}>
-									Stability{sortIndicator('stability')}
-								</button>
-							</th>
-							<th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wider text-text-tertiary" aria-sort={sortKey === 'trajectory' ? (sortAsc ? 'ascending' : 'descending') : 'none'}>
-								<button type="button" class="flex items-center gap-1" onclick={() => toggleSort('trajectory')}>
-									Trajectory{sortIndicator('trajectory')}
-								</button>
-							</th>
-							<th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wider text-text-tertiary" aria-sort={sortKey === 'completionRate' ? (sortAsc ? 'ascending' : 'descending') : 'none'}>
-								<button type="button" class="flex items-center gap-1" onclick={() => toggleSort('completionRate')}>
-									Completion{sortIndicator('completionRate')}
-								</button>
-							</th>
-							<th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wider text-text-tertiary" aria-sort={sortKey === 'alertCount' ? (sortAsc ? 'ascending' : 'descending') : 'none'}>
-								<button type="button" class="flex items-center gap-1" onclick={() => toggleSort('alertCount')}>
-									Alerts{sortIndicator('alertCount')}
-								</button>
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						{#each sortedComparison as row}
-							<tr
-								class="border-b border-border-default transition-colors hover:bg-accent-muted/50 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface-base"
-								tabindex="0"
-								role="link"
-								onclick={() => goto(`/coach/session/${row.clientId}`)}
-								onkeydown={(e) => { if (e.key === 'Enter') goto(`/coach/session/${row.clientId}`) }}
-							>
-								<td class="px-3 py-2.5 font-semibold text-accent hover:underline">{row.name}</td>
-								<td class="px-3 py-2.5 text-text-secondary max-w-[200px] truncate">{row.objective}</td>
-								<td class="px-3 py-2.5 text-center font-semibold {row.avgEffort !== null && row.avgEffort >= 7 ? 'text-success' : row.avgEffort !== null && row.avgEffort < 4 ? 'text-error' : 'text-text-secondary'}">
-									{formatAverage(row.avgEffort)}
-								</td>
-								<td class="px-3 py-2.5 text-center font-semibold {row.avgProgress !== null && row.avgProgress >= 7 ? 'text-success' : row.avgProgress !== null && row.avgProgress < 4 ? 'text-error' : 'text-text-secondary'}">
-									{formatAverage(row.avgProgress)}
-								</td>
-								<td class="px-3 py-2.5 text-center">
-									{#if row.stability !== null}
-										<span class="text-xs font-semibold {row.stability >= 70 ? 'text-success' : row.stability >= 40 ? 'text-warning' : 'text-error'}">
-											{row.stability}
-										</span>
-									{:else}
-										<span class="text-text-muted">—</span>
-									{/if}
-								</td>
-								<td class="px-3 py-2.5 text-center font-semibold {row.trajectory !== null && row.trajectory > 0 ? 'text-success' : row.trajectory !== null && row.trajectory < 0 ? 'text-error' : 'text-text-tertiary'}">
-									{#if row.trajectory !== null}
-										{row.trajectory > 0 ? '+' : ''}{row.trajectory}
-									{:else}
-										—
-									{/if}
-								</td>
-								<td class="px-3 py-2.5 text-center text-text-secondary">
-									{row.completionRate !== null ? `${row.completionRate}%` : '—'}
-								</td>
-								<td class="px-3 py-2.5 text-center">
-									{#if row.alertCount > 0}
-										<span class="text-xs font-bold text-error">{row.alertCount}</span>
-									{:else}
-										<span class="text-text-muted">0</span>
-									{/if}
-								</td>
+						<thead>
+							<tr class="border-b border-border-default">
+								<th
+									class="px-3 py-2 text-left text-xs font-semibold tracking-wider text-text-tertiary uppercase"
+									aria-sort={sortKey === 'name' ? (sortAsc ? 'ascending' : 'descending') : 'none'}
+								>
+									<button
+										type="button"
+										class="flex items-center gap-1"
+										onclick={() => toggleSort('name')}
+									>
+										Name{sortIndicator('name')}
+									</button>
+								</th>
+								<th
+									class="px-3 py-2 text-left text-xs font-semibold tracking-wider text-text-tertiary uppercase"
+								>
+									Objective
+								</th>
+								<th
+									class="px-3 py-2 text-center text-xs font-semibold tracking-wider text-text-tertiary uppercase"
+									aria-sort={sortKey === 'avgEffort'
+										? sortAsc
+											? 'ascending'
+											: 'descending'
+										: 'none'}
+								>
+									<button
+										type="button"
+										class="flex items-center gap-1"
+										onclick={() => toggleSort('avgEffort')}
+									>
+										Effort{sortIndicator('avgEffort')}
+									</button>
+								</th>
+								<th
+									class="px-3 py-2 text-center text-xs font-semibold tracking-wider text-text-tertiary uppercase"
+									aria-sort={sortKey === 'avgProgress'
+										? sortAsc
+											? 'ascending'
+											: 'descending'
+										: 'none'}
+								>
+									<button
+										type="button"
+										class="flex items-center gap-1"
+										onclick={() => toggleSort('avgProgress')}
+									>
+										Performance{sortIndicator('avgProgress')}
+									</button>
+								</th>
+								<th
+									class="px-3 py-2 text-center text-xs font-semibold tracking-wider text-text-tertiary uppercase"
+									aria-sort={sortKey === 'stability'
+										? sortAsc
+											? 'ascending'
+											: 'descending'
+										: 'none'}
+								>
+									<button
+										type="button"
+										class="flex items-center gap-1"
+										onclick={() => toggleSort('stability')}
+									>
+										Stability{sortIndicator('stability')}
+									</button>
+								</th>
+								<th
+									class="px-3 py-2 text-center text-xs font-semibold tracking-wider text-text-tertiary uppercase"
+									aria-sort={sortKey === 'trajectory'
+										? sortAsc
+											? 'ascending'
+											: 'descending'
+										: 'none'}
+								>
+									<button
+										type="button"
+										class="flex items-center gap-1"
+										onclick={() => toggleSort('trajectory')}
+									>
+										Trajectory{sortIndicator('trajectory')}
+									</button>
+								</th>
+								<th
+									class="px-3 py-2 text-center text-xs font-semibold tracking-wider text-text-tertiary uppercase"
+									aria-sort={sortKey === 'completionRate'
+										? sortAsc
+											? 'ascending'
+											: 'descending'
+										: 'none'}
+								>
+									<button
+										type="button"
+										class="flex items-center gap-1"
+										onclick={() => toggleSort('completionRate')}
+									>
+										Completion{sortIndicator('completionRate')}
+									</button>
+								</th>
+								<th
+									class="px-3 py-2 text-center text-xs font-semibold tracking-wider text-text-tertiary uppercase"
+									aria-sort={sortKey === 'alertCount'
+										? sortAsc
+											? 'ascending'
+											: 'descending'
+										: 'none'}
+								>
+									<button
+										type="button"
+										class="flex items-center gap-1"
+										onclick={() => toggleSort('alertCount')}
+									>
+										Alerts{sortIndicator('alertCount')}
+									</button>
+								</th>
 							</tr>
-						{/each}
-					</tbody>
-				</table>
+						</thead>
+						<tbody>
+							<!-- eslint-disable svelte/no-navigation-without-resolve -->
+							{#each sortedComparison as row (row.clientId)}
+								<tr
+									class="cursor-pointer border-b border-border-default transition-colors hover:bg-accent-muted/50 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface-base focus-visible:outline-none"
+									tabindex="0"
+									role="link"
+									onclick={() => goto(`/coach/session/${row.clientId}`)}
+									onkeydown={(e) => {
+										if (e.key === 'Enter') goto(`/coach/session/${row.clientId}`);
+									}}
+								>
+									<td class="px-3 py-2.5 font-semibold text-accent hover:underline">{row.name}</td>
+									<td class="max-w-[200px] truncate px-3 py-2.5 text-text-secondary"
+										>{row.objective}</td
+									>
+									<td
+										class="px-3 py-2.5 text-center font-semibold {row.avgEffort !== null &&
+										row.avgEffort >= 7
+											? 'text-success'
+											: row.avgEffort !== null && row.avgEffort < 4
+												? 'text-error'
+												: 'text-text-secondary'}"
+									>
+										{formatAverage(row.avgEffort)}
+									</td>
+									<td
+										class="px-3 py-2.5 text-center font-semibold {row.avgProgress !== null &&
+										row.avgProgress >= 7
+											? 'text-success'
+											: row.avgProgress !== null && row.avgProgress < 4
+												? 'text-error'
+												: 'text-text-secondary'}"
+									>
+										{formatAverage(row.avgProgress)}
+									</td>
+									<td class="px-3 py-2.5 text-center">
+										{#if row.stability !== null}
+											<span
+												class="text-xs font-semibold {row.stability >= 70
+													? 'text-success'
+													: row.stability >= 40
+														? 'text-warning'
+														: 'text-error'}"
+											>
+												{row.stability}
+											</span>
+										{:else}
+											<span class="text-text-muted">—</span>
+										{/if}
+									</td>
+									<td
+										class="px-3 py-2.5 text-center font-semibold {row.trajectory !== null &&
+										row.trajectory > 0
+											? 'text-success'
+											: row.trajectory !== null && row.trajectory < 0
+												? 'text-error'
+												: 'text-text-tertiary'}"
+									>
+										{#if row.trajectory !== null}
+											{row.trajectory > 0 ? '+' : ''}{row.trajectory}
+										{:else}
+											—
+										{/if}
+									</td>
+									<td class="px-3 py-2.5 text-center text-text-secondary">
+										{row.completionRate !== null ? `${row.completionRate}%` : '—'}
+									</td>
+									<td class="px-3 py-2.5 text-center">
+										{#if row.alertCount > 0}
+											<span class="text-xs font-bold text-error">{row.alertCount}</span>
+										{:else}
+											<span class="text-text-muted">0</span>
+										{/if}
+									</td>
+								</tr>
+							{/each}
+							<!-- eslint-enable svelte/no-navigation-without-resolve -->
+						</tbody>
+					</table>
 				</div>
 			</div>
 		</section>
@@ -233,12 +424,14 @@
 				<p class="mb-6 max-w-sm text-sm text-text-secondary">
 					Invite clients to see performance analytics here.
 				</p>
+				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<a
 					href="/coach/invitations"
 					class="inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-accent-hover"
 				>
 					Invite Clients
 				</a>
+				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 			</div>
 		</section>
 	{/if}
@@ -249,12 +442,16 @@
 			<h2 class="mb-1 text-2xl font-bold text-text-primary">Portfolio Trends</h2>
 			<p class="mb-4 text-xs text-text-tertiary">Weekly averages across all active clients</p>
 			<div class="overflow-x-auto">
-				<div class="flex items-end gap-1" style="min-width: {visibleTimeSeries.length * 60}px; height: 200px;">
-					{#each visibleTimeSeries as week}
+				<div
+					class="flex items-end gap-1"
+					style="min-width: {visibleTimeSeries.length * 60}px; height: 200px;"
+				>
+					{#each visibleTimeSeries as week (week.weekNumber)}
 						{@const maxScore = 10}
 						{@const effortHeight = week.avgEffort !== null ? (week.avgEffort / maxScore) * 160 : 0}
-						{@const perfHeight = week.avgPerformance !== null ? (week.avgPerformance / maxScore) * 160 : 0}
-						<div class="flex flex-col items-center gap-1 flex-1 min-w-[50px]">
+						{@const perfHeight =
+							week.avgPerformance !== null ? (week.avgPerformance / maxScore) * 160 : 0}
+						<div class="flex min-w-[50px] flex-1 flex-col items-center gap-1">
 							<div class="flex items-end gap-0.5" style="height: 160px;">
 								<div
 									class="w-5 rounded-t bg-data-effort transition-all"
@@ -288,13 +485,14 @@
 						onclick={() => (showAllWeeks = !showAllWeeks)}
 						class="ml-auto rounded-lg border border-border-default bg-surface-raised px-3 py-1 text-xs font-semibold text-text-secondary transition-all hover:border-accent/30 hover:text-accent"
 					>
-						{showAllWeeks ? 'Show recent 16 weeks' : `Show all ${data.portfolioTimeSeries.length} weeks`}
+						{showAllWeeks
+							? 'Show recent 16 weeks'
+							: `Show all ${data.portfolioTimeSeries.length} weeks`}
 					</button>
 				{/if}
 			</div>
 		</section>
 	{/if}
-
 </section>
 
 <style>

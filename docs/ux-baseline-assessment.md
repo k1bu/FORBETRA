@@ -342,39 +342,39 @@ _None found._ No task is fully blocked. The app is functional.
 
 ### Major Issues (P1) — Score Impact: -2 to -3
 
-| #   | Issue                                                                                                  | User Types | Dimensions | Freq | Effort | Priority Score |
-| --- | ------------------------------------------------------------------------------------------------------ | :--------: | :--------: | :--: | :----: | :------------: |
-| 1   | **Individual hub: 8-12 information zones** — cognitive overload, hard to scan                          |     I      | CL, IA, FI |  3   |  M(2)  |     0.203      |
-| 2   | **11-button rating scale (0-10)** — too many options, cramped on mobile, no scoring guide              |    I, S    |   CT, CL   |  3   |  M(2)  |     0.191      |
-| 3   | **Coach session page: no tabs/sections** — everything loaded at once, must scroll to notes             |     C      | CL, IA, CT |  3   |  M(2)  |     0.158      |
-| 4   | **No celebration/feedback after key milestones** — adding stakeholder, completing cycle, first AI prep |    All     |   EE, FP   |  2   |  S(1)  |     0.132      |
-| 5   | **Coach pre-fill feature hidden in accordion** — coaches don't know it exists                          |     C      |   OE, CT   |  2   |  S(1)  |     0.108      |
-| 6   | **New Cycle form: too long, no steps/progress** — 5+ sections in one scroll                            |     I      |   CL, CT   |  1   |  M(2)  |     0.101      |
-| 7   | **Coach roster: no risk/urgency sort or filter** — can't quickly identify at-risk clients              |     C      |   CT, IA   |  3   |  M(2)  |     0.095      |
-| 8   | **No guidance when no action available** — return visit with nothing to do feels empty                 |     I      | FP, EE, VP |  2   |  S(1)  |     0.090      |
-| 9   | **Metrics unexplained everywhere** — Stability, Trajectory, Alignment have no definitions              |    I, C    |   CL, CP   |  2   |  S(1)  |     0.087      |
-| 10  | **Insights: 6 section colors** — cognitive overload, unmemorable mapping                               |     I      |   CL, FI   |  2   |  S(1)  |     0.081      |
-| 11  | **No privacy statement on stakeholder form** — Linda Park would hesitate                               |     S      |     TC     |  1   |  S(1)  |     0.075      |
-| 12  | **Coach analytics: no export** — Scale-Focused Coach (Amara) blocked                                   |     C      |   VP, CT   |  2   |  L(3)  |     0.065      |
-| 13  | **No bulk invite for coaches** — one-at-a-time paradigm for 30+ clients                                |     C      |     CT     |  1   |  L(3)  |     0.045      |
+| #   | Issue                                                                                               | User Types | Dimensions | Freq | Effort | Priority Score |
+| --- | --------------------------------------------------------------------------------------------------- | :--------: | :--------: | :--: | :----: | :------------: |
+| 1   | ~~**Individual hub: 8-12 information zones**~~ — **FIXED Phase A.** 10→5 zones.                     |     I      | CL, IA, FI |  3   |  M(2)  |     0.203      |
+| 2   | **11-button rating scale (0-10)** — **VETOED.** Product owner: integral to ratings philosophy.      |    I, S    |   CT, CL   |  3   |  M(2)  |     0.191      |
+| 3   | ~~**Coach session page: no tabs/sections**~~ — **FIXED Phase A.** 4 tabs added.                     |     C      | CL, IA, CT |  3   |  M(2)  |     0.158      |
+| 4   | **No celebration/feedback after key milestones** — **VETOED (animations).** Replaced with empties.  |    All     |   EE, FP   |  2   |  S(1)  |     0.132      |
+| 5   | ~~**Coach pre-fill feature hidden in accordion**~~ — **FIXED Phase A.** Toggle switch + onboarding. |     C      |   OE, CT   |  2   |  S(1)  |     0.108      |
+| 6   | **New Cycle form: too long, no steps/progress** — 5+ sections in one scroll                         |     I      |   CL, CT   |  1   |  M(2)  |     0.101      |
+| 7   | ~~**Coach roster: no risk/urgency sort**~~ — **FIXED Phase A.** 3-way sort dropdown.                |     C      |   CT, IA   |  3   |  M(2)  |     0.095      |
+| 8   | ~~**No guidance when no action available**~~ — **FIXED Phase A.** Adaptive empty states.            |     I      | FP, EE, VP |  2   |  S(1)  |     0.090      |
+| 9   | ~~**Metrics unexplained everywhere**~~ — **FIXED Phase A.** One-line definitions + tooltips.        |    I, C    |   CL, CP   |  2   |  S(1)  |     0.087      |
+| 10  | **Insights: 6 section colors** — cognitive overload, unmemorable mapping                            |     I      |   CL, FI   |  2   |  S(1)  |     0.081      |
+| 11  | ~~**No privacy statement on stakeholder form**~~ — **FIXED Phase A.** Added to welcome modal.       |     S      |     TC     |  1   |  S(1)  |     0.075      |
+| 12  | **Coach analytics: no export** — Scale-Focused Coach (Amara) blocked                                |     C      |   VP, CT   |  2   |  L(3)  |     0.065      |
+| 13  | **No bulk invite for coaches** — one-at-a-time paradigm for 30+ clients                             |     C      |     CT     |  1   |  L(3)  |     0.045      |
 
 ### Minor Issues (P2) — Score Impact: -1 to -2
 
-| #   | Issue                                                     | User Types | Dimensions | Freq | Effort | Priority Score |
-| --- | --------------------------------------------------------- | :--------: | :--------: | :--: | :----: | :------------: |
-| 14  | Behavioral indicators collapsed by default on check-in    |     I      |   CT, CL   |  3   |  S(1)  |     0.068      |
-| 15  | Mobile tab bar hides History, Ask, Settings in "More"     |     I      |     IA     |  3   |  S(1)  |     0.054      |
-| 16  | Relationship field on stakeholder form has no examples    |     I      |   CP, CT   |  2   |  S(1)  |     0.045      |
-| 17  | Chat loses history on page refresh (state only)           |     I      |   FP, VP   |  2   |  M(2)  |     0.038      |
-| 18  | Stakeholder comment placeholder is vague                  |     S      |   CT, VP   |  2   |  S(1)  |     0.038      |
-| 19  | Coach notes week number requires manual entry             |     C      |   CT, CL   |  3   |  S(1)  |     0.036      |
-| 20  | Score reveal not signposted before submission             |     S      |   TC, EE   |  1   |  S(1)  |     0.035      |
-| 21  | History page: all weeks expanded, no search/filter        |     I      |   IA, CL   |  1   |  M(2)  |     0.030      |
-| 22  | Read-only check-in shows disabled form instead of summary |     I      |   FP, CL   |  1   |  M(2)  |     0.028      |
-| 23  | No loading skeletons on hub/roster initial load           |    I, C    |     FP     |  3   |  S(1)  |     0.027      |
-| 24  | Hub/Dashboard distinction unclear                         |     I      |   CP, IA   |  2   |  L(3)  |     0.023      |
-| 25  | Invite form doesn't clear after success                   |     C      |     CT     |  2   |  S(1)  |     0.022      |
-| 26  | Desktop sidebar color contrast may be low                 |     I      |   FI, TC   |  3   |  S(1)  |     0.020      |
+| #   | Issue                                                                                              | User Types | Dimensions | Freq | Effort | Priority Score |
+| --- | -------------------------------------------------------------------------------------------------- | :--------: | :--------: | :--: | :----: | :------------: |
+| 14  | ~~Behavioral indicators collapsed by default~~ — **FIXED Phase A.** Auto-expand on first check-in. |     I      |   CT, CL   |  3   |  S(1)  |     0.068      |
+| 15  | Mobile tab bar hides History, Ask, Settings in "More"                                              |     I      |     IA     |  3   |  S(1)  |     0.054      |
+| 16  | Relationship field on stakeholder form has no examples                                             |     I      |   CP, CT   |  2   |  S(1)  |     0.045      |
+| 17  | Chat loses history on page refresh (state only)                                                    |     I      |   FP, VP   |  2   |  M(2)  |     0.038      |
+| 18  | Stakeholder comment placeholder is vague                                                           |     S      |   CT, VP   |  2   |  S(1)  |     0.038      |
+| 19  | Coach notes week number requires manual entry                                                      |     C      |   CT, CL   |  3   |  S(1)  |     0.036      |
+| 20  | Score reveal not signposted before submission                                                      |     S      |   TC, EE   |  1   |  S(1)  |     0.035      |
+| 21  | History page: all weeks expanded, no search/filter                                                 |     I      |   IA, CL   |  1   |  M(2)  |     0.030      |
+| 22  | Read-only check-in shows disabled form instead of summary                                          |     I      |   FP, CL   |  1   |  M(2)  |     0.028      |
+| 23  | No loading skeletons on hub/roster initial load                                                    |    I, C    |     FP     |  3   |  S(1)  |     0.027      |
+| 24  | Hub/Dashboard distinction unclear                                                                  |     I      |   CP, IA   |  2   |  L(3)  |     0.023      |
+| 25  | Invite form doesn't clear after success                                                            |     C      |     CT     |  2   |  S(1)  |     0.022      |
+| 26  | Desktop sidebar color contrast may be low                                                          |     I      |   FI, TC   |  3   |  S(1)  |     0.020      |
 
 ### Polish Issues (P3) — Score Impact: -0.5 to -1
 
@@ -418,29 +418,61 @@ Sorted by Priority Score (descending). These are the fixes that will move the pl
 
 ---
 
-## 6. Revised Phase A Checklist
+## 6. Phase A Results
 
-Based on validated priority scores, here's the refined Phase A plan:
+### Delivered
 
-### Week 1: Core Task Flows (Est. lift: +0.52)
+- [x] **Hub restructure** — 10 zones → 5: Top Bar, Hero Next Action, At-a-Glance (2 cards), Quick Insight (1) + AI teaser, Recent Activity. Max width reduced to `max-w-3xl`.
+- [x] **Coach session tabs** — 4 tabs: Prep (AI + alerts), Timeline, Notes, Chart. Alert indicator dot on Prep tab.
+- [x] **Surface pre-fill** — Accordion → visible toggle switch with description. Added mention in coach onboarding step 3.
+- [x] **Roster urgency sort** — 3-way sort: Needs attention / Name / Recent.
+- [x] **Adaptive empty states** — Hub shows contextual guidance: "Appears after your first check-in", "Appears when stakeholders respond", "Your first check-in opens on [Day]" with stakeholder add nudge.
+- [x] **Privacy statement** — Added to stakeholder feedback welcome modal: "Your feedback is shared with [Name] and their coach. Your name is attached to your ratings."
+- [x] **Metric definitions** — One-line definitions on insights page (Stability, Trajectory, Alignment). Title tooltips on coach roster.
+- [x] **Auto-expand behavioral indicators** — Expanded by default on first check-in (`!data.previousEntry && data.currentWeek <= 1`).
 
-- [ ] **Hub restructure** — Collapse to 4-5 zones: Next Action, At-a-Glance (2 cards), Quick Insight (1), Recent Activity
-- [ ] **Rating input simplification** — Replace 11-button grid. Options: 5-point labeled scale, continuous slider, or 7-point (1-3-5-7-10 anchored). Test with James persona.
-- [ ] **Add scoring guide** — Show anchor examples: "5 = Average focus this week", "8 = Went above and beyond"
+### Vetoed by Product Owner
 
-### Week 2: Coach Experience (Est. lift: +0.33)
+- **Rating input simplification** — "The 10-point scale is integral to how I think about ratings." 11-button grid stays.
+- **Celebration animations** — "Success animations seem very cheesy." Replaced with adaptive empty states approach.
 
-- [ ] **Session page tabs** — Split into: Prep (AI insights + alerts), Timeline (reflections), Notes, Chart
-- [ ] **Surface pre-fill** — Move out of accordion into visible "Pre-fill client's setup" section with toggle. Add to onboarding step 3.
-- [ ] **Roster urgency sort** — Add "Sort by: Risk level, Last active, Completion rate"
+### Phase A Dimension Scores
 
-### Week 3: Feedback Loops + Trust (Est. lift: +0.12)
+#### Individual (was 6.73 → 7.20, +0.47)
 
-- [ ] **Milestone celebrations** — Success animations for: stakeholder added, first AI insight viewed, cycle completed, first stakeholder feedback received
-- [ ] **Adaptive empty states** — Hub: "Your first check-in opens on [Day]. Here's what to do in the meantime: [Add stakeholders, Review your objective]"
-- [ ] **Privacy statement** — Add to stakeholder form: "Your feedback is shared with [Name] and their coach. Your name is attached to your ratings."
-- [ ] **Metric definitions** — Tooltip on Stability, Trajectory, Alignment: one sentence each
-- [ ] **Expand behavioral indicators** — Auto-expand on first check-in (track via localStorage)
+| #   | Dimension                 | Baseline | Phase A | Delta | Evidence                                                                                                     |
+| --- | ------------------------- | :------: | :-----: | :---: | ------------------------------------------------------------------------------------------------------------ |
+| 1   | First Impression (FI)     |   7.0    | **7.5** | +0.5  | Hub: clean 5-zone layout, max-w-3xl, hero card. Data-curated vs data-dense.                                  |
+| 2   | Clarity of Purpose (CP)   |   7.5    | **8.0** | +0.5  | Hero next-action makes purpose instant. Metric definitions explain data. Empty states explain what's coming. |
+| 3   | Onboarding Ease (OE)      |   6.5    | **6.8** | +0.3  | Behavioral indicators auto-expand on first check-in. No scoring guide (vetoed).                              |
+| 4   | Core Task Flow (CT)       |   7.0    | **7.3** | +0.3  | Hero card points to check-in. Auto-expand indicators help first-timers. 11-button grid unchanged.            |
+| 5   | Info Architecture (IA)    |   6.0    | **7.0** | +1.0  | 10 zones → 5. Clear hierarchy: action → data → insight → history.                                            |
+| 6   | Feedback & Progress (FP)  |   7.0    | **7.5** | +0.5  | Adaptive empty states. AI insight teaser with "Read →".                                                      |
+| 7   | Cognitive Load (CL)       |   5.5    | **6.5** | +1.0  | Zones halved. Single insight instead of 3. Two metric cards instead of 4. 11-button grid still drags.        |
+| 8   | Trust & Credibility (TC)  |   7.5    | **7.5** |   0   | No Individual trust changes.                                                                                 |
+| 9   | Emotional Engagement (EE) |   6.5    | **6.8** | +0.3  | Empty states feel helpful. Hub feels focused. No celebrations (vetoed).                                      |
+| 10  | Value Perception (VP)     |   7.0    | **7.3** | +0.3  | AI insight teaser on hub. Metric definitions make data interpretable.                                        |
+
+#### Coach (was 6.27 → 6.85, +0.58)
+
+| #   | Dimension                 | Baseline | Phase A | Delta | Evidence                                                                                              |
+| --- | ------------------------- | :------: | :-----: | :---: | ----------------------------------------------------------------------------------------------------- |
+| 1   | First Impression (FI)     |   6.5    | **7.0** | +0.5  | Session page: clean tabbed UI. Roster: sort controls.                                                 |
+| 2   | Clarity of Purpose (CP)   |   7.0    | **7.5** | +0.5  | "Prep" tab clearly labeled. Pre-fill toggle has description. Metric tooltips.                         |
+| 3   | Onboarding Ease (OE)      |   6.5    | **7.0** | +0.5  | Pre-fill mentioned in onboarding step 3 with Invitations link.                                        |
+| 4   | Core Task Flow (CT)       |   6.5    | **7.5** | +1.0  | Session tabs: Prep visible, Notes one click. Pre-fill is a toggle. Roster sort finds at-risk clients. |
+| 5   | Info Architecture (IA)    |   6.0    | **7.0** | +1.0  | 4 clear tabs on session. Roster sort. Content organized by task.                                      |
+| 6   | Feedback & Progress (FP)  |   5.5    | **6.0** | +0.5  | Alert dot on Prep tab. Empty states for Timeline/Chart with no data.                                  |
+| 7   | Cognitive Load (CL)       |   5.5    | **6.5** | +1.0  | Session: one tab at a time. Pre-fill: toggle vs accordion. Metric tooltips.                           |
+| 8   | Trust & Credibility (TC)  |   7.0    | **7.0** |   0   | No coach trust changes.                                                                               |
+| 9   | Emotional Engagement (EE) |   5.0    | **5.0** |   0   | No celebrations (vetoed). Still clinical.                                                             |
+| 10  | Value Perception (VP)     |   6.5    | **7.0** | +0.5  | Urgency sort surfaces value. Tabs make AI prep prominent.                                             |
+
+#### Stakeholder (was 7.84 → 7.89, +0.05)
+
+| #   | Dimension                | Baseline | Phase A | Delta | Evidence                                                                             |
+| --- | ------------------------ | :------: | :-----: | :---: | ------------------------------------------------------------------------------------ |
+| 8   | Trust & Credibility (TC) |   8.0    | **8.5** | +0.5  | Privacy statement addresses Linda Park's hesitation. All other dimensions unchanged. |
 
 ---
 
@@ -449,5 +481,6 @@ Based on validated priority scores, here's the refined Phase A plan:
 | Date       | Phase          | Platform | Individual | Coach | Stakeholder | Notes                                   |
 | ---------- | -------------- | :------: | :--------: | :---: | :---------: | --------------------------------------- |
 | 2026-02-28 | Baseline       |   6.87   |    6.73    | 6.27  |    7.84     | Full codebase walkthrough, all personas |
-|            | Phase A target |   ~7.8   |    ~7.7    | ~7.3  |    ~8.4     | After 13 fixes                          |
+| 2026-02-28 | Phase A actual |   7.27   |    7.20    | 6.85  |    7.89     | 8 fixes shipped, 2 vetoed. +0.40 lift.  |
+|            | Phase B target |   ~7.7   |    ~7.5    | ~7.3  |    ~8.2     | New Cycle wizard, colors, export        |
 |            | Phase D target |   9.3+   |    9.3+    | 9.0+  |    9.5+     | Final goal                              |

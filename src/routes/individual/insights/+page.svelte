@@ -158,11 +158,11 @@
 
 	const sectionColors: Record<string, string> = {
 		'Executive Summary': 'border-l-purple-500',
-		'Progress Trajectory': 'border-l-blue-500',
-		'Perception Analysis': 'border-l-teal-500',
+		'Progress Trajectory': 'border-l-purple-500',
+		'Perception Analysis': 'border-l-amber-500',
 		'Key Strengths': 'border-l-emerald-500',
 		'Growth Opportunities': 'border-l-amber-500',
-		Recommendations: 'border-l-indigo-500'
+		Recommendations: 'border-l-emerald-500'
 	};
 
 	function getSectionColor(title: string): string {
