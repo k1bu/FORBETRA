@@ -643,6 +643,29 @@
 						</div>
 					</div>
 
+					<div
+						class="mx-auto max-w-2xl rounded-xl border border-success/20 bg-gradient-to-r from-success/5 to-transparent p-5 text-left"
+					>
+						<p class="mb-2 text-xs font-semibold tracking-wide text-success uppercase">
+							By week 4, you'll have
+						</p>
+						<ul class="space-y-1.5 text-sm text-text-secondary">
+							<li class="flex items-center gap-2">
+								<span class="h-1.5 w-1.5 shrink-0 rounded-full bg-success"></span>
+								Trend data showing how your effort and performance are changing
+							</li>
+							<li class="flex items-center gap-2">
+								<span class="h-1.5 w-1.5 shrink-0 rounded-full bg-success"></span>
+								360 perception gaps — where your self-view differs from stakeholders'
+							</li>
+							<li class="flex items-center gap-2">
+								<span class="h-1.5 w-1.5 shrink-0 rounded-full bg-success"></span>
+								AI-generated coaching insights tailored to your data
+							</li>
+						</ul>
+						<p class="mt-2 text-xs text-text-muted">Takes ~60 seconds per week to maintain.</p>
+					</div>
+
 					<button
 						type="button"
 						onclick={() => goToStep('objective')}

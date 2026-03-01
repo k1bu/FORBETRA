@@ -296,8 +296,50 @@
 					{/each}
 				</div>
 			{:else}
-				<div class="rounded-2xl border border-border-default bg-surface-raised p-8 text-center">
-					<p class="text-text-secondary">No stakeholders yet. Add one below to get started!</p>
+				<div class="rounded-2xl border border-dashed border-border-strong bg-surface-raised p-8">
+					<div class="mb-4 flex justify-center">
+						<div class="flex h-12 w-12 items-center justify-center rounded-full bg-accent-muted">
+							<svg class="h-6 w-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+								><path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+								/></svg
+							>
+						</div>
+					</div>
+					<h3 class="mb-1 text-center text-sm font-semibold text-text-primary">
+						Add 3&#8211;5 stakeholders to unlock 360 insights
+					</h3>
+					<p class="mb-4 text-center text-xs text-text-secondary">
+						Stakeholder feedback reveals perception gaps — the differences between how you see
+						yourself and how others experience you.
+					</p>
+					<div class="space-y-2 text-xs text-text-secondary">
+						<p class="font-semibold text-text-primary">Who to invite:</p>
+						<ul class="space-y-1.5 pl-1">
+							<li class="flex items-start gap-2">
+								<span class="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent"></span>Your direct
+								manager — sees your strategic impact
+							</li>
+							<li class="flex items-start gap-2">
+								<span class="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent"></span>1&#8211;2
+								peers — observe your day-to-day collaboration
+							</li>
+							<li class="flex items-start gap-2">
+								<span class="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent"></span>A direct
+								report — experiences your leadership firsthand
+							</li>
+							<li class="flex items-start gap-2">
+								<span class="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent"></span>A
+								cross-functional partner — sees how you operate across teams
+							</li>
+						</ul>
+					</div>
+					<p class="mt-3 text-center text-[10px] text-text-muted">
+						All feedback is anonymous. Stakeholders receive a simple 60-second form.
+					</p>
 				</div>
 			{/if}
 		</div>

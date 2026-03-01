@@ -432,6 +432,50 @@
 			{/if}
 		</div>
 
+		<!-- Coaching Impact Summary -->
+		{@const totalNotes = data.allCoachNotes.length}
+		{@const totalReflections = data.allReflections.filter((r) => r.submittedAt).length}
+		{@const stakeholderCount = data.client.stakeholders.length}
+		{@const hasEnoughData = totalReflections >= 2 || totalNotes >= 1}
+		{#if hasEnoughData}
+			<div class="rounded-xl border border-border-default bg-surface-subtle px-4 py-3">
+				<p class="mb-1.5 text-[10px] font-semibold tracking-wide text-text-muted uppercase">
+					Your coaching footprint
+				</p>
+				<div class="flex flex-wrap gap-x-5 gap-y-1 text-xs text-text-secondary">
+					<span
+						><strong class="text-text-primary">{totalNotes}</strong> note{totalNotes !== 1
+							? 's'
+							: ''} recorded</span
+					>
+					<span
+						><strong class="text-text-primary">{totalReflections}</strong>
+						check-in{totalReflections !== 1 ? 's' : ''} completed</span
+					>
+					<span
+						><strong class="text-text-primary">{stakeholderCount}</strong>
+						stakeholder{stakeholderCount !== 1 ? 's' : ''} contributing</span
+					>
+					{#if data.client.objective?.insights?.trajectoryScore !== null && data.client.objective?.insights?.trajectoryScore !== undefined}
+						<span
+							>Trajectory: <strong
+								class={data.client.objective.insights.trajectoryScore > 5
+									? 'text-success'
+									: data.client.objective.insights.trajectoryScore < -5
+										? 'text-error'
+										: 'text-text-primary'}
+								>{data.client.objective.insights.trajectoryScore > 5
+									? 'Improving'
+									: data.client.objective.insights.trajectoryScore < -5
+										? 'Declining'
+										: 'Stable'}</strong
+							></span
+						>
+					{/if}
+				</div>
+			</div>
+		{/if}
+
 		<!-- Alerts -->
 		{#if data.alerts.length > 0}
 			<div class="rounded-2xl border border-error/50 bg-error-muted p-6">
