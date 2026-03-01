@@ -12,7 +12,8 @@
 		TrendingDown,
 		Minus,
 		Star,
-		Lightbulb
+		Lightbulb,
+		PenLine
 	} from 'lucide-svelte';
 	import { coachAlertCount } from '$lib/stores/coachAlerts.svelte';
 
@@ -89,7 +90,7 @@
 	<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 		<div class="rounded-xl border border-border-default bg-surface-raised p-4">
 			<div class="mb-1 flex items-center gap-1.5">
-				<Users class="h-4 w-4 text-text-muted" />
+				<Users class="h-4 w-4 text-accent" />
 				<p class="text-xs font-medium text-text-tertiary">Active Clients</p>
 			</div>
 			<p class="text-3xl font-bold text-text-primary tabular-nums">{data.rosterSummary.active}</p>
@@ -107,7 +108,13 @@
 		</div>
 		<div class="rounded-xl border border-border-default bg-surface-raised p-4">
 			<div class="mb-1 flex items-center gap-1.5">
-				<AlertTriangle class="h-4 w-4 text-text-muted" />
+				<AlertTriangle
+					class="h-4 w-4 {data.analytics.highPriorityAlerts > 0
+						? 'text-error'
+						: data.analytics.totalAlerts > 0
+							? 'text-warning'
+							: 'text-success'}"
+				/>
 				<p class="text-xs font-medium text-text-tertiary">Alerts</p>
 			</div>
 			<p class="text-3xl font-bold text-text-primary tabular-nums">{data.analytics.totalAlerts}</p>
@@ -121,7 +128,7 @@
 		</div>
 		<div class="rounded-xl border border-border-default bg-surface-raised p-4">
 			<div class="mb-1 flex items-center gap-1.5">
-				<BarChart3 class="h-4 w-4 text-text-muted" />
+				<BarChart3 class="h-4 w-4 text-cyan-400" />
 				<p class="text-xs font-medium text-text-tertiary">Avg. Stability</p>
 			</div>
 			<p class="text-3xl font-bold text-text-primary tabular-nums">
@@ -131,7 +138,7 @@
 		</div>
 		<div class="rounded-xl border border-border-default bg-surface-raised p-4">
 			<div class="mb-1 flex items-center gap-1.5">
-				<Target class="h-4 w-4 text-text-muted" />
+				<Target class="h-4 w-4 text-amber-400" />
 				<p class="text-xs font-medium text-text-tertiary">Avg. Alignment</p>
 			</div>
 			<p class="text-3xl font-bold text-text-primary tabular-nums">
@@ -175,19 +182,24 @@
 	<!-- Coach Activity -->
 	{#if data.coachActivity.noteCount > 0}
 		{@const n = data.coachActivity.noteCount}
-		<p class="text-xs text-text-muted">
-			{#if n >= 50}
-				Coach milestone: {n} notes across your portfolio. You're building a deep coaching record.
-			{:else if n >= 25}
-				{n} coaching notes and counting. Your observations are shaping outcomes.
-			{:else if n >= 10}
-				{n} coaching notes written. You're building momentum with your clients.
-			{:else if n >= 5}
-				{n} notes captured. Each one shapes your clients' next AI prompt.
-			{:else}
-				Your coaching footprint: {n} note{n !== 1 ? 's' : ''} written
-			{/if}
-		</p>
+		<div
+			class="flex items-center gap-2 rounded-lg border border-border-default bg-surface-subtle px-3 py-2"
+		>
+			<PenLine class="h-3.5 w-3.5 shrink-0 text-text-muted" />
+			<p class="text-xs text-text-muted">
+				{#if n >= 50}
+					Coach milestone: {n} notes across your portfolio. You're building a deep coaching record.
+				{:else if n >= 25}
+					{n} coaching notes and counting. Your observations are shaping outcomes.
+				{:else if n >= 10}
+					{n} coaching notes written. You're building momentum with your clients.
+				{:else if n >= 5}
+					{n} notes captured. Each one shapes your clients' next AI prompt.
+				{:else}
+					Your coaching footprint: {n} note{n !== 1 ? 's' : ''} written
+				{/if}
+			</p>
+		</div>
 	{/if}
 
 	<!-- Coaching Moments -->
@@ -404,7 +416,7 @@
 			href="/coach/analytics"
 			class="group flex items-center gap-3 rounded-xl border border-border-default bg-surface-raised px-4 py-3 transition-colors hover:border-border-strong hover:bg-surface-subtle"
 		>
-			<BarChart3 class="h-4 w-4 shrink-0 text-text-muted" />
+			<BarChart3 class="h-4 w-4 shrink-0 text-cyan-400" />
 			<div class="min-w-0 flex-1">
 				<p class="text-sm font-medium text-text-primary">Analytics</p>
 				<p class="truncate text-xs text-text-tertiary">
@@ -420,7 +432,7 @@
 			href="/coach/invitations"
 			class="group flex items-center gap-3 rounded-xl border border-border-default bg-surface-raised px-4 py-3 transition-colors hover:border-border-strong hover:bg-surface-subtle"
 		>
-			<Mail class="h-4 w-4 shrink-0 text-text-muted" />
+			<Mail class="h-4 w-4 shrink-0 text-accent" />
 			<div class="min-w-0 flex-1">
 				<p class="text-sm font-medium text-text-primary">
 					Invitations{#if data.rosterSummary.pendingInvites > 0}
@@ -439,7 +451,7 @@
 			href="/coach/roster"
 			class="group flex items-center gap-3 rounded-xl border border-border-default bg-surface-raised px-4 py-3 transition-colors hover:border-border-strong hover:bg-surface-subtle"
 		>
-			<ClipboardList class="h-4 w-4 shrink-0 text-text-muted" />
+			<ClipboardList class="h-4 w-4 shrink-0 text-amber-400" />
 			<div class="min-w-0 flex-1">
 				<p class="text-sm font-medium text-text-primary">Client Roster</p>
 				<p class="truncate text-xs text-text-tertiary">

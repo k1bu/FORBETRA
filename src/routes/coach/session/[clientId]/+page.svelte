@@ -244,6 +244,47 @@
 		{/if}
 	</header>
 
+	<!-- Quick Summary -->
+	{#if data.client.objective?.insights}
+		{@const ins = data.client.objective.insights}
+		{@const cycle = data.client.objective.cycle}
+		<div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+			<div class="rounded-lg border border-border-default bg-surface-raised px-3 py-2">
+				<p class="text-[10px] font-medium tracking-wider text-text-muted uppercase">Effort</p>
+				<p class="text-lg font-bold text-cyan-400 tabular-nums">{ins.avgEffort ?? '—'}</p>
+			</div>
+			<div class="rounded-lg border border-border-default bg-surface-raised px-3 py-2">
+				<p class="text-[10px] font-medium tracking-wider text-text-muted uppercase">Performance</p>
+				<p class="text-lg font-bold text-amber-400 tabular-nums">{ins.avgProgress ?? '—'}</p>
+			</div>
+			<div class="rounded-lg border border-border-default bg-surface-raised px-3 py-2">
+				<p class="text-[10px] font-medium tracking-wider text-text-muted uppercase">Trajectory</p>
+				<div class="flex items-center gap-1">
+					{#if ins.trajectoryScore !== null}
+						{#if ins.trajectoryScore > 5}
+							<TrendingUp class="h-4 w-4 text-success" />
+							<span class="text-sm font-semibold text-success">Up</span>
+						{:else if ins.trajectoryScore < -5}
+							<TrendingDown class="h-4 w-4 text-error" />
+							<span class="text-sm font-semibold text-error">Down</span>
+						{:else}
+							<Minus class="h-4 w-4 text-text-muted" />
+							<span class="text-sm font-semibold text-text-muted">Stable</span>
+						{/if}
+					{:else}
+						<span class="text-lg font-bold text-text-muted">—</span>
+					{/if}
+				</div>
+			</div>
+			<div class="rounded-lg border border-border-default bg-surface-raised px-3 py-2">
+				<p class="text-[10px] font-medium tracking-wider text-text-muted uppercase">Completion</p>
+				<p class="text-lg font-bold text-accent tabular-nums">
+					{cycle ? `${Math.round(cycle.completion * 100)}%` : '—'}
+				</p>
+			</div>
+		</div>
+	{/if}
+
 	<!-- Tab Navigation -->
 	<div
 		class="flex gap-1 rounded-xl border border-border-default bg-surface-subtle p-1"

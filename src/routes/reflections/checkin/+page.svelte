@@ -119,7 +119,8 @@
 		</div>
 		<h1 class="text-3xl font-bold text-text-primary">{data.checkInLabel}</h1>
 		<p class="text-base text-text-secondary">
-			Take a moment to reflect on your progress. Every check-in moves you forward.
+			{#if data.currentWeek > 1}Rate your effort and performance this week.{:else}Take a moment to
+				reflect on your progress. Every check-in moves you forward.{/if}
 		</p>
 		{#if !data.isPreview && !data.isAvailable}
 			<div
@@ -319,10 +320,14 @@
 						<div>
 							<label for="effort-score" class="text-lg font-bold text-text-primary">
 								Focused Effort
+								{#if data.previousRatings?.effortScore !== null && data.previousRatings?.effortScore !== undefined}
+									<span class="ml-1 text-sm font-normal text-text-muted"
+										>(last: {data.previousRatings.effortScore})</span
+									>
+								{/if}
 							</label>
 							<p class="text-xs text-text-tertiary">
-								How much attention did you give to your objective: "{data.objective.title}" this
-								week?
+								How much attention did you give to your objective this week?
 							</p>
 						</div>
 					</div>
@@ -394,10 +399,14 @@
 						<div>
 							<label for="progress-score" class="text-lg font-bold text-text-primary">
 								Performance
+								{#if data.previousRatings?.performanceScore !== null && data.previousRatings?.performanceScore !== undefined}
+									<span class="ml-1 text-sm font-normal text-text-muted"
+										>(last: {data.previousRatings.performanceScore})</span
+									>
+								{/if}
 							</label>
 							<p class="text-xs text-text-tertiary">
-								How effective was your performance related to your objective: "{data.objective
-									.title}" this week?
+								How effective was your performance related to your objective this week?
 							</p>
 						</div>
 					</div>

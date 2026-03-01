@@ -933,25 +933,26 @@ Phase J broke the "Coach dimensions stuck at 7.3" pattern — IA and TC both jum
 
 ## 19. Score Update Log
 
-| Date       | Phase          | Platform | Individual | Coach | Stakeholder | Notes                                                                     |
-| ---------- | -------------- | :------: | :--------: | :---: | :---------: | ------------------------------------------------------------------------- |
-| 2026-02-28 | Baseline       |   6.87   |    6.73    | 6.27  |    7.84     | Full codebase walkthrough, all personas                                   |
-| 2026-02-28 | Phase A actual |   7.27   |    7.20    | 6.85  |    7.89     | 8 fixes shipped, 2 vetoed. +0.40 lift.                                    |
-| 2026-02-28 | Phase B actual |   7.39   |    7.44    | 6.89  |    7.89     | 3 fixes + landing copy. +0.12 lift.                                       |
-| 2026-02-28 | Phase C actual |   7.42   |    7.45    | 6.91  |    7.97     | 4 fixes, 2 resolved/N/A. +0.03 lift.                                      |
-| 2026-02-28 | Phase D actual |   7.54   |    7.50    | 7.23  |    7.97     | Dashboard overhaul + note prompts. +0.12                                  |
-| 2026-02-28 | Phase E actual |   7.63   |    7.62    | 7.35  |    7.97     | History, scoring guide, alerts, session. +0.09                            |
-| 2026-02-28 | Phase F actual |   7.71   |    7.66    | 7.46  |    8.11     | Prep freshness, modal streamline, milestones. +0.08                       |
-| 2026-02-28 | Phase G actual |   7.74   |    7.69    | 7.52  |    8.11     | Scoring anchors, tabs, narrative, roster. +0.03                           |
-| 2026-02-28 | Phase H actual |   7.77   |    7.72    | 7.57  |    8.11     | Check-in context, subtitles, toasts, momentum. +0.03                      |
-| 2026-02-28 | Phase I actual |   7.80   |    7.74    | 7.63  |    8.11     | Portfolio wins, activity, guidance, presets. +0.03                        |
-| 2026-02-28 | Phase J actual |   7.82   |    7.74    | 7.69  |    8.11     | Mobile nav, cadence toast, AI explain, prep ctx. +0.02                    |
-| 2026-03-01 | Phase K actual |   7.86   |    7.82    | 7.71  |    8.11     | Settings overhaul, onboarding polish, comprehensive re-eval. +0.04        |
-| 2026-03-01 | Phase L actual |   7.90   |    7.86    | 7.78  |    8.11     | Timeline deltas, tab badges, hub compaction. +0.04                        |
-| 2026-03-01 | Phase M actual |   7.93   |    7.89    | 7.84  |    8.11     | Milestones, impact language, onboarding labels, gap card. +0.03           |
-| 2026-03-01 | Phase N actual |   7.95   |    7.89    | 7.89  |    8.11     | Archive confirm, AI retry, metric defs. +0.02                             |
-| 2026-03-01 | Phase O actual |   7.98   |    7.93    | 7.94  |    8.11     | Onboarding reframe, completion ceremony, coaching moments, streaks. +0.03 |
-|            | Target         |   9.3+   |    9.3+    | 9.0+  |    9.5+     | Final goal. Remaining gap: 1.32 pts.                                      |
+| Date       | Phase          | Platform | Individual | Coach | Stakeholder | Notes                                                                       |
+| ---------- | -------------- | :------: | :--------: | :---: | :---------: | --------------------------------------------------------------------------- |
+| 2026-02-28 | Baseline       |   6.87   |    6.73    | 6.27  |    7.84     | Full codebase walkthrough, all personas                                     |
+| 2026-02-28 | Phase A actual |   7.27   |    7.20    | 6.85  |    7.89     | 8 fixes shipped, 2 vetoed. +0.40 lift.                                      |
+| 2026-02-28 | Phase B actual |   7.39   |    7.44    | 6.89  |    7.89     | 3 fixes + landing copy. +0.12 lift.                                         |
+| 2026-02-28 | Phase C actual |   7.42   |    7.45    | 6.91  |    7.97     | 4 fixes, 2 resolved/N/A. +0.03 lift.                                        |
+| 2026-02-28 | Phase D actual |   7.54   |    7.50    | 7.23  |    7.97     | Dashboard overhaul + note prompts. +0.12                                    |
+| 2026-02-28 | Phase E actual |   7.63   |    7.62    | 7.35  |    7.97     | History, scoring guide, alerts, session. +0.09                              |
+| 2026-02-28 | Phase F actual |   7.71   |    7.66    | 7.46  |    8.11     | Prep freshness, modal streamline, milestones. +0.08                         |
+| 2026-02-28 | Phase G actual |   7.74   |    7.69    | 7.52  |    8.11     | Scoring anchors, tabs, narrative, roster. +0.03                             |
+| 2026-02-28 | Phase H actual |   7.77   |    7.72    | 7.57  |    8.11     | Check-in context, subtitles, toasts, momentum. +0.03                        |
+| 2026-02-28 | Phase I actual |   7.80   |    7.74    | 7.63  |    8.11     | Portfolio wins, activity, guidance, presets. +0.03                          |
+| 2026-02-28 | Phase J actual |   7.82   |    7.74    | 7.69  |    8.11     | Mobile nav, cadence toast, AI explain, prep ctx. +0.02                      |
+| 2026-03-01 | Phase K actual |   7.86   |    7.82    | 7.71  |    8.11     | Settings overhaul, onboarding polish, comprehensive re-eval. +0.04          |
+| 2026-03-01 | Phase L actual |   7.90   |    7.86    | 7.78  |    8.11     | Timeline deltas, tab badges, hub compaction. +0.04                          |
+| 2026-03-01 | Phase M actual |   7.93   |    7.89    | 7.84  |    8.11     | Milestones, impact language, onboarding labels, gap card. +0.03             |
+| 2026-03-01 | Phase N actual |   7.95   |    7.89    | 7.89  |    8.11     | Archive confirm, AI retry, metric defs. +0.02                               |
+| 2026-03-01 | Phase O actual |   7.98   |    7.93    | 7.94  |    8.11     | Onboarding reframe, completion ceremony, coaching moments, streaks. +0.03   |
+| 2026-03-01 | Phase P actual |   8.00   |    7.95    | 7.98  |    8.11     | Dashboard polish, check-in flow, session summary. +0.02. **8.0 milestone!** |
+|            | Target         |   9.3+   |    9.3+    | 9.0+  |    9.5+     | Final goal. Remaining gap: 1.30 pts.                                        |
 
 ---
 
@@ -1394,3 +1395,63 @@ Phase O broke the 7.7 plateau on all five targeted dimensions. Both Coach and In
 **The 7.7 cluster is dissolved.** The new floor is 7.7 (Coach FI) with a cluster at 7.8. The profile has shifted: instead of 5 dimensions at 7.7, we now have 1 at 7.7 and 7 at 7.8. Individual's weakest is now CT/IA/TC at 7.8. Coach's weakest is FI at 7.7.
 
 **Next levers:** Coach FI (7.7) — dashboard visual polish, consistent card styling, icon coherence. The 7.8 cluster (Coach IA/FP/CL/TC, Individual CT/IA/TC) needs deeper structural work to approach 8.5. Consider: coach session view tab refinements, individual check-in flow streamlining, stakeholder feedback experience for both user types. Platform is approaching 8.0 — next milestone.
+
+---
+
+## 25. Phase P Results (Dashboard polish, check-in flow, session summary)
+
+**What shipped:**
+
+1. **Coach dashboard visual polish** — Stat card icons now use semantic colors: accent (Users), contextual red/amber/green (Alerts based on severity), cyan (Stability), amber (Alignment). Coach activity text wrapped in a subtle card with PenLine icon to match card-based pattern. Navigation link icons colored to match stat cards (cyan for Analytics, accent for Invitations, amber for Roster).
+2. **Individual check-in flow streamline** — Returning users see shorter subtitle ("Rate your effort and performance this week" vs verbose paragraph). Inline "(last: 7)" context next to score labels eliminates need to reference separate previous ratings card. Objective title removed from label sub-text (redundant — visible in objective display above).
+3. **Coach session view summary card** — 4-column quick summary (Effort, Performance, Trajectory, Completion) above tab navigation. Effort in cyan, Performance in amber, Trajectory with directional icon (Up/Down/Stable), Completion as percentage. Coach sees client status instantly without clicking any tabs.
+
+### Score Movement
+
+```
+Platform: 7.98 → 8.00 (+0.02) ← 8.0 MILESTONE
+Individual: 7.93 → 7.95 (+0.02)
+Coach: 7.94 → 7.98 (+0.04)
+Stakeholder: 8.11 → 8.11 (unchanged)
+```
+
+#### Coach (was 7.94 → 7.98, +0.04)
+
+| #   | Dimension              | Phase O | Phase P | Delta | Evidence                                                                                                   |
+| --- | ---------------------- | :-----: | :-----: | :---: | ---------------------------------------------------------------------------------------------------------- |
+| 1   | First Impression (FI)  |   7.7   | **7.9** | +0.2  | Semantic icon colors create visual variety and immediate meaning. Activity in card. Nav icons colored.     |
+| 5   | Info Architecture (IA) |   7.8   | **7.9** | +0.1  | Session summary surfaces effort/perf/trajectory/completion above tabs. No tab-clicking needed for context. |
+| 7   | Cognitive Load (CL)    |   7.8   | **7.9** | +0.1  | Session summary eliminates tab-switching to gather basic client context. Coach orients in 2 seconds.       |
+|     | All others             |    —    |    —    |   0   | CP, OE, CT, FP, TC, EE, VP unchanged.                                                                      |
+
+#### Individual (was 7.93 → 7.95, +0.02)
+
+| #   | Dimension           | Phase O | Phase P | Delta | Evidence                                                                                                        |
+| --- | ------------------- | :-----: | :-----: | :---: | --------------------------------------------------------------------------------------------------------------- |
+| 4   | Core Task Flow (CT) |   7.8   | **7.9** | +0.1  | Shorter subtitle, inline "(last: X)" context, less redundant text. Weekly check-in is tighter for repeat users. |
+|     | All others          |    —    |    —    |   0   | FI, CP, OE, IA, FP, CL, TC, EE, VP unchanged.                                                                   |
+
+#### Stakeholder (unchanged)
+
+No Phase P changes affected stakeholder screens.
+
+### Lowest Remaining Dimensions
+
+| Rank | User Type  | Dimension           | Score | Gap to 8.5 |
+| ---- | ---------- | ------------------- | :---: | :--------: |
+| 1    | Individual | Onboarding Ease     |  7.9  |    0.6     |
+| 2    | Individual | Core Task Flow      |  7.9  |    0.6     |
+| 3    | Individual | First Impression    |  7.9  |    0.6     |
+| 4    | Individual | Info Architecture   |  7.8  |    0.7     |
+| 5    | Individual | Trust & Credibility |  7.8  |    0.7     |
+| 6    | Coach      | Feedback & Progress |  7.8  |    0.7     |
+| 7    | Coach      | Trust & Credibility |  7.8  |    0.7     |
+| 8    | Coach      | Onboarding Ease     |  7.9  |    0.6     |
+
+### Phase P Commentary
+
+**Platform crossed 8.0.** This is the first time the platform score has reached this milestone — up from 6.87 baseline (+1.13 in 16 phases). The coach dashboard now has consistent visual language (semantic icons, card-based activity, colored nav), and the session view provides instant client orientation via the summary card.
+
+**The optimization profile has shifted.** We're no longer fixing outliers or breaking plateaus. The remaining dimensions form a smooth gradient from 7.8 to 7.9, with the biggest gaps on Individual IA/TC (7.8) and Coach FP/TC (7.8). These are "depth" dimensions that require genuine capability improvements rather than surface polish.
+
+**Next levers:** The path from 8.0 to 8.5 requires structural improvements: Individual IA needs better navigation or information surfacing. Individual TC needs stronger privacy/data messaging. Coach FP needs richer progress visibility beyond the current prep/alert system. Coach TC could benefit from data provenance improvements. Stakeholder experience (8.11) is stable but needs attention to reach 9.5+ target — the least-touched user type since Phase F.
