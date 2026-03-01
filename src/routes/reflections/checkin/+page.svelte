@@ -119,8 +119,10 @@
 		</div>
 		<h1 class="text-3xl font-bold text-text-primary">{data.checkInLabel}</h1>
 		<p class="text-base text-text-secondary">
-			{#if data.currentWeek > 1}Rate your effort and performance this week.{:else}Take a moment to
-				reflect on your progress. Every check-in moves you forward.{/if}
+			{#if data.currentWeek === 1}Your first check-in sets the baseline. Be honest — this is a
+				starting point, not a judgment.{:else if data.currentWeek <= 3}Each week builds your data.
+				Patterns start emerging around week 3–4.{:else}Rate your effort and performance. Your coach
+				and AI insights use this data.{/if}
 		</p>
 		{#if !data.isPreview && !data.isAvailable}
 			<div
@@ -489,7 +491,9 @@
 					placeholder={notePrompt()}
 				></textarea>
 				<div class="mt-2 flex items-center justify-between">
-					<p class="text-xs text-text-tertiary">Only visible to you and your coach.</p>
+					<p class="text-xs text-text-tertiary">
+						Only visible to you and your coach. Notes feed your weekly AI insights.
+					</p>
 					<p class="text-right text-xs text-text-muted">{notes.length}/500</p>
 				</div>
 			</div>

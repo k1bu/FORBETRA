@@ -578,7 +578,7 @@
 									<div class="flex items-center gap-2">
 										<Sparkles class="h-4 w-4 text-text-muted" />
 										<h3 class="text-sm font-semibold text-text-primary">AI Coaching Insights</h3>
-										<span class="text-xs text-text-tertiary">Not yet generated</span>
+										<span class="text-xs text-accent/70">Ready to generate</span>
 									</div>
 									<button
 										type="button"
@@ -590,7 +590,8 @@
 									</button>
 								</div>
 								<p class="mt-1 text-[10px] text-text-muted">
-									Synthesizes check-ins, notes, and stakeholder feedback
+									AI-powered coaching prep — synthesizes check-ins, notes, and stakeholder feedback
+									into actionable insights
 								</p>
 								{#if generatingPrepFor === client.id}
 									<div class="mt-4 animate-pulse space-y-3">
@@ -663,7 +664,8 @@
 										class="rounded-lg border border-dashed border-accent/30 bg-surface-raised/50 p-4 text-center"
 									>
 										<p class="text-xs text-text-tertiary">
-											No notes yet. Add one to appear in their Monday prompt.
+											No notes yet. Your observations personalize their AI coaching and Monday
+											prompt.
 										</p>
 									</div>
 								{/if}

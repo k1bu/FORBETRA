@@ -70,10 +70,10 @@
 				{#each navItems as item (item.href)}
 					<a
 						href={resolve(item.href)}
-						class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors
+						class="flex items-center gap-2.5 rounded-lg border-l-2 px-3 py-2 text-sm font-medium transition-colors
 							{isActive(item.href)
-							? 'bg-accent-muted text-accent'
-							: 'text-text-secondary hover:bg-surface-subtle hover:text-text-primary'}"
+							? 'border-accent bg-accent-muted text-accent'
+							: 'border-transparent text-text-secondary hover:bg-surface-subtle hover:text-text-primary'}"
 						aria-current={isActive(item.href) ? 'page' : undefined}
 					>
 						<item.icon class="h-4 w-4 shrink-0" />

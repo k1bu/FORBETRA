@@ -3,6 +3,7 @@
 	import { ChevronLeft, ChevronRight, MessageSquare } from 'lucide-svelte';
 	import Badge from '$lib/components/Badge.svelte';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { page } from '$app/stores';
 
 	const { data }: { data: PageData } = $props();
@@ -14,7 +15,7 @@
 		} else {
 			url.searchParams.set('week', String(week));
 		}
-		goto(url.toString(), { replaceState: true });
+		goto(resolve(url.pathname + url.search), { replaceState: true });
 	}
 
 	// Color helpers
@@ -45,6 +46,9 @@
 		<div>
 			<h1 class="text-lg font-bold text-text-primary">Scorecard</h1>
 			<p class="text-xs text-text-muted">{data.objectiveTitle}</p>
+			<p class="mt-0.5 text-[10px] text-text-tertiary">
+				Your self-perception vs. stakeholder feedback
+			</p>
 		</div>
 		<div class="flex items-center gap-2">
 			<button
@@ -54,8 +58,13 @@
 			>
 				<ChevronLeft class="h-4 w-4" />
 			</button>
-			<span class="min-w-[5rem] text-center text-sm font-semibold {data.viewWeek === data.currentWeek ? 'text-accent' : 'text-text-secondary'}">
-				Week {data.viewWeek}{#if data.viewWeek === data.currentWeek} <span class="text-xs font-normal text-text-muted">(now)</span>{/if}
+			<span
+				class="min-w-[5rem] text-center text-sm font-semibold {data.viewWeek === data.currentWeek
+					? 'text-accent'
+					: 'text-text-secondary'}"
+			>
+				Week {data.viewWeek}{#if data.viewWeek === data.currentWeek}
+					<span class="text-xs font-normal text-text-muted">(now)</span>{/if}
 			</span>
 			<button
 				onclick={() => goToWeek(data.viewWeek + 1)}
@@ -68,18 +77,34 @@
 	</div>
 
 	<!-- Self summary row -->
-	<div class="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-lg bg-surface-raised px-4 py-3 border border-border-default">
-		<span class="text-[10px] font-semibold uppercase tracking-wider text-text-muted">Your Scores</span>
+	<div
+		class="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-lg border border-border-default bg-surface-raised px-4 py-3"
+	>
+		<span class="text-[10px] font-semibold tracking-wider text-text-muted uppercase"
+			>Your Scores</span
+		>
 		{#if data.myEffort !== null}
 			<div class="flex items-center gap-1.5">
 				<span class="text-[10px] text-text-muted">Effort</span>
-				<div class="flex h-7 w-7 items-center justify-center rounded text-xs font-bold {effortBg(data.myEffort)}">{data.myEffort}</div>
+				<div
+					class="flex h-7 w-7 items-center justify-center rounded text-xs font-bold {effortBg(
+						data.myEffort
+					)}"
+				>
+					{data.myEffort}
+				</div>
 			</div>
 		{/if}
 		{#if data.myPerformance !== null}
 			<div class="flex items-center gap-1.5">
 				<span class="text-[10px] text-text-muted">Performance</span>
-				<div class="flex h-7 w-7 items-center justify-center rounded text-xs font-bold {perfBg(data.myPerformance)}">{data.myPerformance}</div>
+				<div
+					class="flex h-7 w-7 items-center justify-center rounded text-xs font-bold {perfBg(
+						data.myPerformance
+					)}"
+				>
+					{data.myPerformance}
+				</div>
 			</div>
 		{/if}
 		{#if data.myEffort === null && data.myPerformance === null}
@@ -89,9 +114,34 @@
 
 	<!-- Stakeholder gap cards -->
 	{#if data.scorecard.length > 0}
+		{@const allAligned = data.scorecard.every((s) => s.maxAbsGap <= 1)}
+		{@const anyLarge = data.scorecard.some((s) => s.maxAbsGap > 2)}
+		{#if allAligned}
+			<div
+				class="flex items-center gap-2 rounded-lg border border-success/20 bg-success-muted px-4 py-2.5"
+			>
+				<span class="text-sm text-success"
+					>Well-aligned this week — you and your stakeholders see eye-to-eye.</span
+				>
+			</div>
+		{:else if anyLarge}
+			<div
+				class="flex items-center gap-2 rounded-lg border border-warning/20 bg-warning-muted px-4 py-2.5"
+			>
+				<span class="text-xs text-warning"
+					>Large gaps detected. Consider discussing these with your coach in your next session.</span
+				>
+			</div>
+		{/if}
 		<div class="grid gap-3 sm:grid-cols-2">
-			{#each data.scorecard as row}
-				<div class="rounded-lg border p-4 {row.maxAbsGap > 2 ? 'border-error/30' : row.maxAbsGap > 1 ? 'border-warning/30' : 'border-border-default'} bg-surface-raised">
+			{#each data.scorecard as row (row.stakeholderId)}
+				<div
+					class="rounded-lg border p-4 {row.maxAbsGap > 2
+						? 'border-error/30'
+						: row.maxAbsGap > 1
+							? 'border-warning/30'
+							: 'border-border-default'} bg-surface-raised"
+				>
 					<!-- Stakeholder name + trend -->
 					<div class="mb-3 flex items-center justify-between">
 						<p class="text-sm font-semibold text-text-primary">{row.stakeholderName}</p>
@@ -111,25 +161,65 @@
 						<p class="mb-1 text-[10px] font-medium text-text-tertiary">Effort</p>
 						<div class="flex items-center gap-1">
 							{#if data.myEffort !== null}
-								<div class="flex h-7 w-7 shrink-0 items-center justify-center rounded text-[10px] font-bold {effortBg(data.myEffort)}">{data.myEffort}</div>
+								<div
+									class="flex h-7 w-7 shrink-0 items-center justify-center rounded text-[10px] font-bold {effortBg(
+										data.myEffort
+									)}"
+								>
+									{data.myEffort}
+								</div>
 							{:else}
-								<div class="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-surface-subtle text-[10px] text-text-muted">--</div>
+								<div
+									class="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-surface-subtle text-[10px] text-text-muted"
+								>
+									--
+								</div>
 							{/if}
 							{#if row.effortGap !== null}
 								<div class="flex flex-1 items-center gap-1">
-									<div class="h-px flex-1 {Math.abs(row.effortGap) <= 1 ? 'bg-success/40' : Math.abs(row.effortGap) <= 2 ? 'bg-warning/40' : 'bg-error/40'}"></div>
-									<span class="text-[10px] font-bold {Math.abs(row.effortGap) <= 1 ? 'text-success' : Math.abs(row.effortGap) <= 2 ? 'text-warning' : 'text-error'}">
+									<div
+										class="h-px flex-1 {Math.abs(row.effortGap) <= 1
+											? 'bg-success/40'
+											: Math.abs(row.effortGap) <= 2
+												? 'bg-warning/40'
+												: 'bg-error/40'}"
+									></div>
+									<span
+										class="text-[10px] font-bold {Math.abs(row.effortGap) <= 1
+											? 'text-success'
+											: Math.abs(row.effortGap) <= 2
+												? 'text-warning'
+												: 'text-error'}"
+									>
 										{row.effortGap > 0 ? '+' : ''}{row.effortGap}
 									</span>
-									<div class="h-px flex-1 {Math.abs(row.effortGap) <= 1 ? 'bg-success/40' : Math.abs(row.effortGap) <= 2 ? 'bg-warning/40' : 'bg-error/40'}"></div>
+									<div
+										class="h-px flex-1 {Math.abs(row.effortGap) <= 1
+											? 'bg-success/40'
+											: Math.abs(row.effortGap) <= 2
+												? 'bg-warning/40'
+												: 'bg-error/40'}"
+									></div>
 								</div>
 							{:else}
-								<div class="flex flex-1 items-center"><div class="h-px flex-1 bg-border-default"></div></div>
+								<div class="flex flex-1 items-center">
+									<div class="h-px flex-1 bg-border-default"></div>
+								</div>
 							{/if}
 							{#if row.stakeholderEffort !== null}
-								<div class="flex h-7 w-7 shrink-0 items-center justify-center rounded text-[10px] font-bold {effortBg(row.stakeholderEffort)}">{row.stakeholderEffort}</div>
+								<div
+									class="flex h-7 w-7 shrink-0 items-center justify-center rounded text-[10px] font-bold {effortBg(
+										row.stakeholderEffort
+									)}"
+								>
+									{row.stakeholderEffort}
+								</div>
 							{:else}
-								<div class="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-surface-subtle text-[10px] text-text-muted">--</div>
+								<div
+									class="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-surface-subtle text-[10px] text-text-muted"
+								>
+									--
+								</div>
 							{/if}
 						</div>
 					</div>
@@ -139,28 +229,81 @@
 						<p class="mb-1 text-[10px] font-medium text-text-tertiary">Performance</p>
 						<div class="flex items-center gap-1">
 							{#if data.myPerformance !== null}
-								<div class="flex h-7 w-7 shrink-0 items-center justify-center rounded text-[10px] font-bold {perfBg(data.myPerformance)}">{data.myPerformance}</div>
+								<div
+									class="flex h-7 w-7 shrink-0 items-center justify-center rounded text-[10px] font-bold {perfBg(
+										data.myPerformance
+									)}"
+								>
+									{data.myPerformance}
+								</div>
 							{:else}
-								<div class="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-surface-subtle text-[10px] text-text-muted">--</div>
+								<div
+									class="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-surface-subtle text-[10px] text-text-muted"
+								>
+									--
+								</div>
 							{/if}
 							{#if row.performanceGap !== null}
 								<div class="flex flex-1 items-center gap-1">
-									<div class="h-px flex-1 {Math.abs(row.performanceGap) <= 1 ? 'bg-success/40' : Math.abs(row.performanceGap) <= 2 ? 'bg-warning/40' : 'bg-error/40'}"></div>
-									<span class="text-[10px] font-bold {Math.abs(row.performanceGap) <= 1 ? 'text-success' : Math.abs(row.performanceGap) <= 2 ? 'text-warning' : 'text-error'}">
+									<div
+										class="h-px flex-1 {Math.abs(row.performanceGap) <= 1
+											? 'bg-success/40'
+											: Math.abs(row.performanceGap) <= 2
+												? 'bg-warning/40'
+												: 'bg-error/40'}"
+									></div>
+									<span
+										class="text-[10px] font-bold {Math.abs(row.performanceGap) <= 1
+											? 'text-success'
+											: Math.abs(row.performanceGap) <= 2
+												? 'text-warning'
+												: 'text-error'}"
+									>
 										{row.performanceGap > 0 ? '+' : ''}{row.performanceGap}
 									</span>
-									<div class="h-px flex-1 {Math.abs(row.performanceGap) <= 1 ? 'bg-success/40' : Math.abs(row.performanceGap) <= 2 ? 'bg-warning/40' : 'bg-error/40'}"></div>
+									<div
+										class="h-px flex-1 {Math.abs(row.performanceGap) <= 1
+											? 'bg-success/40'
+											: Math.abs(row.performanceGap) <= 2
+												? 'bg-warning/40'
+												: 'bg-error/40'}"
+									></div>
 								</div>
 							{:else}
-								<div class="flex flex-1 items-center"><div class="h-px flex-1 bg-border-default"></div></div>
+								<div class="flex flex-1 items-center">
+									<div class="h-px flex-1 bg-border-default"></div>
+								</div>
 							{/if}
 							{#if row.stakeholderPerformance !== null}
-								<div class="flex h-7 w-7 shrink-0 items-center justify-center rounded text-[10px] font-bold {perfBg(row.stakeholderPerformance)}">{row.stakeholderPerformance}</div>
+								<div
+									class="flex h-7 w-7 shrink-0 items-center justify-center rounded text-[10px] font-bold {perfBg(
+										row.stakeholderPerformance
+									)}"
+								>
+									{row.stakeholderPerformance}
+								</div>
 							{:else}
-								<div class="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-surface-subtle text-[10px] text-text-muted">--</div>
+								<div
+									class="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-surface-subtle text-[10px] text-text-muted"
+								>
+									--
+								</div>
 							{/if}
 						</div>
 					</div>
+
+					<!-- Gap interpretation for large differences -->
+					{#if row.maxAbsGap > 2}
+						{@const biggestGap =
+							Math.abs(row.effortGap ?? 0) > Math.abs(row.performanceGap ?? 0)
+								? row.effortGap
+								: row.performanceGap}
+						<p class="mt-2 text-[10px] text-text-tertiary">
+							{#if biggestGap !== null && biggestGap > 0}You rate yourself higher than {row.stakeholderName}
+								— explore what they're not seeing.{:else}They see more than you give yourself credit
+								for.{/if}
+						</p>
+					{/if}
 
 					<!-- Stakeholder comment -->
 					{#if row.comment}
@@ -177,16 +320,20 @@
 	{:else}
 		<div class="rounded-lg border border-border-default bg-surface-raised p-8 text-center">
 			<p class="text-sm text-text-muted">No stakeholder data yet for this week.</p>
-			<p class="mt-1 text-xs text-text-tertiary">Once your stakeholders submit feedback, their scores will appear here.</p>
+			<p class="mt-1 text-xs text-text-tertiary">
+				Once your stakeholders submit feedback, their scores will appear here.
+			</p>
 		</div>
 	{/if}
 
 	<!-- Self notes -->
 	{#if data.selfNotes.length > 0}
 		<div class="rounded-lg border border-border-default bg-surface-raised p-4">
-			<p class="mb-2 text-xs font-semibold uppercase tracking-wider text-text-muted">Your Notes This Week</p>
+			<p class="mb-2 text-xs font-semibold tracking-wider text-text-muted uppercase">
+				Your Notes This Week
+			</p>
 			<div class="flex flex-col gap-2">
-				{#each data.selfNotes as note}
+				{#each data.selfNotes as note, i (i)}
 					<p class="text-sm text-text-secondary">{note}</p>
 				{/each}
 			</div>
@@ -195,7 +342,9 @@
 
 	<!-- Legend -->
 	<div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-text-muted">
-		<span>You <span class="font-bold">[ score ]</span>——gap——<span class="font-bold">[ score ]</span> Stakeholder</span>
+		<span
+			>You <span class="font-bold">[ score ]</span>——gap——<span class="font-bold">[ score ]</span> Stakeholder</span
+		>
 		<span class="text-success">Green = aligned (&le;1)</span>
 		<span class="text-warning">Amber = moderate (1-2)</span>
 		<span class="text-error">Red = large (&gt;2)</span>
