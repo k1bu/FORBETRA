@@ -402,10 +402,218 @@ export const actions: Actions = {
 				// Streak computation is non-critical
 			}
 
+			// Build micro-moment based on weekNumber % 6
+			const microMomentType = weekNumber % 6;
+			let microMoment: {
+				type:
+					| 'insight_preview'
+					| 'rater_pulse'
+					| 'streak_milestone'
+					| 'growth_signal'
+					| 'identity_echo'
+					| 'coach_connection';
+				title: string;
+				message: string;
+			} | null = null;
+
+			try {
+				if (microMomentType === 1) {
+					// Insight Preview — score delta teaser
+					const prevReflection = await prisma.reflection.findFirst({
+						where: {
+							cycleId: cycle.id,
+							userId: dbUser.id,
+							subgoalId: firstSubgoal.id,
+							weekNumber: { lt: weekNumber }
+						},
+						orderBy: { weekNumber: 'desc' },
+						select: { effortScore: true, performanceScore: true }
+					});
+					if (prevReflection) {
+						const eDelta = data.effortScore - (prevReflection.effortScore ?? data.effortScore);
+						const pDelta =
+							data.performanceScore - (prevReflection.performanceScore ?? data.performanceScore);
+						let teaser = '';
+						if (eDelta > 0 && pDelta > 0) teaser = 'Both effort and performance are trending up.';
+						else if (eDelta < 0 && pDelta < 0)
+							teaser = 'A dip in both dimensions — worth exploring what shifted.';
+						else if (eDelta > 0) teaser = 'Your effort is climbing. Performance may follow.';
+						else if (pDelta > 0)
+							teaser = 'Performance is up even without more effort — something clicked.';
+						else teaser = 'Steady data this week — consistency has its own signal.';
+						microMoment = {
+							type: 'insight_preview',
+							title: 'Insight Preview',
+							message: `Your AI insight for this week will be ready Sunday evening. Based on your recent pattern: ${teaser}`
+						};
+					} else {
+						microMoment = {
+							type: 'insight_preview',
+							title: 'Insight Preview',
+							message:
+								'Your first AI insight will be generated this Sunday evening. It gets smarter with each check-in.'
+						};
+					}
+				} else if (microMomentType === 2) {
+					// Rater Pulse — feedback count for this cycle
+					const reflection = await prisma.reflection.findFirst({
+						where: {
+							cycleId: cycle.id,
+							userId: dbUser.id,
+							weekNumber,
+							subgoalId: firstSubgoal.id
+						},
+						select: { id: true }
+					});
+					if (reflection) {
+						const feedbackCount = await prisma.feedback.count({
+							where: { reflectionId: reflection.id }
+						});
+						const totalRaters = await prisma.stakeholder.count({
+							where: { individualId: dbUser.id }
+						});
+						if (totalRaters > 0) {
+							microMoment = {
+								type: 'rater_pulse',
+								title: 'Rater Pulse',
+								message:
+									feedbackCount > 0
+										? `This week, ${feedbackCount} of your ${totalRaters} rater${totalRaters !== 1 ? 's' : ''} ${feedbackCount !== 1 ? 'have' : 'has'} provided feedback. Their perspective adds depth to your data.`
+										: `You have ${totalRaters} rater${totalRaters !== 1 ? 's' : ''} invited. As they submit feedback, you'll see how their perception compares with yours.`
+							};
+						}
+					}
+				} else if (microMomentType === 3) {
+					// Streak Milestone — enhanced message based on streak length
+					if (streak >= 20) {
+						microMoment = {
+							type: 'streak_milestone',
+							title: 'Streak Milestone',
+							message: `${streak} check-ins without a miss. This kind of consistency doesn't just build data — it rewires how you lead. You're in rare company.`
+						};
+					} else if (streak >= 10) {
+						microMoment = {
+							type: 'streak_milestone',
+							title: 'Streak Milestone',
+							message: `${streak} check-ins in a row. Your data is now deep enough for meaningful pattern analysis. The AI insights this week will be especially rich.`
+						};
+					} else if (streak >= 6) {
+						microMoment = {
+							type: 'streak_milestone',
+							title: 'Streak Milestone',
+							message: `${streak}-check-in streak — you're in the top 20% of committed leaders on the platform. Patterns are becoming clear.`
+						};
+					} else if (streak >= 3) {
+						microMoment = {
+							type: 'streak_milestone',
+							title: 'Streak Milestone',
+							message: `${streak} weeks consistent — you're building a habit. Research shows it takes about 6 weeks to lock in a new practice.`
+						};
+					} else {
+						microMoment = {
+							type: 'streak_milestone',
+							title: 'Building Momentum',
+							message:
+								'Every check-in builds your streak. Three in a row unlocks richer insights and pattern recognition.'
+						};
+					}
+				} else if (microMomentType === 4) {
+					// Growth Signal — compare to first week
+					const firstWeekReflection = await prisma.reflection.findFirst({
+						where: {
+							cycleId: cycle.id,
+							userId: dbUser.id,
+							subgoalId: firstSubgoal.id,
+							weekNumber: 1
+						},
+						select: { effortScore: true, performanceScore: true }
+					});
+					if (firstWeekReflection && weekNumber > 1) {
+						const eDelta = data.effortScore - (firstWeekReflection.effortScore ?? 0);
+						const pDelta = data.performanceScore - (firstWeekReflection.performanceScore ?? 0);
+						let interpretation = '';
+						if (eDelta > 0 && pDelta > 0)
+							interpretation = 'Both dimensions are moving in the right direction.';
+						else if (eDelta > 0)
+							interpretation = "You're investing more effort — performance often follows.";
+						else if (pDelta > 0)
+							interpretation = 'Performance is climbing — your earlier effort is paying off.';
+						else if (eDelta === 0 && pDelta === 0)
+							interpretation = 'Steady state — consistency is valuable data too.';
+						else
+							interpretation =
+								'Dips are part of the process. The trend over weeks matters more than any single point.';
+						microMoment = {
+							type: 'growth_signal',
+							title: 'Growth Signal',
+							message: `Since your first week: effort ${eDelta >= 0 ? '+' : ''}${eDelta}, performance ${pDelta >= 0 ? '+' : ''}${pDelta}. ${interpretation}`
+						};
+					}
+				} else if (microMomentType === 5) {
+					// Identity Echo — reference identity anchor
+					const week1 = await prisma.reflection.findFirst({
+						where: {
+							cycleId: cycle.id,
+							userId: dbUser.id,
+							weekNumber: 1,
+							notes: { not: null }
+						},
+						select: { notes: true },
+						orderBy: { submittedAt: 'asc' }
+					});
+					const anchor = week1?.notes?.trim();
+					if (anchor) {
+						microMoment = {
+							type: 'identity_echo',
+							title: 'Identity Echo',
+							message: `Remember: you said you're becoming "${anchor.length > 80 ? anchor.slice(0, 80) + '…' : anchor}". This week's check-in is one more data point on that path.`
+						};
+					}
+				} else if (microMomentType === 0) {
+					// Coach Connection — coach name + recent note
+					const coachClient = await prisma.coachClient.findFirst({
+						where: { individualId: dbUser.id, archivedAt: null },
+						select: {
+							coach: {
+								select: { name: true, id: true }
+							}
+						}
+					});
+					if (coachClient?.coach) {
+						const recentNote = await prisma.coachNote.findFirst({
+							where: { individualId: dbUser.id, coachId: coachClient.coach.id },
+							orderBy: { createdAt: 'desc' },
+							select: { content: true }
+						});
+						const coachFirst = coachClient.coach.name?.split(' ')[0] ?? 'Your coach';
+						if (recentNote?.content) {
+							const excerpt =
+								recentNote.content.length > 100
+									? recentNote.content.slice(0, 100) + '…'
+									: recentNote.content;
+							microMoment = {
+								type: 'coach_connection',
+								title: 'Coach Connection',
+								message: `${coachFirst} last noted: "${excerpt}". Your check-in data helps them prepare for your next session.`
+							};
+						} else {
+							microMoment = {
+								type: 'coach_connection',
+								title: 'Coach Connection',
+								message: `${coachFirst} can see your check-in data. Each entry helps them prepare better for your sessions.`
+							};
+						}
+					}
+				}
+			} catch {
+				// Micro-moment is non-critical — skip on error
+			}
+
 			return {
 				success: true,
 				type: checkInInfo.type,
-				streak
+				streak,
+				microMoment
 			};
 		} catch (error) {
 			console.error('Failed to record check-in', error);

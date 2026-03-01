@@ -194,6 +194,18 @@
 						</p>
 					{/if}
 				{/if}
+				{#if form.microMoment}
+					<div
+						class="mt-4 rounded-xl border border-accent/20 bg-gradient-to-b from-accent-muted/60 to-surface-raised px-5 py-4 text-left"
+					>
+						<p class="text-xs font-semibold tracking-wide text-accent uppercase">
+							{form.microMoment.title}
+						</p>
+						<p class="mt-1.5 text-sm leading-relaxed text-text-secondary">
+							{form.microMoment.message}
+						</p>
+					</div>
+				{/if}
 				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<a
 					href="/individual"
