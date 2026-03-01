@@ -3,6 +3,7 @@
 	import CorrelationView from '$lib/components/CorrelationView.svelte';
 	import GapLensView from '$lib/components/GapLensView.svelte';
 	import { FileText, TrendingUp, Sparkles, ThumbsUp, ThumbsDown } from 'lucide-svelte';
+	import InfoTip from '$lib/components/InfoTip.svelte';
 
 	const { data }: { data: PageData } = $props();
 
@@ -440,8 +441,12 @@
 					{/if}
 				</div>
 				<div class="rounded-lg border border-border-default bg-surface-subtle p-4">
-					<p class="mb-1 text-xs font-semibold tracking-wide text-text-tertiary uppercase">
-						Stability
+					<p
+						class="mb-1 flex items-center gap-1 text-xs font-semibold tracking-wide text-text-tertiary uppercase"
+					>
+						Stability <InfoTip
+							text="Measures how consistent your scores are. Higher = more predictable patterns. 70+ is strong."
+						/>
 					</p>
 					<p class="text-2xl font-bold {getStabilityColor(data.insights.stabilityScore)}">
 						{formatScore(data.insights.stabilityScore)}
@@ -451,8 +456,12 @@
 					</p>
 				</div>
 				<div class="rounded-lg border border-border-default bg-surface-subtle p-4">
-					<p class="mb-1 text-xs font-semibold tracking-wide text-text-tertiary uppercase">
-						Trajectory
+					<p
+						class="mb-1 flex items-center gap-1 text-xs font-semibold tracking-wide text-text-tertiary uppercase"
+					>
+						Trajectory <InfoTip
+							text="Shows your score trend over the last 4 weeks. Positive = improving, negative = declining."
+						/>
 					</p>
 					<p
 						class="text-2xl font-bold {data.insights.trajectoryScore !== null &&

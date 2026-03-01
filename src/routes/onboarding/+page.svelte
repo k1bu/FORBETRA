@@ -550,18 +550,25 @@
 						style="width: {stepProgress}%"
 					></div>
 				</div>
-				<div class="mt-2 hidden items-center justify-between sm:flex">
-					{#each allSteps.filter((s) => s !== 'welcome') as step (step)}
-						{@const stepIdx = allSteps.indexOf(step)}
-						{@const currentIdx = allSteps.indexOf(currentStep)}
-						<span
-							class="text-[10px] {stepIdx <= currentIdx
-								? 'font-semibold text-accent'
-								: 'text-text-muted'}"
-						>
-							{stepNames[step]}
-						</span>
-					{/each}
+				<div class="mt-2 flex items-center justify-between">
+					<div class="hidden items-center gap-4 sm:flex">
+						{#each allSteps.filter((s) => s !== 'welcome') as step (step)}
+							{@const stepIdx = allSteps.indexOf(step)}
+							{@const currentIdx = allSteps.indexOf(currentStep)}
+							<span
+								class="text-[10px] {stepIdx <= currentIdx
+									? 'font-semibold text-accent'
+									: 'text-text-muted'}"
+							>
+								{stepNames[step]}
+							</span>
+						{/each}
+					</div>
+					{#if stepProgress >= 75}
+						<span class="text-[10px] font-medium text-success">Almost there!</span>
+					{:else if stepProgress >= 50}
+						<span class="text-[10px] font-medium text-accent">Great progress</span>
+					{/if}
 				</div>
 			</div>
 		{/if}

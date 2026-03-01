@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { AlertTriangle, BarChart3, Target, TrendingUp } from 'lucide-svelte';
+	import InfoTip from '$lib/components/InfoTip.svelte';
 
 	const { data }: { data: PageData } = $props();
 
@@ -214,7 +215,11 @@
 		<div class="rounded-lg border border-border-default bg-surface-raised p-4">
 			<div class="mb-1 flex items-center gap-1.5">
 				<BarChart3 class="h-4 w-4 text-text-muted" />
-				<p class="text-xs font-medium text-text-tertiary">Avg. Stability</p>
+				<p class="text-xs font-medium text-text-tertiary">
+					Avg. Stability <InfoTip
+						text="How consistent client scores are week-over-week. 70+ is strong stability."
+					/>
+				</p>
 			</div>
 			<p class="text-3xl font-bold text-text-primary tabular-nums">
 				{formatScore(data.analytics.avgStability)}

@@ -153,7 +153,7 @@
 	<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 		<a
 			href="/coach/roster"
-			class="rounded-xl border border-border-default bg-surface-raised p-4 transition-colors hover:border-accent/30"
+			class="rounded-lg border border-border-default bg-surface-raised p-4 transition-colors hover:border-accent/30"
 		>
 			<div class="mb-1 flex items-center gap-1.5">
 				<Users class="h-4 w-4 text-accent" />
@@ -174,7 +174,7 @@
 		</a>
 		<a
 			href="/coach/analytics"
-			class="rounded-xl border border-border-default bg-surface-raised p-4 transition-colors hover:border-accent/30"
+			class="rounded-lg border border-border-default bg-surface-raised p-4 transition-colors hover:border-accent/30"
 		>
 			<div class="mb-1 flex items-center gap-1.5">
 				<AlertTriangle
@@ -195,7 +195,7 @@
 				<p class="mt-1 text-xs text-success">All clear</p>
 			{/if}
 		</a>
-		<div class="rounded-xl border border-border-default bg-surface-raised p-4">
+		<div class="rounded-lg border border-border-default bg-surface-raised p-4">
 			<div class="mb-1 flex items-center gap-1.5">
 				<BarChart3 class="h-4 w-4 text-cyan-400" />
 				<p class="text-xs font-medium text-text-tertiary">Avg. Stability</p>
@@ -205,7 +205,7 @@
 			</p>
 			<p class="mt-1 text-[10px] text-text-muted">Week-to-week score consistency</p>
 		</div>
-		<div class="rounded-xl border border-border-default bg-surface-raised p-4">
+		<div class="rounded-lg border border-border-default bg-surface-raised p-4">
 			<div class="mb-1 flex items-center gap-1.5">
 				<Target class="h-4 w-4 text-amber-400" />
 				<p class="text-xs font-medium text-text-tertiary">Avg. Alignment</p>
