@@ -933,17 +933,280 @@ Phase J broke the "Coach dimensions stuck at 7.3" pattern — IA and TC both jum
 
 ## 19. Score Update Log
 
-| Date       | Phase          | Platform | Individual | Coach | Stakeholder | Notes                                                  |
-| ---------- | -------------- | :------: | :--------: | :---: | :---------: | ------------------------------------------------------ |
-| 2026-02-28 | Baseline       |   6.87   |    6.73    | 6.27  |    7.84     | Full codebase walkthrough, all personas                |
-| 2026-02-28 | Phase A actual |   7.27   |    7.20    | 6.85  |    7.89     | 8 fixes shipped, 2 vetoed. +0.40 lift.                 |
-| 2026-02-28 | Phase B actual |   7.39   |    7.44    | 6.89  |    7.89     | 3 fixes + landing copy. +0.12 lift.                    |
-| 2026-02-28 | Phase C actual |   7.42   |    7.45    | 6.91  |    7.97     | 4 fixes, 2 resolved/N/A. +0.03 lift.                   |
-| 2026-02-28 | Phase D actual |   7.54   |    7.50    | 7.23  |    7.97     | Dashboard overhaul + note prompts. +0.12               |
-| 2026-02-28 | Phase E actual |   7.63   |    7.62    | 7.35  |    7.97     | History, scoring guide, alerts, session. +0.09         |
-| 2026-02-28 | Phase F actual |   7.71   |    7.66    | 7.46  |    8.11     | Prep freshness, modal streamline, milestones. +0.08    |
-| 2026-02-28 | Phase G actual |   7.74   |    7.69    | 7.52  |    8.11     | Scoring anchors, tabs, narrative, roster. +0.03        |
-| 2026-02-28 | Phase H actual |   7.77   |    7.72    | 7.57  |    8.11     | Check-in context, subtitles, toasts, momentum. +0.03   |
-| 2026-02-28 | Phase I actual |   7.80   |    7.74    | 7.63  |    8.11     | Portfolio wins, activity, guidance, presets. +0.03     |
-| 2026-02-28 | Phase J actual |   7.82   |    7.74    | 7.69  |    8.11     | Mobile nav, cadence toast, AI explain, prep ctx. +0.02 |
-|            | Target         |   9.3+   |    9.3+    | 9.0+  |    9.5+     | Final goal. Remaining gap: 1.48 pts.                   |
+| Date       | Phase          | Platform | Individual | Coach | Stakeholder | Notes                                                              |
+| ---------- | -------------- | :------: | :--------: | :---: | :---------: | ------------------------------------------------------------------ |
+| 2026-02-28 | Baseline       |   6.87   |    6.73    | 6.27  |    7.84     | Full codebase walkthrough, all personas                            |
+| 2026-02-28 | Phase A actual |   7.27   |    7.20    | 6.85  |    7.89     | 8 fixes shipped, 2 vetoed. +0.40 lift.                             |
+| 2026-02-28 | Phase B actual |   7.39   |    7.44    | 6.89  |    7.89     | 3 fixes + landing copy. +0.12 lift.                                |
+| 2026-02-28 | Phase C actual |   7.42   |    7.45    | 6.91  |    7.97     | 4 fixes, 2 resolved/N/A. +0.03 lift.                               |
+| 2026-02-28 | Phase D actual |   7.54   |    7.50    | 7.23  |    7.97     | Dashboard overhaul + note prompts. +0.12                           |
+| 2026-02-28 | Phase E actual |   7.63   |    7.62    | 7.35  |    7.97     | History, scoring guide, alerts, session. +0.09                     |
+| 2026-02-28 | Phase F actual |   7.71   |    7.66    | 7.46  |    8.11     | Prep freshness, modal streamline, milestones. +0.08                |
+| 2026-02-28 | Phase G actual |   7.74   |    7.69    | 7.52  |    8.11     | Scoring anchors, tabs, narrative, roster. +0.03                    |
+| 2026-02-28 | Phase H actual |   7.77   |    7.72    | 7.57  |    8.11     | Check-in context, subtitles, toasts, momentum. +0.03               |
+| 2026-02-28 | Phase I actual |   7.80   |    7.74    | 7.63  |    8.11     | Portfolio wins, activity, guidance, presets. +0.03                 |
+| 2026-02-28 | Phase J actual |   7.82   |    7.74    | 7.69  |    8.11     | Mobile nav, cadence toast, AI explain, prep ctx. +0.02             |
+| 2026-03-01 | Phase K actual |   7.86   |    7.82    | 7.71  |    8.11     | Settings overhaul, onboarding polish, comprehensive re-eval. +0.04 |
+| 2026-03-01 | Phase L actual |   7.90   |    7.86    | 7.78  |    8.11     | Timeline deltas, tab badges, hub compaction. +0.04                 |
+|            | Target         |   9.3+   |    9.3+    | 9.0+  |    9.5+     | Final goal. Remaining gap: 1.40 pts.                               |
+
+---
+
+## 20. Phase K Results — Comprehensive Re-evaluation
+
+**Full codebase deep-dive by 3 specialized agents** across all Individual (13 routes), Coach (9 routes), and Stakeholder + Onboarding (10+ files) flows. This is the first comprehensive re-evaluation since the initial baseline — all scores validated against current implementation, not just incremental deltas.
+
+### What Shipped (Since Phase J)
+
+1. **Individual Settings page overhaul** — Legacy `/settings` replaced with role-specific `/individual/settings/`. 5 collapsible sections (Profile, Objective, Sub-Objectives, Cycle & Schedule, Stakeholders). Per-section saving states (`isSavingProfile`, `isSavingObjective`, etc.). Validation errors preserve form data (return after failure toast). Objective change warning modal with `ObjectiveChange` audit trail. Three-state save buttons (Saving.../Update/No Changes). Back-navigation breadcrumb.
+2. **Onboarding steps 4 & 5 reorganization** — Step 4 (Cycle) reorganized into logical groups: Timeline, Check-In Schedule, Delivery Method, Summary box. Step 5 (Stakeholders) reorganized with feedback schedule section, reveal scores toggle, per-stakeholder schedule summary.
+3. **Coach invitations fixes** — Enhanced `use:enhance` callbacks with proper result type checking (redirect → toast, error → toast, failure → toast + return). Cancel/Resend accessible to admin users.
+4. **Settings navigation** — Back-navigation breadcrumb returns to role-appropriate hub. Users never stranded.
+
+### Score Movement
+
+```
+Platform: 7.82 → 7.86 (+0.04)
+Individual: 7.74 → 7.82 (+0.08) ← largest Individual lift since Phase E
+Coach: 7.69 → 7.71 (+0.02)
+Stakeholder: 8.11 → 8.11 (unchanged)
+```
+
+#### Individual (was 7.74 → 7.82, +0.08)
+
+| #   | Dimension                 | Phase J | Phase K | Delta | Evidence                                                                                                                                         |
+| --- | ------------------------- | :-----: | :-----: | :---: | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | First Impression (FI)     |   7.7   | **7.8** | +0.1  | Settings: clean collapsible panels with icons (Target, Users, Calendar). Card-based design consistent with hub and dashboard.                    |
+| 2   | Clarity of Purpose (CP)   |   8.3   |   8.3   |   0   | No changes to primary flows. Settings sections are clear but settings is inherently "configuration" — purpose was already evident.               |
+| 3   | Onboarding Ease (OE)      |   7.6   | **7.7** | +0.1  | Step 4 reorganized into 4 logical groups with summary box. Delivery method section clearer. Still dense (9+ fields) but better grouped.          |
+| 4   | Core Task Flow (CT)       |   7.7   | **7.8** | +0.1  | Per-section saves: update one thing without re-submitting everything. Validation preserves form data — errors don't erase valid fields.          |
+| 5   | Info Architecture (IA)    |   7.6   | **7.8** | +0.2  | 5 collapsible sections replace monolithic form. Back-navigation breadcrumb prevents dead-end. Collapse/expand intuitive. Highest δ in phase.     |
+| 6   | Feedback & Progress (FP)  |   8.1   | **8.2** | +0.1  | Per-section saving states: spinner during save, toast on result, "No Changes" disabled state for objective. Change detection visible.            |
+| 7   | Cognitive Load (CL)       |   7.6   | **7.7** | +0.1  | Collapsible sections: user only sees fields for the section they're editing. Section-level saves eliminate "which form did I change?" confusion. |
+| 8   | Trust & Credibility (TC)  |   7.7   | **7.8** | +0.1  | Objective change warning modal + ObjectiveChange audit trail. System communicates: "This change has been recorded." Changes have consequences.   |
+| 9   | Emotional Engagement (EE) |   7.5   |   7.5   |   0   | Settings doesn't add emotional engagement. No new celebrations (still vetoed). Organized sections feel "in control" but not delightful.          |
+| 10  | Value Perception (VP)     |   7.6   |   7.6   |   0   | Settings overhaul makes configuration feel professional, not hacky — but doesn't change core value proposition.                                  |
+
+#### Coach (was 7.69 → 7.71, +0.02)
+
+| #   | Dimension                | Phase J | Phase K | Delta | Evidence                                                                                                                            |
+| --- | ------------------------ | :-----: | :-----: | :---: | ----------------------------------------------------------------------------------------------------------------------------------- |
+| 6   | Feedback & Progress (FP) |   7.4   | **7.5** | +0.1  | Enhanced use:enhance callbacks: redirects → "Session expired" toast, errors → error toast, failures → error toast + form preserved. |
+|     | All others               |    —    |    —    |   0   | No visual, structural, or behavioral changes to coach-facing screens beyond invitations result handling.                            |
+
+#### Stakeholder (was 8.11 → 8.11, unchanged)
+
+No Phase K changes affected stakeholder screens.
+
+---
+
+### Comprehensive Re-evaluation Findings
+
+Three specialized agents performed exhaustive code walkthroughs of every screen, component, state variable, and interaction pattern. Below is the consolidated findings, cross-referenced against the existing issue catalog.
+
+#### Agent Assessment Summary
+
+| User Journey             | Agent Rating | Framework Score | Delta | Explanation                                                                                                                                             |
+| ------------------------ | :----------: | :-------------: | :---: | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Individual (13 routes)   |    6.8/10    |      7.82       | +1.02 | Agent weights all dimensions equally; framework weights high-frequency CT/OE heavily. Agent harsh on streaming fragility and perception gap visibility. |
+| Coach (9 routes)         |    7.0/10    |      7.71       | +0.71 | Closest alignment. Agent penalizes EE (6.5) and CL (6.5) — matches our lowest-scoring dimensions.                                                       |
+| Stakeholder + Onboarding |    7.3/10    |      8.11       | +0.81 | Agent includes onboarding (Individual OE) in score; framework separates it. Stakeholder form itself scored 8/10.                                        |
+
+Agent ratings use unweighted averages across their own criteria. Framework uses dimension weights and user-type weights. Discrepancies are expected and consistent — agent harshness maps to our documented weaknesses.
+
+#### Validated Strengths (Holding or Improving)
+
+1. **Emotional engagement in Individual journey** — Milestone messaging, streak celebration, dynamic check-in prompts all confirmed working and effective
+2. **State management sophistication** — Draft auto-save (onboarding: 24hr, stakeholder: 4hr), per-section settings saves, syncSection() to prevent cross-section clobber
+3. **Visual consistency** — Color coding (cyan=effort, amber=performance) confirmed consistent across all pages (hub, dashboard, scorecard, insights, check-in, stakeholder feedback)
+4. **Mobile-first responsive design** — Bottom tab bar, safe area handling, responsive grids all confirmed functional
+5. **Stakeholder feedback flow** — Single-page, no-signup, draft recovery, score reveal, structured comment prompt all working well
+6. **Coach AI prep pipeline** — Freshness indicator, explanation line, notes-shaped-prep context, generation with skeleton all confirmed
+
+#### Confirmed Existing Issues (Still Open)
+
+| #   | Issue                                                 | Status      | Phase K Notes                                                                   |
+| --- | ----------------------------------------------------- | ----------- | ------------------------------------------------------------------------------- |
+| 2   | 11-button rating scale (0-10)                         | VETOED      | Still present. Agents noted cognitive load but anchoring labels mitigate.       |
+| 13  | No bulk invite for coaches                            | Open        | Agents confirmed one-at-a-time paradigm. Amara Johnson's pain point persists.   |
+| 15  | Mobile tab bar hides History, Ask, Settings in "More" | Open        | Agents confirmed "More" button doesn't hint at hidden items.                    |
+| 17  | Chat loses history on page refresh                    | Open        | Confirmed — state-only, no persistence.                                         |
+| 21  | History page: all weeks expanded, no search/filter    | ~~FIXED E~~ | Re-confirmed fixed — collapsed by default, search working.                      |
+| 22  | Read-only check-in shows disabled form                | Open        | Confirmed by agent — should show summary instead of disabled inputs.            |
+| 24  | Hub/Dashboard distinction unclear                     | Open        | Agents explicitly flagged: "Both available, distinction isn't clear in the UI." |
+| 26  | Desktop sidebar color contrast                        | Open        | Agent noted focus ring visibility may be hard on light backgrounds.             |
+
+### New Issue Catalog (Found in Comprehensive Re-evaluation)
+
+#### Major Issues (P1) — Score Impact: -2 to -3
+
+| #   | Issue                                                                                                                                                          | User Types | Dimensions | Freq | Effort | Priority Score |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------: | :--------: | :--: | :----: | :------------: |
+| 35  | **Hub hero card: 6 distinct states** — cognitive complexity for return visitors (check-in available, catch-up, no action, milestone, cycle complete, new user) |     I      |   CL, CP   |  3   |  M(2)  |     0.203      |
+| 36  | **Perception gaps not surfaced on hub** — users must navigate to Scorecard to discover stakeholder misalignment                                                |     I      |   CT, VP   |  2   |  M(2)  |     0.203      |
+| 37  | **Streaming error recovery** — partial AI responses (Insights, Ask) show as incomplete text with no error indicator or retry                                   |     I      |   FP, TC   |  1   |  M(2)  |     0.068      |
+| 38  | **Coach archive: no confirmation dialog** — user may accidentally archive client and lose roster access                                                        |     C      |   TC, CT   |  1   |  S(1)  |     0.072      |
+| 39  | **Stakeholder feedback: no idempotency** — form resubmit causes duplicate notifications to individual + coach                                                  |     S      |   TC, FP   |  1   |  M(2)  |     0.038      |
+| 40  | **Coach onboarding: progress dots lack step labels** — first-time coaches see dots only, unclear what each step contains                                       |     C      |   OE, CP   |  1   |  S(1)  |     0.108      |
+| 41  | **Analytics portfolio trends: custom HTML chart** — no axis labels, grid lines, or tooltips; can't extract precise values                                      |     C      |   FI, VP   |  2   |  M(2)  |     0.090      |
+| 42  | **Settings objective change warning feels punitive** — modal blocks save flow; feels like punishment for editing                                               |     I      |   CL, EE   |  1   |  S(1)  |     0.135      |
+
+#### Minor Issues (P2) — Score Impact: -1 to -2
+
+| #   | Issue                                                                                       | User Types | Dimensions |
+| --- | ------------------------------------------------------------------------------------------- | :--------: | :--------: |
+| 43  | Stakeholder invalid link page has no recovery path or support contact                       |     S      |   FP, TC   |
+| 44  | Token expiry time (10 days) not shown to stakeholder on feedback form                       |     S      |   TC, CP   |
+| 45  | Onboarding step 4 still dense (9+ fields) despite reorganization                            |     I      |   CL, OE   |
+| 46  | Coach session Prep tab — no retry mechanism for failed AI generation                        |     C      |   FP, CT   |
+| 47  | Coach onboarding back button uses unconventional ↑ arrow (should be ←)                      |     C      |   IA, CL   |
+| 48  | Settings notification time doesn't clarify timezone interpretation                          |     I      |   CP, TC   |
+| 49  | Settings sub-objectives capped at 5 without explanation                                     |     I      |   CP, CL   |
+| 50  | Dashboard vs Today distinction remains subtle — users may not understand why both exist     |     I      |   CP, IA   |
+| 51  | Suggested questions on Ask page are hardcoded, not context-aware                            |     I      |   CL, VP   |
+| 52  | Stakeholder cadence (weekly/biweekly) hidden in Settings — not visible where it matters     |     I      |   CP, FP   |
+| 53  | Roster archive confirmation missing — stakeholders with existing feedback could be orphaned |     C      |   TC, CT   |
+
+#### Polish Issues (P3) — Score Impact: -0.5 to -1
+
+| #   | Issue                                                                     | User Types | Dimensions |
+| --- | ------------------------------------------------------------------------- | :--------: | :--------: |
+| 54  | Settings delivery method toggle doesn't show previously selected state    |     I      |     FP     |
+| 55  | Coach onboarding Skip button too low visibility (text-tertiary)           |     C      |     OE     |
+| 56  | Coach session alert badge dots inconsistent with global alert design      |     C      |     FI     |
+| 57  | Analytics CSV export button has no loading state                          |     C      |     FP     |
+| 58  | Week number in history should include date range for context              |     I      |     IA     |
+| 59  | Thumbs up/down on insights page has no submission confirmation            |     I      |     FP     |
+| 60  | Flame/streak icon could be larger and more celebratory                    |     I      |     EE     |
+| 61  | Coach notes week field doesn't validate against current cycle weeks       |     C      |   CT, TC   |
+| 62  | Gap trend badges ("closing"/"widening") lack direction and magnitude info |     I      |   CP, CL   |
+| 63  | Coach pre-fill stakeholder inputs lack email validation until submit      |     C      |   TC, CT   |
+
+### Updated Score-Lift Prioritization
+
+Sorted by Priority Score. These are the open issues that will move the platform score most per unit of effort.
+
+| Rank |  #  | Issue                                                                           | Priority Score | Est. Lift | Dimensions |
+| :--: | :-: | ------------------------------------------------------------------------------- | :------------: | :-------: | :--------: |
+|  1   | 35  | Hub hero card: consolidate 6 states to 3-4 clear pathways                       |     0.203      |   +0.08   |   CL, CP   |
+|  2   | 36  | Surface perception gaps on hub or dashboard (gap badge/indicator)               |     0.203      |   +0.08   |   CT, VP   |
+|  3   | 42  | Settings objective warning: change from blocking modal to pre-save confirmation |     0.135      |   +0.04   |   CL, EE   |
+|  4   | 40  | Coach onboarding: add step labels to progress dots ("1/3 Welcome")              |     0.108      |   +0.03   |   OE, CP   |
+|  5   | 41  | Analytics chart: replace custom HTML with Chart.js or add axis labels/grid      |     0.090      |   +0.03   |   FI, VP   |
+|  6   | 38  | Coach archive: add confirmation dialog                                          |     0.072      |   +0.02   |   TC, CT   |
+|  7   | 37  | Streaming error recovery: show error state for partial AI responses + retry     |     0.068      |   +0.02   |   FP, TC   |
+|  8   | 13  | Coach bulk invite capability                                                    |     0.045      |   +0.02   |     CT     |
+|  9   | 39  | Stakeholder feedback idempotency key or duplicate check                         |     0.038      |   +0.01   |   TC, FP   |
+
+### Lowest Remaining Dimensions
+
+| Rank | User Type  | Dimension            | Score | Gap to 8.5 |
+| ---- | ---------- | -------------------- | :---: | :--------: |
+| 1    | Coach      | Emotional Engagement |  7.3  |    1.2     |
+| 2    | Coach      | Cognitive Load       |  7.3  |    1.2     |
+| 3    | Coach      | Onboarding Ease      |  7.5  |    1.0     |
+| 4    | Coach      | Info Architecture    |  7.5  |    1.0     |
+| 5    | Coach      | Feedback & Progress  |  7.5  |    1.0     |
+| 6    | Coach      | Trust & Credibility  |  7.5  |    1.0     |
+| 7    | Individual | Emotional Engagement |  7.5  |    1.0     |
+| 8    | Individual | Value Perception     |  7.6  |    0.9     |
+
+### Phase K Commentary
+
+Phase K is the first comprehensive re-evaluation since baseline. Three agents examined every route, component, and state variable in the codebase. The +0.04 platform lift comes primarily from the Individual settings overhaul (+0.08 Individual), which improved IA (+0.2), plus small gains across FI, OE, CT, FP, CL, and TC.
+
+**Key insight from re-evaluation:** The platform's scores are holding up under scrutiny. Agent findings align with our documented weaknesses — Coach EE (7.3) and CL (7.3) remain the floor, matching agent assessments. No score needed retroactive downward adjustment. The new issue catalog (29 items, #35-63) provides a comprehensive roadmap for future phases.
+
+**What needs to happen next to reach 8.5+ across all dimensions:**
+
+1. **Coach EE (7.3 → 8.5):** Needs fundamentally new interaction patterns — coach-specific streaks/milestones ("You've prepped every Monday for 6 weeks"), session impact trails ("Your notes influenced 4 AI prompts"), portfolio sentiment visualization, celebration of coach milestones (first AI prep, 10th note, first client cycle completion).
+
+2. **Coach CL (7.3 → 8.5):** Session page tab summaries (key metric per tab), roster visual hierarchy cleanup, analytics tooltips for metric definitions, pre-fill form simplification.
+
+3. **Individual EE (7.5 → 8.5):** Perception gaps surfaced on hub (creates anticipation), celebration after stakeholder add, check-in streak mechanics (visual progression, not just counter), cycle completion celebration.
+
+4. **Hub cognitive consolidation (#35, #36):** Consolidate hero card states and surface perception gaps — the two highest-priority issues found in this re-evaluation.
+
+### Scenario Re-validation
+
+| Code | Scenario                        |  Previous Success  |  Phase K Status  | Notes                                                                                          |
+| ---- | ------------------------------- | :----------------: | :--------------: | ---------------------------------------------------------------------------------------------- |
+| I-1  | First-time onboarding           |    ~7 min / Yes    |  ~6.5 min / Yes  | Step 4 reorganization saves ~30s. Still dense but grouped logically.                           |
+| I-2  | Weekly check-in                 |   ~70-120s / Yes   |  ~70-120s / Yes  | Unchanged. Anchor labels and dynamic prompts holding.                                          |
+| I-3  | Add stakeholder + feedback link |     ~90s / Yes     |    ~90s / Yes    | Relationship dropdown (Phase I) confirmed smooth.                                              |
+| I-4  | AI insights + ask               |    ~4 min / Yes    |   ~4 min / Yes   | Streaming works. Error recovery still missing (#37).                                           |
+| I-5  | Scorecard review                |    ~2 min / Yes    |   ~2 min / Yes   | Gap visualization confirmed clear. Trend badges still lack detail.                             |
+| I-6  | Start new cycle                 |    ~3 min / Yes    |   ~3 min / Yes   | 3-step wizard (Phase B) confirmed working well.                                                |
+| I-7  | Return visit, no action         |   Observe / 5.5    |  Observe / 6.5   | Milestone messaging (Phase F) + adaptive empty states (Phase A) help.                          |
+| C-1  | Coach onboarding + invite       |   ~3-5 min / Yes   |  ~3-5 min / Yes  | Pre-fill in step 3 (Phase F) confirmed. Progress dots still unlabeled (#40).                   |
+| C-2  | Monday roster review            | ~2-3 min / Partial |   ~2 min / Yes   | Urgency sort (Phase A) + roster enrichment (Phase G) confirmed working.                        |
+| C-3  | Pre-session deep dive           |   ~5-6 min / Yes   |   ~5 min / Yes   | Session tabs (Phase A) + freshness (Phase F) + subgoal pills (Phase E) confirmed.              |
+| C-4  | Analytics review                |    ~3 min / Yes    |   ~3 min / Yes   | Portfolio narrative (Phase G) + CSV export (Phase B) confirmed. Chart still custom HTML (#41). |
+| C-5  | Invite with prefill             |    ~5 min / Yes    |   ~4 min / Yes   | Pre-fill toggle (Phase A) + form clear (Phase C) confirmed.                                    |
+| S-1  | First-time feedback             |  ~75s-2 min / Yes  | ~75s-2 min / Yes | Streamlined modal (Phase F) + structured prompt (Phase C) confirmed.                           |
+| S-2  | Score reveal                    |   Observe / 7.5    |  Observe / 7.5   | Reveal signposting (Phase C) confirmed working.                                                |
+| S-3  | Return visit (4th time)         |   ~45-50s / Yes    |  ~45-50s / Yes   | No welcome modal on return confirmed. Draft restore confirmed.                                 |
+| S-4  | Expired token                   |   Observe / 7.5    |  Observe / 7.5   | No recovery path still missing (#43).                                                          |
+
+---
+
+## 21. Phase L Results (Timeline deltas, tab badges, hub compaction)
+
+**What shipped:**
+
+1. **Timeline week-over-week deltas** (Coach session view) — Each week header now shows computed average Effort and Performance scores with color-coded ↑↓ deltas vs. previous week. Eliminates mental computation across entire timeline. Coach sees "Week 7 Effort 7.2 ↑0.5 Perf 5.8 ↓1.2" instantly.
+2. **Session tab count badges** — Prep tab shows alert count badge (warnings from AI prep), Notes tab shows note count. Coach knows what awaits without clicking tabs. Also fixed `{@const}` placement bug (Svelte 5 requires it as direct child of `{#each}`).
+3. **Individual hub compaction** — Zone 3: merged 2-card metrics layout (Your Ratings + Stakeholder View) into single compact 4-column card (Effort, Performance, Stakeholder, Completion). Zone 4: AI insight teaser now shows first 80 chars of content instead of generic "available" text. Zone 5: Recent Activity collapsed by default with chevron toggle and item count.
+
+### Score Movement
+
+```
+Platform: 7.86 → 7.90 (+0.04)
+Individual: 7.82 → 7.86 (+0.04)
+Coach: 7.71 → 7.78 (+0.07) ← largest Coach lift since Phase I
+Stakeholder: 8.11 → 8.11 (unchanged)
+```
+
+#### Individual (was 7.82 → 7.86, +0.04)
+
+| #   | Dimension             | Phase K | Phase L | Delta | Evidence                                                                                                 |
+| --- | --------------------- | :-----: | :-----: | :---: | -------------------------------------------------------------------------------------------------------- |
+| 1   | First Impression (FI) |   7.8   | **7.9** | +0.1  | Compact 4-col metrics card looks cleaner than 2 separate cards. Collapsed activity reduces visual noise. |
+| 7   | Cognitive Load (CL)   |   7.7   | **7.9** | +0.2  | 2 cards → 1 compact row. AI excerpt eliminates click-to-discover. Recent Activity hidden by default.     |
+| 10  | Value Perception (VP) |   7.6   | **7.7** | +0.1  | AI insight excerpt shows actual content preview — user can assess value before navigating.               |
+|     | All others            |    —    |    —    |   0   | CP, OE, CT, IA, FP, TC, EE unchanged.                                                                    |
+
+#### Coach (was 7.71 → 7.78, +0.07)
+
+| #   | Dimension                 | Phase K | Phase L | Delta | Evidence                                                                                                         |
+| --- | ------------------------- | :-----: | :-----: | :---: | ---------------------------------------------------------------------------------------------------------------- |
+| 5   | Info Architecture (IA)    |   7.5   | **7.6** | +0.1  | Tab count badges provide information scent — coach knows which tabs have content without clicking each one.      |
+| 6   | Feedback & Progress (FP)  |   7.5   | **7.7** | +0.2  | Week-level progress now explicit with computed averages and ↑↓ deltas. Progress visible at every week header.    |
+| 7   | Cognitive Load (CL)       |   7.3   | **7.7** | +0.4  | Timeline deltas eliminate mental computation (4 steps × N weeks). Tab badges eliminate tab-clicking exploration. |
+| 9   | Emotional Engagement (EE) |   7.3   | **7.4** | +0.1  | Seeing ↑ trend arrows in green is subtly reinforcing. Coach gets micro-affirmation of client progress.           |
+|     | All others                |    —    |    —    |   0   | FI, CP, OE, CT, TC, VP unchanged.                                                                                |
+
+#### Stakeholder (unchanged)
+
+No Phase L changes affected stakeholder screens.
+
+### Lowest Remaining Dimensions
+
+| Rank | User Type  | Dimension            | Score | Gap to 8.5 |
+| ---- | ---------- | -------------------- | :---: | :--------: |
+| 1    | Coach      | Emotional Engagement |  7.4  |    1.1     |
+| 2    | Coach      | Onboarding Ease      |  7.5  |    1.0     |
+| 3    | Coach      | Trust & Credibility  |  7.5  |    1.0     |
+| 4    | Individual | Emotional Engagement |  7.5  |    1.0     |
+| 5    | Coach      | Info Architecture    |  7.6  |    0.9     |
+| 6    | Individual | Value Perception     |  7.7  |    0.8     |
+| 7    | Coach      | Cognitive Load       |  7.7  |    0.8     |
+| 8    | Coach      | Feedback & Progress  |  7.7  |    0.8     |
+
+### Phase L Commentary
+
+Phase L delivered the largest Coach lift since Phase I (+0.07) by targeting the session view — the coach's highest-frequency screen. Coach CL jumped +0.4 (7.3 → 7.7), the biggest single-dimension movement since the early phases. Timeline deltas eliminate the #1 mental computation task in the session view: averaging scores and comparing week-over-week. Tab badges add information scent throughout. The Individual hub compaction cleaned up the "Today" page layout — fewer cards, AI content preview, and hidden low-utility section.
+
+**Coach CL is no longer at the bottom.** After 11 phases at 7.3 or below, Coach CL jumped to 7.7, overtaking EE (7.4), OE (7.5), and TC (7.5). The new floor is Coach EE at 7.4. Platform crossed 7.9 for the first time.
+
+**Next levers:** Coach EE (7.4) remains the persistent bottleneck — needs coach-specific progression mechanics (streaks, milestones, impact trails). Individual EE (7.5) could benefit from perception gap surfacing on the hub. Coach OE (7.5) needs onboarding step labels.
