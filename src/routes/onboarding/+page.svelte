@@ -1764,20 +1764,31 @@
 														class="block text-sm font-medium text-text-secondary"
 														for={`stakeholderRelationship${index + 1}`}>Relationship</label
 													>
-													<input
+													<select
 														id={`stakeholderRelationship${index + 1}`}
 														name={`stakeholderRelationship${index + 1}`}
-														type="text"
-														placeholder="e.g. direct manager, peer, direct report"
 														class="w-full rounded-lg border border-border-default bg-surface-raised px-4 py-2 text-text-primary transition-all focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
 														value={stakeholder.relationship}
-														oninput={(event) =>
+														onchange={(event) =>
 															updateStakeholderField(
 																index,
 																'relationship',
 																event.currentTarget.value
 															)}
-													/>
+													>
+														<option value="" disabled selected={!stakeholder.relationship}
+															>Select relationship</option
+														>
+														<option value="Direct Manager">Direct Manager</option>
+														<option value="Skip-Level Manager">Skip-Level Manager</option>
+														<option value="Peer">Peer</option>
+														<option value="Direct Report">Direct Report</option>
+														<option value="Cross-Functional Partner"
+															>Cross-Functional Partner</option
+														>
+														<option value="HR Partner">HR Partner</option>
+														<option value="Other">Other</option>
+													</select>
 												</div>
 
 												<div class="space-y-2">

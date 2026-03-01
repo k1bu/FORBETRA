@@ -334,14 +334,23 @@
 							class="mb-1.5 block text-sm font-medium text-text-primary"
 							>Relationship <span class="font-normal text-text-tertiary">(optional)</span></label
 						>
-						<input
+						<select
 							id="stakeholder-relationship"
 							name="relationship"
-							type="text"
-							class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
-							placeholder="e.g., Manager, Peer, Direct Report"
+							class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
 							value={stakeholderFormValues.relationship}
-						/>
+						>
+							<option value="" disabled selected={!stakeholderFormValues.relationship}
+								>Select relationship</option
+							>
+							<option value="Direct Manager">Direct Manager</option>
+							<option value="Skip-Level Manager">Skip-Level Manager</option>
+							<option value="Peer">Peer</option>
+							<option value="Direct Report">Direct Report</option>
+							<option value="Cross-Functional Partner">Cross-Functional Partner</option>
+							<option value="HR Partner">HR Partner</option>
+							<option value="Other">Other</option>
+						</select>
 					</div>
 					<div>
 						<label

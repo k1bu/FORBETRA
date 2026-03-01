@@ -125,6 +125,11 @@ export const load: PageServerLoad = async (event) => {
 		})
 		.filter((value): value is NonNullable<typeof value> => value !== null);
 
+	// Coach activity — total notes written
+	const noteCount = await prisma.coachNote.count({
+		where: { coachId: dbUser.id }
+	});
+
 	const invitations = await prisma.coachInvite.findMany({
 		where: { coachId: dbUser.id },
 		select: {
@@ -230,6 +235,69 @@ export const load: PageServerLoad = async (event) => {
 				}
 			: null;
 
+	// Portfolio wins — positive highlights for emotional engagement
+	const portfolioWins: Array<{ clientName: string; clientId: string; message: string }> = [];
+	for (const client of activeSummaries) {
+		const refs = client.objective?.cycle?.recentReflections;
+		if (refs && refs.length >= 2) {
+			const latest = refs[0];
+			const prior = refs.slice(1);
+			// Personal best: latest effort or performance is highest in window
+			if (
+				latest.effortScore !== null &&
+				prior.every((r) => r.effortScore === null || latest.effortScore! >= r.effortScore)
+			) {
+				const priorMax = Math.max(
+					...prior.filter((r) => r.effortScore !== null).map((r) => r.effortScore!)
+				);
+				if (latest.effortScore > priorMax) {
+					portfolioWins.push({
+						clientName: client.name,
+						clientId: client.id,
+						message: `Hit a personal best in effort (${latest.effortScore}/10)`
+					});
+				}
+			}
+			if (
+				latest.performanceScore !== null &&
+				prior.every(
+					(r) => r.performanceScore === null || latest.performanceScore! >= r.performanceScore
+				)
+			) {
+				const priorMax = Math.max(
+					...prior.filter((r) => r.performanceScore !== null).map((r) => r.performanceScore!)
+				);
+				if (latest.performanceScore > priorMax) {
+					portfolioWins.push({
+						clientName: client.name,
+						clientId: client.id,
+						message: `Hit a personal best in performance (${latest.performanceScore}/10)`
+					});
+				}
+			}
+		}
+		// Near completion
+		const completion = client.objective?.cycle
+			? Math.round(client.objective.cycle.completion * 100)
+			: 0;
+		if (completion >= 90 && completion < 100) {
+			portfolioWins.push({
+				clientName: client.name,
+				clientId: client.id,
+				message: `${completion}% through their cycle — almost there`
+			});
+		}
+	}
+	// Keep top 3, deduplicate by client (prefer first win per client)
+	const seenClients = new Set<string>();
+	const topWins = portfolioWins
+		.filter((w) => {
+			if (seenClients.has(w.clientId)) return false;
+			seenClients.add(w.clientId);
+			return true;
+		})
+		.slice(0, 3);
+
 	return {
 		coach: {
 			name: dbUser.name ?? 'Coach'
@@ -256,6 +324,8 @@ export const load: PageServerLoad = async (event) => {
 			stable: activeSummaries.length - improving - declining,
 			total: activeSummaries.length
 		},
-		portfolioMomentum
+		portfolioMomentum,
+		portfolioWins: topWins,
+		coachActivity: { noteCount }
 	};
 };

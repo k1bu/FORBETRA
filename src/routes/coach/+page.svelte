@@ -10,7 +10,8 @@
 		Mail,
 		TrendingUp,
 		TrendingDown,
-		Minus
+		Minus,
+		Star
 	} from 'lucide-svelte';
 	import { coachAlertCount } from '$lib/stores/coachAlerts.svelte';
 
@@ -132,6 +133,47 @@
 		</div>
 	</div>
 
+	<!-- First-Visit Guidance -->
+	{#if data.rosterSummary.active === 0}
+		<section class="rounded-xl border border-border-default bg-surface-raised p-5">
+			<h2 class="text-sm font-semibold text-text-primary">Get started</h2>
+			{#if data.rosterSummary.pendingInvites > 0}
+				<p class="mt-1 text-sm text-text-secondary">
+					Your invite is on its way. Once your client accepts, their progress will appear here
+					automatically.
+				</p>
+			{:else}
+				<p class="mt-1 text-sm text-text-secondary">
+					Invite your first client to start tracking their development journey.
+				</p>
+			{/if}
+			<div class="mt-3 flex flex-wrap gap-2">
+				<a
+					href="/coach/invitations"
+					class="rounded-lg bg-accent px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-accent/90"
+				>
+					{data.rosterSummary.pendingInvites > 0 ? 'Invite another client' : 'Invite a client'}
+				</a>
+				<a
+					href="/coach/roster"
+					class="rounded-lg border border-border-default px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-subtle"
+				>
+					Explore roster
+				</a>
+			</div>
+		</section>
+	{/if}
+
+	<!-- Coach Activity -->
+	{#if data.coachActivity.noteCount > 0}
+		<p class="text-xs text-text-muted">
+			Your coaching footprint: {data.coachActivity.noteCount} note{data.coachActivity.noteCount !==
+			1
+				? 's'
+				: ''} written
+		</p>
+	{/if}
+
 	<!-- Clients Needing Attention -->
 	{#if data.atRiskClients.length > 0}
 		<section class="rounded-xl border border-border-default bg-surface-raised p-4">
@@ -233,6 +275,35 @@
 								{clientName}
 							</p>
 							<p class="text-xs text-text-secondary">{alert.message}</p>
+						</div>
+						<ChevronRight
+							class="h-4 w-4 shrink-0 text-text-muted opacity-0 transition-opacity group-hover:opacity-100"
+						/>
+					</a>
+				{/each}
+			</div>
+		</section>
+	{/if}
+
+	<!-- Portfolio Wins -->
+	{#if data.portfolioWins.length > 0}
+		<section class="rounded-xl border border-border-default bg-surface-raised p-4">
+			<div class="mb-3 flex items-center gap-2">
+				<Star class="h-4 w-4 text-warning" />
+				<h2 class="text-sm font-semibold text-text-primary">Portfolio Wins</h2>
+			</div>
+			<div class="divide-y divide-border-default">
+				{#each data.portfolioWins as win (win.clientId)}
+					<a
+						href="/coach/session/{win.clientId}"
+						class="group -mx-4 flex items-center gap-3 px-4 py-3 transition-colors first:pt-0 last:pb-0 hover:bg-surface-subtle"
+					>
+						<span class="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-success"></span>
+						<div class="min-w-0 flex-1">
+							<p class="text-sm font-medium text-text-primary group-hover:text-accent">
+								{win.clientName}
+							</p>
+							<p class="text-xs text-text-secondary">{win.message}</p>
 						</div>
 						<ChevronRight
 							class="h-4 w-4 shrink-0 text-text-muted opacity-0 transition-opacity group-hover:opacity-100"
