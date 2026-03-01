@@ -166,11 +166,19 @@
 
 	<!-- Coach Activity -->
 	{#if data.coachActivity.noteCount > 0}
+		{@const n = data.coachActivity.noteCount}
 		<p class="text-xs text-text-muted">
-			Your coaching footprint: {data.coachActivity.noteCount} note{data.coachActivity.noteCount !==
-			1
-				? 's'
-				: ''} written
+			{#if n >= 50}
+				Coach milestone: {n} notes across your portfolio. You're building a deep coaching record.
+			{:else if n >= 25}
+				{n} coaching notes and counting. Your observations are shaping outcomes.
+			{:else if n >= 10}
+				{n} coaching notes written. You're building momentum with your clients.
+			{:else if n >= 5}
+				{n} notes captured. Each one shapes your clients' next AI prompt.
+			{:else}
+				Your coaching footprint: {n} note{n !== 1 ? 's' : ''} written
+			{/if}
 		</p>
 	{/if}
 

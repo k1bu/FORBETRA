@@ -254,7 +254,7 @@ export const load: PageServerLoad = async (event) => {
 					portfolioWins.push({
 						clientName: client.name,
 						clientId: client.id,
-						message: `Hit a personal best in effort (${latest.effortScore}/10)`
+						message: `Personal best in effort (${latest.effortScore}/10) — your coaching is resonating`
 					});
 				}
 			}
@@ -271,7 +271,7 @@ export const load: PageServerLoad = async (event) => {
 					portfolioWins.push({
 						clientName: client.name,
 						clientId: client.id,
-						message: `Hit a personal best in performance (${latest.performanceScore}/10)`
+						message: `Personal best in performance (${latest.performanceScore}/10) — your guidance is landing`
 					});
 				}
 			}
@@ -284,7 +284,7 @@ export const load: PageServerLoad = async (event) => {
 			portfolioWins.push({
 				clientName: client.name,
 				clientId: client.id,
-				message: `${completion}% through their cycle — almost there`
+				message: `${completion}% through their cycle — the finish line is in sight`
 			});
 		}
 	}

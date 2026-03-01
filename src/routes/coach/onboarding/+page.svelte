@@ -33,7 +33,7 @@
 
 	// Pre-fill state
 	type PrefillStakeholder = { name: string; email: string };
-	let showPrefill = $state(false);
+	let showPrefill = $state(true);
 	let prefillObjectiveTitle = $state('');
 	let prefillStakeholders = $state<PrefillStakeholder[]>([{ name: '', email: '' }]);
 
@@ -55,6 +55,8 @@
 	);
 	let isSubmitting = $state(false);
 
+	const stepLabels = ['Welcome', 'How It Works', 'Invite Client'];
+
 	// Handle successful invite creation — redirect to coach hub
 	$effect(() => {
 		if (form?.success) {
@@ -75,21 +77,34 @@
 <section
 	class="mx-auto flex min-h-screen max-w-3xl flex-col items-center justify-center gap-8 p-4 pb-12"
 >
-	<!-- Progress Dots -->
-	<div class="flex items-center gap-3">
+	<!-- Progress Steps -->
+	<div class="flex items-center gap-6">
 		{#each allSteps as step, i (step)}
 			<button
 				type="button"
 				onclick={() => {
 					if (i <= currentStepIndex) currentStep = step;
 				}}
-				class="h-3 w-3 rounded-full transition-all {i === currentStepIndex
-					? 'scale-110 bg-accent shadow-md shadow-accent/30'
-					: i < currentStepIndex
-						? 'bg-accent/60 hover:bg-accent/70'
-						: 'bg-surface-subtle'}"
-				aria-label="Step {i + 1}"
-			></button>
+				class="flex flex-col items-center gap-1.5"
+				aria-label="Step {i + 1}: {stepLabels[i]}"
+			>
+				<span
+					class="h-3 w-3 rounded-full transition-all {i === currentStepIndex
+						? 'scale-110 bg-accent shadow-md shadow-accent/30'
+						: i < currentStepIndex
+							? 'bg-accent/60 hover:bg-accent/70'
+							: 'bg-surface-subtle'}"
+				></span>
+				<span
+					class="text-[10px] font-medium {i === currentStepIndex
+						? 'text-accent'
+						: i < currentStepIndex
+							? 'text-text-secondary'
+							: 'text-text-muted'}"
+				>
+					{stepLabels[i]}
+				</span>
+			</button>
 		{/each}
 	</div>
 

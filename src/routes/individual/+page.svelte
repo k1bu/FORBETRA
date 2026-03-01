@@ -14,7 +14,8 @@
 		User,
 		Sparkles,
 		ChevronRight,
-		ChevronDown
+		ChevronDown,
+		ArrowUpDown
 	} from 'lucide-svelte';
 
 	const { data }: { data: PageData } = $props();
@@ -540,6 +541,49 @@
 				</div>
 			</div>
 		</div>
+	{/if}
+
+	<!-- ═══ ZONE 3b: Perception Gaps ═══ -->
+	{#if data.perceptionGaps && data.perceptionGaps.length > 0}
+		{@const significantGaps = data.perceptionGaps.filter((g) => g.maxAbsGap > 1)}
+		{#if significantGaps.length > 0}
+			<!-- eslint-disable svelte/no-navigation-without-resolve -->
+			<a
+				href="/individual/scorecard"
+				class="group flex items-start gap-3 rounded-xl border border-border-default bg-surface-raised px-4 py-3 transition-all hover:border-accent/30"
+			>
+				<ArrowUpDown class="mt-0.5 h-4 w-4 shrink-0 text-text-muted" />
+				<div class="min-w-0 flex-1">
+					<p class="text-sm font-medium text-text-primary">
+						{significantGaps.length} perception gap{significantGaps.length !== 1 ? 's' : ''}
+					</p>
+					<div class="mt-1 flex flex-wrap gap-x-4 gap-y-1">
+						{#each significantGaps.slice(0, 3) as gap (gap.stakeholderId)}
+							{@const biggestGap =
+								Math.abs(gap.effortGap ?? 0) > Math.abs(gap.performanceGap ?? 0)
+									? gap.effortGap
+									: gap.performanceGap}
+							{@const absGap = Math.abs(biggestGap ?? 0)}
+							<span class="text-xs {absGap > 2 ? 'text-error' : 'text-warning'}">
+								{gap.stakeholderName}: {biggestGap !== null && biggestGap > 0
+									? '+'
+									: ''}{biggestGap?.toFixed(1)}
+								{#if gap.effortGapTrend === 'closing' || gap.performanceGapTrend === 'closing'}
+									<span class="text-success">closing</span>
+								{:else if gap.effortGapTrend === 'widening' || gap.performanceGapTrend === 'widening'}
+									<span class="text-error">widening</span>
+								{/if}
+							</span>
+						{/each}
+					</div>
+				</div>
+				<span
+					class="mt-1 shrink-0 text-xs font-semibold text-accent transition-transform group-hover:translate-x-0.5"
+					>Details →</span
+				>
+			</a>
+			<!-- eslint-enable svelte/no-navigation-without-resolve -->
+		{/if}
 	{/if}
 
 	<!-- ═══ ZONE 4: Quick Insight (single) + AI Insight Teaser ═══ -->

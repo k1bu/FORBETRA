@@ -72,7 +72,7 @@
 					content: result.content,
 					createdAt: result.createdAt
 				};
-				addToast('Coaching insights generated', 'success');
+				addToast('Session prep ready — coaching opportunities surfaced', 'success');
 			} else {
 				addToast('Failed to generate insights', 'error');
 			}
@@ -149,7 +149,17 @@
 			submittingNote = false;
 		}
 		if (form?.noteSuccess) {
-			addToast(`Note saved — shapes ${data.client.name.split(' ')[0]}'s Monday prompt`, 'success');
+			const count = data.allCoachNotes.length + 1;
+			const firstName = data.client.name.split(' ')[0];
+			const milestoneMsg =
+				count === 10
+					? `Your 10th note for ${firstName} — you're deeply invested`
+					: count === 25
+						? `25 notes for ${firstName} — rich coaching record`
+						: count === 5
+							? `5 notes for ${firstName} — patterns are forming`
+							: `Note saved — shapes ${firstName}'s next prompt`;
+			addToast(milestoneMsg, 'success');
 			noteContent = '';
 		}
 	});

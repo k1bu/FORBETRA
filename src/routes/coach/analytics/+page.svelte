@@ -75,11 +75,17 @@
 			const avgCompletion =
 				clients.reduce((sum, c) => sum + (c.completionRate ?? 0), 0) / clients.length;
 
-			parts.push(
-				`${trendingUp} of ${clients.length} client${clients.length === 1 ? '' : 's'} trending up`
-			);
+			if (trendingUp === clients.length && clients.length > 1) {
+				parts.push(`All ${clients.length} clients trending up — your portfolio is thriving`);
+			} else if (trendingUp > 0) {
+				parts.push(
+					`${trendingUp} of ${clients.length} client${clients.length === 1 ? '' : 's'} gaining momentum`
+				);
+			} else {
+				parts.push(`${clients.length} client${clients.length === 1 ? '' : 's'} in your portfolio`);
+			}
 			if (needsAttention > 0)
-				parts.push(`${needsAttention} need${needsAttention === 1 ? 's' : ''} attention`);
+				parts.push(`${needsAttention} need${needsAttention === 1 ? 's' : ''} your attention`);
 			parts.push(`avg completion ${Math.round(avgCompletion)}%`);
 
 			return parts.join(' · ');
