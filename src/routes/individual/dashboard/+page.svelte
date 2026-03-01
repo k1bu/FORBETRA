@@ -1,4 +1,5 @@
 <script lang="ts">
+	/* eslint-disable @typescript-eslint/no-unused-vars */
 	import type { ActionData, PageData } from './$types';
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
@@ -12,8 +13,7 @@
 				}
 			: { name: '', email: '', relationship: '' };
 
-	const stakeholderError =
-		form?.action === 'stakeholder' && form?.error ? form.error : null;
+	const stakeholderError = form?.action === 'stakeholder' && form?.error ? form.error : null;
 	const stakeholderSuccess = form?.action === 'stakeholder' && form?.success ? true : false;
 
 	const formatDateTime = (value: string | null) => {
@@ -52,10 +52,10 @@
 
 	const formatPromptLabel = (type: string) => {
 		switch (type) {
-		case 'RATING_A':
-			return 'Check-in';
-		case 'RATING_B':
-			return 'Check-in';
+			case 'RATING_A':
+				return 'Check-in';
+			case 'RATING_B':
+				return 'Check-in';
 			default:
 				return 'Upcoming prompt';
 		}
@@ -63,9 +63,9 @@
 
 	const promptTarget = (type: string) => {
 		switch (type) {
-		case 'RATING_A':
-		case 'RATING_B':
-			return '/reflections/checkin';
+			case 'RATING_A':
+			case 'RATING_B':
+				return '/reflections/checkin';
 			default:
 				return '/individual';
 		}
@@ -78,25 +78,52 @@
 		return 'from-purple-500 to-pink-500';
 	};
 
-	import { Clock, BarChart3, Users, Flame, Calendar, CircleCheck, CircleX, RotateCcw } from 'lucide-svelte';
+	import {
+		Clock,
+		BarChart3,
+		Users,
+		Flame,
+		Calendar,
+		CircleCheck,
+		CircleX,
+		RotateCcw
+	} from 'lucide-svelte';
 	import PerformanceEffortChart from '$lib/components/PerformanceEffortChart.svelte';
 	import { getScoreColorNullable, getStabilityColor } from '$lib/utils/scoreColors';
 
-	const getScoreColor = (score: number | null | undefined, type: 'effort' | 'performance' = 'effort') =>
-		getScoreColorNullable(score, type);
+	const getScoreColor = (
+		score: number | null | undefined,
+		type: 'effort' | 'performance' = 'effort'
+	) => getScoreColorNullable(score, type);
 </script>
 
 <svelte:head>
 	<title>Dashboard | Forbetra</title>
 </svelte:head>
 
+<!-- eslint-disable svelte/no-navigation-without-resolve -->
 <section class="mx-auto flex max-w-6xl flex-col gap-8 p-4 pb-12">
 	<!-- Page Header -->
 	<header>
 		<nav aria-label="Breadcrumb" class="mb-2">
 			<ol class="flex items-center gap-1.5 text-sm text-text-tertiary">
-				<li><a href="/individual" class="rounded transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">Hub</a></li>
-				<li aria-hidden="true" class="text-text-muted"><svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg></li>
+				<li>
+					<a
+						href="/individual"
+						class="rounded transition-colors hover:text-text-primary focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
+						>Hub</a
+					>
+				</li>
+				<li aria-hidden="true" class="text-text-muted">
+					<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+						><path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M9 5l7 7-7 7"
+						/></svg
+					>
+				</li>
 				<li><span class="font-medium text-text-primary">Dashboard</span></li>
 			</ol>
 		</nav>
@@ -107,13 +134,14 @@
 		{#if data.subgoals.length}
 			<div class="mt-4 flex flex-wrap gap-2">
 				{#each data.subgoals as subgoal, index (subgoal.id)}
-					<span class="rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-text-secondary">
+					<span
+						class="rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-text-secondary"
+					>
 						{subgoal.label}
 					</span>
 				{/each}
 			</div>
 		{/if}
-
 	</header>
 
 	{#if form?.action === 'feedback'}
@@ -123,8 +151,10 @@
 			</div>
 		{:else if form.feedbackLink}
 			<div class="rounded-xl border border-success/20 bg-success-muted p-4 text-sm text-success">
-				<p class="mb-2 font-semibold"><CircleCheck class="h-4 w-4 inline text-success" /> Feedback link generated!</p>
-				<p class="mb-2 font-mono break-all text-xs">{form.feedbackLink}</p>
+				<p class="mb-2 font-semibold">
+					<CircleCheck class="inline h-4 w-4 text-success" /> Feedback link generated!
+				</p>
+				<p class="mb-2 font-mono text-xs break-all">{form.feedbackLink}</p>
 				{#if form.expiresAt}
 					<p class="text-xs text-success">Expires {formatDateTime(form.expiresAt)}.</p>
 				{/if}
@@ -132,18 +162,21 @@
 		{/if}
 	{/if}
 
-
 	{#if data.cycle}
 		<!-- Quick Stats Grid -->
 		<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 			<!-- Next Prompt Card -->
 			{#if data.nextPrompt}
-				<div class="rounded-xl border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30">
+				<div
+					class="rounded-xl border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30"
+				>
 					<div class="mb-3 flex items-center gap-2">
 						<Clock class="h-4 w-4 text-text-muted" />
-						<p class="text-xs font-semibold uppercase tracking-wide text-text-tertiary">Next Up</p>
+						<p class="text-xs font-semibold tracking-wide text-text-tertiary uppercase">Next Up</p>
 					</div>
-					<p class="mb-1 text-lg font-bold text-text-primary">{formatPromptLabel(data.nextPrompt.type)}</p>
+					<p class="mb-1 text-lg font-bold text-text-primary">
+						{formatPromptLabel(data.nextPrompt.type)}
+					</p>
 					<p class="mb-4 text-sm text-text-secondary">{formatDate(data.nextPrompt.date)}</p>
 					<form method="get" action={promptTarget(data.nextPrompt.type)}>
 						<button
@@ -157,11 +190,13 @@
 			{/if}
 
 			<!-- Cycle Progress Card -->
-			<div class="rounded-xl border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30">
+			<div
+				class="rounded-xl border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30"
+			>
 				<div class="mb-3 flex items-center justify-between">
 					<div class="flex items-center gap-2">
 						<BarChart3 class="h-4 w-4 text-text-muted" />
-						<p class="text-xs font-semibold uppercase tracking-wide text-text-tertiary">Progress</p>
+						<p class="text-xs font-semibold tracking-wide text-text-tertiary uppercase">Progress</p>
 					</div>
 				</div>
 				<div class="mb-3">
@@ -181,14 +216,24 @@
 				<p class="text-xs text-text-secondary">
 					<span class="font-semibold">{data.cycle.reflectionsRecorded}</span> reflections submitted
 				</p>
+				{@const expectedPct = Math.round((data.cycle.weeksElapsed / data.cycle.totalWeeks) * 100)}
+				{#if data.cycle.completion >= expectedPct}
+					<p class="mt-1 text-[10px] text-success">On pace or ahead</p>
+				{:else if data.cycle.completion >= expectedPct - 15}
+					<p class="mt-1 text-[10px] text-text-muted">Slightly behind pace</p>
+				{:else}
+					<p class="mt-1 text-[10px] text-warning">Behind pace — catch up this week</p>
+				{/if}
 			</div>
 
 			<!-- Feedback Summary Card -->
 			{#if data.feedbackSummary}
-				<div class="rounded-xl border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30">
+				<div
+					class="rounded-xl border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30"
+				>
 					<div class="mb-3 flex items-center gap-2">
 						<Users class="h-4 w-4 text-text-muted" />
-						<p class="text-xs font-semibold uppercase tracking-wide text-text-tertiary">Feedback</p>
+						<p class="text-xs font-semibold tracking-wide text-text-tertiary uppercase">Feedback</p>
 					</div>
 					<div class="mb-2 flex items-baseline gap-2">
 						<p class="text-3xl font-bold text-text-primary">
@@ -198,10 +243,18 @@
 					</div>
 					<div class="space-y-1 text-xs text-text-secondary">
 						<p>
-							Effort: <span class="font-semibold {getScoreColor(data.feedbackSummary.avgEffort, 'effort')}">{formatAverage(data.feedbackSummary.avgEffort)}</span>
+							Effort: <span
+								class="font-semibold {getScoreColor(data.feedbackSummary.avgEffort, 'effort')}"
+								>{formatAverage(data.feedbackSummary.avgEffort)}</span
+							>
 						</p>
 						<p>
-							Progress: <span class="font-semibold {getScoreColor(data.feedbackSummary.avgProgress, 'performance')}">{formatAverage(data.feedbackSummary.avgProgress)}</span>
+							Progress: <span
+								class="font-semibold {getScoreColor(
+									data.feedbackSummary.avgProgress,
+									'performance'
+								)}">{formatAverage(data.feedbackSummary.avgProgress)}</span
+							>
 						</p>
 					</div>
 				</div>
@@ -209,15 +262,21 @@
 
 			<!-- Engagement Card (Completion Rate & Streaks) -->
 			{#if data.engagement}
-				<div class="rounded-xl border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30">
+				<div
+					class="rounded-xl border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30"
+				>
 					<div class="mb-3 flex items-center gap-2">
 						<Flame class="h-4 w-4 text-text-muted" />
-						<p class="text-xs font-semibold uppercase tracking-wide text-text-tertiary">Engagement</p>
+						<p class="text-xs font-semibold tracking-wide text-text-tertiary uppercase">
+							Engagement
+						</p>
 					</div>
 					{#if data.engagement.completionRate !== null}
 						<div class="mb-4">
 							<div class="mb-2 flex items-baseline gap-2">
-								<p class="text-3xl font-bold text-text-primary">{data.engagement.completionRate}%</p>
+								<p class="text-3xl font-bold text-text-primary">
+									{data.engagement.completionRate}%
+								</p>
 								<p class="text-xs text-text-secondary">complete</p>
 							</div>
 							<div class="h-2 w-full overflow-hidden rounded-full bg-surface-subtle">
@@ -245,7 +304,6 @@
 					</div>
 				</div>
 			{/if}
-
 		</div>
 
 		<!-- Cycle Details -->
@@ -264,7 +322,9 @@
 				</div>
 				{#if data.weeklyExperiences.length}
 					<div class="space-y-3">
-						<h3 class="text-sm font-semibold uppercase tracking-wide text-text-tertiary">This Week's Check-ins</h3>
+						<h3 class="text-sm font-semibold tracking-wide text-text-tertiary uppercase">
+							This Week's Check-ins
+						</h3>
 						<div class="grid gap-3 md:grid-cols-3">
 							{#each data.weeklyExperiences as experience (experience.type)}
 								{@const stateLabels = {
@@ -274,7 +334,9 @@
 									upcoming: 'Upcoming',
 									catchup: 'Catch Up'
 								}}
-								<div class="rounded-xl border border-border-default bg-surface-raised p-4 transition-all">
+								<div
+									class="rounded-xl border border-border-default bg-surface-raised p-4 transition-all"
+								>
 									<div class="mb-2 flex items-center gap-2">
 										{#if experience.state === 'open'}
 											<span class="h-2 w-2 rounded-full bg-accent"></span>
@@ -287,7 +349,9 @@
 										{:else if experience.state === 'catchup'}
 											<RotateCcw class="h-4 w-4 text-warning" />
 										{/if}
-										<span class="text-xs font-semibold uppercase tracking-wide text-text-secondary">{stateLabels[experience.state]}</span>
+										<span class="text-xs font-semibold tracking-wide text-text-secondary uppercase"
+											>{stateLabels[experience.state]}</span
+										>
 									</div>
 									<p class="mb-2 font-semibold text-text-primary">{experience.label}</p>
 									{#if experience.availableDate}
@@ -320,7 +384,9 @@
 											</p>
 										{/if}
 									{:else if experience.state === 'missed'}
-										<p class="text-xs font-medium text-text-secondary">Window closed — keep going this week!</p>
+										<p class="text-xs font-medium text-text-secondary">
+											Window closed — keep going this week!
+										</p>
 									{:else if experience.state === 'upcoming'}
 										<p class="text-xs font-medium text-text-tertiary">Closed/Not Yet Available</p>
 									{/if}

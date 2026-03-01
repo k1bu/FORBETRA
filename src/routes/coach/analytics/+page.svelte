@@ -166,9 +166,16 @@
 				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 			</nav>
 			<h1 class="text-3xl font-bold text-text-primary">Analytics Dashboard</h1>
-			<p class="mt-2 text-text-secondary">Comprehensive metrics and insights across all clients</p>
+			<p class="mt-2 text-text-secondary">
+				Track effort, performance, and engagement patterns across your portfolio
+			</p>
 			{#if portfolioNarrative}
-				<p class="mt-1 text-sm text-text-tertiary">{portfolioNarrative}</p>
+				<div
+					class="mt-3 flex items-center gap-2 rounded-lg border border-accent/20 bg-accent-muted/50 px-3 py-2"
+				>
+					<TrendingUp class="h-4 w-4 shrink-0 text-accent" />
+					<p class="text-sm font-medium text-text-primary">{portfolioNarrative}</p>
+				</div>
 			{/if}
 		</div>
 		{#if data.clientComparison.length > 0}

@@ -519,13 +519,31 @@
 				cycle: 'Schedule',
 				stakeholders: 'Stakeholders'
 			}}
+			{@const stepDescs = {
+				welcome: '',
+				objective: 'Define what you want to improve',
+				subgoals: 'Break it into observable behaviors',
+				cycle: 'Set your check-in rhythm',
+				stakeholders: 'Invite people who see your work'
+			}}
+			{@const stepTimes = {
+				welcome: '',
+				objective: '~2 min',
+				subgoals: '~3 min',
+				cycle: '~2 min',
+				stakeholders: '~3 min'
+			}}
 			<div class="mb-8">
-				<div class="mb-2 flex items-center justify-between text-sm text-text-secondary">
+				<div class="mb-1 flex items-center justify-between text-sm text-text-secondary">
 					<span class="font-medium"
 						>Step {allSteps.indexOf(currentStep) + 1}: {stepNames[currentStep]}</span
 					>
 					<span class="text-text-muted">{Math.round(stepProgress)}% complete</span>
 				</div>
+				<p class="mb-2 text-xs text-text-muted">
+					{stepDescs[currentStep]}{#if stepTimes[currentStep]}
+						<span class="ml-1 text-text-tertiary">({stepTimes[currentStep]})</span>{/if}
+				</p>
 				<div class="h-2 overflow-hidden rounded-full bg-surface-subtle">
 					<div
 						class="h-full rounded-full bg-accent transition-all duration-500 ease-out"
