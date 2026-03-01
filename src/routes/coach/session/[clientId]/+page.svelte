@@ -184,8 +184,8 @@
 				onclick={() => (activeTab = tab.id)}
 				class="flex-1 rounded-lg px-4 py-2 text-sm font-semibold transition-all {activeTab ===
 				tab.id
-					? 'bg-surface-raised text-text-primary shadow-sm'
-					: 'text-text-tertiary hover:text-text-secondary'}"
+					? 'bg-accent text-white shadow-sm'
+					: 'text-text-tertiary hover:bg-surface-raised hover:text-text-secondary'}"
 			>
 				{tab.label}
 				{#if tab.id === 'prep' && (data.alerts.length > 0 || data.client.alerts.length > 0)}

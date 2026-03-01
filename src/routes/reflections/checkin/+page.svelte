@@ -6,8 +6,7 @@
 		getScoreBgColor,
 		getButtonSelectedColors,
 		getButtonHoverColors,
-		getFocusRing,
-		getScoreLabel
+		getFocusRing
 	} from '$lib/utils/scoreColors';
 	import { addToast } from '$lib/stores/toasts.svelte';
 	import {
@@ -343,19 +342,20 @@
 					{/each}
 				</div>
 
-				<div class="mb-2 flex items-center justify-between">
-					<span class="text-xs font-medium text-text-tertiary">Rarely intentional</span>
-					<div
-						class="rounded-full px-3 py-1 text-xs font-semibold {getScoreBgColor(
-							effortScore,
-							'effort'
-						)} {getScoreColor(effortScore, 'effort')}"
-					>
-						{getScoreLabel(effortScore, 'effort')}
-					</div>
-					<span class="text-xs font-medium text-text-tertiary">Relentless commitment</span>
+				<div class="hidden justify-between px-0.5 sm:flex" aria-hidden="true">
+					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted">None</span>
+					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted"></span>
+					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted"></span>
+					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted">Low</span>
+					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted"></span>
+					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted">Moderate</span>
+					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted"></span>
+					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted">High</span>
+					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted"></span>
+					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted"></span>
+					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted">Total</span>
 				</div>
-				<p class="text-xs text-text-muted italic">
+				<p class="mt-2 text-xs text-text-muted italic">
 					Consider attention, preparation, and prioritization toward the objective.
 				</p>
 			</div>
@@ -417,19 +417,20 @@
 					{/each}
 				</div>
 
-				<div class="mb-2 flex items-center justify-between">
-					<span class="text-xs font-medium text-text-tertiary">Not yet visible</span>
-					<div
-						class="rounded-full px-3 py-1 text-xs font-semibold {getScoreBgColor(
-							performanceScore,
-							'performance'
-						)} {getScoreColor(performanceScore, 'performance')}"
-					>
-						{getScoreLabel(performanceScore, 'performance')}
-					</div>
-					<span class="text-xs font-medium text-text-tertiary">Transformative impact</span>
+				<div class="hidden justify-between px-0.5 sm:flex" aria-hidden="true">
+					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted">None</span>
+					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted"></span>
+					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted"></span>
+					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted">Low</span>
+					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted"></span>
+					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted">Moderate</span>
+					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted"></span>
+					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted">High</span>
+					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted"></span>
+					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted"></span>
+					<span class="w-[calc(100%/11)] text-center text-[10px] text-text-muted">Total</span>
 				</div>
-				<p class="text-xs text-text-muted italic">
+				<p class="mt-2 text-xs text-text-muted italic">
 					Consider outcomes, behavior change, and visible impact related to the objective.
 				</p>
 			</div>

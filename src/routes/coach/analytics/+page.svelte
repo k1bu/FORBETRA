@@ -64,6 +64,28 @@
 		return value.toFixed(1);
 	};
 
+	const portfolioNarrative = $derived(
+		(() => {
+			const clients = data.clientComparison;
+			if (clients.length === 0) return null;
+
+			const parts: string[] = [];
+			const trendingUp = clients.filter((c) => c.trajectory !== null && c.trajectory > 0).length;
+			const needsAttention = clients.filter((c) => c.alertCount > 0).length;
+			const avgCompletion =
+				clients.reduce((sum, c) => sum + (c.completionRate ?? 0), 0) / clients.length;
+
+			parts.push(
+				`${trendingUp} of ${clients.length} client${clients.length === 1 ? '' : 's'} trending up`
+			);
+			if (needsAttention > 0)
+				parts.push(`${needsAttention} need${needsAttention === 1 ? 's' : ''} attention`);
+			parts.push(`avg completion ${Math.round(avgCompletion)}%`);
+
+			return parts.join(' · ');
+		})()
+	);
+
 	const sortIndicator = (key: SortKey) => {
 		if (sortKey !== key) return '';
 		return sortAsc ? ' \u2191' : ' \u2193';
@@ -139,6 +161,9 @@
 			</nav>
 			<h1 class="text-3xl font-bold text-text-primary">Analytics Dashboard</h1>
 			<p class="mt-2 text-text-secondary">Comprehensive metrics and insights across all clients</p>
+			{#if portfolioNarrative}
+				<p class="mt-1 text-sm text-text-tertiary">{portfolioNarrative}</p>
+			{/if}
 		</div>
 		{#if data.clientComparison.length > 0}
 			<button

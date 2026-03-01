@@ -294,9 +294,19 @@
 									{/if}
 								</div>
 								{#if client.objective?.cycle}
-									<span class="text-xs text-text-tertiary">
-										Week {client.objective.cycle.currentWeek ?? '—'}
-									</span>
+									<div class="flex items-center gap-2 text-xs text-text-tertiary">
+										<span>Wk {client.objective.cycle.currentWeek ?? '—'}</span>
+										{#if client.objective.insights}
+											<span class="text-text-muted">·</span>
+											<span class="text-warning tabular-nums"
+												>{formatAverage(client.objective.insights.avgEffort)}</span
+											>
+											<span class="text-text-muted">/</span>
+											<span class="text-accent tabular-nums"
+												>{formatAverage(client.objective.insights.avgProgress)}</span
+											>
+										{/if}
+									</div>
 								{/if}
 							</div>
 							{#if client.alerts && client.alerts.length > 0}
