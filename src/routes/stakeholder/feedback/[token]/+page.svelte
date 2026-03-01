@@ -593,6 +593,35 @@
 						{/if}
 					</div>
 				{/if}
+
+				<!-- Conversion prompt for engaged stakeholders (3+ feedbacks) -->
+				{#if form?.feedbackCount && form.feedbackCount >= 3 && !data.isPreview}
+					<div
+						class="rounded-2xl border border-accent/20 bg-gradient-to-b from-accent-muted to-surface-raised p-6 text-center"
+					>
+						<p class="text-sm text-text-secondary">
+							You've provided feedback {form.feedbackCount} times now.
+						</p>
+						<p class="text-sm text-text-secondary">
+							That means you care about {form.individualFirstName}'s growth.
+						</p>
+						<p class="mt-4 text-lg font-bold text-text-primary">What about yours?</p>
+						<p class="mt-2 text-sm text-text-secondary">
+							Most leaders have blind spots they can't see. Your colleagues could help you see yours
+							— the same way you're helping {form.individualFirstName}.
+						</p>
+						<div class="mt-5 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+							<!-- eslint-disable svelte/no-navigation-without-resolve -->
+							<a
+								href="/sign-up?ref=stakeholder&from={data.stakeholder.id}"
+								class="rounded-xl bg-accent px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-accent-hover"
+							>
+								Start My Own Journey
+							</a>
+							<!-- eslint-enable svelte/no-navigation-without-resolve -->
+						</div>
+					</div>
+				{/if}
 			</div>
 		{/if}
 

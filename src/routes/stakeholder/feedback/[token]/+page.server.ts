@@ -35,8 +35,14 @@ export const load: PageServerLoad = async ({ params, url }) => {
 				objectiveTitle: 'Improve executive presence'
 			},
 			subgoals: [
-				{ label: 'Active listening in meetings', description: 'Make eye contact, paraphrase others, ask clarifying questions' },
-				{ label: 'Confident presentations', description: 'Speak with clear structure and conviction in team updates' }
+				{
+					label: 'Active listening in meetings',
+					description: 'Make eye contact, paraphrase others, ask clarifying questions'
+				},
+				{
+					label: 'Confident presentations',
+					description: 'Speak with clear structure and conviction in team updates'
+				}
 			],
 			isPreview: true,
 			isFirstFeedback: true,
@@ -171,6 +177,11 @@ export const load: PageServerLoad = async ({ params, url }) => {
 
 	const isFirstFeedback = historicRatings.length === 0;
 
+	// Count total feedbacks from this stakeholder (for conversion funnel)
+	const feedbackCount = await prisma.feedback.count({
+		where: { stakeholderId: token.stakeholderId! }
+	});
+
 	const subgoals = (token.reflection.cycle.objective?.subgoals ?? []).map((s) => ({
 		label: s.label,
 		description: s.description
@@ -197,7 +208,8 @@ export const load: PageServerLoad = async ({ params, url }) => {
 		isAlreadySubmitted,
 		isFirstFeedback,
 		previousRatings,
-		historicRatings
+		historicRatings,
+		feedbackCount
 	};
 };
 
@@ -270,7 +282,10 @@ export const actions: Actions = {
 		if (!parsed.success) {
 			const errors = parsed.error.flatten();
 			return fail(400, {
-				error: errors.fieldErrors._form?.[0] ?? errors.fieldErrors.comment?.[0] ?? 'Invalid feedback submission.'
+				error:
+					errors.fieldErrors._form?.[0] ??
+					errors.fieldErrors.comment?.[0] ??
+					'Invalid feedback submission.'
 			});
 		}
 
@@ -298,7 +313,12 @@ export const actions: Actions = {
 		// Fetch stakeholder and reflection details for notification
 		const stakeholder = await prisma.stakeholder.findUnique({
 			where: { id: token.stakeholderId! },
-			select: { name: true, email: true, phone: true, individual: { select: { id: true, name: true, email: true, phone: true } } }
+			select: {
+				name: true,
+				email: true,
+				phone: true,
+				individual: { select: { id: true, name: true, email: true, phone: true } }
+			}
 		});
 
 		const reflection = await prisma.reflection.findUnique({
@@ -446,15 +466,23 @@ export const actions: Actions = {
 			}
 		}
 
+		// Count feedbacks for conversion funnel
+		const totalFeedbacks = await prisma.feedback.count({
+			where: { stakeholderId: token.stakeholderId! }
+		});
+
 		return {
 			success: true,
-			individualScores: reflection && reflection.cycle.revealScores
-				? {
-						effortScore: reflection.effortScore,
-						performanceScore: reflection.performanceScore,
-						participantName: reflection.user.name ?? 'Participant'
-					}
-				: null
+			feedbackCount: totalFeedbacks,
+			individualFirstName: reflection?.user.name?.split(' ')[0] ?? 'them',
+			individualScores:
+				reflection && reflection.cycle.revealScores
+					? {
+							effortScore: reflection.effortScore,
+							performanceScore: reflection.performanceScore,
+							participantName: reflection.user.name ?? 'Participant'
+						}
+					: null
 		};
 	}
 };
