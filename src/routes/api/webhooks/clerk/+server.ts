@@ -1,6 +1,7 @@
 import type { RequestHandler } from '@sveltejs/kit';
 import prisma from '$lib/server/prisma';
 import { Webhook } from 'svix';
+import { rateLimit } from '$lib/server/rateLimit';
 
 type ClerkWebhookEvent = {
 	type: string;
@@ -40,6 +41,10 @@ const verifyClerkWebhook = async (request: Request): Promise<ClerkWebhookEvent |
 };
 
 export const POST: RequestHandler = async ({ request }) => {
+	if (!rateLimit('webhook:clerk', 30, 60_000)) {
+		return new Response('Too many requests', { status: 429 });
+	}
+
 	if (!WEBHOOK_SECRET) {
 		return missingSecretResponse;
 	}

@@ -4,9 +4,14 @@ import { requireRole } from '$lib/server/auth';
 import prisma from '$lib/server/prisma';
 import anthropic from '$lib/server/ai/client';
 import { computeWeekNumber } from '$lib/server/coachUtils';
+import { rateLimit } from '$lib/server/rateLimit';
 
 export const POST: RequestHandler = async (event) => {
 	const { dbUser } = requireRole(event, 'INDIVIDUAL');
+
+	if (!rateLimit(`insight:${dbUser.id}`, 5, 60_000)) {
+		return json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+	}
 
 	const body = await event.request.json();
 	const messages: Array<{ role: 'user' | 'assistant'; content: string }> = body.messages ?? [];
@@ -21,7 +26,10 @@ export const POST: RequestHandler = async (event) => {
 
 	const oversizedMessage = messages.find((m) => m.content.length > 2000);
 	if (oversizedMessage) {
-		return json({ error: 'Message too long. Please keep each message under 2000 characters.' }, { status: 400 });
+		return json(
+			{ error: 'Message too long. Please keep each message under 2000 characters.' },
+			{ status: 400 }
+		);
 	}
 
 	// Simple rate limit: max 20 insight requests per hour (all types)
@@ -141,14 +149,18 @@ ${contextStr}`;
 			try {
 				for await (const event of stream) {
 					if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
-						controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: event.delta.text })}\n\n`));
+						controller.enqueue(
+							encoder.encode(`data: ${JSON.stringify({ text: event.delta.text })}\n\n`)
+						);
 					}
 				}
 				controller.enqueue(encoder.encode('data: [DONE]\n\n'));
 				controller.close();
 			} catch (error) {
 				console.error('[ask:error]', error);
-				controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: 'Stream error' })}\n\n`));
+				controller.enqueue(
+					encoder.encode(`data: ${JSON.stringify({ error: 'Stream error' })}\n\n`)
+				);
 				controller.close();
 			}
 		}

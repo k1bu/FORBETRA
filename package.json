@@ -54,6 +54,7 @@
 		"@fontsource/geist-sans": "^5.2.5",
 		"@prisma/client": "^6.19.0",
 		"@sendgrid/mail": "^8.1.6",
+		"@sentry/sveltekit": "^10.40.0",
 		"chart.js": "^4.4.0",
 		"lucide-svelte": "^0.575.0",
 		"postmark": "^4.0.5",

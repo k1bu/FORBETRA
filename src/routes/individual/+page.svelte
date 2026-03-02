@@ -17,7 +17,10 @@
 		ChevronDown,
 		ArrowUpDown,
 		Lock,
-		Trophy
+		Trophy,
+		Share2,
+		Copy,
+		Check
 	} from 'lucide-svelte';
 	import InfoTip from '$lib/components/InfoTip.svelte';
 
@@ -60,6 +63,32 @@
 
 	let showRecentActivity = $state(false);
 	let showHeatMap = $state(false);
+	let showReportCard = $state(false);
+	let linkedInCopied = $state(false);
+
+	// Journey celebration overlay
+	let showCelebration = $state(false);
+	$effect(() => {
+		try {
+			if (
+				data.cycle?.isCycleCompleted &&
+				data.journeySummary &&
+				!localStorage.getItem('forbetra_journey_celebrated')
+			) {
+				showCelebration = true;
+			}
+		} catch {
+			/* SSR / localStorage unavailable */
+		}
+	});
+	function dismissCelebrationOverlay() {
+		try {
+			localStorage.setItem('forbetra_journey_celebrated', 'true');
+		} catch {
+			/* ignore */
+		}
+		showCelebration = false;
+	}
 
 	// Streak milestone detection
 	const streakMilestone = $derived(
@@ -284,6 +313,89 @@
 	<title>Today | Forbetra</title>
 </svelte:head>
 
+{#if showCelebration && data.journeySummary}
+	{@const js = data.journeySummary}
+	{@const durationWeeks = data.totalWeeks ?? 12}
+	<!-- eslint-disable svelte/no-navigation-without-resolve -->
+	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+		<div
+			class="bg-surface-default mx-auto w-full max-w-lg overflow-y-auto rounded-2xl border border-accent/20 p-8"
+			style="max-height: 90vh"
+		>
+			<div class="flex flex-col items-center text-center">
+				<div
+					class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-success/10 text-3xl"
+				>
+					<Trophy class="h-8 w-8 text-success" />
+				</div>
+				<h2 class="text-2xl font-bold text-text-primary">Journey Complete</h2>
+				<p class="mt-2 text-sm text-text-secondary">
+					You completed {durationWeeks} weeks of intentional growth.
+				</p>
+				<div class="mt-4 flex flex-wrap justify-center gap-3 text-sm text-text-secondary">
+					<span class="rounded-full bg-surface-subtle px-3 py-1"
+						>{js.checkInCount} check-in{js.checkInCount !== 1 ? 's' : ''}</span
+					>
+					<span class="rounded-full bg-surface-subtle px-3 py-1"
+						>{js.raterCount} rater{js.raterCount !== 1 ? 's' : ''}</span
+					>
+					<span class="rounded-full bg-surface-subtle px-3 py-1"
+						>{js.insightCount} AI insight{js.insightCount !== 1 ? 's' : ''}</span
+					>
+				</div>
+				<div class="mt-6 grid w-full grid-cols-2 gap-4 text-left">
+					<div class="rounded-xl bg-surface-subtle px-4 py-3">
+						<p class="text-[10px] font-semibold tracking-wider text-text-muted uppercase">Effort</p>
+						<p class="text-lg font-bold text-text-primary tabular-nums">
+							{js.effortStart ?? '--'} &rarr; {js.effortEnd ?? '--'}
+						</p>
+					</div>
+					<div class="rounded-xl bg-surface-subtle px-4 py-3">
+						<p class="text-[10px] font-semibold tracking-wider text-text-muted uppercase">
+							Performance
+						</p>
+						<p class="text-lg font-bold text-text-primary tabular-nums">
+							{js.performanceStart ?? '--'} &rarr; {js.performanceEnd ?? '--'}
+						</p>
+					</div>
+				</div>
+				{#if data.identityAnchor}
+					<p class="mt-5 text-sm text-text-secondary italic">
+						"{data.identityAnchor}" — that's who you're becoming.
+					</p>
+				{/if}
+				<div class="mt-6 flex w-full flex-col gap-2">
+					<a
+						href="/individual/insights"
+						onclick={dismissCelebrationOverlay}
+						class="w-full rounded-xl bg-accent px-4 py-2.5 text-center text-sm font-semibold text-white transition-colors hover:bg-accent-hover"
+					>
+						View Your Full Report
+					</a>
+					<button
+						type="button"
+						onclick={() => {
+							dismissCelebrationOverlay();
+							showReportCard = true;
+						}}
+						class="flex w-full items-center justify-center gap-1.5 rounded-xl border border-accent/30 bg-surface-raised px-4 py-2.5 text-sm font-semibold text-accent transition-colors hover:bg-accent-muted"
+					>
+						<Share2 class="h-4 w-4" /> Share Your Journey
+					</button>
+					<a
+						href="/individual/new-cycle"
+						onclick={dismissCelebrationOverlay}
+						class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-center text-sm font-semibold text-text-secondary transition-colors hover:bg-surface-subtle"
+					>
+						Start Next Journey
+					</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- eslint-enable svelte/no-navigation-without-resolve -->
+{/if}
+
 <section class="mx-auto flex max-w-3xl flex-col gap-5 p-4 pb-12">
 	<!-- ═══ ZONE 1: Top Bar — Welcome + Objective + Week + Streak ═══ -->
 	<div class="anim-stagger flex flex-col gap-1" style="--stagger: 0">
@@ -488,13 +600,22 @@
 				</div>
 			</div>
 			<!-- eslint-disable svelte/no-navigation-without-resolve -->
-			<div class="flex gap-2 pl-[52px]">
+			<div class="flex flex-wrap gap-2 pl-[52px]">
 				<a
 					href="/individual/insights"
 					class="rounded-lg bg-green-600 px-4 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-green-700"
 				>
 					See Growth Report
 				</a>
+				{#if data.journeySummary}
+					<button
+						type="button"
+						onclick={() => (showReportCard = !showReportCard)}
+						class="flex items-center gap-1 rounded-lg border border-accent/30 bg-surface-raised px-4 py-1.5 text-xs font-semibold text-accent transition-colors hover:bg-accent-muted"
+					>
+						<Share2 class="h-3 w-3" /> Share Your Journey
+					</button>
+				{/if}
 				<a
 					href="/individual/new-cycle"
 					class="rounded-lg border border-success/20 bg-surface-raised px-4 py-1.5 text-xs font-semibold text-success transition-colors hover:bg-success-muted"
@@ -504,6 +625,99 @@
 			</div>
 			<!-- eslint-enable svelte/no-navigation-without-resolve -->
 		</div>
+		{#if showReportCard && data.journeySummary}
+			{@const js = data.journeySummary}
+			{@const effortDelta =
+				js.effortEnd !== null && js.effortStart !== null ? js.effortEnd - js.effortStart : null}
+			{@const perfDelta =
+				js.performanceEnd !== null && js.performanceStart !== null
+					? js.performanceEnd - js.performanceStart
+					: null}
+			{@const durationWeeks = data.totalWeeks ?? 12}
+			<div
+				class="overflow-hidden rounded-2xl border border-border-default bg-[#0f172a] p-8 text-white"
+				style="aspect-ratio: 1200 / 630;"
+			>
+				<div class="flex h-full flex-col justify-between">
+					<div>
+						<p class="text-[10px] font-semibold tracking-widest text-cyan-400 uppercase">
+							Leadership Journey Complete
+						</p>
+						<p class="mt-2 text-xl font-bold">
+							"{data.objective?.title ?? 'My Leadership Journey'}"
+						</p>
+						<p class="mt-1 text-sm text-slate-400">
+							{durationWeeks} weeks &middot; {js.checkInCount} check-ins &middot; {js.raterCount}
+							rater{js.raterCount !== 1 ? 's' : ''}
+						</p>
+					</div>
+					<div class="flex gap-8">
+						<div>
+							<p class="text-[10px] font-semibold tracking-wider text-slate-400 uppercase">
+								Effort
+							</p>
+							<p class="text-lg font-bold tabular-nums">
+								{js.effortStart ?? '--'} &rarr; {js.effortEnd ?? '--'}
+								{#if effortDelta !== null}
+									<span class="text-sm {effortDelta >= 0 ? 'text-emerald-400' : 'text-red-400'}"
+										>{effortDelta > 0 ? '+' : ''}{effortDelta.toFixed(1)}</span
+									>
+								{/if}
+							</p>
+						</div>
+						<div>
+							<p class="text-[10px] font-semibold tracking-wider text-slate-400 uppercase">
+								Performance
+							</p>
+							<p class="text-lg font-bold tabular-nums">
+								{js.performanceStart ?? '--'} &rarr; {js.performanceEnd ?? '--'}
+								{#if perfDelta !== null}
+									<span class="text-sm {perfDelta >= 0 ? 'text-emerald-400' : 'text-red-400'}"
+										>{perfDelta > 0 ? '+' : ''}{perfDelta.toFixed(1)}</span
+									>
+								{/if}
+							</p>
+						</div>
+						<div>
+							<p class="text-[10px] font-semibold tracking-wider text-slate-400 uppercase">
+								Alignment
+							</p>
+							<p class="text-lg font-bold tabular-nums">
+								{js.alignmentStart ?? '--'}% &rarr; {js.alignmentEnd ?? '--'}%
+							</p>
+						</div>
+					</div>
+					{#if js.shareableTakeaway}
+						<p class="text-slate-300 italic">"{js.shareableTakeaway}"</p>
+					{/if}
+					<p class="text-[10px] text-slate-500">Powered by Forbetra &middot; forbetra.com</p>
+				</div>
+			</div>
+			<button
+				type="button"
+				onclick={() => {
+					const text = `I just completed a ${durationWeeks}-week leadership development journey focused on "${data.objective?.title ?? 'my growth'}."
+
+Here's what I learned:
+→ My effort score went from ${js.effortStart ?? '--'} to ${js.effortEnd ?? '--'}
+→ My performance went from ${js.performanceStart ?? '--'} to ${js.performanceEnd ?? '--'}${js.shareableTakeaway ? `\n→ The biggest insight: ${js.shareableTakeaway}` : ''}
+
+If you're curious about your own leadership blind spots, check out forbetra.com
+
+#leadership #development #growth`;
+					navigator.clipboard.writeText(text);
+					linkedInCopied = true;
+					setTimeout(() => (linkedInCopied = false), 2000);
+				}}
+				class="flex w-full items-center justify-center gap-2 rounded-xl border border-accent/30 bg-surface-raised px-4 py-2.5 text-sm font-semibold text-accent transition-colors hover:bg-accent-muted"
+			>
+				{#if linkedInCopied}
+					<Check class="h-4 w-4" /> Copied to clipboard!
+				{:else}
+					<Copy class="h-4 w-4" /> Copy for LinkedIn
+				{/if}
+			</button>
+		{/if}
 	{:else if data.cycle?.isOverdue && !extendSuccess}
 		<!-- Cycle overdue -->
 		<div

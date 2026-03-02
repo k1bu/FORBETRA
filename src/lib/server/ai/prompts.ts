@@ -295,7 +295,10 @@ Name each stakeholder. Describe the direction and trend of their perception gap 
 2-3 areas for development. Ground each in specific data patterns — not generic advice.
 
 ## Recommendations
-Exactly 3 concrete, actionable recommendations. Each must tie directly to a finding from the analysis above. Each recommendation must include a specific behavioral experiment — something concrete enough to visualize doing it this week (e.g. "In your next 1:1, ask your direct report: 'What's one decision I should hand off to you?'").`;
+Exactly 3 concrete, actionable recommendations. Each must tie directly to a finding from the analysis above. Each recommendation must include a specific behavioral experiment — something concrete enough to visualize doing it this week (e.g. "In your next 1:1, ask your direct report: 'What's one decision I should hand off to you?'").
+
+## Shareable Takeaway
+A single sentence under 140 characters that captures the most important insight from this journey. It should be specific to this person's data, not generic. Write it in first person. Example: "I discovered my team sees my delegation as 40% less effective than I thought — and closing that gap changed how I lead."`;
 }
 
 export function buildCoachPrepPrompt(context: CoachPrepContext): string {

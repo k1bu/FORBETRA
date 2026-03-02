@@ -22,67 +22,69 @@ export const load: PageServerLoad = async (event) => {
 		throw error(404, 'Client not found');
 	}
 
-	// Load full individual data (same pattern as roster but for single client)
-	const individual = await prisma.user.findUnique({
-		where: { id: clientId },
-		select: {
-			id: true,
-			email: true,
-			name: true,
-			objectives: {
-				where: { active: true },
-				orderBy: { createdAt: 'desc' },
-				include: {
-					subgoals: {
-						orderBy: { createdAt: 'asc' },
-						select: {
-							id: true,
-							label: true,
-							description: true
-						}
-					},
-					cycles: {
-						orderBy: { startDate: 'desc' },
-						take: 1,
-						include: {
-							reflections: {
-								orderBy: { submittedAt: 'desc' },
-								select: {
-									id: true,
-									weekNumber: true,
-									reflectionType: true,
-									submittedAt: true,
-									effortScore: true,
-									performanceScore: true,
-									notes: true
-								}
-							},
-							coachNotes: {
-								where: { coachId: dbUser.id },
-								orderBy: { createdAt: 'desc' },
-								select: {
-									id: true,
-									content: true,
-									weekNumber: true,
-									createdAt: true
+	// Load individual data + insight queries in parallel
+	const [individual, coachPrep, alerts] = await Promise.all([
+		prisma.user.findUnique({
+			where: { id: clientId },
+			select: {
+				id: true,
+				email: true,
+				name: true,
+				objectives: {
+					where: { active: true },
+					orderBy: { createdAt: 'desc' },
+					include: {
+						subgoals: {
+							orderBy: { createdAt: 'asc' },
+							select: {
+								id: true,
+								label: true,
+								description: true
+							}
+						},
+						cycles: {
+							orderBy: { startDate: 'desc' },
+							take: 1,
+							include: {
+								reflections: {
+									orderBy: { submittedAt: 'desc' },
+									select: {
+										id: true,
+										weekNumber: true,
+										reflectionType: true,
+										submittedAt: true,
+										effortScore: true,
+										performanceScore: true,
+										notes: true
+									}
+								},
+								coachNotes: {
+									where: { coachId: dbUser.id },
+									orderBy: { createdAt: 'desc' },
+									select: {
+										id: true,
+										content: true,
+										weekNumber: true,
+										createdAt: true
+									}
 								}
 							}
-						}
-					},
-					stakeholders: {
-						orderBy: { createdAt: 'asc' },
-						include: {
-							feedbacks: {
-								orderBy: { submittedAt: 'desc' },
-								select: {
-									submittedAt: true,
-									effortScore: true,
-									performanceScore: true,
-									reflection: {
-										select: {
-											weekNumber: true,
-											effortScore: true,
-											performanceScore: true
+						},
+						stakeholders: {
+							orderBy: { createdAt: 'asc' },
+							include: {
+								feedbacks: {
+									orderBy: { submittedAt: 'desc' },
+									select: {
+										submittedAt: true,
+										effortScore: true,
+										performanceScore: true,
+										reflection: {
+											select: {
+												weekNumber: true,
+												effortScore: true,
+												performanceScore: true
+											}
 										}
 									}
 								}
@@ -91,8 +93,22 @@ export const load: PageServerLoad = async (event) => {
 					}
 				}
 			}
-		}
-	});
+		}),
+		prisma.insight.findFirst({
+			where: { userId: clientId, type: 'COACH_PREP', status: 'COMPLETED' },
+			orderBy: { createdAt: 'desc' },
+			select: { id: true, content: true, createdAt: true }
+		}),
+		prisma.insight.findMany({
+			where: {
+				userId: clientId,
+				type: 'COACH_ALERT',
+				status: 'COMPLETED',
+				createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }
+			},
+			select: { content: true, createdAt: true }
+		})
+	]);
 
 	if (!individual) {
 		throw error(404, 'Client not found');
@@ -111,35 +127,6 @@ export const load: PageServerLoad = async (event) => {
 	if (!client) {
 		throw error(404, 'Client not found');
 	}
-
-	// Load latest COACH_PREP insight
-	const coachPrep = await prisma.insight.findFirst({
-		where: {
-			userId: clientId,
-			type: 'COACH_PREP',
-			status: 'COMPLETED'
-		},
-		orderBy: { createdAt: 'desc' },
-		select: {
-			id: true,
-			content: true,
-			createdAt: true
-		}
-	});
-
-	// Load COACH_ALERT insights (last 7 days)
-	const alerts = await prisma.insight.findMany({
-		where: {
-			userId: clientId,
-			type: 'COACH_ALERT',
-			status: 'COMPLETED',
-			createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }
-		},
-		select: {
-			content: true,
-			createdAt: true
-		}
-	});
 
 	// Determine AI prep freshness (has new data arrived since prep was generated?)
 	let prepFreshness: { isStale: boolean; newDataSince: number } | null = null;

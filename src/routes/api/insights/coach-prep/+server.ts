@@ -3,9 +3,14 @@ import type { RequestHandler } from '@sveltejs/kit';
 import prisma from '$lib/server/prisma';
 import { requireRole } from '$lib/server/auth';
 import { generateCoachPrep } from '$lib/server/ai/generateInsight';
+import { rateLimit } from '$lib/server/rateLimit';
 
 export const POST: RequestHandler = async (event) => {
 	const { dbUser } = requireRole(event, 'COACH');
+
+	if (!rateLimit(`insight:${dbUser.id}`, 5, 60_000)) {
+		return json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+	}
 
 	const body = await event.request.json();
 	const individualId = (body.individualId ?? '').toString().trim();

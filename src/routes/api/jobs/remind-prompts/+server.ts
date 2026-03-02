@@ -1,6 +1,7 @@
 import type { RequestHandler } from '@sveltejs/kit';
 import { remindOverduePrompts } from '$jobs/remind-overdue-prompts';
 import { remindStakeholderFeedback } from '$jobs/remind-stakeholder-feedback';
+import { rateLimit } from '$lib/server/rateLimit';
 
 const isAuthorized = (request: Request) => {
 	const secret = process.env.JOB_SECRET_TOKEN;
@@ -10,9 +11,13 @@ const isAuthorized = (request: Request) => {
 	return header === `Bearer ${secret}`;
 };
 
-export const GET: RequestHandler = async ({ request }) => {
+export const GET: RequestHandler = async ({ request, url }) => {
 	if (!isAuthorized(request)) {
 		return new Response('Unauthorized', { status: 401 });
+	}
+
+	if (!rateLimit(`job:${url.pathname}`, 1, 60_000)) {
+		return new Response('Too many requests', { status: 429 });
 	}
 
 	// Run both reminder jobs

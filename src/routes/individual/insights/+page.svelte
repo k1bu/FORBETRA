@@ -160,7 +160,6 @@
 	function getSectionColor(title: string): string {
 		const t = title.toLowerCase();
 		if (t.includes('strengths') || t.includes('recommendations')) return 'border-l-emerald-500';
-		if (t.includes('growth') || t.includes('perception')) return 'border-l-amber-500';
 		return 'border-l-accent';
 	}
 

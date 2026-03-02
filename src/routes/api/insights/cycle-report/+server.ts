@@ -3,9 +3,14 @@ import type { RequestHandler } from '@sveltejs/kit';
 import prisma from '$lib/server/prisma';
 import { requireRole } from '$lib/server/auth';
 import { generateCycleReport, generateCycleReportStreaming } from '$lib/server/ai/generateInsight';
+import { rateLimit } from '$lib/server/rateLimit';
 
 export const POST: RequestHandler = async (event) => {
 	const { dbUser } = requireRole(event, 'INDIVIDUAL');
+
+	if (!rateLimit(`insight:${dbUser.id}`, 5, 60_000)) {
+		return json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+	}
 
 	const objective = await prisma.objective.findFirst({
 		where: { userId: dbUser.id, active: true },
@@ -40,7 +45,9 @@ export const POST: RequestHandler = async (event) => {
 		const sseStream = new ReadableStream({
 			async start(controller) {
 				// Send the insight ID as the first event
-				controller.enqueue(encoder.encode(`event: meta\ndata: ${JSON.stringify({ id: insightId })}\n\n`));
+				controller.enqueue(
+					encoder.encode(`event: meta\ndata: ${JSON.stringify({ id: insightId })}\n\n`)
+				);
 
 				try {
 					while (true) {
@@ -51,7 +58,9 @@ export const POST: RequestHandler = async (event) => {
 					controller.enqueue(encoder.encode('event: done\ndata: {}\n\n'));
 					controller.close();
 				} catch {
-					controller.enqueue(encoder.encode(`event: error\ndata: ${JSON.stringify({ error: 'Stream failed' })}\n\n`));
+					controller.enqueue(
+						encoder.encode(`event: error\ndata: ${JSON.stringify({ error: 'Stream failed' })}\n\n`)
+					);
 					controller.close();
 				}
 			}

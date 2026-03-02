@@ -874,7 +874,7 @@
 								<input type="hidden" name="checkInFrequency" value={checkInFrequency} />
 							</div>
 
-							<!-- Stakeholder Cadence -->
+							<!-- Feedback Frequency -->
 							<div class="border-t border-border-default pt-4">
 								<p class="mb-2 text-sm font-medium text-text-secondary">Feedback Frequency</p>
 								<div class="flex flex-wrap gap-2">

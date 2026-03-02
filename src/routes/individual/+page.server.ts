@@ -8,37 +8,37 @@ export const load: PageServerLoad = async (event) => {
 	try {
 		const { dbUser } = requireRole(event, 'INDIVIDUAL');
 
-		const objective = await prisma.objective.findFirst({
-			where: { userId: dbUser.id, active: true },
-			orderBy: { createdAt: 'desc' },
-			include: {
-				subgoals: { orderBy: { createdAt: 'asc' } },
-				cycles: {
-					orderBy: { startDate: 'desc' },
-					take: 1,
-					include: {
-						reflections: {
-							select: {
-								id: true,
-								reflectionType: true,
-								weekNumber: true,
-								effortScore: true,
-								performanceScore: true
+		const [objective, hasAnyObjective] = await Promise.all([
+			prisma.objective.findFirst({
+				where: { userId: dbUser.id, active: true },
+				orderBy: { createdAt: 'desc' },
+				include: {
+					subgoals: { orderBy: { createdAt: 'asc' } },
+					cycles: {
+						orderBy: { startDate: 'desc' },
+						take: 1,
+						include: {
+							reflections: {
+								select: {
+									id: true,
+									reflectionType: true,
+									weekNumber: true,
+									effortScore: true,
+									performanceScore: true
+								}
 							}
 						}
+					},
+					stakeholders: {
+						orderBy: { createdAt: 'asc' }
 					}
-				},
-				stakeholders: {
-					orderBy: { createdAt: 'asc' }
 				}
-			}
-		});
-
-		// Check if this is the user's first visit (no objective exists at all)
-		const hasAnyObjective = await prisma.objective.findFirst({
-			where: { userId: dbUser.id },
-			select: { id: true }
-		});
+			}),
+			prisma.objective.findFirst({
+				where: { userId: dbUser.id },
+				select: { id: true }
+			})
+		]);
 		const isFirstVisit = !hasAnyObjective;
 
 		// Check if onboarding is complete
@@ -798,7 +798,7 @@ export const load: PageServerLoad = async (event) => {
 			}
 		}
 
-		// --- Latest AI Insight ---
+		// --- Parallel batch: Latest AI Insight + Recent Notes + Identity Anchor ---
 		let latestInsight: {
 			id: string;
 			content: string | null;
@@ -806,24 +806,52 @@ export const load: PageServerLoad = async (event) => {
 			weekNumber: number | null;
 			createdAt: string;
 		} | null = null;
+		let recentNotes: Array<{
+			source: 'self' | 'stakeholder';
+			name: string | null;
+			text: string;
+			weekNumber: number;
+		}> = [];
+		let identityAnchor: string | null = null;
 
 		if (cycle && isOnboardingComplete) {
-			const insight = await prisma.insight.findFirst({
-				where: {
-					userId: dbUser.id,
-					cycleId: cycle.id,
-					status: 'COMPLETED',
-					type: { in: ['CHECK_IN', 'WEEKLY_SYNTHESIS'] }
-				},
-				orderBy: { createdAt: 'desc' },
-				select: {
-					id: true,
-					content: true,
-					type: true,
-					weekNumber: true,
-					createdAt: true
-				}
-			});
+			const [insight, selfNotes, stkComments, week1] = await Promise.all([
+				prisma.insight.findFirst({
+					where: {
+						userId: dbUser.id,
+						cycleId: cycle.id,
+						status: 'COMPLETED',
+						type: { in: ['CHECK_IN', 'WEEKLY_SYNTHESIS'] }
+					},
+					orderBy: { createdAt: 'desc' },
+					select: { id: true, content: true, type: true, weekNumber: true, createdAt: true }
+				}),
+				prisma.reflection.findMany({
+					where: { cycleId: cycle.id, userId: dbUser.id, notes: { not: null } },
+					orderBy: { submittedAt: 'desc' },
+					take: 3,
+					select: { notes: true, weekNumber: true }
+				}),
+				prisma.feedback.findMany({
+					where: {
+						stakeholder: { objectiveId: objective.id },
+						reflection: { cycleId: cycle.id },
+						comment: { not: null }
+					},
+					orderBy: { submittedAt: 'desc' },
+					take: 3,
+					select: {
+						comment: true,
+						stakeholder: { select: { name: true } },
+						reflection: { select: { weekNumber: true } }
+					}
+				}),
+				prisma.reflection.findFirst({
+					where: { cycleId: cycle.id, userId: dbUser.id, weekNumber: 1, notes: { not: null } },
+					select: { notes: true },
+					orderBy: { submittedAt: 'asc' }
+				})
+			]);
 
 			if (insight) {
 				latestInsight = {
@@ -834,28 +862,7 @@ export const load: PageServerLoad = async (event) => {
 					createdAt: insight.createdAt.toISOString()
 				};
 			}
-		}
 
-		// --- Recent Notes: self reflections + stakeholder feedback comments ---
-		let recentNotes: Array<{
-			source: 'self' | 'stakeholder';
-			name: string | null;
-			text: string;
-			weekNumber: number;
-		}> = [];
-
-		if (cycle && isOnboardingComplete) {
-			// Self notes (last 3 with non-null notes)
-			const selfNotes = await prisma.reflection.findMany({
-				where: {
-					cycleId: cycle.id,
-					userId: dbUser.id,
-					notes: { not: null }
-				},
-				orderBy: { submittedAt: 'desc' },
-				take: 3,
-				select: { notes: true, weekNumber: true }
-			});
 			for (const n of selfNotes) {
 				if (n.notes && n.notes.trim().length > 0) {
 					recentNotes.push({
@@ -866,22 +873,6 @@ export const load: PageServerLoad = async (event) => {
 					});
 				}
 			}
-
-			// Stakeholder feedback comments (last 3 with non-null comment)
-			const stkComments = await prisma.feedback.findMany({
-				where: {
-					stakeholder: { objectiveId: objective.id },
-					reflection: { cycleId: cycle.id },
-					comment: { not: null }
-				},
-				orderBy: { submittedAt: 'desc' },
-				take: 3,
-				select: {
-					comment: true,
-					stakeholder: { select: { name: true } },
-					reflection: { select: { weekNumber: true } }
-				}
-			});
 			for (const c of stkComments) {
 				if (c.comment && c.comment.trim().length > 0) {
 					recentNotes.push({
@@ -892,26 +883,78 @@ export const load: PageServerLoad = async (event) => {
 					});
 				}
 			}
-
-			// Sort by week desc, take 5 max
 			recentNotes.sort((a, b) => b.weekNumber - a.weekNumber);
 			recentNotes = recentNotes.slice(0, 5);
+
+			identityAnchor = week1?.notes?.trim() || null;
 		}
 
-		// Fetch identity anchor (Week 1 notes)
-		let identityAnchor: string | null = null;
-		if (cycle && isOnboardingComplete) {
-			const week1 = await prisma.reflection.findFirst({
-				where: {
-					cycleId: cycle.id,
-					userId: dbUser.id,
-					weekNumber: 1,
-					notes: { not: null }
-				},
-				select: { notes: true },
-				orderBy: { submittedAt: 'asc' }
-			});
-			identityAnchor = week1?.notes?.trim() || null;
+		// --- Journey Summary (for completed cycles) ---
+		let journeySummary: {
+			effortStart: number | null;
+			effortEnd: number | null;
+			performanceStart: number | null;
+			performanceEnd: number | null;
+			alignmentStart: number | null;
+			alignmentEnd: number | null;
+			checkInCount: number;
+			raterCount: number;
+			insightCount: number;
+			shareableTakeaway: string | null;
+		} | null = null;
+
+		if (cycle && cycle.status === 'COMPLETED' && isOnboardingComplete) {
+			const filledWeeks = (heatMapWeeks ?? []).filter(
+				(w) => w.effort !== null || w.performance !== null
+			);
+			const firstWeek = filledWeeks[0] ?? null;
+			const lastWeek = filledWeeks.length > 1 ? filledWeeks[filledWeeks.length - 1] : null;
+
+			// Alignment start/end from stakeholder heat map
+			const filledStkWeeks = (stakeholderAvgHeatMap ?? []).filter(
+				(w) => w.effort !== null || w.performance !== null
+			);
+			const stkFirst = filledStkWeeks[0] ?? null;
+			const stkLast = filledStkWeeks.length > 1 ? filledStkWeeks[filledStkWeeks.length - 1] : null;
+
+			// Count check-ins and insights (parallel)
+			const checkInCount = cycle.reflections.length;
+			const raterCount = objective.stakeholders.length;
+			const [insightCount, cycleReport] = await Promise.all([
+				prisma.insight.count({
+					where: { cycleId: cycle.id, userId: dbUser.id, status: 'COMPLETED' }
+				}),
+				prisma.insight.findFirst({
+					where: {
+						cycleId: cycle.id,
+						userId: dbUser.id,
+						type: 'CYCLE_REPORT',
+						status: 'COMPLETED'
+					},
+					select: { content: true }
+				})
+			]);
+
+			let shareableTakeaway: string | null = null;
+			if (cycleReport?.content) {
+				const takeawayMatch = cycleReport.content.match(/## Shareable Takeaway\s*\n+(.+)/);
+				if (takeawayMatch) {
+					shareableTakeaway = takeawayMatch[1].trim();
+				}
+			}
+
+			journeySummary = {
+				effortStart: firstWeek?.effort ?? null,
+				effortEnd: lastWeek?.effort ?? firstWeek?.effort ?? null,
+				performanceStart: firstWeek?.performance ?? null,
+				performanceEnd: lastWeek?.performance ?? firstWeek?.performance ?? null,
+				alignmentStart: stkFirst ? Math.round(((stkFirst.effort ?? 0) / 10) * 100) : null,
+				alignmentEnd: stkLast ? Math.round(((stkLast.effort ?? 0) / 10) * 100) : null,
+				checkInCount,
+				raterCount,
+				insightCount,
+				shareableTakeaway
+			};
 		}
 
 		// Compute the next check-in day name for the welcome card
@@ -976,7 +1019,8 @@ export const load: PageServerLoad = async (event) => {
 			latestScorecard: isOnboardingComplete ? latestScorecard : [],
 			visualizationData: isOnboardingComplete ? visualizationData : null,
 			recentNotes,
-			identityAnchor
+			identityAnchor,
+			journeySummary
 		};
 	} catch (error: unknown) {
 		const errMsg = error instanceof Error ? error.message : 'Unknown error';

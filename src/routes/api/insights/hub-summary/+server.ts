@@ -4,9 +4,14 @@ import prisma from '$lib/server/prisma';
 import { requireRole } from '$lib/server/auth';
 import { generateWeeklySynthesis } from '$lib/server/ai/generateInsight';
 import { computeWeekNumber } from '$lib/server/coachUtils';
+import { rateLimit } from '$lib/server/rateLimit';
 
 export const POST: RequestHandler = async (event) => {
 	const { dbUser } = requireRole(event, 'INDIVIDUAL');
+
+	if (!rateLimit(`insight:${dbUser.id}`, 5, 60_000)) {
+		return json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+	}
 
 	// Get active cycle
 	const objective = await prisma.objective.findFirst({

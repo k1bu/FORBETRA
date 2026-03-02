@@ -752,7 +752,7 @@
 								</label>
 							</div>
 
-							<!-- Stakeholder Cadence -->
+							<!-- Feedback Frequency -->
 							<div class="space-y-3">
 								<p class="block text-sm font-semibold text-text-secondary">Feedback frequency</p>
 								<div class="grid gap-3 md:grid-cols-2">

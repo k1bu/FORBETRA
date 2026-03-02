@@ -6,6 +6,7 @@ import { emailTemplates } from '$lib/notifications/emailTemplates';
 import { trySendSms } from '$lib/notifications/sms';
 import { smsTemplates } from '$lib/notifications/smsTemplates';
 import { validatePhone, normalizePhone } from '$lib/utils/phone';
+import { rateLimit } from '$lib/server/rateLimit';
 import type { Actions, PageServerLoad } from './$types';
 
 const sanitizeToken = (value: string | undefined) => {
@@ -259,7 +260,12 @@ export const actions: Actions = {
 
 		return { phoneSaved: true };
 	},
-	default: async ({ params, request, url }) => {
+	default: async ({ params, request, url, getClientAddress }) => {
+		const clientIP = getClientAddress();
+		if (!rateLimit(`feedback:${clientIP}`, 10, 60_000)) {
+			return fail(429, { error: 'Too many requests. Please try again later.' });
+		}
+
 		const isPreview = url.searchParams.get('preview') === 'true';
 
 		// Prevent submission in preview mode
