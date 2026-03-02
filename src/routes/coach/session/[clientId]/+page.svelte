@@ -13,8 +13,10 @@
 		Lock,
 		Copy,
 		Check,
-		Trophy
+		Trophy,
+		Users
 	} from 'lucide-svelte';
+	import EmptyState from '$lib/components/EmptyState.svelte';
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
 
@@ -763,6 +765,13 @@ Completion rate: ${data.client.objective?.cycle?.completion ?? '--'}%. ${stakeho
 					{/each}
 				</div>
 			</div>
+		{:else}
+			<EmptyState
+				heading="No raters yet"
+				description="This client hasn't added any raters. 360 feedback will appear here once raters are invited and submit scores."
+			>
+				{#snippet icon()}<Users class="h-8 w-8" />{/snippet}
+			</EmptyState>
 		{/if}
 	{/if}
 

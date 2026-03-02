@@ -806,6 +806,7 @@ export const load: PageServerLoad = async (event) => {
 			weekNumber: number | null;
 			createdAt: string;
 		} | null = null;
+		let weeklyAction: string | null = null;
 		let recentNotes: Array<{
 			source: 'self' | 'stakeholder';
 			name: string | null;
@@ -861,6 +862,14 @@ export const load: PageServerLoad = async (event) => {
 					weekNumber: insight.weekNumber,
 					createdAt: insight.createdAt.toISOString()
 				};
+
+				// Extract weekly action from insight content (tagged with "ACTION: ")
+				if (insight.content) {
+					const actionMatch = insight.content.match(/^ACTION:\s*(.+)$/m);
+					if (actionMatch) {
+						weeklyAction = actionMatch[1].trim();
+					}
+				}
 			}
 
 			for (const n of selfNotes) {
@@ -1016,6 +1025,7 @@ export const load: PageServerLoad = async (event) => {
 				? { stabilityScore, trajectoryScore, completionRate, alignmentRatio }
 				: null,
 			latestInsight,
+			weeklyAction,
 			latestScorecard: isOnboardingComplete ? latestScorecard : [],
 			visualizationData: isOnboardingComplete ? visualizationData : null,
 			recentNotes,

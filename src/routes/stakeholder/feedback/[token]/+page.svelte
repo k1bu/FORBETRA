@@ -579,7 +579,7 @@
 								<button
 									type="submit"
 									disabled={!phoneInput.trim() || phoneSaving}
-									class="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
+									class="min-h-[44px] rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
 								>
 									{phoneSaving ? 'Saving...' : 'Save'}
 								</button>
@@ -809,7 +809,7 @@
 									onclick={() => (effortScore = i)}
 									aria-pressed={isSelected}
 									aria-label="Score {i} out of 10"
-									class="flex h-10 w-full items-center justify-center rounded-lg border-2 text-sm font-semibold transition-all {isSelected
+									class="flex min-h-[44px] w-full items-center justify-center rounded-lg border-2 text-sm font-semibold transition-all {isSelected
 										? buttonColors
 										: 'border-border-default bg-surface-raised text-text-secondary ' +
 											hoverColors} focus:ring-2 focus:outline-none {focusRing} focus:ring-offset-2"
@@ -873,7 +873,7 @@
 									onclick={() => (performanceScore = i)}
 									aria-pressed={isSelected}
 									aria-label="Score {i} out of 10"
-									class="flex h-10 w-full items-center justify-center rounded-lg border-2 text-sm font-semibold transition-all {isSelected
+									class="flex min-h-[44px] w-full items-center justify-center rounded-lg border-2 text-sm font-semibold transition-all {isSelected
 										? buttonColors
 										: 'border-border-default bg-surface-raised text-text-secondary ' +
 											hoverColors} focus:ring-2 focus:outline-none {focusRing} focus:ring-offset-2"
@@ -928,7 +928,7 @@
 						<button
 							type="button"
 							onclick={() => (showComment = true)}
-							class="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-border-default py-3 text-sm font-medium text-text-muted transition-colors hover:border-accent/30 hover:text-accent"
+							class="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-border-default py-3 text-sm font-medium text-text-muted transition-colors hover:border-accent/30 hover:text-accent"
 						>
 							<PenLine class="h-4 w-4" />
 							Add a comment

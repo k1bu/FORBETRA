@@ -400,7 +400,7 @@
 							disabled={!data.isAvailable || data.isLocked}
 							aria-pressed={isSelected}
 							aria-label="Score {i} out of 10"
-							class="flex h-10 w-full items-center justify-center rounded-lg border-2 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-60 {isSelected
+							class="flex min-h-[44px] w-full items-center justify-center rounded-lg border-2 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-60 {isSelected
 								? buttonColors + ' anim-pop shadow-md'
 								: 'border-border-default bg-surface-raised text-text-secondary ' +
 									hoverColors} focus:ring-2 focus:outline-none {focusRing} focus:ring-offset-2"
@@ -420,7 +420,7 @@
 						type="button"
 						onclick={() => (effortScore = data.previousRatings!.effortScore!)}
 						disabled={!data.isAvailable || data.isLocked}
-						class="mt-2 rounded-full border border-accent/30 bg-accent-muted px-3 py-1 text-xs font-medium text-accent transition-colors hover:bg-accent/20 disabled:opacity-60"
+						class="mt-2 min-h-[44px] rounded-full border border-accent/30 bg-accent-muted px-4 py-2.5 text-xs font-medium text-accent transition-colors hover:bg-accent/20 disabled:opacity-60"
 					>
 						Same as last week: {data.previousRatings.effortScore}
 					</button>
@@ -478,7 +478,7 @@
 							disabled={!data.isAvailable || data.isLocked}
 							aria-pressed={isSelected}
 							aria-label="Score {i} out of 10"
-							class="flex h-10 w-full items-center justify-center rounded-lg border-2 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-60 {isSelected
+							class="flex min-h-[44px] w-full items-center justify-center rounded-lg border-2 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-60 {isSelected
 								? buttonColors + ' anim-pop shadow-md'
 								: 'border-border-default bg-surface-raised text-text-secondary ' +
 									hoverColors} focus:ring-2 focus:outline-none {focusRing} focus:ring-offset-2"
@@ -498,7 +498,7 @@
 						type="button"
 						onclick={() => (performanceScore = data.previousRatings!.performanceScore!)}
 						disabled={!data.isAvailable || data.isLocked}
-						class="mt-2 rounded-full border border-accent/30 bg-accent-muted px-3 py-1 text-xs font-medium text-accent transition-colors hover:bg-accent/20 disabled:opacity-60"
+						class="mt-2 min-h-[44px] rounded-full border border-accent/30 bg-accent-muted px-4 py-2.5 text-xs font-medium text-accent transition-colors hover:bg-accent/20 disabled:opacity-60"
 					>
 						Same as last week: {data.previousRatings.performanceScore}
 					</button>

@@ -177,7 +177,10 @@ Provide a 3-5 sentence synthesis that includes:
 4. **Stakeholder alignment note** (do others see what the individual sees?)
 5. **One specific behavioral experiment** for next week (concrete enough to visualize doing it)
 
-Be concrete. Use numbers. Name patterns.`;
+Be concrete. Use numbers. Name patterns.
+
+After your synthesis, add one final line in exactly this format:
+ACTION: [A single concrete behavioral action for this week. Start with a verb. Be specific enough to act on today.]`;
 }
 
 export type CycleReportContext = {

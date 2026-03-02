@@ -3,48 +3,49 @@ import prisma from '$lib/server/prisma';
 import { requireRole } from '$lib/server/auth';
 import type { PageServerLoad } from './$types';
 import { stdDev } from '$lib/server/coachUtils';
+import { findSignificantGaps, type PerceptionGap } from '$lib/utils/gapNarrative';
 
 export const load: PageServerLoad = async (event) => {
 	const { dbUser } = requireRole(event, 'INDIVIDUAL');
 
-		const objective = await prisma.objective.findFirst({
-			where: { userId: dbUser.id, active: true },
-			orderBy: { createdAt: 'desc' },
-			include: {
-				cycles: {
-					orderBy: { startDate: 'desc' },
-					take: 1,
-					include: {
-						reflections: {
-							select: {
-								id: true,
-								reflectionType: true,
-								weekNumber: true,
-								submittedAt: true,
-								effortScore: true,
-								performanceScore: true,
-								notes: true
-							}
+	const objective = await prisma.objective.findFirst({
+		where: { userId: dbUser.id, active: true },
+		orderBy: { createdAt: 'desc' },
+		include: {
+			cycles: {
+				orderBy: { startDate: 'desc' },
+				take: 1,
+				include: {
+					reflections: {
+						select: {
+							id: true,
+							reflectionType: true,
+							weekNumber: true,
+							submittedAt: true,
+							effortScore: true,
+							performanceScore: true,
+							notes: true
 						}
 					}
-				},
-				stakeholders: {
-					orderBy: { createdAt: 'asc' },
-					include: {
-						feedbacks: {
-							orderBy: { submittedAt: 'desc' },
-							include: {
-								reflection: {
-									select: {
-										weekNumber: true
-									}
+				}
+			},
+			stakeholders: {
+				orderBy: { createdAt: 'asc' },
+				include: {
+					feedbacks: {
+						orderBy: { submittedAt: 'desc' },
+						include: {
+							reflection: {
+								select: {
+									weekNumber: true
 								}
 							}
 						}
 					}
 				}
 			}
-		});
+		}
+	});
 
 	if (!objective) {
 		throw redirect(303, '/onboarding');
@@ -124,9 +125,9 @@ export const load: PageServerLoad = async (event) => {
 		const effortAverage =
 			week.effortScores.length > 0
 				? Number(
-						(week.effortScores.reduce((sum, score) => sum + score, 0) / week.effortScores.length).toFixed(
-							1
-						)
+						(
+							week.effortScores.reduce((sum, score) => sum + score, 0) / week.effortScores.length
+						).toFixed(1)
 					)
 				: null;
 		if (effortAverage !== null) {
@@ -215,7 +216,9 @@ export const load: PageServerLoad = async (event) => {
 			const latestFeedback = stakeholder.feedbacks[0] ?? null;
 			const latestReflectionWeek = latestFeedback?.reflection?.weekNumber ?? null;
 			const isCurrentWeekResponse =
-				currentWeek !== null && latestReflectionWeek === currentWeek && !!latestFeedback?.submittedAt;
+				currentWeek !== null &&
+				latestReflectionWeek === currentWeek &&
+				!!latestFeedback?.submittedAt;
 
 			if (isCurrentWeekResponse) {
 				respondedThisWeek += 1;
@@ -229,7 +232,12 @@ export const load: PageServerLoad = async (event) => {
 	// Prepare data for Correlation View and Gap Lens
 	let correlationData: {
 		individual: Array<{ effort: number; progress: number; weekNumber: number }>;
-		stakeholders: Array<{ effort: number; progress: number; weekNumber: number; stakeholderName: string }>;
+		stakeholders: Array<{
+			effort: number;
+			progress: number;
+			weekNumber: number;
+			stakeholderName: string;
+		}>;
 	} | null = null;
 
 	let gapLensData: {
@@ -252,11 +260,20 @@ export const load: PageServerLoad = async (event) => {
 		const individualWeeklyData = allReflectionWeeks.map((week) => {
 			const effortAverage =
 				week.effortScores.length > 0
-					? Number((week.effortScores.reduce((sum, score) => sum + score, 0) / week.effortScores.length).toFixed(1))
+					? Number(
+							(
+								week.effortScores.reduce((sum, score) => sum + score, 0) / week.effortScores.length
+							).toFixed(1)
+						)
 					: null;
 			const progressAverage =
 				week.performanceScores.length > 0
-					? Number((week.performanceScores.reduce((sum, score) => sum + score, 0) / week.performanceScores.length).toFixed(1))
+					? Number(
+							(
+								week.performanceScores.reduce((sum, score) => sum + score, 0) /
+								week.performanceScores.length
+							).toFixed(1)
+						)
 					: null;
 
 			return {
@@ -337,7 +354,6 @@ export const load: PageServerLoad = async (event) => {
 			if (feedback.reflection) {
 				const weekNumber = feedback.reflection.weekNumber;
 				const stakeholderId = feedback.stakeholder.id;
-				const stakeholderName = feedback.stakeholder.name;
 
 				// For average calculation
 				if (!stakeholderWeeklyMap.has(weekNumber)) {
@@ -448,13 +464,52 @@ export const load: PageServerLoad = async (event) => {
 		};
 	}
 
-	let cycleReport: { id: string; content: string | null; createdAt: Date; thumbs: number | null } | null = null;
+	let cycleReport: {
+		id: string;
+		content: string | null;
+		createdAt: Date;
+		thumbs: number | null;
+	} | null = null;
 	if (cycle) {
 		cycleReport = await prisma.insight.findFirst({
 			where: { userId: dbUser.id, cycleId: cycle.id, status: 'COMPLETED', type: 'CYCLE_REPORT' },
 			orderBy: { createdAt: 'desc' },
 			select: { id: true, content: true, createdAt: true, thumbs: true }
 		});
+	}
+
+	// Perception gap analysis — compare latest self-scores to rater averages
+	let perceptionGaps: PerceptionGap[] = [];
+	if (cycle && currentWeek) {
+		const latestWeek = reflectionTrend[0]; // Most recent week
+		if (latestWeek) {
+			const recentFeedbacks = allFeedbacks.filter(
+				(f) => f.reflection.weekNumber === latestWeek.weekNumber
+			);
+			if (recentFeedbacks.length > 0) {
+				const raterEffortScores = recentFeedbacks
+					.map((f) => f.effortScore)
+					.filter((s): s is number => s != null);
+				const raterPerfScores = recentFeedbacks
+					.map((f) => f.performanceScore)
+					.filter((s): s is number => s != null);
+				const raterEffortAvg =
+					raterEffortScores.length > 0
+						? raterEffortScores.reduce((a, b) => a + b, 0) / raterEffortScores.length
+						: null;
+				const raterPerfAvg =
+					raterPerfScores.length > 0
+						? raterPerfScores.reduce((a, b) => a + b, 0) / raterPerfScores.length
+						: null;
+
+				perceptionGaps = findSignificantGaps(
+					latestWeek.effortScore,
+					latestWeek.performanceScore,
+					raterEffortAvg,
+					raterPerfAvg
+				);
+			}
+		}
 	}
 
 	return {
@@ -472,7 +527,7 @@ export const load: PageServerLoad = async (event) => {
 		},
 		correlationData,
 		gapLensData,
-		cycleReport
+		cycleReport,
+		perceptionGaps
 	};
 };
-

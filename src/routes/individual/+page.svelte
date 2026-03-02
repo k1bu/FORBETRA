@@ -20,9 +20,11 @@
 		Trophy,
 		Share2,
 		Copy,
-		Check
+		Check,
+		Target
 	} from 'lucide-svelte';
 	import InfoTip from '$lib/components/InfoTip.svelte';
+	import ErrorBoundary from '$lib/components/ErrorBoundary.svelte';
 
 	const { data }: { data: PageData } = $props();
 
@@ -444,7 +446,7 @@
 				{#if data.objective.subgoals && data.objective.subgoals.length > 0}
 					<button
 						onclick={() => (showSubgoals = !showSubgoals)}
-						class="shrink-0 text-xs font-medium text-accent transition-colors hover:text-accent-hover"
+						class="min-h-[44px] shrink-0 px-2 text-xs font-medium text-accent transition-colors hover:text-accent-hover"
 					>
 						{data.objective.subgoals.length} focus area{data.objective.subgoals.length === 1
 							? ''
@@ -559,6 +561,31 @@
 					{streakMilestone.label} — {streakMilestone.level}+ streak
 				</p>
 				<p class="text-sm text-text-secondary">{streakMilestone.message}</p>
+			</div>
+		</div>
+	{/if}
+
+	<!-- ═══ Weekly Action Card ═══ -->
+	{#if data.weeklyAction && data.isOnboardingComplete && !data.cycle?.isCycleCompleted}
+		<div
+			class="flex items-start gap-3 rounded-xl border border-accent/20 bg-gradient-to-r from-accent/5 to-transparent px-4 py-3"
+		>
+			<Target class="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+			<div class="min-w-0 flex-1">
+				<p class="text-[10px] font-semibold tracking-widest text-accent uppercase">
+					This Week's Focus
+				</p>
+				<p class="mt-1 text-sm text-text-secondary">{data.weeklyAction}</p>
+				{#if data.latestInsight?.weekNumber}
+					<!-- eslint-disable svelte/no-navigation-without-resolve -->
+					<a
+						href="/individual/insights"
+						class="mt-1.5 inline-block text-xs font-medium text-accent hover:text-accent-hover"
+					>
+						Based on Week {data.latestInsight.weekNumber} insights →
+					</a>
+					<!-- eslint-enable svelte/no-navigation-without-resolve -->
+				{/if}
 			</div>
 		</div>
 	{/if}
@@ -951,7 +978,7 @@ If you're curious about your own leadership blind spots, check out forbetra.com
 			<button
 				type="button"
 				onclick={() => (showHeatMap = !showHeatMap)}
-				class="flex w-full items-center justify-between px-4 py-3"
+				class="flex min-h-[44px] w-full items-center justify-between px-4 py-3"
 			>
 				<span class="text-[10px] font-semibold tracking-wider text-text-muted uppercase"
 					>Weekly heat map</span
@@ -1007,26 +1034,26 @@ If you're curious about your own leadership blind spots, check out forbetra.com
 		<div class="anim-stagger flex gap-2 overflow-x-auto" style="--stagger: 2">
 			<a
 				href="/reflections/checkin"
-				class="flex items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-accent/30 hover:text-accent"
+				class="flex min-h-[44px] items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-3 py-2.5 text-xs font-medium text-text-secondary transition-colors hover:border-accent/30 hover:text-accent"
 			>
 				<Calendar class="h-3 w-3" /> Check-in
 			</a>
 			<a
 				href="/individual/stakeholders"
-				class="flex items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-accent/30 hover:text-accent"
+				class="flex min-h-[44px] items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-3 py-2.5 text-xs font-medium text-text-secondary transition-colors hover:border-accent/30 hover:text-accent"
 			>
 				<User class="h-3 w-3" /> Raters
 			</a>
 			{#if isGrowingPlus}
 				<a
 					href="/individual/scorecard"
-					class="flex items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-accent/30 hover:text-accent"
+					class="flex min-h-[44px] items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-3 py-2.5 text-xs font-medium text-text-secondary transition-colors hover:border-accent/30 hover:text-accent"
 				>
 					<ArrowUpDown class="h-3 w-3" /> Scorecard
 				</a>
 				<a
 					href="/individual/insights"
-					class="flex items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-accent/30 hover:text-accent"
+					class="flex min-h-[44px] items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-3 py-2.5 text-xs font-medium text-text-secondary transition-colors hover:border-accent/30 hover:text-accent"
 				>
 					<Sparkles class="h-3 w-3" /> Insights
 				</a>
@@ -1167,52 +1194,56 @@ If you're curious about your own leadership blind spots, check out forbetra.com
 
 	<!-- ═══ ZONE 4: Quick Insight (single) + AI Insight Teaser ═══ -->
 	{#if isGrowingPlus && (quickInsights.length > 0 || data.latestInsight)}
-		<div class="anim-stagger flex flex-col gap-2" style="--stagger: 3">
-			<div class="flex items-center gap-2">
-				<p class="text-[10px] font-semibold tracking-widest text-text-muted uppercase">Insights</p>
-				<Lock class="h-3 w-3 text-text-muted" />
-				<span class="text-[10px] text-text-muted">Visible to you and your coach</span>
-			</div>
-			{#if quickInsights.length > 0}
-				{@const insight = quickInsights[0]}
-				<div
-					class="flex items-start gap-2.5 rounded-xl border border-border-default bg-surface-raised px-4 py-3"
-				>
-					<span class="mt-0.5 shrink-0">
-						{#if insight.tone === 'positive'}<TrendingUp
-								class="h-4 w-4 text-success"
-							/>{:else if insight.tone === 'warning'}<TrendingDown
-								class="h-4 w-4 text-warning"
-							/>{:else}<ArrowRight class="h-4 w-4 text-text-muted" />{/if}
-					</span>
-					<p class="text-sm text-text-secondary">{insight.text}</p>
+		<ErrorBoundary>
+			<div class="anim-stagger flex flex-col gap-2" style="--stagger: 3">
+				<div class="flex items-center gap-2">
+					<p class="text-[10px] font-semibold tracking-widest text-text-muted uppercase">
+						Insights
+					</p>
+					<Lock class="h-3 w-3 text-text-muted" />
+					<span class="text-[10px] text-text-muted">Visible to you and your coach</span>
 				</div>
-			{/if}
-			{#if data.latestInsight}
-				<!-- eslint-disable svelte/no-navigation-without-resolve -->
-				<a
-					href="/individual/insights"
-					class="group flex items-center gap-2.5 rounded-xl border border-border-default bg-surface-raised px-4 py-3 transition-all hover:border-accent/30"
-				>
-					<Sparkles class="h-4 w-4 shrink-0 text-accent" />
-					<div class="min-w-0 flex-1">
-						<p class="truncate text-sm text-text-secondary">
-							{#if data.latestInsight.weekNumber}Week {data.latestInsight.weekNumber}{/if} AI Insight
-						</p>
-						{#if data.latestInsight.content}
-							<p class="mt-0.5 truncate text-xs text-text-muted">
-								{data.latestInsight.content.slice(0, 80)}…
-							</p>
-						{/if}
-					</div>
-					<span
-						class="shrink-0 text-xs font-semibold text-accent transition-transform group-hover:translate-x-0.5"
-						>Read →</span
+				{#if quickInsights.length > 0}
+					{@const insight = quickInsights[0]}
+					<div
+						class="flex items-start gap-2.5 rounded-xl border border-border-default bg-surface-raised px-4 py-3"
 					>
-				</a>
-				<!-- eslint-enable svelte/no-navigation-without-resolve -->
-			{/if}
-		</div>
+						<span class="mt-0.5 shrink-0">
+							{#if insight.tone === 'positive'}<TrendingUp
+									class="h-4 w-4 text-success"
+								/>{:else if insight.tone === 'warning'}<TrendingDown
+									class="h-4 w-4 text-warning"
+								/>{:else}<ArrowRight class="h-4 w-4 text-text-muted" />{/if}
+						</span>
+						<p class="text-sm text-text-secondary">{insight.text}</p>
+					</div>
+				{/if}
+				{#if data.latestInsight}
+					<!-- eslint-disable svelte/no-navigation-without-resolve -->
+					<a
+						href="/individual/insights"
+						class="group flex items-center gap-2.5 rounded-xl border border-border-default bg-surface-raised px-4 py-3 transition-all hover:border-accent/30"
+					>
+						<Sparkles class="h-4 w-4 shrink-0 text-accent" />
+						<div class="min-w-0 flex-1">
+							<p class="truncate text-sm text-text-secondary">
+								{#if data.latestInsight.weekNumber}Week {data.latestInsight.weekNumber}{/if} AI Insight
+							</p>
+							{#if data.latestInsight.content}
+								<p class="mt-0.5 truncate text-xs text-text-muted">
+									{data.latestInsight.content.slice(0, 80)}…
+								</p>
+							{/if}
+						</div>
+						<span
+							class="shrink-0 text-xs font-semibold text-accent transition-transform group-hover:translate-x-0.5"
+							>Read →</span
+						>
+					</a>
+					<!-- eslint-enable svelte/no-navigation-without-resolve -->
+				{/if}
+			</div>
+		</ErrorBoundary>
 	{/if}
 
 	<!-- ═══ ZONE 5: Recent Activity (collapsible) ═══ -->
