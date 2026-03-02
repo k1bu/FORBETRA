@@ -142,8 +142,10 @@
 	let smsEnabled = $state(false);
 
 	// --- Toast on form success ---
+	let toastShownForForm: typeof form = null;
 	$effect(() => {
-		if (!form) return;
+		if (!form || form === toastShownForForm) return;
+		toastShownForForm = form;
 		if (form.action === 'createInvite' && form.success) {
 			addToast(`Invitation sent to ${form.email}`, 'success');
 		} else if (form.action === 'cancelInvite' && form.success) {

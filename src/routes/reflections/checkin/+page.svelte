@@ -21,9 +21,11 @@
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
 
+	let toastShownForForm: ActionData | null = null;
 	$effect(() => {
-		if (form?.success) {
+		if (form?.success && form !== toastShownForForm) {
 			addToast('Check-in submitted!', 'success');
+			toastShownForForm = form;
 		}
 	});
 
