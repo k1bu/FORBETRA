@@ -2,6 +2,7 @@ import prisma from '$lib/server/prisma';
 import { requireRole } from '$lib/server/auth';
 import { stdDev, computeWeekNumber } from '$lib/server/coachUtils';
 import { parseCheckInDays } from '$lib/utils/checkInDays';
+import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
@@ -48,14 +49,20 @@ export const load: PageServerLoad = async (event) => {
 			objective.cycles.length > 0
 		);
 
-		// If no objective, return early with onboarding status
+		// If no objective, redirect to onboarding
 		if (!objective) {
-			return {
-				isFirstVisit,
-				isOnboardingComplete: false,
-				objective: null,
-				summary: null
-			};
+			throw redirect(303, '/onboarding');
+		}
+
+		// If objective exists with cycles but no initial rating (week 0), redirect to initial-ratings
+		if (objective.cycles.length > 0) {
+			const cycleId = objective.cycles[0].id;
+			const hasInitialRating = await prisma.reflection.findFirst({
+				where: { userId: dbUser.id, cycleId, weekNumber: 0 }
+			});
+			if (!hasInitialRating) {
+				throw redirect(303, '/onboarding/initial-ratings');
+			}
 		}
 
 		const cycle = objective.cycles[0] ?? null;

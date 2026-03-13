@@ -554,8 +554,13 @@
 								Get future reminders via text?
 							</p>
 							<p class="mb-4 text-xs text-text-secondary">
-								We'll send a quick SMS when {data.reflection.participantName} requests feedback. No spam,
-								ever.
+								We'll send a quick SMS when {data.reflection.participantName} requests feedback. ~1–2
+								msgs/month. Msg & data rates may apply. Reply STOP to opt out.
+								<!-- eslint-disable svelte/no-navigation-without-resolve -->
+								<a href="/sms-terms" target="_blank" class="text-accent underline">SMS Terms</a>
+								·
+								<a href="/privacy" target="_blank" class="text-accent underline">Privacy</a>
+								<!-- eslint-enable svelte/no-navigation-without-resolve -->
 							</p>
 							{#if form?.phoneError}
 								<p class="mb-3 text-xs text-error">{form.phoneError}</p>

@@ -11,7 +11,7 @@
 			<h2 class="mb-2 text-lg font-semibold text-text-primary">1. Introduction</h2>
 			<p>
 				Forbetra ("we," "our," or "us") operates the Forbetra personal development platform at
-				forbetra.vercel.app. This Privacy Policy describes how we collect, use, and protect your
+				app.forbetra.com. This Privacy Policy describes how we collect, use, and protect your
 				personal information when you use our service.
 			</p>
 		</div>

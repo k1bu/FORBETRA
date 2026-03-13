@@ -167,6 +167,8 @@
 	let notificationTime = '17:00';
 	let notificationTimePreset: 'morning' | 'evening' | 'night' | 'custom' = 'evening';
 	let deliveryMethod: 'email' | 'sms' | 'both' = 'email';
+	let smsConsent = false;
+	let isSubmitting = false;
 
 	let subgoalForms: SubgoalFormValue[] = Array.from(
 		{ length: initialSubgoalCount },
@@ -544,7 +546,14 @@
 					{stepDescs[currentStep]}{#if stepTimes[currentStep]}
 						<span class="ml-1 text-text-tertiary">({stepTimes[currentStep]})</span>{/if}
 				</p>
-				<div class="h-2 overflow-hidden rounded-full bg-surface-subtle">
+				<div
+					class="h-2 overflow-hidden rounded-full bg-surface-subtle"
+					role="progressbar"
+					aria-valuenow={Math.round(stepProgress)}
+					aria-valuemin={0}
+					aria-valuemax={100}
+					aria-label="Onboarding progress"
+				>
 					<div
 						class="h-full rounded-full bg-accent transition-all duration-500 ease-out"
 						style="width: {stepProgress}%"
@@ -729,6 +738,7 @@
 						<input type="hidden" name="cycleDurationWeeks" value={cycleDurationWeeks} />
 						<input type="hidden" name="notificationTime" value={notificationTime} />
 						<input type="hidden" name="deliveryMethod" value={deliveryMethod} />
+						<input type="hidden" name="smsConsent" value={smsConsent ? 'true' : 'false'} />
 						<input type="hidden" name="phone" value={phone} />
 						<input type="hidden" name="stakeholderFeedbackTime" value={stakeholderFeedbackTime} />
 						{#each Array.from({ length: 5 }, (_, i) => i) as index (index)}
@@ -1269,7 +1279,31 @@
 														required
 														class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-text-primary transition-all placeholder:text-text-muted focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
 													/>
-													<p class="text-xs text-text-muted">We\'ll never share your number.</p>
+													<p class="text-xs text-text-muted">We'll never share your number.</p>
+													<label
+														class="mt-3 flex items-start gap-2.5 rounded-lg border border-border-default bg-surface-subtle px-3 py-2.5"
+													>
+														<input
+															type="checkbox"
+															bind:checked={smsConsent}
+															required
+															class="mt-0.5 h-4 w-4 rounded border-border-default text-accent focus:ring-accent/30"
+														/>
+														<span class="text-xs leading-relaxed text-text-secondary">
+															I agree to receive automated text messages from Forbetra for coaching
+															reminders and feedback requests. ~1–4 msgs/week. Msg & data rates may
+															apply. Reply STOP to opt out.
+															<!-- eslint-disable svelte/no-navigation-without-resolve -->
+															<a href="/sms-terms" target="_blank" class="text-accent underline"
+																>SMS Terms</a
+															>
+															·
+															<a href="/privacy" target="_blank" class="text-accent underline"
+																>Privacy</a
+															>
+															<!-- eslint-enable svelte/no-navigation-without-resolve -->
+														</span>
+													</label>
 												</div>
 											{/if}
 										</div>
@@ -1978,22 +2012,33 @@
 						{#if currentStep === 'stakeholders'}
 							<button
 								type="submit"
-								class="group inline-flex items-center gap-2 rounded-xl bg-accent px-8 py-3 font-semibold text-white transition-all hover:bg-accent-hover focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:outline-none"
+								disabled={isSubmitting}
+								onclick={() => {
+									isSubmitting = true;
+								}}
+								class="group inline-flex items-center gap-2 rounded-xl bg-accent px-8 py-3 font-semibold text-white transition-all hover:bg-accent-hover focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
 							>
-								{isEditing ? 'Save Changes' : 'Complete Setup'}
-								<svg
-									class="h-5 w-5 transition-transform group-hover:translate-x-1"
-									fill="none"
-									stroke="currentColor"
-									viewBox="0 0 24 24"
-								>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M5 13l4 4L19 7"
-									></path>
-								</svg>
+								{#if isSubmitting}
+									<span
+										class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
+									></span>
+									Launching your journey...
+								{:else}
+									{isEditing ? 'Save Changes' : 'Complete Setup'}
+									<svg
+										class="h-5 w-5 transition-transform group-hover:translate-x-1"
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M5 13l4 4L19 7"
+										></path>
+									</svg>
+								{/if}
 							</button>
 						{:else}
 							<button

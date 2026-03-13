@@ -8,10 +8,16 @@
 
 	let submitting = $state(false);
 
+	let syncRetries = $state(0);
+	const maxSyncRetries = 5;
+
 	// Auto-retry when DB user hasn't synced yet
 	$effect(() => {
-		if (data.dbUser === null && data.showRoleSelection === false) {
-			const timer = setTimeout(() => invalidateAll(), 2000);
+		if (data.dbUser === null && data.showRoleSelection === false && syncRetries < maxSyncRetries) {
+			const timer = setTimeout(() => {
+				syncRetries++;
+				invalidateAll();
+			}, 2000);
 			return () => clearTimeout(timer);
 		}
 	});
@@ -341,9 +347,27 @@
 				{/if}
 				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 			{:else}
-				<p class="text-center text-text-tertiary">
-					We're finalizing your profile. Refresh this page if things don't update in a few seconds.
-				</p>
+				<div class="mx-auto max-w-sm space-y-4 text-center">
+					{#if syncRetries < maxSyncRetries}
+						<div class="flex items-center justify-center gap-3">
+							<span
+								class="h-5 w-5 animate-spin rounded-full border-2 border-accent border-t-transparent"
+							></span>
+							<p class="text-text-tertiary">Setting up your profile...</p>
+						</div>
+					{:else}
+						<p class="text-text-secondary">Something went wrong setting up your profile.</p>
+						<button
+							onclick={() => {
+								syncRetries = 0;
+								invalidateAll();
+							}}
+							class="rounded-xl bg-accent px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-accent-hover"
+						>
+							Try again
+						</button>
+					{/if}
+				</div>
 			{/if}
 		</section>
 	{/if}

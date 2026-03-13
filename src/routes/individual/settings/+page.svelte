@@ -29,6 +29,9 @@
 	let profileTimezone = $state(data.user.timezone);
 	let notificationTime = $state(data.user.notificationTime);
 	let deliveryMethod = $state(data.user.deliveryMethod);
+	const needsPhone = $derived(
+		(deliveryMethod === 'sms' || deliveryMethod === 'both') && !profilePhone?.trim()
+	);
 
 	// --- Objective state ---
 	let isSavingObjective = $state(false);
@@ -497,15 +500,34 @@
 									</button>
 								</div>
 								<input type="hidden" name="deliveryMethod" value={deliveryMethod} />
+								{#if deliveryMethod === 'sms' || deliveryMethod === 'both'}
+									<p class="mt-2 text-xs leading-relaxed text-text-muted">
+										By enabling SMS, you agree to receive automated text messages from Forbetra.
+										~1–4 msgs/week. Msg & data rates may apply. Reply STOP to opt out.
+										<!-- eslint-disable svelte/no-navigation-without-resolve -->
+										<a href="/sms-terms" target="_blank" class="text-accent underline">SMS Terms</a>
+										·
+										<a href="/privacy" target="_blank" class="text-accent underline">Privacy</a>
+										<!-- eslint-enable svelte/no-navigation-without-resolve -->
+									</p>
+								{/if}
 							</div>
 						</div>
 					</div>
 				</div>
 
+				{#if needsPhone}
+					<p
+						class="mt-3 rounded-lg border border-warning/30 bg-warning-muted px-4 py-2.5 text-sm text-warning"
+					>
+						Please enter a phone number above to use SMS delivery.
+					</p>
+				{/if}
+
 				<div class="mt-5 flex justify-end">
 					<button
 						type="submit"
-						disabled={isSavingProfile}
+						disabled={isSavingProfile || needsPhone}
 						class="rounded-xl bg-accent px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
 					>
 						{#if isSavingProfile}

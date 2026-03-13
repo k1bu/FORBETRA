@@ -2,7 +2,7 @@
 
 Real-time 360 coaching platform. Combines structured weekly self-reflection with continuous stakeholder feedback, AI-synthesized insights, and coach-facing intelligence.
 
-**Live:** https://forbetra.vercel.app
+**Live:** https://app.forbetra.com
 **Repo:** https://github.com/k1bu/FORBETRA (Kieran's GitHub)
 
 ## Quick Start
