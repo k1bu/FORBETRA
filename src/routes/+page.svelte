@@ -29,6 +29,12 @@
 		name="description"
 		content="Forbetra helps professionals grow through structured check-ins and honest feedback from the people who see them in action."
 	/>
+	<meta property="og:title" content="Forbetra — Real Growth, Real Feedback" />
+	<meta
+		property="og:description"
+		content="Forbetra helps professionals grow through structured check-ins and honest feedback from the people who see them in action."
+	/>
+	<meta property="og:url" content="https://app.forbetra.com" />
 </svelte:head>
 
 <SignedOut>
