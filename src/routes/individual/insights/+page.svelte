@@ -2,12 +2,13 @@
 	import type { PageData } from './$types';
 	import CorrelationView from '$lib/components/CorrelationView.svelte';
 	import GapLensView from '$lib/components/GapLensView.svelte';
-	import { FileText, ThumbsUp, ThumbsDown, History, ChevronDown } from 'lucide-svelte';
+	import { FileText, ThumbsUp, ThumbsDown, History, ChevronDown, BarChart3 } from 'lucide-svelte';
 	import ErrorBoundary from '$lib/components/ErrorBoundary.svelte';
 
 	const { data }: { data: PageData } = $props();
 
 	let showHistory = $state(false);
+	let showExplore = $state(false);
 
 	import { addToast } from '$lib/stores/toasts.svelte';
 
@@ -310,98 +311,113 @@
 		</div>
 	</ErrorBoundary>
 
-	<!-- Correlation View -->
-	{#if data.correlationData && (data.correlationData.individual.length > 0 || data.correlationData.stakeholders.length > 0)}
-		<div class="rounded-lg border border-border-default bg-surface-raised p-6">
-			<CorrelationView
-				individualData={data.correlationData.individual}
-				stakeholderData={data.correlationData.stakeholders}
-			/>
-		</div>
-	{:else}
-		<div class="rounded-lg border border-dashed border-border-strong bg-surface-raised p-6">
-			<h2 class="mb-2 text-lg font-bold text-text-primary">Correlation View</h2>
-			<p class="text-sm text-text-secondary">
-				Shows how your effort and performance relate over time. Complete 3+ check-ins to unlock this
-				view.
-			</p>
-		</div>
-	{/if}
-
-	<!-- Gap Lens View -->
-	{#if data.gapLensData && (data.gapLensData.effort.length > 0 || data.gapLensData.performance.length > 0)}
-		<div class="rounded-lg border border-border-default bg-surface-raised p-6">
-			<GapLensView
-				effortGaps={data.gapLensData.effort}
-				performanceGaps={data.gapLensData.performance}
-				stakeholders={data.gapLensData.stakeholders ?? []}
-			/>
-		</div>
-	{:else}
-		<div class="rounded-lg border border-dashed border-border-strong bg-surface-raised p-6">
-			<h2 class="mb-2 text-lg font-bold text-text-primary">Gap Lens</h2>
-			<p class="text-sm text-text-secondary">
-				Reveals differences between how you see yourself and how others see you. Add reviewers and
-				complete check-ins to unlock this view.
-			</p>
-		</div>
-	{/if}
-
-	<!-- History Accordion -->
-	{#if data.historyWeeks && data.historyWeeks.length > 0}
-		<div class="rounded-2xl border border-border-default bg-surface-raised">
+	<!-- Explore Your Data toggle -->
+	{#if !showExplore}
+		<div class="flex justify-center">
 			<button
-				type="button"
-				onclick={() => (showHistory = !showHistory)}
-				class="flex w-full items-center justify-between px-6 py-4 text-left"
+				onclick={() => (showExplore = true)}
+				class="inline-flex items-center gap-2 rounded-xl border border-border-default bg-surface-raised px-5 py-2.5 text-sm font-semibold text-text-secondary transition-all hover:border-accent/30 hover:text-accent"
 			>
-				<div class="flex items-center gap-2">
-					<History class="h-4 w-4 text-text-muted" />
-					<h2 class="text-base font-semibold text-text-primary">Check-in History</h2>
-					<span class="rounded-full bg-surface-subtle px-2 py-0.5 text-xs text-text-muted">
-						{data.historyWeeks.length} week{data.historyWeeks.length !== 1 ? 's' : ''}
-					</span>
-				</div>
-				<ChevronDown
-					class="h-4 w-4 text-text-muted transition-transform {showHistory ? 'rotate-180' : ''}"
-				/>
+				<BarChart3 class="h-4 w-4" />
+				Explore Your Data
 			</button>
-
-			{#if showHistory}
-				<div class="border-t border-border-default px-6 py-4">
-					<div class="space-y-4">
-						{#each data.historyWeeks as week (week.weekNumber)}
-							<div class="rounded-xl border border-border-default bg-surface-subtle p-4">
-								<p class="mb-2 text-sm font-semibold text-text-primary">Week {week.weekNumber}</p>
-								<div class="space-y-2">
-									{#each week.reflections as reflection (reflection.id)}
-										<div class="flex items-center justify-between text-sm">
-											<span class="text-text-secondary"
-												>{reflection.type === 'RATING_A' ? 'Check-in' : 'Rating'}</span
-											>
-											<div class="flex gap-4">
-												{#if reflection.effortScore !== null}
-													<span class="text-cyan-500 tabular-nums"
-														>Effort: {reflection.effortScore}/10</span
-													>
-												{/if}
-												{#if reflection.performanceScore !== null}
-													<span class="text-amber-500 tabular-nums"
-														>Performance: {reflection.performanceScore}/10</span
-													>
-												{/if}
-											</div>
-										</div>
-										{#if reflection.notes}
-											<p class="mt-1 text-xs text-text-muted italic">{reflection.notes}</p>
-										{/if}
-									{/each}
-								</div>
-							</div>
-						{/each}
-					</div>
-				</div>
-			{/if}
 		</div>
+	{/if}
+
+	{#if showExplore}
+		<!-- Correlation View -->
+		{#if data.correlationData && (data.correlationData.individual.length > 0 || data.correlationData.stakeholders.length > 0)}
+			<div class="rounded-lg border border-border-default bg-surface-raised p-6">
+				<CorrelationView
+					individualData={data.correlationData.individual}
+					stakeholderData={data.correlationData.stakeholders}
+				/>
+			</div>
+		{:else}
+			<div class="rounded-lg border border-dashed border-border-strong bg-surface-raised p-6">
+				<h2 class="mb-2 text-lg font-bold text-text-primary">Correlation View</h2>
+				<p class="text-sm text-text-secondary">
+					Shows how your effort and performance relate over time. Complete 3+ check-ins to unlock
+					this view.
+				</p>
+			</div>
+		{/if}
+
+		<!-- Gap Lens View -->
+		{#if data.gapLensData && (data.gapLensData.effort.length > 0 || data.gapLensData.performance.length > 0)}
+			<div class="rounded-lg border border-border-default bg-surface-raised p-6">
+				<GapLensView
+					effortGaps={data.gapLensData.effort}
+					performanceGaps={data.gapLensData.performance}
+					stakeholders={data.gapLensData.stakeholders ?? []}
+				/>
+			</div>
+		{:else}
+			<div class="rounded-lg border border-dashed border-border-strong bg-surface-raised p-6">
+				<h2 class="mb-2 text-lg font-bold text-text-primary">Gap Lens</h2>
+				<p class="text-sm text-text-secondary">
+					Reveals differences between how you see yourself and how others see you. Add reviewers and
+					complete check-ins to unlock this view.
+				</p>
+			</div>
+		{/if}
+
+		<!-- History Accordion -->
+		{#if data.historyWeeks && data.historyWeeks.length > 0}
+			<div class="rounded-2xl border border-border-default bg-surface-raised">
+				<button
+					type="button"
+					onclick={() => (showHistory = !showHistory)}
+					class="flex w-full items-center justify-between px-6 py-4 text-left"
+				>
+					<div class="flex items-center gap-2">
+						<History class="h-4 w-4 text-text-muted" />
+						<h2 class="text-base font-semibold text-text-primary">Check-in History</h2>
+						<span class="rounded-full bg-surface-subtle px-2 py-0.5 text-xs text-text-muted">
+							{data.historyWeeks.length} week{data.historyWeeks.length !== 1 ? 's' : ''}
+						</span>
+					</div>
+					<ChevronDown
+						class="h-4 w-4 text-text-muted transition-transform {showHistory ? 'rotate-180' : ''}"
+					/>
+				</button>
+
+				{#if showHistory}
+					<div class="border-t border-border-default px-6 py-4">
+						<div class="space-y-4">
+							{#each data.historyWeeks as week (week.weekNumber)}
+								<div class="rounded-xl border border-border-default bg-surface-subtle p-4">
+									<p class="mb-2 text-sm font-semibold text-text-primary">Week {week.weekNumber}</p>
+									<div class="space-y-2">
+										{#each week.reflections as reflection (reflection.id)}
+											<div class="flex items-center justify-between text-sm">
+												<span class="text-text-secondary"
+													>{reflection.type === 'RATING_A' ? 'Check-in' : 'Rating'}</span
+												>
+												<div class="flex gap-4">
+													{#if reflection.effortScore !== null}
+														<span class="text-cyan-500 tabular-nums"
+															>Effort: {reflection.effortScore}/10</span
+														>
+													{/if}
+													{#if reflection.performanceScore !== null}
+														<span class="text-amber-500 tabular-nums"
+															>Performance: {reflection.performanceScore}/10</span
+														>
+													{/if}
+												</div>
+											</div>
+											{#if reflection.notes}
+												<p class="mt-1 text-xs text-text-muted italic">{reflection.notes}</p>
+											{/if}
+										{/each}
+									</div>
+								</div>
+							{/each}
+						</div>
+					</div>
+				{/if}
+			</div>
+		{/if}
 	{/if}
 </section>
