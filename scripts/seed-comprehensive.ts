@@ -13,13 +13,7 @@
  * Usage: npx tsx scripts/seed-comprehensive.ts
  */
 
-import {
-	PrismaClient,
-	UserRole,
-	CycleStatus,
-	ReflectionType,
-	SubgoalMetric
-} from '@prisma/client';
+import { PrismaClient, UserRole, CycleStatus, ReflectionType, SubgoalMetric } from '@prisma/client';
 import { COACHES, PERSONAS, SEED_EMAIL_PATTERN } from './seed-config';
 import { getScores, applyStakeholderBias, getActiveWeeks } from './seed-patterns';
 import { generateCoachNotes } from './seed-coach-notes';
@@ -54,36 +48,39 @@ async function cleanExistingSeedData() {
 
 	console.log(`  Found ${seedUsers.length} seed users to clean up...`);
 
-	await prisma.$transaction(async (tx) => {
-		for (const user of seedUsers) {
-			for (const objective of user.objectives) {
-				for (const cycle of objective.cycles) {
-					for (const reflection of cycle.reflections) {
-						await tx.feedback.deleteMany({ where: { reflectionId: reflection.id } });
+	await prisma.$transaction(
+		async (tx) => {
+			for (const user of seedUsers) {
+				for (const objective of user.objectives) {
+					for (const cycle of objective.cycles) {
+						for (const reflection of cycle.reflections) {
+							await tx.feedback.deleteMany({ where: { reflectionId: reflection.id } });
+						}
+						await tx.reflection.deleteMany({ where: { cycleId: cycle.id } });
+						await tx.coachNote.deleteMany({ where: { cycleId: cycle.id } });
 					}
-					await tx.reflection.deleteMany({ where: { cycleId: cycle.id } });
-					await tx.coachNote.deleteMany({ where: { cycleId: cycle.id } });
+					await tx.cycle.deleteMany({ where: { objectiveId: objective.id } });
+					await tx.subgoal.deleteMany({ where: { objectiveId: objective.id } });
+					await tx.stakeholder.deleteMany({ where: { objectiveId: objective.id } });
 				}
-				await tx.cycle.deleteMany({ where: { objectiveId: objective.id } });
-				await tx.subgoal.deleteMany({ where: { objectiveId: objective.id } });
-				await tx.stakeholder.deleteMany({ where: { objectiveId: objective.id } });
+				await tx.objective.deleteMany({ where: { userId: user.id } });
+				await tx.coachClient.deleteMany({
+					where: { OR: [{ coachId: user.id }, { individualId: user.id }] }
+				});
+				await tx.coachNote.deleteMany({
+					where: { OR: [{ coachId: user.id }, { individualId: user.id }] }
+				});
+				await tx.coachInvite.deleteMany({
+					where: { OR: [{ coachId: user.id }, { individualId: user.id }] }
+				});
+				await tx.token.deleteMany({ where: { userId: user.id } });
+				await tx.insight.deleteMany({ where: { userId: user.id } });
+				await tx.organizationMember.deleteMany({ where: { userId: user.id } });
+				await tx.user.delete({ where: { id: user.id } });
 			}
-			await tx.objective.deleteMany({ where: { userId: user.id } });
-			await tx.coachClient.deleteMany({
-				where: { OR: [{ coachId: user.id }, { individualId: user.id }] }
-			});
-			await tx.coachNote.deleteMany({
-				where: { OR: [{ coachId: user.id }, { individualId: user.id }] }
-			});
-			await tx.coachInvite.deleteMany({
-				where: { OR: [{ coachId: user.id }, { individualId: user.id }] }
-			});
-			await tx.token.deleteMany({ where: { userId: user.id } });
-			await tx.insight.deleteMany({ where: { userId: user.id } });
-			await tx.organizationMember.deleteMany({ where: { userId: user.id } });
-			await tx.user.delete({ where: { id: user.id } });
-		}
-	}, { timeout: 60000 });
+		},
+		{ timeout: 60000 }
+	);
 
 	console.log(`  Cleaned up ${seedUsers.length} seed users and all related data.`);
 }
@@ -120,8 +117,7 @@ async function main() {
 		let totalStakeholders = 0;
 		let totalCoachNotes = 0;
 
-		const individualRecords: Array<{ id: string; email: string; name: string; index: number }> =
-			[];
+		const individualRecords: Array<{ id: string; email: string; name: string; index: number }> = [];
 
 		for (let i = 0; i < PERSONAS.length; i++) {
 			const persona = PERSONAS[i];
@@ -167,9 +163,7 @@ async function main() {
 
 			// Create cycle
 			const cycleStartDate = new Date();
-			cycleStartDate.setDate(
-				cycleStartDate.getDate() - persona.cycleWeeks * 7
-			);
+			cycleStartDate.setDate(cycleStartDate.getDate() - persona.cycleWeeks * 7);
 			cycleStartDate.setHours(0, 0, 0, 0);
 
 			const cycleEndDate = new Date(cycleStartDate);
@@ -182,8 +176,7 @@ async function main() {
 					label: 'Cycle 1',
 					startDate: cycleStartDate,
 					endDate: cycleEndDate,
-					status:
-						persona.cycleStatus === 'ACTIVE' ? CycleStatus.ACTIVE : CycleStatus.COMPLETED,
+					status: persona.cycleStatus === 'ACTIVE' ? CycleStatus.ACTIVE : CycleStatus.COMPLETED,
 					stakeholderCadence: 'weekly',
 					autoThrottle: true
 				}
@@ -262,12 +255,7 @@ async function main() {
 					const stakeholderConfig = persona.stakeholders[si];
 					const stakeholderRecord = stakeholderRecords[si];
 
-					const biasedScores = applyStakeholderBias(
-						scores,
-						stakeholderConfig.bias,
-						week,
-						si
-					);
+					const biasedScores = applyStakeholderBias(scores, stakeholderConfig.bias, week, si);
 
 					// null means sporadic stakeholder didn't respond this week
 					if (biasedScores === null) continue;
@@ -335,9 +323,7 @@ async function main() {
 							individualId: individualRecord.id
 						}
 					});
-					console.log(
-						`  ${coachConfig.name} -> ${individualRecord.name}`
-					);
+					console.log(`  ${coachConfig.name} -> ${individualRecord.name}`);
 				}
 			}
 		}
@@ -363,9 +349,9 @@ async function main() {
 			const clients = config.clientIndices.map((idx) => PERSONAS[idx].name).join(', ');
 			console.log(`  ${config.name} — manages: ${clients}`);
 		}
-	} catch (error: any) {
+	} catch (error: unknown) {
 		console.error('\nError seeding data:', error);
-		if (error.code === 'P2002') {
+		if ((error as Record<string, unknown>).code === 'P2002') {
 			console.error('  Unique constraint violation. Run seed:clean first.');
 		}
 		throw error;

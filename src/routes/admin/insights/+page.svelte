@@ -17,7 +17,9 @@
 
 	const formatDate = (value: string | Date | null) => {
 		if (!value) return '--';
-		return new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
+		return new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeStyle: 'short' }).format(
+			new Date(value)
+		);
 	};
 
 	const truncate = (text: string | null, len: number) => {
@@ -64,14 +66,20 @@
 
 	<!-- Filters -->
 	<div class="flex flex-wrap items-center gap-3">
-		<select class="rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary" bind:value={typeFilter}>
+		<select
+			class="rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary"
+			bind:value={typeFilter}
+		>
 			<option value="ALL">All Types</option>
 			<option value="CHECK_IN">CHECK_IN</option>
 			<option value="WEEKLY_SYNTHESIS">WEEKLY_SYNTHESIS</option>
 			<option value="COACH_PREP">COACH_PREP</option>
 			<option value="COACH_ALERT">COACH_ALERT</option>
 		</select>
-		<select class="rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary" bind:value={statusFilter}>
+		<select
+			class="rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary"
+			bind:value={statusFilter}
+		>
 			<option value="ALL">All Statuses</option>
 			<option value="PENDING">PENDING</option>
 			<option value="GENERATING">GENERATING</option>
@@ -84,7 +92,9 @@
 	<!-- Insights Table -->
 	<div class="overflow-hidden rounded-lg border border-border-default bg-surface-raised">
 		<table class="min-w-full divide-y divide-border-default text-sm">
-			<thead class="bg-surface-subtle text-left text-xs font-semibold uppercase tracking-wide text-text-tertiary">
+			<thead
+				class="bg-surface-subtle text-left text-xs font-semibold tracking-wide text-text-tertiary uppercase"
+			>
 				<tr>
 					<th class="px-4 py-3">User</th>
 					<th class="px-4 py-3">Type</th>
@@ -95,24 +105,33 @@
 					<th class="px-4 py-3">Date</th>
 				</tr>
 			</thead>
+			<!-- eslint-disable svelte/no-navigation-without-resolve -->
 			<tbody class="divide-y divide-border-default">
 				{#each filtered as insight (insight.id)}
 					<tr class="hover:bg-surface-subtle">
 						<td class="px-4 py-3">
-							<a href="/admin/users/{insight.user.id}" class="font-medium text-accent hover:underline">
+							<a
+								href="/admin/users/{insight.user.id}"
+								class="font-medium text-accent hover:underline"
+							>
 								{insight.user.name ?? insight.user.email}
 							</a>
 						</td>
 						<td class="px-4 py-3">
-							<span class="rounded bg-accent-muted px-2 py-0.5 text-xs font-semibold text-accent">{insight.type}</span>
+							<span class="rounded bg-accent-muted px-2 py-0.5 text-xs font-semibold text-accent"
+								>{insight.type}</span
+							>
 						</td>
 						<td class="px-4 py-3">
-							<span class="rounded px-2 py-0.5 text-xs font-semibold {
-								insight.status === 'COMPLETED' ? 'bg-success-muted text-success' :
-								insight.status === 'FAILED' ? 'bg-error-muted text-error' :
-								insight.status === 'GENERATING' ? 'bg-warning-muted text-warning' :
-								'bg-surface-subtle text-text-secondary'
-							}">
+							<span
+								class="rounded px-2 py-0.5 text-xs font-semibold {insight.status === 'COMPLETED'
+									? 'bg-success-muted text-success'
+									: insight.status === 'FAILED'
+										? 'bg-error-muted text-error'
+										: insight.status === 'GENERATING'
+											? 'bg-warning-muted text-warning'
+											: 'bg-surface-subtle text-text-secondary'}"
+							>
 								{insight.status}
 							</span>
 						</td>
@@ -133,12 +152,17 @@
 					</tr>
 				{/each}
 			</tbody>
+			<!-- eslint-enable svelte/no-navigation-without-resolve -->
 		</table>
 	</div>
 
 	{#if filtered.length === 0}
-		<div class="rounded-xl border border-dashed border-border-strong bg-surface-raised p-8 text-center text-sm text-text-tertiary">
-			No insights found. Run <code class="rounded bg-surface-subtle px-1.5 py-0.5">npm run insights:backfill</code> to generate insights for existing data.
+		<div
+			class="rounded-xl border border-dashed border-border-strong bg-surface-raised p-8 text-center text-sm text-text-tertiary"
+		>
+			No insights found. Run <code class="rounded bg-surface-subtle px-1.5 py-0.5"
+				>npm run insights:backfill</code
+			> to generate insights for existing data.
 		</div>
 	{/if}
 </section>

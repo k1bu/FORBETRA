@@ -1,9 +1,9 @@
 /**
  * Link Clerk User to Seeded Data
- * 
+ *
  * Links a Clerk user (by email) to existing seeded Prisma data.
  * This is useful if a new Prisma user was created instead of linking to seeded data.
- * 
+ *
  * Usage:
  *   npx tsx scripts/link-clerk-to-seeded.ts
  */
@@ -28,7 +28,7 @@ function loadEnv() {
 				}
 			}
 		}
-	} catch (error) {
+	} catch {
 		// .env might not exist
 	}
 }
@@ -74,7 +74,7 @@ async function linkClerkToSeeded() {
 		// Get all Clerk users and search for matching email
 		console.log('📥 Fetching Clerk users...');
 		let clerkUser = null;
-		let allClerkUsers: any[] = [];
+		let allClerkUsers: unknown[] = [];
 		let hasMore = true;
 		let offset = 0;
 		const limit = 500;
@@ -83,7 +83,7 @@ async function linkClerkToSeeded() {
 		while (hasMore) {
 			const url = `https://api.clerk.com/v1/users?limit=${limit}${offset > 0 ? `&offset=${offset}` : ''}`;
 			console.log(`   Fetching batch (offset: ${offset})...`);
-			
+
 			const clerkResponse = await fetch(url, {
 				headers: {
 					Authorization: `Bearer ${CLERK_SECRET_KEY}`,
@@ -99,15 +99,17 @@ async function linkClerkToSeeded() {
 			}
 
 			const clerkData = await clerkResponse.json();
-			
+
 			// Debug: log the response structure
 			if (offset === 0) {
-				console.log(`   Response structure: ${JSON.stringify(Object.keys(clerkData)).slice(0, 200)}...`);
+				console.log(
+					`   Response structure: ${JSON.stringify(Object.keys(clerkData)).slice(0, 200)}...`
+				);
 			}
-			
+
 			// Clerk API returns users in different structures depending on version
 			// Try different possible formats
-			let users: any[] = [];
+			let users: unknown[] = [];
 			if (Array.isArray(clerkData)) {
 				users = clerkData;
 			} else if (Array.isArray(clerkData.data)) {
@@ -117,28 +119,33 @@ async function linkClerkToSeeded() {
 			} else if (clerkData.results && Array.isArray(clerkData.results)) {
 				users = clerkData.results;
 			}
-			
+
 			console.log(`   Found ${users.length} users in this batch`);
-			
+
 			if (users.length === 0 && offset === 0) {
 				console.log(`   ⚠️  No users found. Full response structure:`);
 				console.log(`   ${JSON.stringify(clerkData, null, 2).slice(0, 500)}...`);
 			}
-			
+
 			allClerkUsers = allClerkUsers.concat(users);
 
 			// Check if we found the user
-			const found = users.find((u: any) => {
-				const primaryEmailId = u.primary_email_address_id;
-				const primaryEmail = u.email_addresses?.find(
-					(e: any) => e.id === primaryEmailId
-				)?.email_address?.toLowerCase();
-				
+			const found = users.find((u: unknown) => {
+				const user = u as Record<string, unknown>;
+				const primaryEmailId = user.primary_email_address_id;
+				const emailAddresses = user.email_addresses as Array<Record<string, unknown>> | undefined;
+				const primaryEmail = emailAddresses?.find(
+					(e: Record<string, unknown>) => e.id === primaryEmailId
+				)?.email_address as string | undefined;
+
 				// Also check all email addresses
-				const allEmails = u.email_addresses?.map((e: any) => e.email_address?.toLowerCase()) || [];
-				
+				const allEmails =
+					emailAddresses?.map((e: Record<string, unknown>) =>
+						(e.email_address as string)?.toLowerCase()
+					) || [];
+
 				return (
-					primaryEmail === seededUser.email.toLowerCase() ||
+					primaryEmail?.toLowerCase() === seededUser.email.toLowerCase() ||
 					allEmails.includes(seededUser.email.toLowerCase())
 				);
 			});
@@ -158,18 +165,23 @@ async function linkClerkToSeeded() {
 
 			offset += limit;
 		}
-		
+
 		console.log(`\n📊 Total Clerk users fetched: ${allClerkUsers.length}`);
 
 		if (!clerkUser) {
 			console.log(`❌ No Clerk user found with email: ${seededUser.email}`);
 			if (allClerkUsers.length > 0) {
 				console.log(`\n📋 Found ${allClerkUsers.length} Clerk user(s) total:`);
-				allClerkUsers.forEach((u: any, i: number) => {
-					const primaryEmail = u.email_addresses?.find(
-						(e: any) => e.id === u.primary_email_address_id
-					)?.email_address || u.email_addresses?.[0]?.email_address || 'N/A';
-					console.log(`   ${i + 1}. ${primaryEmail} (ID: ${u.id})`);
+				allClerkUsers.forEach((u: unknown, i: number) => {
+					const user = u as Record<string, unknown>;
+					const emailAddresses = user.email_addresses as Array<Record<string, unknown>> | undefined;
+					const primaryEmail =
+						(emailAddresses?.find(
+							(e: Record<string, unknown>) => e.id === user.primary_email_address_id
+						)?.email_address as string) ||
+						(emailAddresses?.[0]?.email_address as string) ||
+						'N/A';
+					console.log(`   ${i + 1}. ${primaryEmail} (ID: ${user.id})`);
 				});
 			}
 			console.log('\n💡 Make sure you signed up in Clerk with: demo+clerk_test@test.forbetra.com');
@@ -210,8 +222,8 @@ async function linkClerkToSeeded() {
 			console.log(`✅ Linked seeded user to Clerk account`);
 			console.log(`   You should now see your data when you sign in!`);
 		}
-	} catch (error: any) {
-		console.error('\n❌ Error:', error.message);
+	} catch (error: unknown) {
+		console.error('\n❌ Error:', (error as Error).message);
 		throw error;
 	} finally {
 		await prisma.$disconnect();
@@ -222,4 +234,3 @@ linkClerkToSeeded().catch((error) => {
 	console.error('❌ Fatal error:', error);
 	process.exit(1);
 });
-

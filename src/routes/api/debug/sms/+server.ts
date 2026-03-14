@@ -48,9 +48,6 @@ export const POST: RequestHandler = async ({ request }) => {
 		return json({ ok: true, mode: getSmsMode() });
 	} catch (error) {
 		const message = error instanceof Error ? error.message : 'Unknown error';
-		return json(
-			{ ok: false, error: message, mode: getSmsMode() },
-			{ status: 500 }
-		);
+		return json({ ok: false, error: message, mode: getSmsMode() }, { status: 500 });
 	}
 };

@@ -58,22 +58,25 @@ export const load: PageServerLoad = async (event) => {
 	const cycle = objective.cycles[0];
 
 	// Group reflections by week number
-	const weekMap = new Map<number, {
-		reflections: Array<{
-			id: string;
-			type: string;
-			effortScore: number | null;
-			performanceScore: number | null;
-			notes: string | null;
-			checkInDate: string;
-			feedbacks: Array<{
-				stakeholderName: string;
+	const weekMap = new Map<
+		number,
+		{
+			reflections: Array<{
+				id: string;
+				type: string;
 				effortScore: number | null;
 				performanceScore: number | null;
-				comment: string | null;
+				notes: string | null;
+				checkInDate: string;
+				feedbacks: Array<{
+					stakeholderName: string;
+					effortScore: number | null;
+					performanceScore: number | null;
+					comment: string | null;
+				}>;
 			}>;
-		}>;
-	}>();
+		}
+	>();
 
 	for (const r of cycle.reflections) {
 		if (!weekMap.has(r.weekNumber)) {

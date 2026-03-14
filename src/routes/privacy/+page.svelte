@@ -45,9 +45,7 @@
 			<h2 class="mb-2 text-lg font-semibold text-text-primary">3. How We Use Your Information</h2>
 			<ul class="ml-4 list-disc space-y-1">
 				<li>To provide and operate the Forbetra development platform.</li>
-				<li>
-					To send feedback request invitations via email and SMS to stakeholders you designate.
-				</li>
+				<li>To send feedback request invitations via email and SMS to reviewers you designate.</li>
 				<li>To generate AI-powered coaching insights based on your development data.</li>
 				<li>To send you reminders, notifications, and service updates.</li>
 				<li>To improve and maintain the platform.</li>
@@ -57,10 +55,10 @@
 		<div>
 			<h2 class="mb-2 text-lg font-semibold text-text-primary">4. SMS/Text Messaging</h2>
 			<p class="mb-2">
-				Forbetra may send SMS text messages to users and stakeholders for the following purposes:
+				Forbetra may send SMS text messages to users and reviewers for the following purposes:
 			</p>
 			<ul class="ml-4 list-disc space-y-1">
-				<li>Feedback request invitations sent to stakeholders.</li>
+				<li>Feedback request invitations sent to reviewers.</li>
 				<li>Coaching invitation notifications.</li>
 				<li>Welcome messages when added as a rater.</li>
 			</ul>

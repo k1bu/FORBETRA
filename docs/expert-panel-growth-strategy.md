@@ -1,6 +1,6 @@
 # FORBETRA EXPERT PANEL: MAKING A SELF-DIRECTED DEVELOPMENT PLATFORM AWARD-WINNING AND VIRAL
 
-*Simulated panel discussion — February 6, 2026*
+_Simulated panel discussion — February 6, 2026_
 
 ---
 
@@ -79,7 +79,7 @@ One more thing: the tokenized stakeholder links are clever — no auth friction 
 
 ## ROUND 2: THE VIRALITY QUESTION
 
-*"How does a leadership development tool go viral?"*
+_"How does a leadership development tool go viral?"_
 
 ---
 
@@ -125,7 +125,7 @@ The deepest virality play is the API. If Forbetra's behavioral data can be consu
 
 ## ROUND 3: WHAT'S MISSING
 
-*Each panelist identifies the #1 thing Forbetra needs to add or change.*
+_Each panelist identifies the #1 thing Forbetra needs to add or change._
 
 ---
 
@@ -134,6 +134,7 @@ The deepest virality play is the API. If Forbetra's behavioral data can be consu
 I cannot buy what I cannot measure. Build a cohort-level analytics dashboard that shows: average gap closure over time, consistency scores by business unit, stakeholder alignment trends, and — this is the hard one — correlation with business outcomes. Even if the correlation is indirect, give me a story I can tell. "Leaders who maintained 80%+ consistency on Forbetra for 12 weeks saw their engagement survey scores improve by 14%." That is a business case. Without it, Forbetra is a line item I cut in the next budget review.
 
 Specifically, I need three views:
+
 1. **Cohort Health:** Which cohorts are engaged, which are dropping off, and what predicts drop-off?
 2. **Gap Trends:** Where are the biggest self-stakeholder perception gaps across the organization, and are they closing?
 3. **ROI Proxy:** Correlation between Forbetra engagement and whatever outcomes data we feed in — engagement scores, retention, promotion rates, performance ratings.
@@ -158,7 +159,7 @@ Here is my proposed redesign:
 
 **Hour 0:** Sign up. One screen: "What is the one leadership behavior you want to improve?" (Free text, AI categorizes it into objective + subgoals behind the scenes.)
 
-**Hour 0.5:** Identity Anchor — but reframed. Not "write an anchor" — that is homework. Instead: "Complete this sentence: The leader I am becoming is ___." One field. One sentence. Emotionally engaging, not effortful.
+**Hour 0.5:** Identity Anchor — but reframed. Not "write an anchor" — that is homework. Instead: "Complete this sentence: The leader I am becoming is \_\_\_." One field. One sentence. Emotionally engaging, not effortful.
 
 **Hour 1:** "Who sees you lead? Add 3 people." Name and email. That is it. Stakeholders get an immediate invitation — not to rate on a full scale, but to answer one question: "On a scale of 1-10, how would you rate [Name]'s [behavior] this week?" One question. One tap.
 
@@ -186,7 +187,7 @@ The technical moat is not the UI. Anyone can build a check-in app. The moat is t
 
 ## ROUND 4: THE AWARD-WINNING QUESTION
 
-*"What would make this win a Brandon Hall, HR Tech Award, or App Store Best Of?"*
+_"What would make this win a Brandon Hall, HR Tech Award, or App Store Best Of?"_
 
 ---
 
@@ -274,7 +275,7 @@ Show that. Demonstrate that the AI-generated developmental responses improve in 
 
 ## ROUND 6: THE PLAYBOOK
 
-*The panel converges on a prioritized action list.*
+_The panel converges on a prioritized action list._
 
 ---
 
@@ -289,6 +290,7 @@ Before we prioritize, let me name the strategic reality: Forbetra has a 6-12 mon
 ---
 
 ### PRIORITY 1: Activation Redesign — Time-to-First-Insight Under 24 Hours
+
 **(PRIYA'S MUST-DO)**
 
 **Priya Sharma:** Nothing else matters if users do not activate. The current onboarding requires too many steps before the first moment of emotional impact. Redesign the first 24 hours as follows:
@@ -309,6 +311,7 @@ Before we prioritize, let me name the strategic reality: Forbetra has a 6-12 mon
 ---
 
 ### PRIORITY 2: AI Developmental Response Engine (Phase 1)
+
 **(MARCUS'S MUST-DO)**
 
 **Marcus Jefferson:** Build the developmental response engine in two phases. Phase 1, buildable in 6-8 weeks:
@@ -327,15 +330,18 @@ Phase 2 (Month 4-6): Add the behavioral feature store Deon described. Use accumu
 ---
 
 ### PRIORITY 3: Stakeholder-as-Growth-Loop + Coach Distribution Strategy
+
 **(SARAH'S MUST-DO)**
 
 **Sarah Chen:** Build the product-led growth mechanics into the stakeholder experience and launch a coach enablement program simultaneously. These are two sides of the same distribution strategy.
 
 **Stakeholder conversion flow (2-3 weeks build):**
+
 - After a stakeholder submits a rating, show a completion screen with: aggregate impact data ("You have helped [Name] close 2 perception gaps this quarter"), a CTA to start their own development journey, and an option to request a demo for their team/organization.
 - Track stakeholder-to-user conversion rate. Even at 5%, this creates compounding organic growth.
 
 **Coach distribution program (4-6 weeks to launch):**
+
 - Free Forbetra coach accounts for credentialed executive coaches (ICF PCC/MCC, CCE, EMCC).
 - Coach-specific features: multi-client dashboard, session prep summaries from Forbetra data, printable progress reports for organizational sponsors.
 - Co-marketing: "Forbetra-Certified Coach" designation. Coaches listed in a directory. Mutual referrals.
@@ -346,6 +352,7 @@ Phase 2 (Month 4-6): Add the behavioral feature store Deon described. Use accumu
 ---
 
 ### PRIORITY 4: Data Infrastructure + Organizational Analytics Layer
+
 **(DEON'S MUST-DO)**
 
 **Deon Williams:** Build the data infrastructure that enables everything else on this list to work at scale. This is not a feature — it is a foundation.
@@ -353,17 +360,20 @@ Phase 2 (Month 4-6): Add the behavioral feature store Deon described. Use accumu
 **90-day data infrastructure roadmap:**
 
 **Weeks 1-4: Event tracking and behavioral feature store.**
+
 - Implement structured event logging for all user actions. Every check-in, stakeholder rating, gap reveal view, coach note, and AI insight interaction becomes a timestamped event.
 - Build computed behavioral features as materialized views in Supabase: consistency score, trajectory direction, gap magnitude, volatility index, stakeholder alignment coefficient.
 - These features power the AI engine (Priority 2), the org analytics (below), and the predictive models (future).
 
 **Weeks 5-8: Organizational analytics dashboard.**
+
 - Cohort-level views: engagement rates, average gap closure, consistency distribution, top development themes.
 - Filterable by: business unit, tenure, level, cohort, time period.
 - Export capability: PDF reports and CSV data exports for talent review integration.
 - This is what Sarah needs to buy it and what gets CHROs to screenshot it.
 
 **Weeks 9-12: Predictive engagement model and security hardening.**
+
 - Build a disengagement prediction model (even rule-based initially): flag users who miss two consecutive check-ins, whose scores flatline, or whose stakeholder response rates drop.
 - Trigger: coach alert, re-engagement email, or in-app nudge.
 - Harden tokenized stakeholder links: add expiration (7 days), rate limiting, and optional email verification.
@@ -376,14 +386,14 @@ Phase 2 (Month 4-6): Add the behavioral feature store Deon described. Use accumu
 
 ### SUMMARY: THE 6-MONTH ROADMAP
 
-| Month | Priority | Key Deliverable | Success Metric |
-|-------|----------|----------------|----------------|
-| 1-2 | Activation Redesign | 24-hour time-to-first-insight | 60%+ activation rate |
-| 2-3 | AI Response Engine (Phase 1) | Personalized developmental insights post-check-in | 70%+ "helpful" rating |
-| 2-4 | Growth Loops | Stakeholder conversion flow + Coach program launch | 5%+ stakeholder conversion; 50 coaches onboarded |
-| 3-5 | Data Infrastructure | Event tracking, feature store, org analytics dashboard | Dashboard usable for pilot cohort review |
-| 4-6 | AI Response Engine (Phase 2) | Behavioral clustering, improved personalization | Measurable improvement in insight quality scores |
-| 5-6 | Enterprise Readiness | SSO, SOC 2 prep, HRIS export, white-label foundation | Pass first enterprise security review |
+| Month | Priority                     | Key Deliverable                                        | Success Metric                                   |
+| ----- | ---------------------------- | ------------------------------------------------------ | ------------------------------------------------ |
+| 1-2   | Activation Redesign          | 24-hour time-to-first-insight                          | 60%+ activation rate                             |
+| 2-3   | AI Response Engine (Phase 1) | Personalized developmental insights post-check-in      | 70%+ "helpful" rating                            |
+| 2-4   | Growth Loops                 | Stakeholder conversion flow + Coach program launch     | 5%+ stakeholder conversion; 50 coaches onboarded |
+| 3-5   | Data Infrastructure          | Event tracking, feature store, org analytics dashboard | Dashboard usable for pilot cohort review         |
+| 4-6   | AI Response Engine (Phase 2) | Behavioral clustering, improved personalization        | Measurable improvement in insight quality scores |
+| 5-6   | Enterprise Readiness         | SSO, SOC 2 prep, HRIS export, white-label foundation   | Pass first enterprise security review            |
 
 ---
 

@@ -9,10 +9,7 @@ export const load: PageServerLoad = async (event) => {
 
 	const coachClients = await prisma.coachClient.findMany({
 		where: { coachId: dbUser.id },
-		orderBy: [
-			{ archivedAt: 'asc' },
-			{ createdAt: 'asc' }
-		],
+		orderBy: [{ archivedAt: 'asc' }, { createdAt: 'asc' }],
 		select: {
 			id: true,
 			individualId: true,
@@ -310,4 +307,3 @@ export const actions: Actions = {
 		return { cadenceSuccess: true };
 	}
 };
-

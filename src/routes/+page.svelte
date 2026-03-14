@@ -66,8 +66,8 @@
 					<div class="h-[2px] w-24 rounded-full bg-border-default"></div>
 					<p class="text-lg leading-relaxed text-text-tertiary">
 						Forbetra gives you a clear, structured way to work on what matters most — your
-						professional growth. Set a meaningful objective, check in with yourself regularly, and
-						hear from the people who see you in action.
+						professional growth. Set a meaningful goal, check in with yourself regularly, and hear
+						from the people who see you in action.
 					</p>
 				</div>
 				<div class="mt-10 grid gap-4 text-sm text-text-secondary">
@@ -205,7 +205,7 @@
 							</div>
 							<h2 class="mb-2 text-xl font-semibold text-text-primary">Individual</h2>
 							<p class="mb-4 text-sm leading-relaxed text-text-tertiary">
-								Set development objectives, reflect weekly, and get feedback from stakeholders.
+								Set development goals, reflect weekly, and get feedback from reviewers.
 							</p>
 							<div class="space-y-2 text-xs text-text-muted">
 								<div class="flex items-center gap-2">

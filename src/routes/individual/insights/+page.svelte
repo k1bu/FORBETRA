@@ -2,11 +2,20 @@
 	import type { PageData } from './$types';
 	import CorrelationView from '$lib/components/CorrelationView.svelte';
 	import GapLensView from '$lib/components/GapLensView.svelte';
-	import { FileText, TrendingUp, Sparkles, ThumbsUp, ThumbsDown } from 'lucide-svelte';
-	import InfoTip from '$lib/components/InfoTip.svelte';
+	import {
+		FileText,
+		TrendingUp,
+		Sparkles,
+		ThumbsUp,
+		ThumbsDown,
+		History,
+		ChevronDown
+	} from 'lucide-svelte';
 	import ErrorBoundary from '$lib/components/ErrorBoundary.svelte';
 
 	const { data }: { data: PageData } = $props();
+
+	let showHistory = $state(false);
 
 	const formatAverage = (value: number | null | undefined) => {
 		if (value === null || value === undefined) {
@@ -15,21 +24,7 @@
 		return value.toFixed(1);
 	};
 
-	const formatPercent = (value: number | null | undefined) => {
-		if (value === null || value === undefined) {
-			return '—';
-		}
-		return `${Math.round(value * 100)}%`;
-	};
-
-	const formatScore = (value: number | null | undefined) => {
-		if (value === null || value === undefined) {
-			return '—';
-		}
-		return `${value}/100`;
-	};
-
-	import { getScoreColorNullable, getStabilityColor } from '$lib/utils/scoreColors';
+	import { getScoreColorNullable } from '$lib/utils/scoreColors';
 	import { addToast } from '$lib/stores/toasts.svelte';
 
 	const getScoreColor = (
@@ -441,59 +436,6 @@
 						</p>
 					{/if}
 				</div>
-				<div class="rounded-lg border border-border-default bg-surface-subtle p-4">
-					<p
-						class="mb-1 flex items-center gap-1 text-xs font-semibold tracking-wide text-text-tertiary uppercase"
-					>
-						Stability <InfoTip
-							text="Measures how consistent your scores are. Higher = more predictable patterns. 70+ is strong."
-						/>
-					</p>
-					<p class="text-2xl font-bold {getStabilityColor(data.insights.stabilityScore)}">
-						{formatScore(data.insights.stabilityScore)}
-					</p>
-					<p class="mt-1 text-[10px] text-text-muted">
-						How consistent your scores are week to week
-					</p>
-				</div>
-				<div class="rounded-lg border border-border-default bg-surface-subtle p-4">
-					<p
-						class="mb-1 flex items-center gap-1 text-xs font-semibold tracking-wide text-text-tertiary uppercase"
-					>
-						Trajectory <InfoTip
-							text="Shows your score trend over the last 4 weeks. Positive = improving, negative = declining."
-						/>
-					</p>
-					<p
-						class="text-2xl font-bold {data.insights.trajectoryScore !== null &&
-						data.insights.trajectoryScore !== undefined
-							? data.insights.trajectoryScore > 10
-								? 'text-success'
-								: data.insights.trajectoryScore < -10
-									? 'text-error'
-									: 'text-accent'
-							: 'text-text-muted'}"
-					>
-						{#if data.insights.trajectoryScore !== null && data.insights.trajectoryScore !== undefined}
-							{#if data.insights.trajectoryScore > 10}↑{:else if data.insights.trajectoryScore < -10}↓{:else}→{/if}
-							{data.insights.trajectoryScore > 0 ? '+' : ''}{data.insights.trajectoryScore}
-						{:else}
-							—
-						{/if}
-					</p>
-					<p class="mt-1 text-[10px] text-text-muted">
-						Direction of your scores over the last 4 weeks
-					</p>
-				</div>
-				<div class="rounded-lg border border-border-default bg-surface-subtle p-4">
-					<p class="mb-1 text-xs font-semibold tracking-wide text-text-tertiary uppercase">
-						Rater Alignment
-					</p>
-					<p class="text-2xl font-bold text-success">
-						{formatPercent(data.insights.alignmentRatio)}
-					</p>
-					<p class="mt-1 text-[10px] text-text-muted">% of stakeholders who responded this week</p>
-				</div>
 			</div>
 		</div>
 	{/if}
@@ -529,8 +471,8 @@
 		<div class="rounded-lg border border-dashed border-border-strong bg-surface-raised p-6">
 			<h2 class="mb-2 text-lg font-bold text-text-primary">Gap Lens</h2>
 			<p class="text-sm text-text-secondary">
-				Reveals differences between how you see yourself and how others see you. Add stakeholders
-				and complete check-ins to unlock this view.
+				Reveals differences between how you see yourself and how others see you. Add reviewers and
+				complete check-ins to unlock this view.
 			</p>
 		</div>
 	{/if}
@@ -562,5 +504,62 @@
 				</div>
 			</div>
 		{/each}
+	{/if}
+
+	<!-- History Accordion -->
+	{#if data.historyWeeks && data.historyWeeks.length > 0}
+		<div class="rounded-2xl border border-border-default bg-surface-raised">
+			<button
+				type="button"
+				onclick={() => (showHistory = !showHistory)}
+				class="flex w-full items-center justify-between px-6 py-4 text-left"
+			>
+				<div class="flex items-center gap-2">
+					<History class="h-4 w-4 text-text-muted" />
+					<h2 class="text-base font-semibold text-text-primary">Check-in History</h2>
+					<span class="rounded-full bg-surface-subtle px-2 py-0.5 text-xs text-text-muted">
+						{data.historyWeeks.length} week{data.historyWeeks.length !== 1 ? 's' : ''}
+					</span>
+				</div>
+				<ChevronDown
+					class="h-4 w-4 text-text-muted transition-transform {showHistory ? 'rotate-180' : ''}"
+				/>
+			</button>
+
+			{#if showHistory}
+				<div class="border-t border-border-default px-6 py-4">
+					<div class="space-y-4">
+						{#each data.historyWeeks as week (week.weekNumber)}
+							<div class="rounded-xl border border-border-default bg-surface-subtle p-4">
+								<p class="mb-2 text-sm font-semibold text-text-primary">Week {week.weekNumber}</p>
+								<div class="space-y-2">
+									{#each week.reflections as reflection (reflection.id)}
+										<div class="flex items-center justify-between text-sm">
+											<span class="text-text-secondary"
+												>{reflection.type === 'RATING_A' ? 'Check-in' : 'Rating'}</span
+											>
+											<div class="flex gap-4">
+												{#if reflection.effortScore !== null}
+													<span class="text-cyan-500 tabular-nums">E: {reflection.effortScore}</span
+													>
+												{/if}
+												{#if reflection.performanceScore !== null}
+													<span class="text-amber-500 tabular-nums"
+														>P: {reflection.performanceScore}</span
+													>
+												{/if}
+											</div>
+										</div>
+										{#if reflection.notes}
+											<p class="mt-1 text-xs text-text-muted italic">{reflection.notes}</p>
+										{/if}
+									{/each}
+								</div>
+							</div>
+						{/each}
+					</div>
+				</div>
+			{/if}
+		</div>
 	{/if}
 </section>

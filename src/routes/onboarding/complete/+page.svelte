@@ -28,8 +28,8 @@
 		</div>
 		<h1 class="text-3xl font-bold text-text-primary">You're ready to grow</h1>
 		<p class="mt-2 text-base text-text-secondary">
-			You've defined your objective, set your cadence, and built your feedback team. That clarity is
-			rare — and it matters.
+			You've defined your goal, set your cadence, and built your feedback team. That clarity is rare
+			— and it matters.
 		</p>
 		<p class="mt-3 text-sm font-medium text-accent">Your first check-in is how it all begins.</p>
 	</div>
@@ -37,7 +37,7 @@
 	<!-- Summary Cards -->
 	<div class="w-full space-y-4">
 		<div class="rounded-2xl border border-border-default bg-surface-raised p-5">
-			<h2 class="text-xs font-semibold tracking-wide text-text-tertiary uppercase">Objective</h2>
+			<h2 class="text-xs font-semibold tracking-wide text-text-tertiary uppercase">Goal</h2>
 			<h3 class="mt-2 text-lg font-semibold text-text-primary">{data.objective.title}</h3>
 			{#if data.objective.description}
 				<p class="mt-1 text-sm text-text-secondary">{data.objective.description}</p>

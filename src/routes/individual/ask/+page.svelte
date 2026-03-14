@@ -123,7 +123,7 @@
 		'What patterns do you see in my effort scores?',
 		'How does my self-assessment compare to my stakeholders?',
 		'What should I focus on next week?',
-		'Am I making progress toward my objective?'
+		'Am I making progress toward my goal?'
 	];
 </script>
 

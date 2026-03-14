@@ -12,9 +12,7 @@
 	let isExpanded = $state(false);
 
 	// Sort ratings by week number (descending - most recent first)
-	const sortedRatings = $derived(
-		[...historicRatings].sort((a, b) => b.weekNumber - a.weekNumber)
-	);
+	const sortedRatings = $derived([...historicRatings].sort((a, b) => b.weekNumber - a.weekNumber));
 </script>
 
 <button
@@ -38,13 +36,19 @@
 		<table class="w-full">
 			<thead class="bg-surface-subtle">
 				<tr>
-					<th class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-text-secondary">
+					<th
+						class="px-4 py-2.5 text-left text-xs font-semibold tracking-wide text-text-secondary uppercase"
+					>
 						Week
 					</th>
-					<th class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-text-secondary">
+					<th
+						class="px-4 py-2.5 text-left text-xs font-semibold tracking-wide text-text-secondary uppercase"
+					>
 						Effort
 					</th>
-					<th class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-text-secondary">
+					<th
+						class="px-4 py-2.5 text-left text-xs font-semibold tracking-wide text-text-secondary uppercase"
+					>
 						Performance
 					</th>
 				</tr>
@@ -52,7 +56,9 @@
 			<tbody class="divide-y divide-border-default">
 				{#each sortedRatings as rating (rating.weekNumber)}
 					<tr class="transition-colors hover:bg-surface-subtle/50">
-						<td class="px-4 py-2.5 text-sm font-medium text-text-primary">Week {rating.weekNumber}</td>
+						<td class="px-4 py-2.5 text-sm font-medium text-text-primary"
+							>Week {rating.weekNumber}</td
+						>
 						<td class="px-4 py-2.5 text-sm text-text-secondary">
 							{#if rating.effortScore !== null}
 								<span class="font-medium">{rating.effortScore}</span>

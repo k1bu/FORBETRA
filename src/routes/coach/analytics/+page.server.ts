@@ -8,10 +8,7 @@ export const load: PageServerLoad = async (event) => {
 
 	const coachClients = await prisma.coachClient.findMany({
 		where: { coachId: dbUser.id },
-		orderBy: [
-			{ archivedAt: 'asc' },
-			{ createdAt: 'asc' }
-		],
+		orderBy: [{ archivedAt: 'asc' }, { createdAt: 'asc' }],
 		select: {
 			id: true,
 			individualId: true,
@@ -176,7 +173,10 @@ export const load: PageServerLoad = async (event) => {
 		}));
 
 	// --- Portfolio Time Series: weekly averages across all active clients ---
-	const weeklyBuckets = new Map<number, { efforts: number[]; performances: number[]; clientIds: Set<string> }>();
+	const weeklyBuckets = new Map<
+		number,
+		{ efforts: number[]; performances: number[]; clientIds: Set<string> }
+	>();
 	for (const client of clientSummaries) {
 		if (client.archived || !client.objective || !client.visualizationData) continue;
 		const weeklyData = client.visualizationData.individual ?? [];
@@ -199,12 +199,18 @@ export const load: PageServerLoad = async (event) => {
 	const portfolioTimeSeries = Array.from(weeklyBuckets.entries())
 		.map(([weekNumber, bucket]) => ({
 			weekNumber,
-			avgEffort: bucket.efforts.length > 0
-				? Number((bucket.efforts.reduce((a, b) => a + b, 0) / bucket.efforts.length).toFixed(1))
-				: null,
-			avgPerformance: bucket.performances.length > 0
-				? Number((bucket.performances.reduce((a, b) => a + b, 0) / bucket.performances.length).toFixed(1))
-				: null,
+			avgEffort:
+				bucket.efforts.length > 0
+					? Number((bucket.efforts.reduce((a, b) => a + b, 0) / bucket.efforts.length).toFixed(1))
+					: null,
+			avgPerformance:
+				bucket.performances.length > 0
+					? Number(
+							(bucket.performances.reduce((a, b) => a + b, 0) / bucket.performances.length).toFixed(
+								1
+							)
+						)
+					: null,
 			clientCount: bucket.clientIds.size
 		}))
 		.sort((a, b) => a.weekNumber - b.weekNumber);
@@ -228,4 +234,3 @@ export const load: PageServerLoad = async (event) => {
 		portfolioTimeSeries
 	};
 };
-

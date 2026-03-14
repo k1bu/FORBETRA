@@ -46,7 +46,7 @@
 </script>
 
 <svelte:head>
-	<title>Stakeholders | Forbetra</title>
+	<title>Reviewers | Forbetra</title>
 </svelte:head>
 
 <section class="mx-auto flex max-w-6xl flex-col gap-8 p-4 pb-12">
@@ -72,11 +72,11 @@
 						/></svg
 					>
 				</li>
-				<li><span class="font-medium text-text-primary">Stakeholders</span></li>
+				<li><span class="font-medium text-text-primary">Reviewers</span></li>
 			</ol>
 		</nav>
 		<!-- eslint-enable svelte/no-navigation-without-resolve -->
-		<h1 class="text-3xl font-bold text-text-primary">Stakeholders</h1>
+		<h1 class="text-3xl font-bold text-text-primary">Reviewers</h1>
 		<p class="mt-1 text-text-secondary">Manage the people who provide feedback on your progress</p>
 	</header>
 
@@ -119,7 +119,7 @@
 	<div class="grid gap-6 lg:grid-cols-3">
 		<!-- Stakeholders List -->
 		<div class="space-y-4 lg:col-span-2">
-			<h2 class="text-lg font-bold text-text-primary">Your Stakeholders</h2>
+			<h2 class="text-lg font-bold text-text-primary">Your Reviewers</h2>
 			{#if data.stakeholders.length}
 				<div class="space-y-4">
 					{#each data.stakeholders as stakeholder (stakeholder.id)}
@@ -310,7 +310,7 @@
 						</div>
 					</div>
 					<h3 class="mb-1 text-center text-sm font-semibold text-text-primary">
-						Add 3&#8211;5 stakeholders to unlock 360 insights
+						Add 3&#8211;5 reviewers to unlock 360 insights
 					</h3>
 					<p class="mb-4 text-center text-xs text-text-secondary">
 						Rater feedback reveals perception gaps — the differences between how you see yourself
@@ -338,7 +338,7 @@
 						</ul>
 					</div>
 					<p class="mt-3 text-center text-[10px] text-text-muted">
-						All feedback is anonymous. Stakeholders receive a simple 60-second form.
+						All feedback is anonymous. Reviewers receive a simple 60-second form.
 					</p>
 				</div>
 			{/if}

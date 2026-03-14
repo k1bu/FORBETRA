@@ -234,7 +234,7 @@
 			<p class="text-3xl font-bold text-text-primary tabular-nums">
 				{formatPercent(data.analytics.avgAlignment)}
 			</p>
-			<p class="mt-1 text-[10px] text-text-muted">Stakeholder response rate</p>
+			<p class="mt-1 text-[10px] text-text-muted">Reviewer response rate</p>
 		</div>
 		<div class="rounded-lg border border-border-default bg-surface-raised p-4">
 			<div class="mb-1 flex items-center gap-1.5">

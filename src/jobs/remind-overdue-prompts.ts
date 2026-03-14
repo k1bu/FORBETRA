@@ -102,10 +102,7 @@ export const remindOverduePrompts = async () => {
 			}
 
 			// Send SMS reminder
-			await trySendSms(
-				objective.user.phone,
-				smsTemplates.reminderOverdue({ appUrl })
-			);
+			await trySendSms(objective.user.phone, smsTemplates.reminderOverdue({ appUrl }));
 		}
 	}
 };

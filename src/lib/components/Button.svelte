@@ -19,15 +19,14 @@
 		type?: 'button' | 'submit';
 		children: Snippet;
 		class?: string;
-		[key: string]: any;
+		[key: string]: unknown;
 	} = $props();
 
 	const baseClasses =
 		'inline-flex items-center justify-center rounded-lg font-medium tracking-tight transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-base disabled:opacity-50 disabled:cursor-not-allowed';
 
 	const variantClasses: Record<Variant, string> = {
-		primary:
-			'bg-accent text-white hover:bg-accent-hover focus-visible:ring-accent',
+		primary: 'bg-accent text-white hover:bg-accent-hover focus-visible:ring-accent',
 		secondary:
 			'glass border-border-strong text-text-primary hover:bg-surface-subtle focus-visible:ring-border-accent',
 		destructive:

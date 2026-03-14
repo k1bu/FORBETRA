@@ -45,9 +45,7 @@ export const sendSms = async (payload: SmsPayload) => {
 	await twilioClient.messages.create({
 		body: payload.body,
 		to: payload.to,
-		...(messagingServiceSid
-			? { messagingServiceSid }
-			: { from: fromNumber })
+		...(messagingServiceSid ? { messagingServiceSid } : { from: fromNumber })
 	});
 
 	console.info(`[sms:sent] SMS sent to ${payload.to}`);

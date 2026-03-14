@@ -386,9 +386,7 @@ async function seedTestData() {
 		console.log(
 			`   - Cycle: 12 weeks (${cycleStartDate.toISOString().split('T')[0]} to ${cycleEndDate.toISOString().split('T')[0]})`
 		);
-		console.log(
-			`   - Reflections: ${totalReflections} (EFFORT + PROGRESS for 12 weeks)`
-		);
+		console.log(`   - Reflections: ${totalReflections} (EFFORT + PROGRESS for 12 weeks)`);
 		console.log(`   - Stakeholder Feedback: ${totalFeedbacks} (3 stakeholders × 12 weeks)`);
 		console.log('\n🎨 You can now preview the visualization by:');
 		console.log(
@@ -401,9 +399,9 @@ async function seedTestData() {
 			'   with these emails, Clerk will automatically link to the seeded Prisma records.'
 		);
 		console.log('');
-	} catch (error: any) {
+	} catch (error: unknown) {
 		console.error('\n❌ Error seeding test data:', error);
-		if (error.code === 'P2002') {
+		if ((error as Record<string, unknown>).code === 'P2002') {
 			console.error('   ⚠️  Unique constraint error. Data may already exist.');
 		}
 		throw error;

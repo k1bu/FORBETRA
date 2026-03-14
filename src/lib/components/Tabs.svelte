@@ -14,12 +14,12 @@
 		tabs: Tab[];
 		active: string;
 		class?: string;
-		[key: string]: any;
+		[key: string]: unknown;
 	} = $props();
 </script>
 
 <div
-	class="inline-flex rounded-lg bg-surface-raised border border-border-default p-1 {className}"
+	class="inline-flex rounded-lg border border-border-default bg-surface-raised p-1 {className}"
 	role="tablist"
 	{...rest}
 >

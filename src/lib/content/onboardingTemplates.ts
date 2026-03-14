@@ -62,8 +62,18 @@ export const onboardingContexts: OnboardingContext[] = [
 						'Stakeholders who regularly see you communicate can quickly flag what lands well and what distracts from your message.',
 					recommendedApproach:
 						'Invite 3–5 stakeholders who join executive updates or critical meetings so they can observe your delivery and share concrete stories.',
-					recommendedRoles: ['Direct manager or skip-level leader', 'Trusted peer in leadership meetings', 'Direct report who monitors team morale', 'HR partner, coach, or communications lead'],
-					exampleStakeholders: ['COO or Chief of Staff', 'Peer VP or director', 'Lead direct report for a major program', 'HR business partner or executive coach']
+					recommendedRoles: [
+						'Direct manager or skip-level leader',
+						'Trusted peer in leadership meetings',
+						'Direct report who monitors team morale',
+						'HR partner, coach, or communications lead'
+					],
+					exampleStakeholders: [
+						'COO or Chief of Staff',
+						'Peer VP or director',
+						'Lead direct report for a major program',
+						'HR business partner or executive coach'
+					]
 				}
 			},
 			{
@@ -95,8 +105,18 @@ export const onboardingContexts: OnboardingContext[] = [
 						'Stakeholders surface blind spots in your thinking and ensure strategic messages travel across functions.',
 					recommendedApproach:
 						'Select 3–5 stakeholders who influence planning cycles so they can assess whether your strategy shows up in real workflows.',
-					recommendedRoles: ['Executive sponsor', 'Cross-functional partner (e.g., Finance, Product, Operations)', 'Strategy or biz-ops leader', 'Direct report who drives planning cadence'],
-					exampleStakeholders: ['CFO or senior finance partner', 'Head of Product or Operations counterpart', 'Strategy director or chief of staff', 'Program manager running quarterly planning']
+					recommendedRoles: [
+						'Executive sponsor',
+						'Cross-functional partner (e.g., Finance, Product, Operations)',
+						'Strategy or biz-ops leader',
+						'Direct report who drives planning cadence'
+					],
+					exampleStakeholders: [
+						'CFO or senior finance partner',
+						'Head of Product or Operations counterpart',
+						'Strategy director or chief of staff',
+						'Program manager running quarterly planning'
+					]
 				}
 			},
 			{
@@ -128,8 +148,18 @@ export const onboardingContexts: OnboardingContext[] = [
 						'Stakeholders who rely on your team can validate whether delegation strengthens delivery and talent growth.',
 					recommendedApproach:
 						'Choose 3–5 stakeholders who experience the downstream impact of delegation so they can reflect on empowerment gains.',
-					recommendedRoles: ['Direct manager', 'Key direct report receiving delegated work', 'Peer or partner team lead', 'People/HR partner focused on talent development'],
-					exampleStakeholders: ['VP or senior leader supervising your function', 'Senior IC or team lead you delegate to', 'Cross-functional project owner', 'HR business partner or leadership coach']
+					recommendedRoles: [
+						'Direct manager',
+						'Key direct report receiving delegated work',
+						'Peer or partner team lead',
+						'People/HR partner focused on talent development'
+					],
+					exampleStakeholders: [
+						'VP or senior leader supervising your function',
+						'Senior IC or team lead you delegate to',
+						'Cross-functional project owner',
+						'HR business partner or leadership coach'
+					]
 				}
 			}
 		]
@@ -169,8 +199,18 @@ export const onboardingContexts: OnboardingContext[] = [
 						'Operational stakeholders confirm whether your awareness translates into actionable briefings and team responsiveness.',
 					recommendedApproach:
 						'Loop in 3–5 stakeholders who monitor or depend on your situational calls so they can log concrete feedback after exercises.',
-					recommendedRoles: ['Commanding officer or XO', 'Platoon sergeant or senior enlisted advisor', 'Ops/intelligence partner observing the mission', 'Peer leader from a sister unit'],
-					exampleStakeholders: ['Company commander', 'Platoon sergeant', 'Intelligence NCO or S2 liaison', 'Adjacent unit squad leader']
+					recommendedRoles: [
+						'Commanding officer or XO',
+						'Platoon sergeant or senior enlisted advisor',
+						'Ops/intelligence partner observing the mission',
+						'Peer leader from a sister unit'
+					],
+					exampleStakeholders: [
+						'Company commander',
+						'Platoon sergeant',
+						'Intelligence NCO or S2 liaison',
+						'Adjacent unit squad leader'
+					]
 				}
 			},
 			{
@@ -202,8 +242,18 @@ export const onboardingContexts: OnboardingContext[] = [
 						'Trust is best evaluated by the people you lead and those who rely on your unit under stress.',
 					recommendedApproach:
 						'Invite 3–5 stakeholders who observe morale and collaboration daily so they can document tangible shifts in cohesion.',
-					recommendedRoles: ['Command team (commander/XO)', 'Peer squad or platoon leaders', 'Unit training or readiness NCO', 'Mission partner from another section'],
-					exampleStakeholders: ['Company first sergeant', 'Peer platoon leader', 'Unit readiness NCO', 'Attached support element leader']
+					recommendedRoles: [
+						'Command team (commander/XO)',
+						'Peer squad or platoon leaders',
+						'Unit training or readiness NCO',
+						'Mission partner from another section'
+					],
+					exampleStakeholders: [
+						'Company first sergeant',
+						'Peer platoon leader',
+						'Unit readiness NCO',
+						'Attached support element leader'
+					]
 				}
 			},
 			{
@@ -235,11 +285,20 @@ export const onboardingContexts: OnboardingContext[] = [
 						'Leaders above and alongside you can validate whether your calls align with intent and timing requirements.',
 					recommendedApproach:
 						'Select 3–5 stakeholders who oversee or depend on your decisions so they can review mission logs and offer precise coaching.',
-					recommendedRoles: ['Commander or battalion staff supervisor', 'Senior enlisted advisor', 'Peer leader sharing mission space', 'Observer/controller or evaluator'],
-					exampleStakeholders: ['Battalion S3 or operations officer', 'Company first sergeant or senior NCO', 'Peer platoon commander', 'Observer-controller from training command']
+					recommendedRoles: [
+						'Commander or battalion staff supervisor',
+						'Senior enlisted advisor',
+						'Peer leader sharing mission space',
+						'Observer/controller or evaluator'
+					],
+					exampleStakeholders: [
+						'Battalion S3 or operations officer',
+						'Company first sergeant or senior NCO',
+						'Peer platoon commander',
+						'Observer-controller from training command'
+					]
 				}
 			}
 		]
 	}
 ];
-

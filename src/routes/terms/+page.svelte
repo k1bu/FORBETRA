@@ -68,9 +68,9 @@
 		<div>
 			<h2 class="mb-2 text-lg font-semibold text-text-primary">5. User Content</h2>
 			<p>
-				You retain ownership of all content you submit to Forbetra (objectives, check-ins,
-				feedback). By using the Service, you grant us a limited license to process this content
-				solely for the purpose of providing the Service, including generating AI-powered insights.
+				You retain ownership of all content you submit to Forbetra (goals, check-ins, feedback). By
+				using the Service, you grant us a limited license to process this content solely for the
+				purpose of providing the Service, including generating AI-powered insights.
 			</p>
 		</div>
 

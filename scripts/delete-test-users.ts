@@ -1,9 +1,9 @@
 /**
  * Delete Test Users
- * 
+ *
  * Deletes coach@test.forbetra.com and user@test.forbetra.com
  * and all their associated data from the database.
- * 
+ *
  * Usage:
  *   npx tsx scripts/delete-test-users.ts
  */
@@ -109,9 +109,9 @@ async function deleteTestUsers() {
 			});
 
 			console.log(`   ✅ Successfully deleted ${email}`);
-		} catch (error: any) {
-			console.error(`   ❌ Error deleting ${email}:`, error.message);
-			if (error.code === 'P2003') {
+		} catch (error: unknown) {
+			console.error(`   ❌ Error deleting ${email}:`, (error as Error).message);
+			if ((error as Record<string, unknown>).code === 'P2003') {
 				console.error(`   ⚠️  Foreign key constraint error. There may be additional related data.`);
 			}
 		}
@@ -128,4 +128,3 @@ deleteTestUsers()
 	.finally(async () => {
 		await prisma.$disconnect();
 	});
-

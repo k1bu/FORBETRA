@@ -40,8 +40,9 @@ export const onboardingSchema = z.object({
 		.optional(),
 	subgoals: z
 		.array(subgoalSchema)
-		.min(1, 'Add at least one sub-objective')
-		.max(5, 'Keep it to five sub-objectives or fewer'),
+		.min(0)
+		.max(5, 'Keep it to five sub-objectives or fewer')
+		.default([]),
 	stakeholders: z
 		.array(stakeholderSchema)
 		.max(5, 'Add up to five stakeholders')
@@ -51,18 +52,21 @@ export const onboardingSchema = z.object({
 	cycleStartDate: z
 		.string()
 		.refine((value) => value.length > 0, 'Start date is required')
-		.refine((value) => !Number.isNaN(Date.parse(value)), 'Provide a valid start date'),
+		.refine((value) => !Number.isNaN(Date.parse(value)), 'Provide a valid start date')
+		.optional()
+		.default(new Date().toISOString().slice(0, 10)),
 	cycleDurationWeeks: z
 		.number()
-		.refine((value) => Number.isFinite(value), 'Select a cycle length')
 		.int()
 		.min(4, 'Pick at least 4 weeks')
-		.max(26, 'Keep cycles to 26 weeks or fewer'),
+		.max(26, 'Keep cycles to 26 weeks or fewer')
+		.optional()
+		.default(12),
 	checkInFrequency: z
 		.string()
 		.min(1, 'Select at least one check-in day')
 		.optional()
-		.default('tue,fri'),
+		.default('mon,wed,fri'),
 	stakeholderCadence: z
 		.string()
 		.refine(

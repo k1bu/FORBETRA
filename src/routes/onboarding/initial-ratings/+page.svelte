@@ -61,10 +61,10 @@
 			<h1 class="mb-4 text-3xl font-bold text-text-primary">Set Your Starting Point</h1>
 			<p class="text-lg leading-relaxed text-text-secondary">
 				These ratings capture where you feel you are right now as you begin working toward your
-				objective:
+				goal:
 			</p>
 			<p class="mt-2 text-xl font-semibold text-accent">
-				"{data.isPreview ? 'Your development objective' : data.objective.title}"
+				"{data.isPreview ? 'Your development goal' : data.objective.title}"
 			</p>
 			<p class="mt-3 text-base text-text-secondary">
 				There's no right or wrong answer — this simply gives us a baseline to measure change over
@@ -120,7 +120,7 @@
 					</label>
 					<p class="text-base leading-relaxed text-text-secondary">
 						Over the past few weeks, how consistently have you been putting deliberate effort toward
-						improving your {data.isPreview ? 'your development objective' : data.objective.title}?
+						improving your {data.isPreview ? 'your development goal' : data.objective.title}?
 					</p>
 				</div>
 
@@ -172,7 +172,7 @@
 					<p class="text-base leading-relaxed text-text-secondary">
 						Based on recent situations, how effectively have you been showing up in line with your
 						goal of improving your {data.isPreview
-							? 'your development objective'
+							? 'your development goal'
 							: data.objective.title}?
 					</p>
 				</div>

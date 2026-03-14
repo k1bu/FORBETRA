@@ -89,7 +89,10 @@ export const getFocusRing = (score: number, type: ScoreType): string => {
 };
 
 // --- Score labels ---
-export const getScoreLabel = (score: number, type: 'effort' | 'performance' | 'progress'): string => {
+export const getScoreLabel = (
+	score: number,
+	type: 'effort' | 'performance' | 'progress'
+): string => {
 	if (type === 'effort') {
 		if (score <= 2) return 'Rarely intentional';
 		if (score <= 4) return 'Sporadic effort';
@@ -106,7 +109,10 @@ export const getScoreLabel = (score: number, type: 'effort' | 'performance' | 'p
 };
 
 // --- Nullable variant for dashboard/insights ---
-export const getScoreColorNullable = (score: number | null | undefined, type: ScoreType): string => {
+export const getScoreColorNullable = (
+	score: number | null | undefined,
+	type: ScoreType
+): string => {
 	if (score === null || score === undefined) return 'text-text-muted';
 	return getScoreColor(score, type);
 };
@@ -123,21 +129,21 @@ export const getStabilityColor = (score: number | null | undefined): string => {
 export const CHART_COLORS = {
 	effort: {
 		individual: {
-			border: 'rgb(6, 182, 212)',        // cyan-500
+			border: 'rgb(6, 182, 212)', // cyan-500
 			bg: 'rgba(6, 182, 212, 0.1)'
 		},
 		stakeholder: {
-			border: 'rgb(34, 211, 238)',        // cyan-400
+			border: 'rgb(34, 211, 238)', // cyan-400
 			bg: 'rgba(34, 211, 238, 0.1)'
 		}
 	},
 	performance: {
 		individual: {
-			border: 'rgb(245, 158, 11)',        // amber-500
+			border: 'rgb(245, 158, 11)', // amber-500
 			bg: 'rgba(245, 158, 11, 0.1)'
 		},
 		stakeholder: {
-			border: 'rgb(251, 191, 36)',        // amber-400
+			border: 'rgb(251, 191, 36)', // amber-400
 			bg: 'rgba(251, 191, 36, 0.1)'
 		}
 	}

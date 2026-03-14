@@ -1,12 +1,12 @@
 /**
  * Sync Prisma Database with Clerk
- * 
+ *
  * This script:
  * 1. Fetches all users from Clerk
  * 2. Removes Prisma users that don't exist in Clerk (orphaned records)
  * 3. Updates Prisma users to match Clerk data (email, name)
  * 4. Reports any mismatches
- * 
+ *
  * Usage:
  *   npx tsx scripts/sync-clerk-db.ts
  */
@@ -21,7 +21,7 @@ function loadEnv() {
 		const envPath = resolve(process.cwd(), '.env');
 		const envContent = readFileSync(envPath, 'utf-8');
 		const lines = envContent.split('\n');
-		
+
 		for (const line of lines) {
 			const trimmed = line.trim();
 			if (trimmed && !trimmed.startsWith('#')) {
@@ -32,7 +32,7 @@ function loadEnv() {
 				}
 			}
 		}
-	} catch (error) {
+	} catch {
 		// .env file might not exist, that's okay - use existing env vars
 	}
 }
@@ -59,7 +59,7 @@ async function syncWithClerk() {
 		const clerkUsersResponse = await fetch('https://api.clerk.com/v1/users?limit=500', {
 			method: 'GET',
 			headers: {
-				'Authorization': `Bearer ${CLERK_SECRET_KEY}`,
+				Authorization: `Bearer ${CLERK_SECRET_KEY}`,
 				'Content-Type': 'application/json'
 			}
 		});
@@ -75,13 +75,13 @@ async function syncWithClerk() {
 		console.log(`   Found ${clerkUsers.length} users in Clerk\n`);
 
 		// Create a map of Clerk user IDs to Clerk user data
-		const clerkUserMap = new Map<string, any>();
-		const clerkEmailMap = new Map<string, any>();
+		const clerkUserMap = new Map<string, unknown>();
+		const clerkEmailMap = new Map<string, unknown>();
 
 		for (const clerkUser of clerkUsers) {
 			const primaryEmail =
 				clerkUser.email_addresses?.find(
-					(email: any) => email.id === clerkUser.primary_email_address_id
+					(email: Record<string, unknown>) => email.id === clerkUser.primary_email_address_id
 				)?.email_address ??
 				clerkUser.email_addresses?.[0]?.email_address ??
 				'';
@@ -118,8 +118,10 @@ async function syncWithClerk() {
 
 				if (!clerkUser) {
 					// Clerk user doesn't exist - this is an orphaned record
-					console.log(`⚠️  Orphaned user found: ${prismaUser.email} (Clerk ID: ${prismaUser.clerkUserId})`);
-					
+					console.log(
+						`⚠️  Orphaned user found: ${prismaUser.email} (Clerk ID: ${prismaUser.clerkUserId})`
+					);
+
 					// Check if user has related data
 					const hasData =
 						prismaUser.objectives.length > 0 ||
@@ -127,7 +129,9 @@ async function syncWithClerk() {
 						prismaUser.coachNotesReceived.length > 0;
 
 					if (hasData) {
-						console.log(`   ⚠️  User has related data. Skipping deletion. Manual cleanup may be needed.`);
+						console.log(
+							`   ⚠️  User has related data. Skipping deletion. Manual cleanup may be needed.`
+						);
 						errors++;
 					} else {
 						console.log(`   🗑️  Deleting orphaned user...`);
@@ -135,8 +139,8 @@ async function syncWithClerk() {
 							await prisma.user.delete({ where: { id: prismaUser.id } });
 							deleted++;
 							console.log(`   ✅ Deleted`);
-						} catch (error: any) {
-							console.error(`   ❌ Failed to delete: ${error.message}`);
+						} catch (error: unknown) {
+							console.error(`   ❌ Failed to delete: ${(error as Error).message}`);
 							errors++;
 						}
 					}
@@ -146,8 +150,7 @@ async function syncWithClerk() {
 						[clerkUser.first_name, clerkUser.last_name].filter(Boolean).join(' ') || null;
 					const email = clerkUser.primaryEmail.toLowerCase();
 
-					const needsUpdate =
-						prismaUser.email !== email || prismaUser.name !== fullName;
+					const needsUpdate = prismaUser.email !== email || prismaUser.name !== fullName;
 
 					if (needsUpdate) {
 						console.log(`🔄 Updating user: ${prismaUser.email}`);
@@ -161,8 +164,8 @@ async function syncWithClerk() {
 							});
 							updated++;
 							console.log(`   ✅ Updated to: ${email}`);
-						} catch (error: any) {
-							console.error(`   ❌ Failed to update: ${error.message}`);
+						} catch (error: unknown) {
+							console.error(`   ❌ Failed to update: ${(error as Error).message}`);
 							errors++;
 						}
 					}
@@ -179,15 +182,15 @@ async function syncWithClerk() {
 							where: { id: prismaUser.id },
 							data: {
 								clerkUserId: clerkUser.id,
-								name: [clerkUser.first_name, clerkUser.last_name]
-									.filter(Boolean)
-									.join(' ') || prismaUser.name
+								name:
+									[clerkUser.first_name, clerkUser.last_name].filter(Boolean).join(' ') ||
+									prismaUser.name
 							}
 						});
 						updated++;
 						console.log(`   ✅ Linked`);
-					} catch (error: any) {
-						console.error(`   ❌ Failed to link: ${error.message}`);
+					} catch (error: unknown) {
+						console.error(`   ❌ Failed to link: ${(error as Error).message}`);
 						errors++;
 					}
 				} else {
@@ -209,8 +212,8 @@ async function syncWithClerk() {
 		} else {
 			console.log('\n⚠️  Sync completed with errors. Review the output above.');
 		}
-	} catch (error: any) {
-		console.error('❌ Error syncing with Clerk:', error.message);
+	} catch (error: unknown) {
+		console.error('❌ Error syncing with Clerk:', (error as Error).message);
 		throw error;
 	} finally {
 		await prisma.$disconnect();
@@ -221,4 +224,3 @@ syncWithClerk().catch((error) => {
 	console.error(error);
 	process.exit(1);
 });
-

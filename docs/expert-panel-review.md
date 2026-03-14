@@ -1,19 +1,20 @@
 # FORBETRA Expert Panel Review
+
 ### Comprehensive Product Audit — February 2026
 
-*A multi-perspective review from a simulated UX panel and executive coaching advisory group, based on a complete codebase analysis of every route, component, data model, AI prompt, and user flow.*
+_A multi-perspective review from a simulated UX panel and executive coaching advisory group, based on a complete codebase analysis of every route, component, data model, AI prompt, and user flow._
 
 ---
 
 ## THE PANEL
 
-| Reviewer | Perspective | Focus Areas |
-|----------|------------|-------------|
-| **Sarah Chen** | VP Product Design (UX) | Onboarding, information architecture, visual consistency, mobile |
-| **Dr. James Rodriguez** | ICF Master Certified Coach | Coach experience, coaching workflow, session preparation |
-| **Dr. Priya Patel** | Leadership Development Consultant | Stakeholder feedback loops, 360 methodology, enterprise readiness |
-| **Michael Torres** | Product Strategist (ex-BetterUp) | Competitive positioning, retention mechanics, growth loops |
-| **Dr. Emily Watkins** | Behavioral Psychologist / Data Scientist | Measurement validity, AI insight quality, behavioral nudges |
+| Reviewer                | Perspective                              | Focus Areas                                                       |
+| ----------------------- | ---------------------------------------- | ----------------------------------------------------------------- |
+| **Sarah Chen**          | VP Product Design (UX)                   | Onboarding, information architecture, visual consistency, mobile  |
+| **Dr. James Rodriguez** | ICF Master Certified Coach               | Coach experience, coaching workflow, session preparation          |
+| **Dr. Priya Patel**     | Leadership Development Consultant        | Stakeholder feedback loops, 360 methodology, enterprise readiness |
+| **Michael Torres**      | Product Strategist (ex-BetterUp)         | Competitive positioning, retention mechanics, growth loops        |
+| **Dr. Emily Watkins**   | Behavioral Psychologist / Data Scientist | Measurement validity, AI insight quality, behavioral nudges       |
 
 ---
 
@@ -38,17 +39,20 @@ Forbetra is a **genuinely innovative real-time 360 coaching platform** that does
 ### 1.1 Landing Page — Grade: B+
 
 **Strengths:**
+
 - Clean split-panel design with subtle gradient animations
 - Value props are clear: objectives, reflections, stakeholder feedback
 - "Human. Data. Better." tagline is memorable
 
 **Issues:**
+
 - No social proof — no logos, testimonials, or user counts
 - No product screenshots or demo video — users commit to sign-up without seeing what they're getting
 - "Terms of Use" link goes to `/terms` which likely doesn't exist
 - The signed-in home page is a routing hub, not a destination — INDIVIDUAL users immediately redirect to `/individual`, which is correct, but STAKEHOLDER users see "Stay tuned" with nothing to do
 
 **Recommendations:**
+
 - Add a product tour / demo walkthrough before sign-up
 - Add at minimum 3 coach/enterprise testimonials
 - Build a proper signed-in home for stakeholders showing their pending feedback requests
@@ -56,6 +60,7 @@ Forbetra is a **genuinely innovative real-time 360 coaching platform** that does
 ### 1.2 Onboarding Flow — Grade: B
 
 **Strengths:**
+
 - The 5-step wizard (Welcome → Context/Objective → Subgoals → Cycle Config → Stakeholders) is well-structured
 - Template library with pre-built objectives is excellent — reduces blank-page anxiety
 - Cycle configuration preview ("Your Week") showing the exact weekly rhythm is brilliant
@@ -74,6 +79,7 @@ Forbetra is a **genuinely innovative real-time 360 coaching platform** that does
 5. **Initial ratings default to 5/10.** This anchoring bias means most users will submit near-middle scores rather than reflecting on their actual starting point. Defaulting to "no selection" would produce more honest baselines.
 
 **Recommendations:**
+
 - Implement draft persistence (localStorage or server-side) with resume capability
 - Make the progress bar clickable for direct navigation
 - Remove default score selection on initial ratings — require deliberate choice
@@ -85,6 +91,7 @@ Forbetra is a **genuinely innovative real-time 360 coaching platform** that does
 **This is the highest-priority redesign target.**
 
 **Strengths:**
+
 - The "Next Action" banner directing users to their current check-in is well-designed
 - Quick Insights (pattern-based observations) add real value
 - The scorecard with per-stakeholder gap visualization is genuinely innovative
@@ -103,6 +110,7 @@ Forbetra is a **genuinely innovative real-time 360 coaching platform** that does
 5. **~1000-line server load function.** The page makes many sequential database queries and in-memory aggregations. This will get slower as data accumulates and is a maintainability concern.
 
 **Recommendations:**
+
 - **Restructure into 3 progressive views:**
   - **"Today" view** (default): Next action, this week's scores vs last week, one quick insight. Clean, focused, actionable.
   - **"Progress" view**: Charts, heat maps, metrics, trends. For weekly review sessions.
@@ -114,6 +122,7 @@ Forbetra is a **genuinely innovative real-time 360 coaching platform** that does
 ### 1.4 Reflection / Check-in Experience — Grade: B+
 
 **Strengths:**
+
 - The 11-button score grid with color-coded selection and dynamic label pills is well-crafted
 - Score labels ("Rarely intentional" → "Relentless commitment" for effort) add psychological meaning beyond numbers
 - 48-hour catch-up window for missed check-ins is user-friendly
@@ -128,6 +137,7 @@ Forbetra is a **genuinely innovative real-time 360 coaching platform** that does
 3. **No reflection history.** Users can't scroll through past weeks' intentions or check-ins from a single view. They can only see the current week.
 
 **Recommendations:**
+
 - Remove or redirect the legacy `/reflections/[type]` route
 - Add a "Reflection History" view showing all past weeks' entries in a scrollable timeline
 - Clarify view-only vs. editable states with distinct visual treatments (disabled form vs. editable form)
@@ -135,23 +145,27 @@ Forbetra is a **genuinely innovative real-time 360 coaching platform** that does
 ### 1.5 Monday Intention Prompts — Grade: A-
 
 **Strengths:**
+
 - The 12-week rotating prompt sequence is psychologically sophisticated (Identity → Momentum → Stakeholder Alignment → Energy → Skill → Obstacles → Feedback → Well-being → Stretch → Systems → Storytelling → Integration)
 - Week 1 "Identity Anchor" gets special treatment with educational content about identity-based goals — this is excellent
 - Coach notes integration (showing coach's notes for this week) creates a connected experience
 - Character count guidance with encouraging feedback ("Great start! Keep going...") uses progressive encouragement well
 
 **Issues:**
+
 - No prompt history view — users can't see what they wrote in previous weeks
 - No locking mechanism on intentions (unlike check-ins)
 - The identity anchor check uses a hardcoded string comparison (`data.prompt.heading === 'Identity anchor'`) which is fragile
 
 **Recommendations:**
+
 - Add a "Past Intentions" sidebar or accordion showing previous weeks' entries
 - Consider letting coaches customize or add supplementary prompts per client
 
 ### 1.6 Visual Consistency — Grade: C+
 
 The app has three distinct visual eras:
+
 1. **Onboarding flow** (steps 1-5): Rich gradients, animations, modern card design
 2. **Individual hub / dashboard**: Dense, data-heavy, well-designed but overwhelming
 3. **Onboarding complete page + legacy reflection route**: Plain white cards, minimal styling, feels unfinished
@@ -159,6 +173,7 @@ The app has three distinct visual eras:
 The stakeholder feedback form is the most polished page (draft auto-save, reveal animation, welcome overlay). The onboarding complete page is the least polished.
 
 **Recommendations:**
+
 - Establish a design system document with consistent card styles, spacing, color usage
 - Bring the complete page up to the same visual quality as the onboarding wizard
 - Audit all pages for consistent use of gradients, shadows, and animations
@@ -170,6 +185,7 @@ The stakeholder feedback form is the most polished page (draft auto-save, reveal
 ### 2.1 Coach Hub & Roster — Grade: B
 
 **Strengths:**
+
 - Alert-driven dashboard surfaces the clients who need attention first
 - Stability score and alignment ratio give coaches at-a-glance portfolio health
 - Roster page provides deep per-client data: recent scores, stakeholder feedback, trend lines
@@ -210,17 +226,20 @@ The stakeholder feedback form is the most polished page (draft auto-save, reveal
 ### 2.2 Coach Onboarding & Invitation Flow — Grade: B-
 
 **Strengths:**
+
 - Email invitation with personal message from coach is professional
 - Auto-linking when invited individual signs up is seamless
 - Coach invite tokens expire in 14 days (reasonable)
 
 **Issues:**
+
 - No coach onboarding experience — coaches are assigned the COACH role and dropped into the dashboard with no orientation
 - No ability for coaches to set up their own profile, preferences, or coaching methodology
 - Coaches can't see a prospective client's objectives before the client completes onboarding
 - No way for a coach to suggest an objective template to a client during the invitation
 
 **Recommendations:**
+
 - Build a coach onboarding wizard: profile setup, methodology selection (directive/non-directive/hybrid), alert preferences, session cadence
 - Let coaches attach suggested objective templates to invitations
 - Add a "Pending Clients" view showing invited-but-not-yet-onboarded individuals
@@ -230,6 +249,7 @@ The stakeholder feedback form is the most polished page (draft auto-save, reveal
 **Current state:** A single page showing aggregated metrics (total alerts, avg stability, avg alignment, avg effort/performance) across the entire roster.
 
 **What's missing:**
+
 - No per-client comparison view (who is improving fastest? who needs the most attention?)
 - No time-series analytics (how has portfolio health changed over time?)
 - No outcome tracking (how many clients completed cycles? what was the average improvement?)
@@ -237,6 +257,7 @@ The stakeholder feedback form is the most polished page (draft auto-save, reveal
 - No export capability (PDF report for supervisor/organization)
 
 **Recommendations:**
+
 - Build a **Portfolio Overview** with sortable client comparison (stability, trajectory, completion, alignment)
 - Add **Time-Series Dashboard** showing coach portfolio health over weeks/months
 - Add **Outcome Reporting** for completed cycles (before/after scores, trajectory, stakeholder alignment improvement)
@@ -249,6 +270,7 @@ The stakeholder feedback form is the most polished page (draft auto-save, reveal
 ### 3.1 Stakeholder Feedback Design — Grade: B+
 
 **Strengths:**
+
 - The two-dimension model (effort + performance) is clean and easy for stakeholders to understand
 - Token-based access with no authentication required removes friction beautifully
 - The "Reveal" feature (showing self vs. stakeholder scores after submission) is a clever engagement hook
@@ -290,12 +312,14 @@ The stakeholder feedback form is the most polished page (draft auto-save, reveal
 ### 3.2 360 Data Quality — Grade: B-
 
 **Issues:**
+
 - **No outlier detection.** If a stakeholder submits 1/10 when all others submit 8/10, the average is pulled down dramatically with no flagging.
 - **No response rate tracking at the stakeholder level.** The system knows how many responded this week, but there's no longitudinal "this stakeholder has responded 2 of 8 times" metric.
 - **No rater reliability scoring.** Stakeholders who consistently rate in a narrow range (e.g., always 7-8) provide less signal than those who rate across a wider range.
 - **Effort and Performance are self-defined.** Different stakeholders may interpret "effort" differently — one might mean "visible work hours" while another means "intentional focus on the objective." There's no calibration or definition guidance specific to the objective.
 
 **Recommendations:**
+
 - Add per-stakeholder response rate tracking and surface it to both coaches and individuals
 - Implement statistical outlier detection (>2 SD from stakeholder mean) with flagging for coach review
 - Add objective-specific behavioral anchors for the effort and performance scales (not just generic labels)
@@ -319,13 +343,13 @@ For this to be adopted by organizations (the highest-value market segment), Forb
 
 ### 4.1 What Forbetra Does Better Than Competitors
 
-| Competitor | What They Do | Where Forbetra Wins |
-|-----------|-------------|---------------------|
-| **BetterUp** | 1:1 coaching marketplace | Forbetra's continuous data loop (weekly reflections + stakeholder feedback) gives coaches real data, not just self-report in sessions |
-| **15Five** | Performance management + check-ins | Forbetra's stakeholder feedback and perception gap analysis are unique; 15Five is manager-down, not 360 |
-| **CoachHub** | Digital coaching platform | Forbetra's AI-generated Coach Prep with stakeholder gap data is a true differentiator |
-| **Culture Amp** | Engagement surveys + 360s | Forbetra runs 360 feedback continuously, not annually/quarterly — the data is always current |
-| **Hogan / CCL 360s** | Traditional 360 assessments | Forbetra is real-time and developmental, not point-in-time and evaluative |
+| Competitor           | What They Do                       | Where Forbetra Wins                                                                                                                   |
+| -------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| **BetterUp**         | 1:1 coaching marketplace           | Forbetra's continuous data loop (weekly reflections + stakeholder feedback) gives coaches real data, not just self-report in sessions |
+| **15Five**           | Performance management + check-ins | Forbetra's stakeholder feedback and perception gap analysis are unique; 15Five is manager-down, not 360                               |
+| **CoachHub**         | Digital coaching platform          | Forbetra's AI-generated Coach Prep with stakeholder gap data is a true differentiator                                                 |
+| **Culture Amp**      | Engagement surveys + 360s          | Forbetra runs 360 feedback continuously, not annually/quarterly — the data is always current                                          |
+| **Hogan / CCL 360s** | Traditional 360 assessments        | Forbetra is real-time and developmental, not point-in-time and evaluative                                                             |
 
 **Forbetra's core differentiator: The only platform that combines continuous self-reflection, real-time stakeholder feedback, and AI coaching intelligence in a single loop.** This is genuinely unique.
 
@@ -366,6 +390,7 @@ For this to be adopted by organizations (the highest-value market segment), Forb
 ### 4.3 Growth Loops — Grade: D
 
 The product has no viral mechanics:
+
 - Stakeholders don't become users (they provide feedback via token and leave)
 - Coaches don't invite other coaches
 - No referral mechanism
@@ -373,6 +398,7 @@ The product has no viral mechanics:
 - No content marketing engine (blog, templates, benchmarks)
 
 **Recommendations:**
+
 - **Stakeholder → User conversion:** After a stakeholder submits 3+ feedbacks, prompt them: "Want to start your own development journey? Your coach [name] can set you up."
 - **Coach referral program:** "Invite a fellow coach to Forbetra" with incentive (free months, premium features)
 - **Shareable Cycle Reports:** Let users generate a shareable (anonymized) summary of their growth journey for LinkedIn or internal comms
@@ -385,6 +411,7 @@ The product has no viral mechanics:
 ### 5.1 Measurement Model — Grade: B+
 
 **Strengths:**
+
 - The two-axis model (effort + performance) is grounded in deliberate practice research and captures a meaningful distinction
 - Weekly cadence matches the optimal frequency for behavioral reflection (not so frequent it becomes mindless, not so infrequent it loses immediacy)
 - The 0-10 scale with behavioral anchors ("Rarely intentional" to "Relentless commitment") provides just enough granularity
@@ -394,13 +421,14 @@ The product has no viral mechanics:
 
 1. **No reliability assessment.** There's no test-retest or internal consistency check. Users might rate effort as 7 one week and 5 the next for the same level of effort, simply due to mood or framing effects.
 
-2. **The stability metric penalizes legitimate change.** Stability = 100 - (stdDev * 10). If a user genuinely improves from 4 to 8 over 4 weeks, their stability score drops. But this is a good thing — they're growing. Consider renaming this "Consistency" and adding a separate "Growth" metric.
+2. **The stability metric penalizes legitimate change.** Stability = 100 - (stdDev \* 10). If a user genuinely improves from 4 to 8 over 4 weeks, their stability score drops. But this is a good thing — they're growing. Consider renaming this "Consistency" and adding a separate "Growth" metric.
 
 3. **Subgoals are underutilized.** The onboarding collects 3+ subgoals with detailed descriptions, but check-ins measure only at the objective level (one effort + one performance score). Subgoals are listed as "behavioral indicators" but never independently rated in the primary flow. The per-subgoal `/reflections/[type]` route exists but appears orphaned.
 
 4. **No construct validation.** "Effort" and "performance" are defined by generic labels. Research on coaching outcomes uses validated constructs (Leadership Practices Inventory, Multifactor Leadership Questionnaire). Consider mapping to established frameworks.
 
 **Recommendations:**
+
 - Rename "Stability" to "Consistency" to avoid penalizing growth
 - Add a "Growth" metric: the absolute change from baseline (week 0) to current
 - Either fully implement per-subgoal tracking or remove subgoals from measurement (keep them as guidance only)
@@ -409,6 +437,7 @@ The product has no viral mechanics:
 ### 5.2 AI Insight Quality — Grade: B+
 
 **Strengths:**
+
 - The system prompt is well-crafted with specific principles: be specific, reference scores, name gaps, ground in performance psychology
 - Four distinct insight types (CHECK_IN, WEEKLY_SYNTHESIS, COACH_PREP, CYCLE_REPORT) serve different needs at different times
 - COACH_PREP is the standout — it includes stability scores, gap trends, alerts, and suggested conversation starters. This is genuinely useful coaching intelligence.
@@ -446,6 +475,7 @@ The product has no viral mechanics:
 ### 5.3 Behavioral Nudge System — Grade: C+
 
 **Current nudges:**
+
 - Email reminders at 9am (base check-in) and 2pm (overdue)
 - Weekly intention prompts with rotating psychological themes
 - Stakeholder feedback reminders (biweekly cadence option)
@@ -462,6 +492,7 @@ The product has no viral mechanics:
 4. **No social proof.** "3 of your 4 stakeholders have already provided feedback this week" would significantly boost the 4th stakeholder's response rate.
 
 **Recommendations:**
+
 - Use streak data in reminder emails: "You've been consistent for 5 weeks — keep it going!"
 - Send "feedback received" notifications immediately (not batched)
 - Implement adaptive email frequency based on user behavior
@@ -474,6 +505,7 @@ The product has no viral mechanics:
 ### 6.1 Code Duplication — Severity: High
 
 The functions `computeWeekNumber()`, `stdDev()`, `getDateForWeekday()`, streak calculations, and metric computation are **independently defined** in:
+
 - `src/routes/individual/+page.server.ts`
 - `src/routes/individual/dashboard/+page.server.ts`
 - `src/routes/individual/insights/+page.server.ts`
@@ -508,48 +540,48 @@ The functions `computeWeekNumber()`, `stdDev()`, `getDateForWeekday()`, streak c
 
 ### Tier 1: Ship-Blocking (Do Before Any New Users)
 
-| # | Recommendation | Impact | Effort |
-|---|---------------|--------|--------|
-| 1 | **Fix "Make Changes" / post-onboarding editing** — let users edit objectives, subgoals, cycle dates | Critical | Medium |
-| 2 | **Build "Start New Cycle" flow** — continue same objective with fresh dates | Critical | Medium |
-| 3 | **Fix token expiration inconsistency** (7 vs 10 days) | Bug fix | Low |
-| 4 | **Remove/redirect orphaned `/reflections/[type]` route** | Bug fix | Low |
-| 5 | **Extract duplicate server-side utilities** into shared module | Tech debt | Medium |
+| #   | Recommendation                                                                                      | Impact    | Effort |
+| --- | --------------------------------------------------------------------------------------------------- | --------- | ------ |
+| 1   | **Fix "Make Changes" / post-onboarding editing** — let users edit objectives, subgoals, cycle dates | Critical  | Medium |
+| 2   | **Build "Start New Cycle" flow** — continue same objective with fresh dates                         | Critical  | Medium |
+| 3   | **Fix token expiration inconsistency** (7 vs 10 days)                                               | Bug fix   | Low    |
+| 4   | **Remove/redirect orphaned `/reflections/[type]` route**                                            | Bug fix   | Low    |
+| 5   | **Extract duplicate server-side utilities** into shared module                                      | Tech debt | Medium |
 
 ### Tier 2: Competitive Differentiation (Next 4-6 Weeks)
 
-| # | Recommendation | Impact | Effort |
-|---|---------------|--------|--------|
-| 6 | **Restructure Individual Hub** into Today/Progress/Scorecard views | High | High |
-| 7 | **Add streaming to AI insights** | High | Low |
-| 8 | **Build Coach Session View** (client deep-dive with prep + notes + data) | High | Medium |
-| 9 | **On-demand Coach Prep** generation (not just Monday morning) | High | Low |
-| 10 | **Add in-app notifications** (toast system for insights, feedback, coach notes) | High | Medium |
-| 11 | **Make Reveal opt-in** for participants (don't auto-show self-scores to stakeholders) | Medium | Low |
-| 12 | **Add milestone celebrations** and streak-based email nudges | Medium | Low |
+| #   | Recommendation                                                                        | Impact | Effort |
+| --- | ------------------------------------------------------------------------------------- | ------ | ------ |
+| 6   | **Restructure Individual Hub** into Today/Progress/Scorecard views                    | High   | High   |
+| 7   | **Add streaming to AI insights**                                                      | High   | Low    |
+| 8   | **Build Coach Session View** (client deep-dive with prep + notes + data)              | High   | Medium |
+| 9   | **On-demand Coach Prep** generation (not just Monday morning)                         | High   | Low    |
+| 10  | **Add in-app notifications** (toast system for insights, feedback, coach notes)       | High   | Medium |
+| 11  | **Make Reveal opt-in** for participants (don't auto-show self-scores to stakeholders) | Medium | Low    |
+| 12  | **Add milestone celebrations** and streak-based email nudges                          | Medium | Low    |
 
 ### Tier 3: Best-in-Class (Next 2-3 Months)
 
-| # | Recommendation | Impact | Effort |
-|---|---------------|--------|--------|
-| 13 | **"Ask About Your Data" AI chat** | Transformative | High |
-| 14 | **Stakeholder Engagement Loop** (thank-you, impact summaries) | High | Medium |
-| 15 | **Coach Analytics Dashboard** (portfolio comparison, outcomes, time-series) | High | High |
-| 16 | **SMS reminders** via Twilio (already a dependency) | Medium | Low |
-| 17 | **Structured stakeholder prompts** (specific behavior + suggestion) | Medium | Low |
-| 18 | **Reflection history timeline** (browse past weeks) | Medium | Medium |
-| 19 | **Onboarding save-as-you-go** (draft persistence) | Medium | Medium |
-| 20 | **Organization model** for enterprise readiness | High | Very High |
+| #   | Recommendation                                                              | Impact         | Effort    |
+| --- | --------------------------------------------------------------------------- | -------------- | --------- |
+| 13  | **"Ask About Your Data" AI chat**                                           | Transformative | High      |
+| 14  | **Stakeholder Engagement Loop** (thank-you, impact summaries)               | High           | Medium    |
+| 15  | **Coach Analytics Dashboard** (portfolio comparison, outcomes, time-series) | High           | High      |
+| 16  | **SMS reminders** via Twilio (already a dependency)                         | Medium         | Low       |
+| 17  | **Structured stakeholder prompts** (specific behavior + suggestion)         | Medium         | Low       |
+| 18  | **Reflection history timeline** (browse past weeks)                         | Medium         | Medium    |
+| 19  | **Onboarding save-as-you-go** (draft persistence)                           | Medium         | Medium    |
+| 20  | **Organization model** for enterprise readiness                             | High           | Very High |
 
 ### Tier 4: Market Expansion
 
-| # | Recommendation | Impact | Effort |
-|---|---------------|--------|--------|
-| 21 | Stakeholder → User conversion funnel | Growth | Medium |
-| 22 | Sharable Cycle Reports for LinkedIn | Growth | Medium |
-| 23 | Public objective template library (SEO) | Growth | Low |
-| 24 | Coach referral program | Growth | Medium |
-| 25 | Cohort management + aggregate reporting | Enterprise | High |
+| #   | Recommendation                          | Impact     | Effort |
+| --- | --------------------------------------- | ---------- | ------ |
+| 21  | Stakeholder → User conversion funnel    | Growth     | Medium |
+| 22  | Sharable Cycle Reports for LinkedIn     | Growth     | Medium |
+| 23  | Public objective template library (SEO) | Growth     | Low    |
+| 24  | Coach referral program                  | Growth     | Medium |
+| 25  | Cohort management + aggregate reporting | Enterprise | High   |
 
 ---
 
@@ -558,6 +590,7 @@ The functions `computeWeekNumber()`, `stdDev()`, `getDateForWeekday()`, streak c
 Forbetra has the ingredients to be a category-defining product. The core insight — that real-time, continuous 360 feedback combined with AI coaching intelligence is fundamentally better than periodic surveys and disconnected coaching sessions — is **correct and underserved in the market**.
 
 The platform's strongest assets are:
+
 1. The weekly reflection + stakeholder feedback loop (the product's moat)
 2. The AI Coach Prep system (genuinely useful coaching intelligence)
 3. The perception gap analysis (operationalizes the Johari Window in real-time)
@@ -567,4 +600,4 @@ The work ahead is primarily about **reducing friction, completing workflows, and
 
 ---
 
-*Panel review conducted February 2026. Based on complete codebase analysis of Forbetra v0.0.1.*
+_Panel review conducted February 2026. Based on complete codebase analysis of Forbetra v0.0.1._

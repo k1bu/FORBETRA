@@ -214,10 +214,13 @@ export const actions: Actions = {
 			objectiveTitle: submission.objectiveTitle,
 			objectiveDescription:
 				submission.objectiveDescription.length > 0 ? submission.objectiveDescription : undefined,
-			subgoals: submission.subgoals.map((subgoal) => ({
-				label: subgoal.label,
-				description: subgoal.description.length > 0 ? subgoal.description : undefined
-			})),
+			subgoals:
+				submission.subgoals.length > 0
+					? submission.subgoals.map((subgoal) => ({
+							label: subgoal.label,
+							description: subgoal.description.length > 0 ? subgoal.description : undefined
+						}))
+					: [],
 			stakeholders:
 				submission.stakeholders.length > 0
 					? submission.stakeholders.map((stakeholder) => ({
@@ -228,10 +231,12 @@ export const actions: Actions = {
 						}))
 					: [],
 			cycleLabel: submission.cycleLabel.length > 0 ? submission.cycleLabel : undefined,
-			cycleStartDate: submission.cycleStartDate,
-			cycleDurationWeeks: cycleDurationWeeksValue,
-			checkInFrequency: submission.checkInFrequency,
-			stakeholderCadence: submission.stakeholderCadence
+			cycleStartDate: submission.cycleStartDate || undefined,
+			cycleDurationWeeks: Number.isNaN(cycleDurationWeeksValue)
+				? undefined
+				: cycleDurationWeeksValue,
+			checkInFrequency: submission.checkInFrequency || undefined,
+			stakeholderCadence: submission.stakeholderCadence || undefined
 		});
 
 		if (!parsed.success) {
@@ -395,14 +400,16 @@ export const actions: Actions = {
 						}
 					});
 
-					for (const subgoal of data.subgoals) {
-						await tx.subgoal.create({
-							data: {
-								objectiveId: objective.id,
-								label: subgoal.label,
-								description: subgoal.description ?? null
-							}
-						});
+					if (data.subgoals.length > 0) {
+						for (const subgoal of data.subgoals) {
+							await tx.subgoal.create({
+								data: {
+									objectiveId: objective.id,
+									label: subgoal.label,
+									description: subgoal.description ?? null
+								}
+							});
+						}
 					}
 
 					if (data.stakeholders && data.stakeholders.length > 0) {
@@ -470,7 +477,9 @@ export const actions: Actions = {
 							label:
 								data.cycleLabel && data.cycleLabel.trim().length > 0
 									? data.cycleLabel.trim()
-									: 'Cycle 1',
+									: dbUser.name
+										? `${dbUser.name} — ${data.objectiveTitle}`
+										: data.objectiveTitle,
 							startDate,
 							endDate,
 							status: 'ACTIVE',

@@ -49,17 +49,20 @@ export const sendStakeholderImpactSummaries = async () => {
 	}
 
 	// Group by stakeholder + individual pair
-	const grouped = new Map<string, {
-		stakeholderName: string;
-		stakeholderEmail: string;
-		stakeholderPhone: string | null;
-		individualName: string;
-		feedbacks: Array<{
-			weekNumber: number;
-			effortScore: number | null;
-			performanceScore: number | null;
-		}>;
-	}>();
+	const grouped = new Map<
+		string,
+		{
+			stakeholderName: string;
+			stakeholderEmail: string;
+			stakeholderPhone: string | null;
+			individualName: string;
+			feedbacks: Array<{
+				weekNumber: number;
+				effortScore: number | null;
+				performanceScore: number | null;
+			}>;
+		}
+	>();
 
 	for (const fb of recentFeedbacks) {
 		if (!fb.stakeholder || !fb.reflection) continue;
@@ -93,7 +96,9 @@ export const sendStakeholderImpactSummaries = async () => {
 		// Compute trend from sorted feedbacks
 		const sorted = [...feedbacks].sort((a, b) => a.weekNumber - b.weekNumber);
 		const effortScores = sorted.map((f) => f.effortScore).filter((s): s is number => s !== null);
-		const performanceScores = sorted.map((f) => f.performanceScore).filter((s): s is number => s !== null);
+		const performanceScores = sorted
+			.map((f) => f.performanceScore)
+			.filter((s): s is number => s !== null);
 
 		const computeTrend = (scores: number[]): 'up' | 'down' | 'stable' => {
 			if (scores.length < 2) return 'stable';

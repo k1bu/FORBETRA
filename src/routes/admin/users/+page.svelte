@@ -24,10 +24,7 @@
 			if (roleFilter !== 'ALL' && user.role !== roleFilter) return false;
 			if (!searchTerm) return true;
 			const q = searchTerm.toLowerCase();
-			return (
-				(user.name ?? '').toLowerCase().includes(q) ||
-				user.email.toLowerCase().includes(q)
-			);
+			return (user.name ?? '').toLowerCase().includes(q) || user.email.toLowerCase().includes(q);
 		})
 	);
 </script>
@@ -43,7 +40,9 @@
 	</header>
 
 	{#if form?.error}
-		<div class="rounded border border-border-default bg-error-muted p-3 text-sm text-error">{form.error}</div>
+		<div class="rounded border border-border-default bg-error-muted p-3 text-sm text-error">
+			{form.error}
+		</div>
 	{:else if form?.success}
 		<div class="rounded border border-border-default bg-success-muted p-3 text-sm text-success">
 			{form.message ?? 'Action completed successfully.'}
@@ -55,7 +54,7 @@
 		<input
 			type="search"
 			placeholder="Search by name or email..."
-			class="rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
+			class="rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
 			bind:value={searchTerm}
 		/>
 		<select
@@ -70,36 +69,57 @@
 		<span class="text-xs text-text-tertiary">{filteredUsers.length} shown</span>
 	</div>
 
+	<!-- eslint-disable svelte/no-navigation-without-resolve -->
 	<!-- Mobile: Card layout (below sm) -->
 	<div class="space-y-3 sm:hidden">
 		{#each filteredUsers as user (user.id)}
 			<div class="rounded-lg border border-border-default bg-surface-raised p-4">
 				<div class="mb-2 flex items-start justify-between gap-2">
 					<div class="min-w-0">
-						<a href="/admin/users/{user.id}" class="font-medium text-text-primary hover:text-accent hover:underline">
+						<a
+							href="/admin/users/{user.id}"
+							class="font-medium text-text-primary hover:text-accent hover:underline"
+						>
 							{user.name ?? 'Unnamed user'}
 						</a>
 						<p class="truncate text-xs text-text-tertiary">{user.email}</p>
 					</div>
-					<span class="shrink-0 rounded bg-surface-subtle px-2 py-1 text-xs font-semibold text-text-secondary uppercase">
+					<span
+						class="shrink-0 rounded bg-surface-subtle px-2 py-1 text-xs font-semibold text-text-secondary uppercase"
+					>
 						{user.role}
 					</span>
 				</div>
 				<p class="mb-3 text-xs text-text-tertiary">
-					Created {new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(new Date(user.createdAt))}
+					Created {new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(
+						new Date(user.createdAt)
+					)}
 				</p>
 				<div class="flex flex-wrap items-center gap-2">
-					<a href="/admin/users/{user.id}" class="rounded border border-border-default px-3 py-1 text-xs font-medium text-accent hover:bg-accent-muted">Details</a>
-					<button onclick={() => viewAsUser(user.id)} class="rounded border border-border-default px-3 py-1 text-xs font-medium text-warning hover:bg-warning-muted">View as</button>
+					<a
+						href="/admin/users/{user.id}"
+						class="rounded border border-border-default px-3 py-1 text-xs font-medium text-accent hover:bg-accent-muted"
+						>Details</a
+					>
+					<button
+						onclick={() => viewAsUser(user.id)}
+						class="rounded border border-border-default px-3 py-1 text-xs font-medium text-warning hover:bg-warning-muted"
+						>View as</button
+					>
 					<form method="post" class="inline">
 						<input type="hidden" name="intent" value="update" />
 						<input type="hidden" name="userId" value={user.id} />
-						<select name="role" class="rounded border border-border-default bg-surface-raised px-2 py-1 text-xs text-text-primary">
+						<select
+							name="role"
+							class="rounded border border-border-default bg-surface-raised px-2 py-1 text-xs text-text-primary"
+						>
 							{#each data.roles as role (role)}
 								<option value={role} selected={user.role === role}>{role}</option>
 							{/each}
 						</select>
-						<button type="submit" class="rounded bg-accent px-2 py-1 text-xs font-medium text-white">Update</button>
+						<button type="submit" class="rounded bg-accent px-2 py-1 text-xs font-medium text-white"
+							>Update</button
+						>
 					</form>
 					<form method="post" class="inline">
 						<input type="hidden" name="intent" value="delete" />
@@ -107,8 +127,13 @@
 						<button
 							type="submit"
 							class="rounded border border-border-default px-3 py-1 text-xs font-medium text-error hover:bg-error-muted"
-							onclick={(event) => { if (!confirm(`Delete ${user.email}? This will remove their account and related data.`)) event.preventDefault(); }}
-						>Delete</button>
+							onclick={(event) => {
+								if (
+									!confirm(`Delete ${user.email}? This will remove their account and related data.`)
+								)
+									event.preventDefault();
+							}}>Delete</button
+						>
 					</form>
 				</div>
 			</div>
@@ -116,7 +141,9 @@
 	</div>
 
 	<!-- Desktop: Table layout (sm and above) -->
-	<div class="hidden overflow-hidden rounded-lg border border-border-default bg-surface-raised sm:block">
+	<div
+		class="hidden overflow-hidden rounded-lg border border-border-default bg-surface-raised sm:block"
+	>
 		<table class="min-w-full divide-y divide-border-default text-sm">
 			<thead
 				class="bg-surface-subtle text-left text-xs font-semibold tracking-wide text-text-tertiary uppercase"
@@ -132,7 +159,10 @@
 				{#each filteredUsers as user (user.id)}
 					<tr class="align-top">
 						<td class="px-4 py-3">
-							<a href="/admin/users/{user.id}" class="font-medium text-text-primary hover:text-accent hover:underline">
+							<a
+								href="/admin/users/{user.id}"
+								class="font-medium text-text-primary hover:text-accent hover:underline"
+							>
 								{user.name ?? 'Unnamed user'}
 							</a>
 							<p class="text-xs text-text-tertiary">
@@ -169,7 +199,10 @@
 								</button>
 							</form>
 							<div class="mt-2 flex gap-2">
-								<a href="/admin/users/{user.id}" class="rounded border border-border-default px-3 py-1 text-xs font-medium text-accent hover:bg-accent-muted">
+								<a
+									href="/admin/users/{user.id}"
+									class="rounded border border-border-default px-3 py-1 text-xs font-medium text-accent hover:bg-accent-muted"
+								>
 									Details
 								</a>
 								<button
@@ -183,7 +216,7 @@
 									<input type="hidden" name="userId" value={user.id} />
 									<button
 										type="submit"
-										class="rounded border border-border-default px-3 py-1 text-xs font-medium uppercase text-error hover:bg-error-muted"
+										class="rounded border border-border-default px-3 py-1 text-xs font-medium text-error uppercase hover:bg-error-muted"
 										onclick={(event) => {
 											if (
 												!confirm(
@@ -204,4 +237,5 @@
 			</tbody>
 		</table>
 	</div>
+	<!-- eslint-enable svelte/no-navigation-without-resolve -->
 </section>

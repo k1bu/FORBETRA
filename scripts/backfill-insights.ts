@@ -24,9 +24,7 @@ async function backfillInsights() {
 	}
 
 	// Dynamic import to get SvelteKit module resolution
-	const { generateWeeklySynthesis } = await import(
-		'../src/lib/server/ai/generateInsight'
-	);
+	const { generateWeeklySynthesis } = await import('../src/lib/server/ai/generateInsight');
 
 	// Find all cycles with reflections
 	const cycles = await prisma.cycle.findMany({
@@ -51,9 +49,7 @@ async function backfillInsights() {
 
 	for (const cycle of cycles) {
 		const existingWeeks = new Set(
-			cycle.insights
-				.filter((i) => i.weekNumber !== null)
-				.map((i) => i.weekNumber!)
+			cycle.insights.filter((i) => i.weekNumber !== null).map((i) => i.weekNumber!)
 		);
 
 		const weekNumbers = [...new Set(cycle.reflections.map((r) => r.weekNumber))].sort(
@@ -77,9 +73,9 @@ async function backfillInsights() {
 					failed++;
 					console.log(`    Failed`);
 				}
-			} catch (error: any) {
+			} catch (error: unknown) {
 				failed++;
-				console.error(`    Error: ${error.message}`);
+				console.error(`    Error: ${(error as Error).message}`);
 			}
 
 			// Small delay between API calls to avoid rate limiting

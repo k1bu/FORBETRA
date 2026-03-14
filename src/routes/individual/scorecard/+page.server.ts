@@ -43,12 +43,17 @@ export const load: PageServerLoad = async (event) => {
 
 	const cycleEnd = cycle.endDate ?? null;
 	const totalWeeks = cycleEnd
-		? Math.max(1, Math.ceil((cycleEnd.getTime() - cycle.startDate.getTime()) / (7 * 24 * 60 * 60 * 1000)))
+		? Math.max(
+				1,
+				Math.ceil((cycleEnd.getTime() - cycle.startDate.getTime()) / (7 * 24 * 60 * 60 * 1000))
+			)
 		: currentWeek;
 
 	// Week navigation via query param
 	const weekParam = event.url.searchParams.get('week');
-	const viewWeek = weekParam ? Math.max(1, Math.min(totalWeeks, parseInt(weekParam, 10) || currentWeek)) : currentWeek;
+	const viewWeek = weekParam
+		? Math.max(1, Math.min(totalWeeks, parseInt(weekParam, 10) || currentWeek))
+		: currentWeek;
 
 	// Build stakeholder name map
 	const stakeholderNameMap = new Map<string, string>();
@@ -72,18 +77,23 @@ export const load: PageServerLoad = async (event) => {
 	});
 
 	// Self scores: average effort/performance for viewWeek
-	const selfReflections = cycle.reflections.filter(r => r.weekNumber === viewWeek);
-	const selfEfforts = selfReflections.map(r => r.effortScore).filter((v): v is number => v !== null);
-	const selfPerfs = selfReflections.map(r => r.performanceScore).filter((v): v is number => v !== null);
-	const avg = (arr: number[]) => arr.length > 0 ? Number((arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1)) : null;
+	const selfReflections = cycle.reflections.filter((r) => r.weekNumber === viewWeek);
+	const selfEfforts = selfReflections
+		.map((r) => r.effortScore)
+		.filter((v): v is number => v !== null);
+	const selfPerfs = selfReflections
+		.map((r) => r.performanceScore)
+		.filter((v): v is number => v !== null);
+	const avg = (arr: number[]) =>
+		arr.length > 0 ? Number((arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1)) : null;
 
 	const myEffort = avg(selfEfforts);
 	const myPerformance = avg(selfPerfs);
 
 	// Self notes for this week
 	const selfNotes = selfReflections
-		.filter(r => r.notes && r.notes.trim().length > 0)
-		.map(r => r.notes!)
+		.filter((r) => r.notes && r.notes.trim().length > 0)
+		.map((r) => r.notes!)
 		.slice(0, 3);
 
 	// Build per-stakeholder scorecard for viewWeek
@@ -103,7 +113,10 @@ export const load: PageServerLoad = async (event) => {
 	const scorecard: ScorecardRow[] = [];
 
 	// Group feedbacks by stakeholder and week
-	const shWeekMap = new Map<string, Map<number, { efforts: number[]; performances: number[]; comments: string[] }>>();
+	const shWeekMap = new Map<
+		string,
+		Map<number, { efforts: number[]; performances: number[]; comments: string[] }>
+	>();
 	for (const fb of allFeedbacks) {
 		if (!fb.reflection) continue;
 		const wk = fb.reflection.weekNumber;
@@ -121,9 +134,9 @@ export const load: PageServerLoad = async (event) => {
 	// Self scores per week (for trend computation)
 	const selfWeekMap = new Map<number, { effort: number | null; performance: number | null }>();
 	for (let wk = 1; wk <= totalWeeks; wk++) {
-		const refs = cycle.reflections.filter(r => r.weekNumber === wk);
-		const effs = refs.map(r => r.effortScore).filter((v): v is number => v !== null);
-		const prfs = refs.map(r => r.performanceScore).filter((v): v is number => v !== null);
+		const refs = cycle.reflections.filter((r) => r.weekNumber === wk);
+		const effs = refs.map((r) => r.effortScore).filter((v): v is number => v !== null);
+		const prfs = refs.map((r) => r.performanceScore).filter((v): v is number => v !== null);
 		selfWeekMap.set(wk, { effort: avg(effs), performance: avg(prfs) });
 	}
 
@@ -157,19 +170,27 @@ export const load: PageServerLoad = async (event) => {
 		const stkPerf = viewData ? avg(viewData.performances) : null;
 		const comment = viewData?.comments[viewData.comments.length - 1] ?? null;
 
-		const effortGap = (myEffort !== null && stkEffort !== null) ? Number((myEffort - stkEffort).toFixed(1)) : null;
-		const perfGap = (myPerformance !== null && stkPerf !== null) ? Number((myPerformance - stkPerf).toFixed(1)) : null;
+		const effortGap =
+			myEffort !== null && stkEffort !== null ? Number((myEffort - stkEffort).toFixed(1)) : null;
+		const perfGap =
+			myPerformance !== null && stkPerf !== null
+				? Number((myPerformance - stkPerf).toFixed(1))
+				: null;
 
-		const effortGapTrend = shWeeks ? computeTrend(
-			shWeeks,
-			(wk) => selfWeekMap.get(wk)?.effort ?? null,
-			(wk, data) => avg(data.efforts)
-		) : null;
-		const performanceGapTrend = shWeeks ? computeTrend(
-			shWeeks,
-			(wk) => selfWeekMap.get(wk)?.performance ?? null,
-			(wk, data) => avg(data.performances)
-		) : null;
+		const effortGapTrend = shWeeks
+			? computeTrend(
+					shWeeks,
+					(wk) => selfWeekMap.get(wk)?.effort ?? null,
+					(wk, data) => avg(data.efforts)
+				)
+			: null;
+		const performanceGapTrend = shWeeks
+			? computeTrend(
+					shWeeks,
+					(wk) => selfWeekMap.get(wk)?.performance ?? null,
+					(wk, data) => avg(data.performances)
+				)
+			: null;
 
 		scorecard.push({
 			stakeholderId: sh.id,

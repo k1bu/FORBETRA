@@ -199,9 +199,9 @@ export function buildClientSummary(
 		const effortAverage =
 			week.effortScores.length > 0
 				? Number(
-						(week.effortScores.reduce((sum, score) => sum + score, 0) / week.effortScores.length).toFixed(
-							1
-						)
+						(
+							week.effortScores.reduce((sum, score) => sum + score, 0) / week.effortScores.length
+						).toFixed(1)
 					)
 				: null;
 		if (effortAverage !== null) effortSeries.push(effortAverage);
@@ -313,9 +313,7 @@ export function buildClientSummary(
 		// Overdue reflections check — respect checkInFrequency
 		const checkInFrequency = cycle.checkInFrequency ?? '3x';
 		const submittedTypes = new Set(
-			cycle.reflections
-				.filter((r) => r.weekNumber === currentWeek)
-				.map((r) => r.reflectionType)
+			cycle.reflections.filter((r) => r.weekNumber === currentWeek).map((r) => r.reflectionType)
 		);
 		const overdueTypes: string[] = [];
 		if (!submittedTypes.has('RATING_A')) overdueTypes.push('Wednesday check-in');
@@ -405,11 +403,20 @@ export function buildClientSummary(
 	const individualWeeklyData = allReflectionWeeks.map((week) => {
 		const effortAverage =
 			week.effortScores.length > 0
-				? Number((week.effortScores.reduce((sum, score) => sum + score, 0) / week.effortScores.length).toFixed(1))
+				? Number(
+						(
+							week.effortScores.reduce((sum, score) => sum + score, 0) / week.effortScores.length
+						).toFixed(1)
+					)
 				: null;
 		const progressAverage =
 			week.performanceScores.length > 0
-				? Number((week.performanceScores.reduce((sum, score) => sum + score, 0) / week.performanceScores.length).toFixed(1))
+				? Number(
+						(
+							week.performanceScores.reduce((sum, score) => sum + score, 0) /
+							week.performanceScores.length
+						).toFixed(1)
+					)
 				: null;
 
 		return {
@@ -500,4 +507,3 @@ export function buildClientSummary(
 			: undefined
 	};
 }
-

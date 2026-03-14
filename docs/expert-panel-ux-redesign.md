@@ -1,6 +1,6 @@
 # Forbetra UX Design Panel: Re-imagining the Experience
 
-*Simulated panel discussion — February 6, 2026*
+_Simulated panel discussion — February 6, 2026_
 
 ---
 
@@ -409,7 +409,7 @@ Implementation: A `BottomNav.svelte` component in the layout, using `$page.url.p
 
 **TOBIAS:** That's a hidden interaction. No one will discover the long-press without onboarding. And if you have to teach the interaction, you've lost the simplicity argument.
 
-*This tension is unresolved and probably needs user testing to settle.*
+_This tension is unresolved and probably needs user testing to settle._
 
 ---
 
@@ -441,7 +441,7 @@ Implementation: A `BottomNav.svelte` component in the layout, using `$page.url.p
 
 **JULIE:** Careful with customization. In my experience, fewer than 15% of users actually customize when given the option, and offering the option creates decision fatigue for the 85% who won't. I'd rather have one really good default that evolves intelligently than a customizable layout that most people never touch.
 
-*This tension resolves toward progressive disclosure with a strong default, but the customization question remains open.*
+_This tension resolves toward progressive disclosure with a strong default, but the customization question remains open._
 
 ---
 

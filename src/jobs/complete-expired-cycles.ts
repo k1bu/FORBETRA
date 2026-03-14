@@ -66,7 +66,10 @@ export async function completeExpiredCycles(): Promise<{
 				try {
 					await generateCycleReport(cycle.userId, cycle.id);
 				} catch (reportError) {
-					console.error(`[cycles:complete] Failed to generate report for cycle ${cycle.id}`, reportError);
+					console.error(
+						`[cycles:complete] Failed to generate report for cycle ${cycle.id}`,
+						reportError
+					);
 					// Don't fail the whole cycle completion if report generation fails
 				}
 			} else {

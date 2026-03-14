@@ -16,7 +16,9 @@
 	} = $props();
 </script>
 
-<div class="flex flex-col items-center justify-center rounded-lg border border-dashed border-border-default bg-surface-raised p-8 text-center">
+<div
+	class="flex flex-col items-center justify-center rounded-lg border border-dashed border-border-default bg-surface-raised p-8 text-center"
+>
 	{#if icon}
 		<div class="mb-3 text-text-muted">{@render icon()}</div>
 	{/if}
@@ -25,11 +27,13 @@
 		<p class="mt-1 max-w-sm text-sm text-text-secondary">{description}</p>
 	{/if}
 	{#if actionLabel && actionHref}
+		<!-- eslint-disable svelte/no-navigation-without-resolve -->
 		<a
 			href={actionHref}
-			class="mt-4 inline-flex items-center rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+			class="mt-4 inline-flex items-center rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-hover focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:outline-none"
 		>
 			{actionLabel}
 		</a>
+		<!-- eslint-enable svelte/no-navigation-without-resolve -->
 	{/if}
 </div>

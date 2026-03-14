@@ -11,12 +11,8 @@
 		TrendingDown,
 		Minus,
 		Lock,
-		Copy,
-		Check,
-		Trophy,
-		Users
+		ChevronDown
 	} from 'lucide-svelte';
-	import EmptyState from '$lib/components/EmptyState.svelte';
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
 
@@ -26,19 +22,9 @@
 	let noteContent = $state('');
 	let noteWeek = $state(data.client.objective?.cycle?.currentWeek?.toString() ?? '');
 	let submittingNote = $state(false);
-	let impactCopied = $state(false);
+	let showChart = $state(false);
 
 	const prepData = $derived(freshPrep ?? data.coachPrep);
-
-	// Tab navigation
-	type SessionTab = 'prep' | 'timeline' | 'notes' | 'chart';
-	let activeTab = $state<SessionTab>('prep');
-	const tabs: { id: SessionTab; label: string; desc: string }[] = [
-		{ id: 'prep', label: 'Prep', desc: 'AI insights & alerts' },
-		{ id: 'timeline', label: 'Timeline', desc: 'Weekly check-ins' },
-		{ id: 'notes', label: 'Notes', desc: 'Your observations' },
-		{ id: 'chart', label: 'Chart', desc: 'Trends over time' }
-	];
 
 	const formatDate = (value: string | null | undefined) => {
 		if (!value) return '';
@@ -74,7 +60,7 @@
 					content: result.content,
 					createdAt: result.createdAt
 				};
-				addToast('Session prep ready — coaching opportunities surfaced', 'success');
+				addToast('Session prep ready', 'success');
 			} else {
 				prepError = result.error || 'Could not generate insights. Try again in a moment.';
 			}
@@ -85,8 +71,8 @@
 		}
 	}
 
-	// Group reflections by week
-	const reflectionsByWeek = $derived(
+	// Recent weeks: last 3-4 weeks of reflections
+	const recentWeeks = $derived(
 		(() => {
 			// eslint-disable-next-line svelte/prefer-svelte-reactivity
 			const map = new Map<number, typeof data.allReflections>();
@@ -95,54 +81,9 @@
 				if (!map.has(week)) map.set(week, []);
 				map.get(week)!.push(r);
 			}
-			return Array.from(map.entries()).sort(([a], [b]) => b - a);
-		})()
-	);
-
-	// Week summaries with deltas for timeline
-	const weekSummaries = $derived(
-		(() => {
-			const weeks = reflectionsByWeek;
-			const avg = (nums: number[]) =>
-				nums.length > 0
-					? Math.round((nums.reduce((a, b) => a + b, 0) / nums.length) * 10) / 10
-					: null;
-			// eslint-disable-next-line svelte/prefer-svelte-reactivity
-			const result = new Map<
-				number,
-				{
-					avgEffort: number | null;
-					avgPerf: number | null;
-					effortDelta: number | null;
-					perfDelta: number | null;
-				}
-			>();
-			for (let i = 0; i < weeks.length; i++) {
-				const [weekNum, refs] = weeks[i];
-				const avgEffort = avg(
-					refs.map((r) => r.effortScore).filter((s): s is number => s !== null)
-				);
-				const avgPerf = avg(
-					refs.map((r) => r.performanceScore).filter((s): s is number => s !== null)
-				);
-				let effortDelta: number | null = null;
-				let perfDelta: number | null = null;
-				if (i + 1 < weeks.length) {
-					const [, prevRefs] = weeks[i + 1];
-					const prevEffort = avg(
-						prevRefs.map((r) => r.effortScore).filter((s): s is number => s !== null)
-					);
-					const prevPerf = avg(
-						prevRefs.map((r) => r.performanceScore).filter((s): s is number => s !== null)
-					);
-					if (avgEffort !== null && prevEffort !== null)
-						effortDelta = Math.round((avgEffort - prevEffort) * 10) / 10;
-					if (avgPerf !== null && prevPerf !== null)
-						perfDelta = Math.round((avgPerf - prevPerf) * 10) / 10;
-				}
-				result.set(weekNum, { avgEffort, avgPerf, effortDelta, perfDelta });
-			}
-			return result;
+			return Array.from(map.entries())
+				.sort(([a], [b]) => b - a)
+				.slice(0, 4);
 		})()
 	);
 
@@ -151,125 +92,134 @@
 			submittingNote = false;
 		}
 		if (form?.noteSuccess) {
-			const count = data.allCoachNotes.length + 1;
-			const firstName = data.client.name.split(' ')[0];
-			const milestoneMsg =
-				count === 10
-					? `Your 10th note for ${firstName} — you're deeply invested`
-					: count === 25
-						? `25 notes for ${firstName} — rich coaching record`
-						: count === 5
-							? `5 notes for ${firstName} — patterns are forming`
-							: `Note saved — shapes ${firstName}'s next prompt`;
-			addToast(milestoneMsg, 'success');
+			addToast('Note saved', 'success');
 			noteContent = '';
 		}
 	});
 </script>
 
-<svelte:window
-	onkeydown={(e) => {
-		if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-		const idx = parseInt(e.key) - 1;
-		if (idx >= 0 && idx < tabs.length) activeTab = tabs[idx].id;
-	}}
-/>
-
 <svelte:head>
 	<title>Client Session | Forbetra</title>
 </svelte:head>
 
-<section class="mx-auto flex max-w-5xl flex-col gap-6 p-4 pb-12">
+<section class="mx-auto flex max-w-3xl flex-col gap-6 p-4 pb-12">
 	<!-- Header -->
-	<header class="flex flex-wrap items-start justify-between gap-3">
-		<div>
-			<nav aria-label="Breadcrumb" class="mb-2">
-				<ol class="flex items-center gap-1.5 text-sm text-text-tertiary">
-					<!-- eslint-disable svelte/no-navigation-without-resolve -->
-					<li>
-						<a
-							href="/coach"
-							class="rounded transition-colors hover:text-text-primary focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
-							>Coach Hub</a
-						>
-					</li>
-					<li aria-hidden="true" class="text-text-muted">
-						<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-							><path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M9 5l7 7-7 7"
-							/></svg
-						>
-					</li>
-					<li>
-						<a
-							href="/coach/roster"
-							class="rounded transition-colors hover:text-text-primary focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
-							>Roster</a
-						>
-					</li>
-					<!-- eslint-enable svelte/no-navigation-without-resolve -->
-					<li aria-hidden="true" class="text-text-muted">
-						<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-							><path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M9 5l7 7-7 7"
-							/></svg
-						>
-					</li>
-					<li><span class="font-medium text-text-primary">{data.client.name}</span></li>
-				</ol>
-			</nav>
-			<h1 class="text-3xl font-bold text-text-primary">{data.client.name}</h1>
-			<p class="text-sm text-text-secondary">{data.client.email}</p>
-			{#if data.client.objective}
-				<div class="mt-2 flex items-center gap-2">
-					<Target class="h-4 w-4 text-accent" />
-					<span class="text-sm font-medium text-text-secondary">{data.client.objective.title}</span>
-				</div>
-				{#if data.subgoals.length > 0}
-					<div class="mt-1.5 flex flex-wrap gap-1.5 pl-6">
-						{#each data.subgoals as subgoal (subgoal.id)}
-							<span
-								class="rounded-full bg-surface-subtle px-2.5 py-0.5 text-xs text-text-muted"
-								title={subgoal.description ?? subgoal.label}
-							>
-								{subgoal.label}
-							</span>
-						{/each}
+	<header>
+		<nav aria-label="Breadcrumb" class="mb-2">
+			<ol class="flex items-center gap-1.5 text-sm text-text-tertiary">
+				<!-- eslint-disable svelte/no-navigation-without-resolve -->
+				<li>
+					<a
+						href="/coach"
+						class="rounded transition-colors hover:text-text-primary focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
+						>Dashboard</a
+					>
+				</li>
+				<!-- eslint-enable svelte/no-navigation-without-resolve -->
+				<li aria-hidden="true" class="text-text-muted">/</li>
+				<li><span class="font-medium text-text-primary">{data.client.name}</span></li>
+			</ol>
+		</nav>
+		<div class="flex items-start justify-between gap-3">
+			<div>
+				<h1 class="text-2xl font-bold text-text-primary">{data.client.name}</h1>
+				<p class="text-sm text-text-muted">{data.client.email}</p>
+				{#if data.client.objective}
+					<div class="mt-1.5 flex items-center gap-2">
+						<Target class="h-4 w-4 text-accent" />
+						<span class="text-sm text-text-secondary">{data.client.objective.title}</span>
 					</div>
 				{/if}
+			</div>
+			{#if data.client.objective?.cycle}
+				<span class="rounded-full bg-accent-muted px-3 py-1 text-xs font-semibold text-accent">
+					Week {data.client.objective.cycle.currentWeek ?? '—'}
+				</span>
 			{/if}
 		</div>
-		{#if data.client.objective?.cycle}
-			<span class="rounded-full bg-accent-muted px-3 py-1 text-xs font-semibold text-accent">
-				Week {data.client.objective.cycle.currentWeek ?? '—'}
-			</span>
-		{/if}
 	</header>
 
-	<!-- Quick Summary -->
+	<!-- Alerts -->
+	{#if data.alerts.length > 0 || data.client.alerts.length > 0}
+		<div class="space-y-2">
+			{#each data.alerts as alert, i (i)}
+				<div
+					class="flex items-start gap-2 rounded-xl border border-error/30 bg-error-muted px-4 py-3 text-sm text-error"
+				>
+					<AlertTriangle class="mt-0.5 h-4 w-4 shrink-0" />
+					{alert.content}
+				</div>
+			{/each}
+			{#each data.client.alerts as alert, i (i)}
+				<div
+					class="flex items-start gap-2 rounded-xl border border-warning/30 bg-warning-muted px-4 py-3 text-sm {alert.severity ===
+					'high'
+						? 'text-error'
+						: 'text-warning'}"
+				>
+					<AlertTriangle class="mt-0.5 h-4 w-4 shrink-0" />
+					{alert.message}
+				</div>
+			{/each}
+		</div>
+	{/if}
+
+	<!-- 1. AI Prep Summary -->
+	<div class="rounded-xl border border-accent/20 bg-surface-raised p-5">
+		<div class="mb-3 flex items-center justify-between">
+			<div class="flex items-center gap-2">
+				<Sparkles class="h-4 w-4 text-accent" />
+				<h2 class="font-semibold text-text-primary">AI Coaching Insights</h2>
+				{#if prepData}
+					<span class="text-xs text-text-tertiary">{formatRelativeDays(prepData.createdAt)}</span>
+					{#if data.prepFreshness?.isStale}
+						<span
+							class="rounded-full bg-warning/10 px-2 py-0.5 text-[10px] font-medium text-warning"
+						>
+							{data.prepFreshness.newDataSince} new
+						</span>
+					{/if}
+				{/if}
+			</div>
+			<button
+				type="button"
+				disabled={generatingPrep}
+				onclick={generatePrep}
+				class="rounded-lg border border-accent/30 bg-surface-raised px-3 py-1.5 text-xs font-semibold text-accent transition-all hover:border-accent hover:bg-accent-muted disabled:cursor-not-allowed disabled:opacity-50"
+			>
+				{generatingPrep ? 'Generating...' : prepData ? 'Refresh' : 'Generate'}
+			</button>
+		</div>
+		{#if prepError}
+			<div class="flex items-start gap-2 rounded-lg border border-error/20 bg-error/5 px-3 py-2">
+				<p class="flex-1 text-xs text-error">{prepError}</p>
+				<button
+					type="button"
+					onclick={generatePrep}
+					class="shrink-0 text-xs font-semibold text-accent hover:underline">Retry</button
+				>
+			</div>
+		{/if}
+		{#if prepData?.content}
+			<div class="prose prose-sm max-w-none whitespace-pre-line text-text-secondary">
+				{prepData.content}
+			</div>
+		{:else}
+			<p class="text-sm text-text-tertiary">No prep generated yet. Click above to generate.</p>
+		{/if}
+	</div>
+
+	<!-- 2. Recent Scores + Gap Highlights -->
 	{#if data.client.objective?.insights}
 		{@const ins = data.client.objective.insights}
-		{@const cycle = data.client.objective.cycle}
-		<div
-			class="grid grid-cols-2 gap-3 sm:grid-cols-4"
-			role="group"
-			aria-label="Client summary metrics"
-		>
+		<div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
 			<div class="rounded-lg border border-border-default bg-surface-raised px-3 py-2">
 				<p class="text-[10px] font-medium tracking-wider text-text-muted uppercase">Effort</p>
 				<p class="text-lg font-bold text-cyan-400 tabular-nums">{ins.avgEffort ?? '—'}</p>
-				<p class="text-[9px] text-text-muted">Self-reported avg</p>
 			</div>
 			<div class="rounded-lg border border-border-default bg-surface-raised px-3 py-2">
 				<p class="text-[10px] font-medium tracking-wider text-text-muted uppercase">Performance</p>
 				<p class="text-lg font-bold text-amber-400 tabular-nums">{ins.avgProgress ?? '—'}</p>
-				<p class="text-[9px] text-text-muted">Self-reported avg</p>
 			</div>
 			<div class="rounded-lg border border-border-default bg-surface-raised px-3 py-2">
 				<p class="text-[10px] font-medium tracking-wider text-text-muted uppercase">Trajectory</p>
@@ -289,606 +239,227 @@
 						<span class="text-lg font-bold text-text-muted">—</span>
 					{/if}
 				</div>
-				<p class="text-[9px] text-text-muted">Week-over-week trend</p>
 			</div>
 			<div class="rounded-lg border border-border-default bg-surface-raised px-3 py-2">
 				<p class="text-[10px] font-medium tracking-wider text-text-muted uppercase">Completion</p>
 				<p class="text-lg font-bold text-accent tabular-nums">
-					{cycle ? `${Math.round(cycle.completion * 100)}%` : '—'}
+					{data.client.objective.cycle
+						? `${Math.round(data.client.objective.cycle.completion * 100)}%`
+						: '—'}
 				</p>
-				<p class="text-[9px] text-text-muted">Journey progress</p>
 			</div>
 		</div>
 	{/if}
 
-	<!-- Tab Navigation -->
-	<div
-		class="flex gap-1 rounded-xl border border-border-default bg-surface-subtle p-1"
-		role="tablist"
-	>
-		{#each tabs as tab, tabIdx (tab.id)}
-			<button
-				type="button"
-				role="tab"
-				id="tab-{tab.id}"
-				aria-selected={activeTab === tab.id}
-				aria-controls="panel-{tab.id}"
-				title="{tab.desc} (press {tabIdx + 1})"
-				onclick={() => (activeTab = tab.id)}
-				class="flex flex-1 flex-col items-center gap-0.5 rounded-lg px-4 py-2 transition-all {activeTab ===
-				tab.id
-					? 'bg-accent text-white shadow-sm'
-					: 'text-text-tertiary hover:bg-surface-raised hover:text-text-secondary'}"
-			>
-				<span class="text-sm font-semibold">
-					{tab.label}
-					<span class="ml-0.5 hidden text-[9px] font-normal opacity-50 sm:inline">{tabIdx + 1}</span
-					>
-					{#if tab.id === 'prep' && data.alerts.length + data.client.alerts.length > 0}
-						<span class="ml-1 rounded-full bg-warning px-1.5 text-[10px] font-bold text-white"
-							>{data.alerts.length + data.client.alerts.length}</span
-						>
-					{/if}
-					{#if tab.id === 'notes' && data.allCoachNotes.length > 0}
-						<span
-							class="ml-1 text-[10px] font-normal {activeTab === tab.id
-								? 'text-white/70'
-								: 'text-text-muted'}">{data.allCoachNotes.length}</span
-						>
-					{/if}
-				</span>
-				<span
-					class="hidden text-[9px] font-normal sm:block {activeTab === tab.id
-						? 'text-white/70'
-						: 'text-text-muted'}"
-				>
-					{tab.desc}
-				</span>
-			</button>
-		{/each}
-	</div>
-
-	<!-- ═══ TAB: Prep ═══ -->
-	{#if activeTab === 'prep'}
-		<!-- AI Coaching Insights -->
-		<div
-			class="rounded-2xl border border-accent/30 bg-gradient-to-br from-accent/5 to-accent-muted p-6"
-		>
-			<div class="mb-4 flex items-center justify-between">
-				<div class="flex items-center gap-2">
-					<Sparkles class="h-5 w-5 text-accent" />
-					<div>
-						<h2 class="text-lg font-bold text-text-primary">AI Coaching Insights</h2>
-						<p class="text-xs text-text-tertiary">
-							Synthesizes check-ins, notes, and stakeholder feedback to surface coaching
-							opportunities
-						</p>
+	<!-- Recent check-ins (last 3-4 weeks) -->
+	{#if recentWeeks.length > 0}
+		<div class="rounded-xl border border-border-default bg-surface-raised p-5">
+			<h2 class="mb-3 font-semibold text-text-primary">Recent Check-ins</h2>
+			<div class="space-y-3">
+				{#each recentWeeks as [weekNumber, reflections] (weekNumber)}
+					<div class="rounded-lg border border-border-default bg-surface-subtle p-3">
+						<p class="mb-1.5 text-xs font-bold text-text-secondary">Week {weekNumber}</p>
+						<div class="space-y-1.5">
+							{#each reflections as r, i (i)}
+								<div class="flex items-start gap-2 text-xs">
+									<span
+										class="shrink-0 rounded bg-accent-muted px-1.5 py-0.5 text-[10px] font-semibold text-accent"
+									>
+										{r.reflectionType === 'RATING_A' || r.reflectionType === 'RATING_B'
+											? 'Self'
+											: r.reflectionType === 'STAKEHOLDER'
+												? '360'
+												: r.reflectionType}
+									</span>
+									<div class="min-w-0 flex-1">
+										{#if r.effortScore !== null || r.performanceScore !== null}
+											<span class="text-text-secondary">
+												{#if r.effortScore !== null}E: <strong>{r.effortScore}</strong>{/if}
+												{#if r.effortScore !== null && r.performanceScore !== null}
+													·
+												{/if}
+												{#if r.performanceScore !== null}P: <strong>{r.performanceScore}</strong
+													>{/if}
+											</span>
+										{/if}
+										{#if r.notes}
+											<p class="mt-0.5 text-text-muted">{r.notes}</p>
+										{/if}
+									</div>
+									{#if r.submittedAt}
+										<span class="shrink-0 text-[10px] text-text-muted"
+											>{formatDate(r.submittedAt)}</span
+										>
+									{/if}
+								</div>
+							{/each}
+						</div>
 					</div>
-					{#if prepData}
-						<span class="text-xs text-text-tertiary">{formatRelativeDays(prepData.createdAt)}</span>
-						{#if data.prepFreshness?.isStale}
+				{/each}
+			</div>
+		</div>
+	{/if}
+
+	<!-- Rater feedback summary -->
+	{#if data.stakeholderTrends.length > 0}
+		<div class="rounded-xl border border-border-default bg-surface-raised p-5">
+			<h2 class="mb-3 font-semibold text-text-primary">Reviewer Feedback</h2>
+			<div class="grid gap-2 sm:grid-cols-2">
+				{#each data.stakeholderTrends as trend (trend.name)}
+					{@const effortDiff =
+						trend.latestEffort != null && trend.previousEffort != null
+							? trend.latestEffort - trend.previousEffort
+							: null}
+					{@const perfDiff =
+						trend.latestPerformance != null && trend.previousPerformance != null
+							? trend.latestPerformance - trend.previousPerformance
+							: null}
+					<div
+						class="flex items-center justify-between rounded-lg border border-border-default bg-surface-subtle px-3 py-2"
+					>
+						<div>
+							<p class="text-sm font-medium text-text-primary">{trend.name}</p>
+							<div class="flex gap-3 text-xs text-text-muted">
+								{#if trend.latestEffort !== null}
+									<span>E: {trend.latestEffort}</span>
+								{/if}
+								{#if trend.latestPerformance !== null}
+									<span>P: {trend.latestPerformance}</span>
+								{/if}
+							</div>
+						</div>
+						{#if effortDiff !== null || perfDiff !== null}
+							{@const avgDiff =
+								((effortDiff ?? 0) + (perfDiff ?? 0)) /
+								((effortDiff !== null ? 1 : 0) + (perfDiff !== null ? 1 : 0) || 1)}
 							<span
-								class="rounded-full bg-warning/10 px-2 py-0.5 text-[10px] font-semibold text-warning"
+								class="text-xs {avgDiff > 0.5
+									? 'text-success'
+									: avgDiff < -0.5
+										? 'text-error'
+										: 'text-text-muted'}"
 							>
-								{data.prepFreshness.newDataSince} new data point{data.prepFreshness.newDataSince ===
-								1
-									? ''
-									: 's'}
-							</span>
-						{:else if data.prepFreshness}
-							<span
-								class="rounded-full bg-success/10 px-2 py-0.5 text-[10px] font-semibold text-success"
-							>
-								Up to date
+								{#if avgDiff > 0.5}
+									<TrendingUp class="h-3.5 w-3.5" />
+								{:else if avgDiff < -0.5}
+									<TrendingDown class="h-3.5 w-3.5" />
+								{:else}
+									<Minus class="h-3.5 w-3.5" />
+								{/if}
 							</span>
 						{/if}
-					{/if}
-				</div>
-				<button
-					type="button"
-					disabled={generatingPrep}
-					onclick={generatePrep}
-					class="rounded-lg border border-accent/30 bg-surface-raised px-4 py-2 text-xs font-semibold text-accent transition-all hover:border-accent hover:bg-accent-muted disabled:cursor-not-allowed disabled:opacity-50"
-				>
-					{generatingPrep ? 'Generating...' : prepData ? 'Refresh Insights' : 'Generate Insights'}
-				</button>
+					</div>
+				{/each}
 			</div>
-			{#if prepError}
-				<div class="flex items-start gap-2 rounded-lg border border-error/20 bg-error/5 px-3 py-2">
-					<p class="flex-1 text-xs text-error">{prepError}</p>
+		</div>
+	{/if}
+
+	<!-- 3. Coach Notes -->
+	<div class="rounded-xl border border-border-default bg-surface-raised p-5">
+		<div class="mb-3 flex items-baseline justify-between">
+			<h2 class="font-semibold text-text-primary">Coach Notes</h2>
+			<p class="flex items-center gap-1 text-[10px] text-text-muted">
+				<Lock class="h-3 w-3" />
+				Private — shapes AI insights
+			</p>
+		</div>
+
+		<!-- Add note form -->
+		<form
+			method="post"
+			action="?/createNote"
+			class="mb-4 rounded-lg border border-border-default bg-surface-subtle p-3"
+			use:enhance={() => {
+				submittingNote = true;
+				return async ({ update }) => {
+					submittingNote = false;
+					await update();
+				};
+			}}
+		>
+			{#if data.cycleId}
+				<input type="hidden" name="cycleId" value={data.cycleId} />
+			{/if}
+			{#if form?.noteError}
+				<p class="mb-2 text-xs text-error">{form.noteError}</p>
+			{/if}
+			<div class="flex gap-3">
+				<div class="min-w-0 flex-1">
+					<textarea
+						name="content"
+						rows="2"
+						required
+						minlength="10"
+						bind:value={noteContent}
+						class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent/30 focus:outline-none"
+						placeholder="Add a note..."
+					></textarea>
+				</div>
+				<div class="flex shrink-0 flex-col gap-2">
+					<input
+						type="number"
+						name="weekNumber"
+						min="1"
+						max="52"
+						bind:value={noteWeek}
+						class="w-16 rounded-lg border border-border-default bg-surface-raised px-2 py-1 text-center text-xs text-text-primary focus:border-accent focus:outline-none"
+						placeholder="Wk"
+					/>
 					<button
-						type="button"
-						onclick={generatePrep}
-						class="shrink-0 text-xs font-semibold text-accent hover:underline"
+						type="submit"
+						disabled={submittingNote}
+						class="rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white transition-all hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
 					>
-						Retry
+						{submittingNote ? 'Saving...' : 'Save'}
 					</button>
 				</div>
-			{/if}
-			{#if prepData?.content}
-				<div class="prose prose-sm max-w-none whitespace-pre-line text-text-secondary">
-					{prepData.content}
-				</div>
-				<!-- Data provenance — trust cues -->
-				{@const submittedReflections = data.allReflections.filter((r) => r.submittedAt)}
-				{@const stakeholdersWithData = data.stakeholderTrends.filter(
-					(s) => s.latestEffort !== null || s.latestPerformance !== null
-				)}
-				<div
-					class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg border border-border-default bg-surface-subtle px-3 py-2 text-[10px] text-text-muted"
-				>
-					<span class="font-semibold tracking-wide uppercase">Sources analyzed</span>
-					<span
-						>{submittedReflections.length} check-in{submittedReflections.length !== 1
-							? 's'
-							: ''}</span
-					>
-					<span>{data.allCoachNotes.length} note{data.allCoachNotes.length !== 1 ? 's' : ''}</span>
-					<span
-						>{stakeholdersWithData.length} rater{stakeholdersWithData.length !== 1 ? 's' : ''}</span
-					>
-					{#if prepData}
-						<span class="ml-auto">Generated {formatRelativeDays(prepData.createdAt)}</span>
-					{/if}
-				</div>
-			{:else}
-				<p class="text-sm text-text-tertiary">No prep generated yet. Click above to generate.</p>
-			{/if}
-		</div>
-
-		<!-- Coaching Impact Summary -->
-		{@const totalNotes = data.allCoachNotes.length}
-		{@const totalReflections = data.allReflections.filter((r) => r.submittedAt).length}
-		{@const stakeholderCount = data.client.stakeholders.length}
-		{@const hasEnoughData = totalReflections >= 2 || totalNotes >= 1}
-		{#if hasEnoughData}
-			<div class="rounded-xl border border-border-default bg-surface-subtle px-4 py-3">
-				<p class="mb-1.5 text-[10px] font-semibold tracking-wide text-text-muted uppercase">
-					Your coaching footprint
-				</p>
-				<div class="flex flex-wrap gap-x-5 gap-y-1 text-xs text-text-secondary">
-					<span
-						><strong class="text-text-primary">{totalNotes}</strong> note{totalNotes !== 1
-							? 's'
-							: ''} recorded</span
-					>
-					<span
-						><strong class="text-text-primary">{totalReflections}</strong>
-						check-in{totalReflections !== 1 ? 's' : ''} completed</span
-					>
-					<span
-						><strong class="text-text-primary">{stakeholderCount}</strong>
-						rater{stakeholderCount !== 1 ? 's' : ''} contributing</span
-					>
-					{#if data.client.objective?.insights?.trajectoryScore !== null && data.client.objective?.insights?.trajectoryScore !== undefined}
-						<span
-							>Trajectory: <strong
-								class={data.client.objective.insights.trajectoryScore > 5
-									? 'text-success'
-									: data.client.objective.insights.trajectoryScore < -5
-										? 'text-error'
-										: 'text-text-primary'}
-								>{data.client.objective.insights.trajectoryScore > 5
-									? 'Improving'
-									: data.client.objective.insights.trajectoryScore < -5
-										? 'Declining'
-										: 'Stable'}</strong
-							></span
-						>
-					{/if}
-				</div>
 			</div>
-		{/if}
+		</form>
 
-		<!-- Journey Complete: Coach Impact Summary -->
-		{#if data.client.objective?.cycle?.status === 'COMPLETED'}
-			{@const ins = data.client.objective?.insights}
-			{@const cycleWeeks =
-				data.client.objective?.cycle?.weeksElapsed ??
-				data.client.objective?.cycle?.currentWeek ??
-				0}
-			<div
-				class="rounded-xl border border-success/30 bg-gradient-to-r from-success/5 to-transparent p-5"
-			>
-				<div class="mb-3 flex items-center gap-2">
-					<Trophy class="h-4 w-4 text-success" />
-					<p class="text-[10px] font-semibold tracking-wider text-success uppercase">
-						Client Journey Complete &middot; {data.client.name?.split(' ')[0] ?? 'Client'}
-					</p>
-				</div>
-				<p class="mb-3 text-sm font-medium text-text-primary">
-					"{data.client.objective?.title}" &middot; {cycleWeeks} weeks
-				</p>
-				<div class="mb-3 flex flex-wrap gap-x-5 gap-y-1 text-xs text-text-secondary">
-					{#if ins?.avgEffort !== null && ins?.avgEffort !== undefined}
-						<span
-							>Effort avg: <strong class="text-text-primary">{ins.avgEffort.toFixed(1)}</strong
-							></span
-						>
-					{/if}
-					{#if ins?.avgProgress !== null && ins?.avgProgress !== undefined}
-						<span
-							>Performance avg: <strong class="text-text-primary"
-								>{ins.avgProgress.toFixed(1)}</strong
-							></span
-						>
-					{/if}
-					{#if ins?.alignmentRatio !== null && ins?.alignmentRatio !== undefined}
-						<span
-							>Rater alignment: <strong class="text-text-primary"
-								>{Math.round(ins.alignmentRatio * 100)}%</strong
-							></span
-						>
-					{/if}
-					<span><strong class="text-text-primary">{totalReflections}</strong> check-ins</span>
-					<span
-						><strong class="text-text-primary">{stakeholderCount}</strong>
-						rater{stakeholderCount !== 1 ? 's' : ''}</span
-					>
-				</div>
-				<button
-					type="button"
-					onclick={() => {
-						const text = `Client completed a ${cycleWeeks}-week leadership development journey focused on "${data.client.objective?.title ?? ''}."
-Results: Effort avg ${ins?.avgEffort?.toFixed(1) ?? '--'}, performance avg ${ins?.avgProgress?.toFixed(1) ?? '--'}, rater alignment ${ins?.alignmentRatio !== null && ins?.alignmentRatio !== undefined ? Math.round(ins.alignmentRatio * 100) + '%' : '--'}.
-Completion rate: ${data.client.objective?.cycle?.completion ?? '--'}%. ${stakeholderCount} rater${stakeholderCount !== 1 ? 's' : ''} contributing.
-— Generated by Forbetra`;
-						navigator.clipboard.writeText(text);
-						impactCopied = true;
-						setTimeout(() => (impactCopied = false), 2000);
-					}}
-					class="flex items-center gap-1.5 rounded-lg border border-success/20 bg-surface-raised px-3 py-1.5 text-xs font-semibold text-success transition-colors hover:bg-success-muted"
-				>
-					{#if impactCopied}
-						<Check class="h-3 w-3" /> Copied!
-					{:else}
-						<Copy class="h-3 w-3" /> Copy Summary
-					{/if}
-				</button>
-			</div>
-		{/if}
-
-		<!-- Alerts -->
-		{#if data.alerts.length > 0}
-			<div class="rounded-2xl border border-error/50 bg-error-muted p-6">
-				<div class="mb-3 flex items-center gap-2">
-					<AlertTriangle class="h-5 w-5 text-warning" />
-					<h2 class="text-lg font-bold text-error">AI Alerts</h2>
-				</div>
-				<ul class="space-y-2">
-					{#each data.alerts as alert, i (i)}
-						<li class="glass rounded-lg px-3 py-2 text-sm text-error">
-							{alert.content}
-						</li>
-					{/each}
-				</ul>
-			</div>
-		{/if}
-
-		{#if data.client.alerts.length > 0}
-			<div class="rounded-2xl border border-border-strong bg-warning-muted p-6">
-				<div class="mb-3 flex items-center gap-2">
-					<AlertTriangle class="h-5 w-5 text-warning" />
-					<h2 class="text-lg font-bold text-warning">Status Alerts</h2>
-				</div>
-				<ul class="space-y-2">
-					{#each data.client.alerts as alert, i (i)}
-						<li
-							class="glass flex items-start gap-2 rounded-lg px-3 py-2 text-sm {alert.severity ===
-							'high'
-								? 'border border-error/50 font-semibold text-error'
-								: 'text-warning'}"
-						>
-							<span
-								class="mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full {alert.severity === 'high'
-									? 'bg-error'
-									: alert.severity === 'medium'
-										? 'bg-warning'
-										: 'bg-accent'}"
-							></span>
-							{alert.message}
-						</li>
-					{/each}
-				</ul>
-			</div>
-		{/if}
-	{/if}
-
-	<!-- ═══ TAB: Timeline ═══ -->
-	{#if activeTab === 'timeline'}
-		<!-- Check-in Timeline -->
-		{#if reflectionsByWeek.length > 0}
-			<div class="rounded-2xl border border-border-default bg-surface-raised p-6">
-				<h2 class="mb-4 text-lg font-bold text-text-primary">Check-in Timeline</h2>
-				<div class="space-y-4">
-					{#each reflectionsByWeek as [weekNumber, reflections] (weekNumber)}
-						{@const ws = weekSummaries.get(weekNumber)}
-						<div class="rounded-xl border border-border-default bg-surface-subtle p-4">
-							<div class="mb-2 flex items-baseline gap-3">
-								<p class="text-sm font-bold text-text-secondary">Week {weekNumber}</p>
-								{#if ws}
-									<div class="flex gap-3 text-xs">
-										{#if ws.avgEffort !== null}
-											<span class="text-warning">
-												Effort {ws.avgEffort}{#if ws.effortDelta !== null && ws.effortDelta !== 0}
-													{#if ws.effortDelta > 0}
-														<span class="text-success"> ↑{ws.effortDelta}</span>
-													{:else}
-														<span class="text-error"> ↓{Math.abs(ws.effortDelta)}</span>
-													{/if}
-												{/if}
-											</span>
-										{/if}
-										{#if ws.avgPerf !== null}
-											<span class="text-accent">
-												Perf {ws.avgPerf}{#if ws.perfDelta !== null && ws.perfDelta !== 0}
-													{#if ws.perfDelta > 0}
-														<span class="text-success"> ↑{ws.perfDelta}</span>
-													{:else}
-														<span class="text-error"> ↓{Math.abs(ws.perfDelta)}</span>
-													{/if}
-												{/if}
-											</span>
-										{/if}
-									</div>
-								{/if}
-							</div>
-							<div class="space-y-2">
-								{#each reflections as r, i (i)}
-									<div
-										class="flex items-start gap-3 rounded-lg bg-surface-raised px-3 py-2 text-sm"
-									>
-										<span
-											class="shrink-0 rounded bg-accent-muted px-1.5 py-0.5 text-[10px] font-semibold text-accent"
-										>
-											{r.reflectionType === 'RATING_A' || r.reflectionType === 'RATING_B'
-												? 'Self-Report'
-												: r.reflectionType === 'STAKEHOLDER'
-													? '360 Feedback'
-													: r.reflectionType}
-										</span>
-										<div class="min-w-0 flex-1">
-											{#if r.effortScore !== null || r.performanceScore !== null}
-												<div class="flex gap-3 text-xs">
-													{#if r.effortScore !== null}
-														<span class="text-warning"
-															>Effort: <strong>{r.effortScore}</strong></span
-														>
-													{/if}
-													{#if r.performanceScore !== null}
-														<span class="text-accent"
-															>Perf: <strong>{r.performanceScore}</strong></span
-														>
-													{/if}
-												</div>
-											{/if}
-											{#if r.notes}
-												<p class="mt-1 text-xs text-text-secondary">{r.notes}</p>
-											{/if}
-										</div>
-										{#if r.submittedAt}
-											<span class="shrink-0 text-[10px] text-text-muted"
-												>{formatDate(r.submittedAt)}</span
-											>
-										{/if}
-									</div>
-								{/each}
-							</div>
-						</div>
-					{/each}
-				</div>
-			</div>
-		{:else}
-			<div
-				class="rounded-2xl border border-dashed border-border-strong bg-surface-raised p-8 text-center"
-			>
-				<div class="mb-3 flex justify-center">
-					<div class="flex h-12 w-12 items-center justify-center rounded-full bg-accent-muted">
-						<Target class="h-6 w-6 text-accent" />
-					</div>
-				</div>
-				<h3 class="mb-1 text-sm font-semibold text-text-primary">No check-ins yet</h3>
-				<p class="text-xs text-text-secondary">
-					Once {data.client.name.split(' ')[0]} completes their first check-in, their data will appear
-					here in chronological order.
-				</p>
-			</div>
-		{/if}
-
-		<!-- Stakeholder Feedback Summary -->
-		{#if data.client.stakeholders.length > 0}
-			<div class="rounded-2xl border border-border-strong bg-success-muted p-6">
-				<h2 class="mb-4 text-lg font-bold text-text-primary">Rater Feedback</h2>
-				<div class="grid gap-3 sm:grid-cols-2">
-					{#each data.client.stakeholders as stakeholder (stakeholder.email)}
-						{@const trend = data.stakeholderTrends.find((t) => t.name === stakeholder.name)}
-						{@const effortDiff =
-							trend?.latestEffort != null && trend?.previousEffort != null
-								? trend.latestEffort - trend.previousEffort
-								: null}
-						{@const perfDiff =
-							trend?.latestPerformance != null && trend?.previousPerformance != null
-								? trend.latestPerformance - trend.previousPerformance
-								: null}
-						<div class="glass rounded-xl border border-border-default p-3">
-							<div class="flex items-center justify-between">
-								<div>
-									<p class="text-sm font-semibold text-text-primary">{stakeholder.name}</p>
-									<p class="text-xs text-text-tertiary">{stakeholder.email}</p>
-								</div>
-								{#if effortDiff !== null || perfDiff !== null}
-									{@const avgDiff =
-										((effortDiff ?? 0) + (perfDiff ?? 0)) /
-										((effortDiff !== null ? 1 : 0) + (perfDiff !== null ? 1 : 0) || 1)}
-									<span
-										class="flex items-center gap-0.5 text-xs {avgDiff > 0.5
-											? 'text-success'
-											: avgDiff < -0.5
-												? 'text-error'
-												: 'text-text-muted'}"
-									>
-										{#if avgDiff > 0.5}
-											<TrendingUp class="h-3.5 w-3.5" />
-										{:else if avgDiff < -0.5}
-											<TrendingDown class="h-3.5 w-3.5" />
-										{:else}
-											<Minus class="h-3.5 w-3.5" />
-										{/if}
-									</span>
-								{/if}
-							</div>
-							{#if stakeholder.lastFeedback}
-								<div class="mt-2 flex gap-3 text-xs">
-									{#if stakeholder.lastFeedback.effortScore !== null}
-										<span class="text-success"
-											>Effort: <strong>{stakeholder.lastFeedback.effortScore}</strong></span
-										>
-									{/if}
-									{#if stakeholder.lastFeedback.performanceScore !== null}
-										<span class="text-success"
-											>Perf: <strong>{stakeholder.lastFeedback.performanceScore}</strong></span
-										>
-									{/if}
-								</div>
-								<p class="mt-1 text-[10px] text-text-muted">
-									{stakeholder.lastFeedback.weekNumber
-										? `Week ${stakeholder.lastFeedback.weekNumber}`
-										: ''}
-									{stakeholder.lastFeedback.submittedAt
-										? ` · ${formatRelativeDays(stakeholder.lastFeedback.submittedAt)}`
-										: ''}
-								</p>
-							{:else}
-								<p class="mt-2 text-xs text-text-muted">No feedback yet</p>
+		<!-- Notes list -->
+		{#if data.allCoachNotes.length > 0}
+			<ul class="space-y-2">
+				{#each data.allCoachNotes as note (note.id)}
+					<li class="rounded-lg border border-border-default bg-surface-subtle p-3">
+						<p class="text-sm text-text-secondary">{note.content}</p>
+						<div class="mt-1.5 flex items-center gap-2 text-xs text-text-tertiary">
+							{#if note.weekNumber}
+								<span class="rounded-full bg-accent-muted px-2 py-0.5 font-semibold text-accent"
+									>Week {note.weekNumber}</span
+								>
 							{/if}
+							<span>{formatRelativeDays(note.createdAt)}</span>
 						</div>
-					{/each}
-				</div>
-			</div>
+					</li>
+				{/each}
+			</ul>
 		{:else}
-			<EmptyState
-				heading="No raters yet"
-				description="This client hasn't added any raters. 360 feedback will appear here once raters are invited and submit scores."
-			>
-				{#snippet icon()}<Users class="h-8 w-8" />{/snippet}
-			</EmptyState>
+			<p class="text-center text-sm text-text-tertiary">No notes yet.</p>
 		{/if}
-	{/if}
+	</div>
 
-	<!-- ═══ TAB: Notes ═══ -->
-	{#if activeTab === 'notes'}
-		<div class="rounded-2xl border border-border-default bg-surface-raised p-6">
-			<div class="mb-4 flex items-baseline justify-between">
-				<h2 class="text-lg font-bold text-text-primary">Coach Notes</h2>
-				<p class="flex items-center gap-1 text-[10px] text-text-muted">
-					<Lock class="h-3 w-3" />
-					Only you can see these. They shape AI prompts and insights.
-				</p>
-			</div>
-
-			<!-- Inline add note form -->
-			<form
-				method="post"
-				action="?/createNote"
-				class="mb-4 rounded-xl border border-border-default bg-surface-subtle p-4"
-				use:enhance={() => {
-					submittingNote = true;
-					return async ({ update }) => {
-						submittingNote = false;
-						await update();
-					};
-				}}
+	<!-- 4. Trend Chart (collapsed by default) -->
+	{#if data.client.visualizationData && data.client.visualizationData.individual.length > 0}
+		<div class="rounded-xl border border-border-default bg-surface-raised">
+			<button
+				type="button"
+				onclick={() => (showChart = !showChart)}
+				class="flex w-full items-center justify-between p-5 text-left"
 			>
-				{#if data.cycleId}
-					<input type="hidden" name="cycleId" value={data.cycleId} />
-				{/if}
-				{#if form?.noteError}
-					<p class="mb-2 text-xs text-error">{form.noteError}</p>
-				{/if}
-				<div class="flex gap-3">
-					<div class="min-w-0 flex-1">
-						<textarea
-							name="content"
-							rows="2"
-							required
-							minlength="10"
-							bind:value={noteContent}
-							class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:bg-surface-raised focus:ring-1 focus:ring-accent/30 focus:outline-none"
-							placeholder="Add a note for this client..."
-						></textarea>
-					</div>
-					<div class="flex shrink-0 flex-col gap-2">
-						<input
-							type="number"
-							name="weekNumber"
-							min="1"
-							max="12"
-							bind:value={noteWeek}
-							class="w-16 rounded-lg border border-border-default bg-surface-raised px-2 py-1 text-center text-xs text-text-primary focus:border-accent focus:outline-none"
-							placeholder="Wk"
-						/>
-						<button
-							type="submit"
-							disabled={submittingNote}
-							class="rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white transition-all hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
-						>
-							{submittingNote ? 'Saving...' : 'Save'}
-						</button>
-					</div>
+				<h2 class="font-semibold text-text-primary">Performance & Effort Trends</h2>
+				<ChevronDown
+					class="h-4 w-4 text-text-muted transition-transform {showChart ? 'rotate-180' : ''}"
+				/>
+			</button>
+			{#if showChart}
+				<div class="border-t border-border-default p-5">
+					<PerformanceEffortChart
+						individualData={data.client.visualizationData.individual}
+						stakeholderData={data.client.visualizationData.stakeholders}
+						stakeholders={data.client.visualizationData.stakeholderList}
+					/>
 				</div>
-			</form>
-
-			<!-- Notes list -->
-			{#if data.allCoachNotes.length > 0}
-				<ul class="space-y-2">
-					{#each data.allCoachNotes as note (note.id)}
-						<li class="rounded-lg border border-border-default bg-surface-subtle p-3">
-							<p class="text-sm text-text-secondary">{note.content}</p>
-							<div class="mt-2 flex items-center gap-2 text-xs text-text-tertiary">
-								{#if note.weekNumber}
-									<span class="rounded-full bg-accent-muted px-2 py-0.5 font-semibold text-accent">
-										Week {note.weekNumber}
-									</span>
-								{/if}
-								<span>{formatRelativeDays(note.createdAt)}</span>
-							</div>
-						</li>
-					{/each}
-				</ul>
-			{:else}
-				<p class="text-center text-sm text-text-tertiary">
-					No notes yet. Add your first note above.
-				</p>
 			{/if}
 		</div>
-	{/if}
-
-	<!-- ═══ TAB: Chart ═══ -->
-	{#if activeTab === 'chart'}
-		{#if data.client.visualizationData && data.client.visualizationData.individual.length > 0}
-			<div class="rounded-2xl border border-border-default bg-surface-raised p-6">
-				<h2 class="mb-4 text-lg font-bold text-text-primary">Performance & Effort Over Time</h2>
-				<PerformanceEffortChart
-					individualData={data.client.visualizationData.individual}
-					stakeholderData={data.client.visualizationData.stakeholders}
-					stakeholders={data.client.visualizationData.stakeholderList}
-				/>
-			</div>
-		{:else}
-			<div
-				class="rounded-2xl border border-dashed border-border-strong bg-surface-raised p-8 text-center"
-			>
-				<div class="mb-3 flex justify-center">
-					<div class="flex h-12 w-12 items-center justify-center rounded-full bg-accent-muted">
-						<TrendingUp class="h-6 w-6 text-accent" />
-					</div>
-				</div>
-				<h3 class="mb-1 text-sm font-semibold text-text-primary">Charts coming soon</h3>
-				<p class="text-xs text-text-secondary">
-					Effort and performance trends will appear here after {data.client.name.split(' ')[0]} completes
-					their first few check-ins.
-				</p>
-			</div>
-		{/if}
 	{/if}
 </section>

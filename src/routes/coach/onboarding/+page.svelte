@@ -51,7 +51,7 @@
 	let name = $state('');
 	let phone = $state('');
 	let message = $state(
-		"I'd like to invite you to join Forbetra so I can support your development journey. You'll set your own objective, track weekly progress, and get feedback from the people around you — and I'll be here to guide you through it."
+		"I'd like to invite you to join Forbetra so I can support your development journey. You'll set your own goal, track weekly progress, and get feedback from the people around you — and I'll be here to guide you through it."
 	);
 	let isSubmitting = $state(false);
 
@@ -227,11 +227,11 @@
 				</div>
 				<h1 class="text-3xl font-bold text-text-primary">Invite Your First Client</h1>
 				<p class="mx-auto max-w-md text-base text-text-secondary">
-					Send an invitation to an individual you'd like to coach. They'll set up their own
-					objective and stakeholders.
+					Send an invitation to an individual you'd like to coach. They'll set up their own goal and
+					stakeholders.
 				</p>
 				<p class="mx-auto max-w-md text-xs text-text-tertiary">
-					You can optionally pre-fill their objective and stakeholders below.
+					You can optionally pre-fill their goal and stakeholders below.
 				</p>
 			</div>
 
@@ -325,7 +325,7 @@
 						<div>
 							<p class="text-sm font-semibold text-text-primary">Pre-fill client's setup</p>
 							<p class="text-xs text-text-tertiary">
-								Save them time by pre-filling their objective and stakeholders
+								Save them time by pre-filling their goal and stakeholders
 							</p>
 						</div>
 						<button
@@ -349,7 +349,7 @@
 						<div class="mt-4 space-y-4">
 							<div>
 								<label for="prefillObjectiveTitle" class="text-xs font-semibold text-text-secondary"
-									>Objective title</label
+									>Goal title</label
 								>
 								<input
 									id="prefillObjectiveTitle"

@@ -37,7 +37,7 @@
 		<input
 			type="search"
 			placeholder="Search by stakeholder or individual name..."
-			class="rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
+			class="rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
 			bind:value={searchTerm}
 		/>
 		<span class="text-xs text-text-tertiary">{filtered.length} shown</span>
@@ -45,7 +45,9 @@
 
 	<div class="overflow-hidden rounded-lg border border-border-default bg-surface-raised">
 		<table class="min-w-full divide-y divide-border-default text-sm">
-			<thead class="bg-surface-subtle text-left text-xs font-semibold uppercase tracking-wide text-text-tertiary">
+			<thead
+				class="bg-surface-subtle text-left text-xs font-semibold tracking-wide text-text-tertiary uppercase"
+			>
 				<tr>
 					<th class="px-4 py-3">Name</th>
 					<th class="px-4 py-3">Email</th>
@@ -57,6 +59,7 @@
 					<th class="px-4 py-3">Last Feedback</th>
 				</tr>
 			</thead>
+			<!-- eslint-disable svelte/no-navigation-without-resolve -->
 			<tbody class="divide-y divide-border-default">
 				{#each filtered as sh (sh.id)}
 					<tr class="hover:bg-surface-subtle">
@@ -83,6 +86,7 @@
 					</tr>
 				{/each}
 			</tbody>
+			<!-- eslint-enable svelte/no-navigation-without-resolve -->
 		</table>
 	</div>
 </section>

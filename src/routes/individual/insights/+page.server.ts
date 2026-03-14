@@ -512,6 +512,40 @@ export const load: PageServerLoad = async (event) => {
 		}
 	}
 
+	// History data: reflections grouped by week (merged from history page)
+	type HistoryWeek = {
+		weekNumber: number;
+		reflections: Array<{
+			id: string;
+			type: string;
+			effortScore: number | null;
+			performanceScore: number | null;
+			notes: string | null;
+			checkInDate: string;
+		}>;
+	};
+	let historyWeeks: HistoryWeek[] = [];
+
+	if (cycle) {
+		const historyWeekMap = new Map<number, HistoryWeek['reflections']>();
+		for (const r of cycle.reflections) {
+			if (!historyWeekMap.has(r.weekNumber)) {
+				historyWeekMap.set(r.weekNumber, []);
+			}
+			historyWeekMap.get(r.weekNumber)!.push({
+				id: r.id,
+				type: r.reflectionType,
+				effortScore: r.effortScore,
+				performanceScore: r.performanceScore,
+				notes: r.notes,
+				checkInDate: r.submittedAt?.toISOString() ?? new Date().toISOString()
+			});
+		}
+		historyWeeks = Array.from(historyWeekMap.entries())
+			.map(([weekNumber, reflections]) => ({ weekNumber, reflections }))
+			.sort((a, b) => b.weekNumber - a.weekNumber);
+	}
+
 	return {
 		objective: {
 			id: objective.id,
@@ -528,6 +562,7 @@ export const load: PageServerLoad = async (event) => {
 		correlationData,
 		gapLensData,
 		cycleReport,
-		perceptionGaps
+		perceptionGaps,
+		historyWeeks
 	};
 };

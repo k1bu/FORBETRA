@@ -509,14 +509,15 @@ Monthly, conduct a full re-evaluation:
 
 ## 8. SCORE LOG
 
-| Date       | Platform Score | USA  | SIM  | EFF  | STK  | VIR | REL  | SCA | Notes                                                                                           |
-| ---------- | :------------: | :--: | :--: | :--: | :--: | :-: | :--: | :-: | ----------------------------------------------------------------------------------------------- |
-| 2026-02-28 |      6.87      | 6.87 |  —   |  —   |  —   |  —  |  —   |  —  | Baseline (UX-only framework)                                                                    |
-| 2026-03-01 |      6.91      | 8.35 | 6.50 | 7.50 | 6.00 | 4.5 | 7.50 | 5.0 | First comprehensive assessment (7-dimension framework)                                          |
-| 2026-03-01 |      7.53      | 8.50 | 6.80 | 8.30 | 7.50 | 6.0 | 7.50 | 5.0 | Post-Directive 001 (6/6 tasks). +0.62 from baseline.                                            |
-| 2026-03-01 |      8.23      | 8.90 | 8.80 | 8.70 | 8.80 | 6.2 | 7.50 | 5.0 | Post-Directive 002 (7/7 tasks). +0.70. Strong across Simplicity/Stickiness/Efficacy.            |
-| 2026-03-01 |      8.75      | 9.05 | 8.85 | 8.90 | 9.10 | 8.3 | 9.05 | 5.5 | Post-Directive 003 (8/8 tasks). +0.52. Virality +2.1, Reliability +1.55. Gap to 9.5: **-0.75**. |
-|            |                |      |      |      |      |     |      |     |                                                                                                 |
+| Date       | Platform Score | USA  | SIM  | EFF  | STK  | VIR | REL  | SCA | Notes                                                                                                             |
+| ---------- | :------------: | :--: | :--: | :--: | :--: | :-: | :--: | :-: | ----------------------------------------------------------------------------------------------------------------- |
+| 2026-02-28 |      6.87      | 6.87 |  —   |  —   |  —   |  —  |  —   |  —  | Baseline (UX-only framework)                                                                                      |
+| 2026-03-01 |      6.91      | 8.35 | 6.50 | 7.50 | 6.00 | 4.5 | 7.50 | 5.0 | First comprehensive assessment (7-dimension framework)                                                            |
+| 2026-03-01 |      7.53      | 8.50 | 6.80 | 8.30 | 7.50 | 6.0 | 7.50 | 5.0 | Post-Directive 001 (6/6 tasks). +0.62 from baseline.                                                              |
+| 2026-03-01 |      8.23      | 8.90 | 8.80 | 8.70 | 8.80 | 6.2 | 7.50 | 5.0 | Post-Directive 002 (7/7 tasks). +0.70. Strong across Simplicity/Stickiness/Efficacy.                              |
+| 2026-03-01 |      8.75      | 9.05 | 8.85 | 8.90 | 9.10 | 8.3 | 9.05 | 5.5 | Post-Directive 003 (8/8 tasks). +0.52. Virality +2.1, Reliability +1.55. Gap to 9.5: **-0.75**.                   |
+| 2026-03-01 |      9.20      | 9.55 | 9.20 | 9.45 | 9.40 | 8.6 | 9.25 | 7.0 | Post-Directive 004 (6/8 tasks, 75%). +0.45. Tests+polish+efficacy. Missing: OG meta, data export. Gap: **-0.30**. |
+|            |                |      |      |      |      |     |      |     |                                                                                                                   |
 
 _USA=Usability, SIM=Simplicity, EFF=Efficacy, STK=Stickiness, VIR=Virality, REL=Reliability, SCA=Scalability_
 

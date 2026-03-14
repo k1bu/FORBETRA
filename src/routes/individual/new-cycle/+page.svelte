@@ -121,7 +121,7 @@
 	// === Wizard step state ===
 	let step = $state(1);
 	const totalSteps = 3;
-	const stepLabels = ['Objective', 'Schedule', 'Settings'];
+	const stepLabels = ['Goal', 'Schedule', 'Settings'];
 
 	// Validation per step
 	const step1Valid = $derived(cycleMode === 'continue' || freshObjectiveTitle.trim().length >= 3);
@@ -178,7 +178,7 @@
 					Continue your journey
 				</p>
 				<p class="mt-3 text-lg font-bold text-text-primary">
-					Same objective: "{data.objective.title}"
+					Same goal: "{data.objective.title}"
 				</p>
 				<p class="mt-1 text-sm text-text-secondary">
 					Same focus areas, same raters, {data.defaults.durationWeeks} weeks starting {cycleStartDate}.
@@ -322,10 +322,8 @@
 										{/if}
 									</div>
 									<div>
-										<p class="font-semibold text-text-primary">Continue with same objective</p>
-										<p class="text-xs text-text-tertiary">
-											Keep your current objective and focus areas
-										</p>
+										<p class="font-semibold text-text-primary">Continue with same goal</p>
+										<p class="text-xs text-text-tertiary">Keep your current goal and focus areas</p>
 									</div>
 								</button>
 								<button
@@ -347,8 +345,8 @@
 										{/if}
 									</div>
 									<div>
-										<p class="font-semibold text-text-primary">Start with a new objective</p>
-										<p class="text-xs text-text-tertiary">Set a fresh objective and focus areas</p>
+										<p class="font-semibold text-text-primary">Start with a new goal</p>
+										<p class="text-xs text-text-tertiary">Set a fresh goal and focus areas</p>
 									</div>
 								</button>
 							</div>
@@ -357,7 +355,7 @@
 						{#if cycleMode === 'continue'}
 							<div class="rounded-2xl border border-border-default bg-surface-raised p-6">
 								<p class="mb-1 text-[10px] font-semibold tracking-wider text-text-muted uppercase">
-									Your Objective
+									Your Goal
 								</p>
 								<h2 class="text-xl font-bold text-text-primary">{data.objective.title}</h2>
 								{#if data.objective.description}
@@ -389,7 +387,7 @@
 						{:else}
 							<div class="space-y-4 rounded-2xl border border-border-default bg-surface-raised p-6">
 								<p class="text-[10px] font-semibold tracking-wider text-text-muted uppercase">
-									New Objective
+									New Goal
 								</p>
 								<div class="space-y-2">
 									<label
@@ -742,10 +740,10 @@
 									/>
 									<div>
 										<span class="text-sm font-semibold text-text-secondary"
-											>Allow stakeholders to see my self-scores after they submit feedback</span
+											>Allow reviewers to see my self-scores after they submit feedback</span
 										>
 										<p class="text-xs text-text-tertiary">
-											When enabled, stakeholders see how you rated yourself so they can compare
+											When enabled, reviewers see how you rated yourself so they can compare
 											perspectives.
 										</p>
 									</div>
@@ -805,7 +803,7 @@
 							</p>
 							<div class="grid gap-3 text-sm sm:grid-cols-2">
 								<div>
-									<span class="text-text-muted">Objective:</span>
+									<span class="text-text-muted">Goal:</span>
 									<span class="ml-1 font-medium text-text-primary"
 										>{cycleMode === 'continue' ? data.objective.title : freshObjectiveTitle}</span
 									>

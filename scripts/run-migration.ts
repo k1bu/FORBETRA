@@ -38,4 +38,3 @@ async function runMigration() {
 }
 
 runMigration();
-

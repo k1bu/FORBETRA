@@ -8,15 +8,25 @@
 			{#if index > 0}
 				<li aria-hidden="true" class="text-text-muted">
 					<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M9 5l7 7-7 7"
+						/>
 					</svg>
 				</li>
 			{/if}
 			<li>
 				{#if item.href && index < items.length - 1}
-					<a href={item.href} class="rounded transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
+					<!-- eslint-disable svelte/no-navigation-without-resolve -->
+					<a
+						href={item.href}
+						class="rounded transition-colors hover:text-text-primary focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
+					>
 						{item.label}
 					</a>
+					<!-- eslint-enable svelte/no-navigation-without-resolve -->
 				{:else}
 					<span class="font-medium text-text-primary">{item.label}</span>
 				{/if}

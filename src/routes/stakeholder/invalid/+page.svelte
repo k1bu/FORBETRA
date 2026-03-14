@@ -7,8 +7,13 @@
 >
 	<!-- Forbetra brand header -->
 	<div class="pb-2 text-center">
-		<p class="text-text-primary text-lg" style="font-style: italic; font-weight: 700; letter-spacing: 0.02em;">forbetra</p>
-		<p class="text-text-tertiary text-xs">You. And Improved.</p>
+		<p
+			class="text-lg text-text-primary"
+			style="font-style: italic; font-weight: 700; letter-spacing: 0.02em;"
+		>
+			forbetra
+		</p>
+		<p class="text-xs text-text-tertiary">You. And Improved.</p>
 	</div>
 
 	<h1 class="text-2xl font-semibold text-text-primary">This feedback link is no longer valid</h1>

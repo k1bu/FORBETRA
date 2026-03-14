@@ -5,7 +5,7 @@
 </script>
 
 {#if toasts.length > 0}
-	<div class="fixed bottom-24 right-4 z-50 flex flex-col gap-2 lg:bottom-4">
+	<div class="fixed right-4 bottom-24 z-50 flex flex-col gap-2 lg:bottom-4">
 		{#each toasts as toast (toast.id)}
 			<div
 				transition:fly={{ x: 80, duration: 300 }}
@@ -19,7 +19,11 @@
 				aria-live="polite"
 			>
 				<span aria-hidden="true">
-					{#if toast.type === 'success'}<CircleCheck class="h-5 w-5" />{:else if toast.type === 'error'}<CircleX class="h-5 w-5" />{:else}<Info class="h-5 w-5" />{/if}
+					{#if toast.type === 'success'}<CircleCheck
+							class="h-5 w-5"
+						/>{:else if toast.type === 'error'}<CircleX class="h-5 w-5" />{:else}<Info
+							class="h-5 w-5"
+						/>{/if}
 				</span>
 				<span class="text-sm font-medium">{toast.message}</span>
 				<button
@@ -28,7 +32,12 @@
 					aria-label="Dismiss"
 				>
 					<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M6 18L18 6M6 6l12 12"
+						/>
 					</svg>
 				</button>
 			</div>

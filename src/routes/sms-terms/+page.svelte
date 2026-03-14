@@ -18,9 +18,9 @@
 			</p>
 			<ul class="ml-4 list-disc space-y-1">
 				<li>Check-in reminders — nudges to complete your weekly self-assessment</li>
-				<li>Feedback requests — notifications when a stakeholder provides new feedback</li>
+				<li>Feedback requests — notifications when a reviewer provides new feedback</li>
 				<li>Coaching reminders — session prep and follow-up prompts</li>
-				<li>Stakeholder invitations — requests to provide 360-degree feedback</li>
+				<li>Reviewer invitations — requests to provide 360-degree feedback</li>
 			</ul>
 		</div>
 
@@ -29,7 +29,7 @@
 			<p>
 				Message frequency varies based on your coaching activity. Typical usage is
 				<strong>1–4 messages per week</strong> for individuals and
-				<strong>1–2 messages per month</strong> for stakeholders/raters.
+				<strong>1–2 messages per month</strong> for reviewers/raters.
 			</p>
 		</div>
 

@@ -8,7 +8,14 @@ import { emailTemplates } from '$lib/notifications/emailTemplates';
 import { trySendSms } from '$lib/notifications/sms';
 import { smsTemplates } from '$lib/notifications/smsTemplates';
 import { Prisma } from '@prisma/client';
-import { stdDev, computeWeekNumber, getDateForWeekday, toIsoDate, weeksBetween, FEEDBACK_TOKEN_EXPIRY_DAYS } from '$lib/server/coachUtils';
+import {
+	stdDev,
+	computeWeekNumber,
+	getDateForWeekday,
+	toIsoDate,
+	weeksBetween,
+	FEEDBACK_TOKEN_EXPIRY_DAYS
+} from '$lib/server/coachUtils';
 import { parseCheckInDays } from '$lib/utils/checkInDays';
 
 function dayNameToNumber(day: string): number {
@@ -54,7 +61,6 @@ const getNextPrompt = (
 
 	return null;
 };
-
 
 // Get the state of a weekly experience
 type ExperienceState = 'open' | 'completed' | 'missed' | 'upcoming' | 'catchup';
@@ -118,8 +124,13 @@ const getWeeklyExperiences = async (
 
 	const experiences: WeeklyExperience[] = [];
 	const dayLabels: Record<string, string> = {
-		sun: 'Sunday', mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday',
-		thu: 'Thursday', fri: 'Friday', sat: 'Saturday'
+		sun: 'Sunday',
+		mon: 'Monday',
+		tue: 'Tuesday',
+		wed: 'Wednesday',
+		thu: 'Thursday',
+		fri: 'Friday',
+		sat: 'Saturday'
 	};
 
 	let slotIndex = 0;
@@ -135,9 +146,14 @@ const getWeeklyExperiences = async (
 
 		// Calculate the next check-in day's date for deadline (or end of week)
 		const nextDayIndex = checkInDays.indexOf(dayName) + 1;
-		const nextDayDate = nextDayIndex < checkInDays.length
-			? getDateForWeekday(dayNameToNumber(checkInDays[nextDayIndex]), normalizedStartDate, currentWeek)
-			: null;
+		const nextDayDate =
+			nextDayIndex < checkInDays.length
+				? getDateForWeekday(
+						dayNameToNumber(checkInDays[nextDayIndex]),
+						normalizedStartDate,
+						currentWeek
+					)
+				: null;
 
 		let ratingState: ExperienceState;
 		if (isCompleted) {
@@ -240,7 +256,6 @@ export const load: PageServerLoad = async (event) => {
 		: 0;
 	const completion =
 		totalWeeks > 0 ? Math.min(100, Math.round((weeksElapsed / totalWeeks) * 100)) : 0;
-	const currentTime = new Date();
 	const now = new Date(); // For token expiration comparison
 	now.setHours(0, 0, 0, 0);
 	const currentWeek = cycle ? computeWeekNumber(cycle.startDate) : null;
@@ -702,7 +717,10 @@ export const actions: Actions = {
 		const primarySubgoal = objective.subgoals[0];
 
 		if (!primarySubgoal) {
-			return fail(400, { action: 'feedback', error: 'Add a sub-objective before requesting feedback.' });
+			return fail(400, {
+				action: 'feedback',
+				error: 'Add a sub-objective before requesting feedback.'
+			});
 		}
 
 		const cycle = objective.cycles[0];
@@ -879,9 +897,8 @@ export const actions: Actions = {
 			});
 		}
 
-		let stakeholder;
 		try {
-			stakeholder = await prisma.stakeholder.create({
+			await prisma.stakeholder.create({
 				data: {
 					individualId: dbUser.id,
 					objectiveId: objective.id,

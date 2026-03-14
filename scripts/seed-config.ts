@@ -86,10 +86,25 @@ export const PERSONAS: PersonaConfig[] = [
 		cycleWeeks: 12,
 		cycleStatus: 'COMPLETED',
 		stakeholders: [
-			{ name: 'Priya Sharma', email: `priya.pos${SEED_DOMAIN}`, relationship: 'Direct Report', bias: 'positive' },
+			{
+				name: 'Priya Sharma',
+				email: `priya.pos${SEED_DOMAIN}`,
+				relationship: 'Direct Report',
+				bias: 'positive'
+			},
 			{ name: 'James Wu', email: `james.neu${SEED_DOMAIN}`, relationship: 'Peer', bias: 'neutral' },
-			{ name: 'Lisa Park', email: `lisa.neg${SEED_DOMAIN}`, relationship: 'Manager', bias: 'negative' },
-			{ name: 'Carlos Mendez', email: `carlos.spo${SEED_DOMAIN}`, relationship: 'Skip-level', bias: 'sporadic' }
+			{
+				name: 'Lisa Park',
+				email: `lisa.neg${SEED_DOMAIN}`,
+				relationship: 'Manager',
+				bias: 'negative'
+			},
+			{
+				name: 'Carlos Mendez',
+				email: `carlos.spo${SEED_DOMAIN}`,
+				relationship: 'Skip-level',
+				bias: 'sporadic'
+			}
 		]
 	},
 	// 2. Plateaued - Jordan Kim
@@ -117,9 +132,24 @@ export const PERSONAS: PersonaConfig[] = [
 		cycleWeeks: 12,
 		cycleStatus: 'COMPLETED',
 		stakeholders: [
-			{ name: 'Maya Johnson', email: `maya.pos${SEED_DOMAIN}`, relationship: 'Product Partner', bias: 'positive' },
-			{ name: 'Tom Chen', email: `tom.neu${SEED_DOMAIN}`, relationship: 'Design Lead', bias: 'neutral' },
-			{ name: 'Rachel Adams', email: `rachel.neg${SEED_DOMAIN}`, relationship: 'Data Lead', bias: 'negative' }
+			{
+				name: 'Maya Johnson',
+				email: `maya.pos${SEED_DOMAIN}`,
+				relationship: 'Product Partner',
+				bias: 'positive'
+			},
+			{
+				name: 'Tom Chen',
+				email: `tom.neu${SEED_DOMAIN}`,
+				relationship: 'Design Lead',
+				bias: 'neutral'
+			},
+			{
+				name: 'Rachel Adams',
+				email: `rachel.neg${SEED_DOMAIN}`,
+				relationship: 'Data Lead',
+				bias: 'negative'
+			}
 		]
 	},
 	// 3. Declining - Casey Morgan
@@ -147,10 +177,30 @@ export const PERSONAS: PersonaConfig[] = [
 		cycleWeeks: 12,
 		cycleStatus: 'COMPLETED',
 		stakeholders: [
-			{ name: 'David Lee', email: `david.pos${SEED_DOMAIN}`, relationship: 'Mentee', bias: 'positive' },
-			{ name: 'Sophie Brown', email: `sophie.neu${SEED_DOMAIN}`, relationship: 'Peer Mentor', bias: 'neutral' },
-			{ name: 'Kevin Zhang', email: `kevin.neg${SEED_DOMAIN}`, relationship: 'Engineering Manager', bias: 'negative' },
-			{ name: 'Aria Patel', email: `aria.spo${SEED_DOMAIN}`, relationship: 'Mentee', bias: 'sporadic' }
+			{
+				name: 'David Lee',
+				email: `david.pos${SEED_DOMAIN}`,
+				relationship: 'Mentee',
+				bias: 'positive'
+			},
+			{
+				name: 'Sophie Brown',
+				email: `sophie.neu${SEED_DOMAIN}`,
+				relationship: 'Peer Mentor',
+				bias: 'neutral'
+			},
+			{
+				name: 'Kevin Zhang',
+				email: `kevin.neg${SEED_DOMAIN}`,
+				relationship: 'Engineering Manager',
+				bias: 'negative'
+			},
+			{
+				name: 'Aria Patel',
+				email: `aria.spo${SEED_DOMAIN}`,
+				relationship: 'Mentee',
+				bias: 'sporadic'
+			}
 		]
 	},
 	// 4. High Performer - Taylor Brooks
@@ -178,9 +228,24 @@ export const PERSONAS: PersonaConfig[] = [
 		cycleWeeks: 12,
 		cycleStatus: 'COMPLETED',
 		stakeholders: [
-			{ name: 'Nina Ross', email: `nina.pos${SEED_DOMAIN}`, relationship: 'VP of Engineering', bias: 'positive' },
-			{ name: 'Brett Collins', email: `brett.neu${SEED_DOMAIN}`, relationship: 'Peer Director', bias: 'neutral' },
-			{ name: 'Olivia Santos', email: `olivia.pos2${SEED_DOMAIN}`, relationship: 'Direct Report', bias: 'positive' }
+			{
+				name: 'Nina Ross',
+				email: `nina.pos${SEED_DOMAIN}`,
+				relationship: 'VP of Engineering',
+				bias: 'positive'
+			},
+			{
+				name: 'Brett Collins',
+				email: `brett.neu${SEED_DOMAIN}`,
+				relationship: 'Peer Director',
+				bias: 'neutral'
+			},
+			{
+				name: 'Olivia Santos',
+				email: `olivia.pos2${SEED_DOMAIN}`,
+				relationship: 'Direct Report',
+				bias: 'positive'
+			}
 		]
 	},
 	// 5. Inconsistent - Morgan Lee
@@ -208,10 +273,30 @@ export const PERSONAS: PersonaConfig[] = [
 		cycleWeeks: 12,
 		cycleStatus: 'COMPLETED',
 		stakeholders: [
-			{ name: 'Hannah White', email: `hannah.neu${SEED_DOMAIN}`, relationship: 'Manager', bias: 'neutral' },
-			{ name: 'Derek Kim', email: `derek.neg${SEED_DOMAIN}`, relationship: 'Project Lead', bias: 'negative' },
-			{ name: 'Fiona O\'Brien', email: `fiona.pos${SEED_DOMAIN}`, relationship: 'Teammate', bias: 'positive' },
-			{ name: 'Greg Tanaka', email: `greg.spo${SEED_DOMAIN}`, relationship: 'Stakeholder', bias: 'sporadic' }
+			{
+				name: 'Hannah White',
+				email: `hannah.neu${SEED_DOMAIN}`,
+				relationship: 'Manager',
+				bias: 'neutral'
+			},
+			{
+				name: 'Derek Kim',
+				email: `derek.neg${SEED_DOMAIN}`,
+				relationship: 'Project Lead',
+				bias: 'negative'
+			},
+			{
+				name: "Fiona O'Brien",
+				email: `fiona.pos${SEED_DOMAIN}`,
+				relationship: 'Teammate',
+				bias: 'positive'
+			},
+			{
+				name: 'Greg Tanaka',
+				email: `greg.spo${SEED_DOMAIN}`,
+				relationship: 'Stakeholder',
+				bias: 'sporadic'
+			}
 		]
 	},
 	// 6. Effort Gap - Sam Patel
@@ -239,9 +324,24 @@ export const PERSONAS: PersonaConfig[] = [
 		cycleWeeks: 12,
 		cycleStatus: 'COMPLETED',
 		stakeholders: [
-			{ name: 'Alex Torres', email: `alext.pos${SEED_DOMAIN}`, relationship: 'Product Manager', bias: 'positive' },
-			{ name: 'Maria Costa', email: `maria.neu${SEED_DOMAIN}`, relationship: 'Tech Lead', bias: 'neutral' },
-			{ name: 'Ryan Hughes', email: `ryan.neg${SEED_DOMAIN}`, relationship: 'Director', bias: 'negative' }
+			{
+				name: 'Alex Torres',
+				email: `alext.pos${SEED_DOMAIN}`,
+				relationship: 'Product Manager',
+				bias: 'positive'
+			},
+			{
+				name: 'Maria Costa',
+				email: `maria.neu${SEED_DOMAIN}`,
+				relationship: 'Tech Lead',
+				bias: 'neutral'
+			},
+			{
+				name: 'Ryan Hughes',
+				email: `ryan.neg${SEED_DOMAIN}`,
+				relationship: 'Director',
+				bias: 'negative'
+			}
 		]
 	},
 	// 7. Late Bloomer - Riley Chen
@@ -269,9 +369,24 @@ export const PERSONAS: PersonaConfig[] = [
 		cycleWeeks: 12,
 		cycleStatus: 'COMPLETED',
 		stakeholders: [
-			{ name: 'Chris Walker', email: `chris.neu${SEED_DOMAIN}`, relationship: 'Data Analyst', bias: 'neutral' },
-			{ name: 'Jessica Lin', email: `jessica.pos${SEED_DOMAIN}`, relationship: 'Product Director', bias: 'positive' },
-			{ name: 'Brandon Miller', email: `brandon.neg${SEED_DOMAIN}`, relationship: 'Engineering Lead', bias: 'negative' }
+			{
+				name: 'Chris Walker',
+				email: `chris.neu${SEED_DOMAIN}`,
+				relationship: 'Data Analyst',
+				bias: 'neutral'
+			},
+			{
+				name: 'Jessica Lin',
+				email: `jessica.pos${SEED_DOMAIN}`,
+				relationship: 'Product Director',
+				bias: 'positive'
+			},
+			{
+				name: 'Brandon Miller',
+				email: `brandon.neg${SEED_DOMAIN}`,
+				relationship: 'Engineering Lead',
+				bias: 'negative'
+			}
 		]
 	},
 	// 8. Early Stage - Jamie Torres
@@ -299,9 +414,24 @@ export const PERSONAS: PersonaConfig[] = [
 		cycleWeeks: 12,
 		cycleStatus: 'ACTIVE',
 		stakeholders: [
-			{ name: 'Pat Henderson', email: `pat.pos${SEED_DOMAIN}`, relationship: 'Mentor', bias: 'positive' },
-			{ name: 'Linda Nguyen', email: `linda.neu${SEED_DOMAIN}`, relationship: 'Manager', bias: 'neutral' },
-			{ name: 'Steve Kowalski', email: `steve.neg${SEED_DOMAIN}`, relationship: 'Senior Peer', bias: 'negative' }
+			{
+				name: 'Pat Henderson',
+				email: `pat.pos${SEED_DOMAIN}`,
+				relationship: 'Mentor',
+				bias: 'positive'
+			},
+			{
+				name: 'Linda Nguyen',
+				email: `linda.neu${SEED_DOMAIN}`,
+				relationship: 'Manager',
+				bias: 'neutral'
+			},
+			{
+				name: 'Steve Kowalski',
+				email: `steve.neg${SEED_DOMAIN}`,
+				relationship: 'Senior Peer',
+				bias: 'negative'
+			}
 		]
 	}
 ];

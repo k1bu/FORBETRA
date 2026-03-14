@@ -85,33 +85,6 @@ export const actions: Actions = {
 		const phone = String(formData.get('phone') ?? '').trim();
 		const message = String(formData.get('message') ?? '').trim();
 
-		// Parse optional pre-fill payload
-		const objectiveTitle = String(formData.get('prefillObjectiveTitle') ?? '').trim();
-		const objectiveDescription = String(formData.get('prefillObjectiveDescription') ?? '').trim();
-		const subgoalsJson = String(formData.get('prefillSubgoals') ?? '').trim();
-		const stakeholdersJson = String(formData.get('prefillStakeholders') ?? '').trim();
-		const cycleDurationWeeks = String(formData.get('prefillCycleDurationWeeks') ?? '').trim();
-		const checkInFrequency = String(formData.get('prefillCheckInFrequency') ?? '').trim();
-		const stakeholderCadence = String(formData.get('prefillStakeholderCadence') ?? '').trim();
-
-		let payload: Record<string, unknown> | null = null;
-		if (objectiveTitle.length > 0) {
-			payload = { objectiveTitle, objectiveDescription };
-			try {
-				if (subgoalsJson) payload.subgoals = JSON.parse(subgoalsJson);
-			} catch {
-				/* intentionally empty */
-			}
-			try {
-				if (stakeholdersJson) payload.stakeholders = JSON.parse(stakeholdersJson);
-			} catch {
-				/* intentionally empty */
-			}
-			if (cycleDurationWeeks) payload.cycleDurationWeeks = Number(cycleDurationWeeks) || 12;
-			if (checkInFrequency) payload.checkInFrequency = checkInFrequency;
-			if (stakeholderCadence) payload.stakeholderCadence = stakeholderCadence;
-		}
-
 		if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
 			return fail(400, {
 				action: 'createInvite' as const,
@@ -174,7 +147,7 @@ export const actions: Actions = {
 							name: name.length > 0 ? name : existingInvite.name,
 							phone: normalizedPhone ?? existingInvite.phone,
 							message: message.length > 0 ? message : existingInvite.message,
-							payload: (payload ?? undefined) as Prisma.InputJsonValue | undefined,
+							payload: undefined,
 							tokenHash,
 							expiresAt,
 							acceptedAt: null,
@@ -202,7 +175,7 @@ export const actions: Actions = {
 						name: name.length > 0 ? name : null,
 						phone: normalizedPhone,
 						message: message.length > 0 ? message : null,
-						payload: (payload ?? undefined) as Prisma.InputJsonValue | undefined,
+						payload: undefined,
 						tokenHash,
 						expiresAt
 					}

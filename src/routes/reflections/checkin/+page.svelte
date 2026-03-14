@@ -258,7 +258,7 @@
 			<div class="rounded-xl border border-border-default bg-surface-subtle px-5 py-4">
 				<div class="flex items-center gap-3 text-base text-text-secondary">
 					<Target class="h-5 w-5 text-accent" />
-					<span class="font-medium">Objective:</span>
+					<span class="font-medium">Goal:</span>
 					<span class="text-lg font-semibold text-text-primary">{data.objective.title}</span>
 				</div>
 			</div>
@@ -294,7 +294,7 @@
 					<div class="border-t border-border-default px-4 py-4">
 						<p class="mb-3 text-xs leading-relaxed text-text-secondary">
 							Use these as reference points when rating your overall effort and progress. They help
-							define what success looks like for your objective.
+							define what success looks like for your goal.
 						</p>
 						<div class="space-y-2">
 							{#each data.subgoals as subgoal, index (subgoal.id)}
@@ -368,7 +368,7 @@
 								{/if}
 							</label>
 							<p class="text-xs text-text-tertiary">
-								How much attention did you give to your objective this week?
+								How much attention did you give to your goal this week?
 							</p>
 						</div>
 					</div>
@@ -446,7 +446,7 @@
 								{/if}
 							</label>
 							<p class="text-xs text-text-tertiary">
-								How effective was your performance related to your objective this week?
+								How effective was your performance related to your goal this week?
 							</p>
 						</div>
 					</div>

@@ -43,11 +43,7 @@ export const load: PageServerLoad = async (event) => {
 		const isFirstVisit = !hasAnyObjective;
 
 		// Check if onboarding is complete
-		const isOnboardingComplete = !!(
-			objective &&
-			objective.subgoals.length > 0 &&
-			objective.cycles.length > 0
-		);
+		const isOnboardingComplete = !!(objective && objective.cycles.length > 0);
 
 		// If no objective, redirect to onboarding
 		if (!objective) {

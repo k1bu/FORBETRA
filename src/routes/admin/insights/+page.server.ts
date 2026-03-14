@@ -67,9 +67,7 @@ export const load: PageServerLoad = async (event) => {
 			thumbsNone,
 			successRate:
 				totalInsights > 0
-					? Math.round(
-							((statusBreakdown['COMPLETED'] ?? 0) / totalInsights) * 100
-						)
+					? Math.round(((statusBreakdown['COMPLETED'] ?? 0) / totalInsights) * 100)
 					: 0
 		}
 	};

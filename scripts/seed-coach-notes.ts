@@ -116,7 +116,7 @@ function getNotesForPattern(pattern: PersonaPattern, totalWeeks: number): NoteTe
 				{
 					weekNumber: 1,
 					content:
-						'Sam is clearly a hard worker, but there\'s a pattern of effort not converting to visible results. This is a prioritization and visibility issue, not a work ethic issue. Critical to frame this correctly to avoid Sam feeling undervalued.'
+						"Sam is clearly a hard worker, but there's a pattern of effort not converting to visible results. This is a prioritization and visibility issue, not a work ethic issue. Critical to frame this correctly to avoid Sam feeling undervalued."
 				},
 				{
 					weekNumber: midWeek,
@@ -173,9 +173,6 @@ export type CoachNoteData = {
 /**
  * Generate coach notes for a persona.
  */
-export function generateCoachNotes(
-	pattern: PersonaPattern,
-	totalWeeks: number
-): CoachNoteData[] {
+export function generateCoachNotes(pattern: PersonaPattern, totalWeeks: number): CoachNoteData[] {
 	return getNotesForPattern(pattern, totalWeeks);
 }

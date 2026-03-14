@@ -1,10 +1,14 @@
 <script lang="ts">
-	let { class: className = '', variant = 'text' }: { class?: string; variant?: 'text' | 'circle' | 'rect' } =
-		$props();
+	let {
+		class: className = '',
+		variant = 'text'
+	}: { class?: string; variant?: 'text' | 'circle' | 'rect' } = $props();
 </script>
 
 <div
-	class="skeleton-shimmer relative overflow-hidden rounded bg-surface-subtle {variant === 'circle' ? 'rounded-full' : ''} {className}"
+	class="skeleton-shimmer relative overflow-hidden rounded bg-surface-subtle {variant === 'circle'
+		? 'rounded-full'
+		: ''} {className}"
 	role="status"
 	aria-label="Loading"
 ></div>
