@@ -2,8 +2,6 @@ import { redirect } from '@sveltejs/kit';
 import prisma from '$lib/server/prisma';
 import { requireRole } from '$lib/server/auth';
 import type { PageServerLoad } from './$types';
-import { stdDev } from '$lib/server/coachUtils';
-import { findSignificantGaps, type PerceptionGap } from '$lib/utils/gapNarrative';
 
 export const load: PageServerLoad = async (event) => {
 	const { dbUser } = requireRole(event, 'INDIVIDUAL');
@@ -76,14 +74,6 @@ export const load: PageServerLoad = async (event) => {
 				}
 			})
 		: [];
-	const currentTime = new Date();
-	const currentWeek = cycle
-		? Math.max(
-				1,
-				Math.floor((currentTime.getTime() - cycle.startDate.getTime()) / (7 * 24 * 60 * 60 * 1000))
-			)
-		: null;
-
 	const reflectionTrendMap = new Map<
 		number,
 		{
@@ -111,123 +101,6 @@ export const load: PageServerLoad = async (event) => {
 			reflectionTrendMap.set(reflection.weekNumber, weekEntry);
 		});
 	}
-
-	const trendWeeks = Array.from(reflectionTrendMap.values())
-		.sort((a, b) => b.weekNumber - a.weekNumber)
-		.slice(0, 4);
-
-	let trendEffortSum = 0;
-	let trendEffortCount = 0;
-	let trendProgressSum = 0;
-	let trendProgressCount = 0;
-
-	const reflectionTrend = trendWeeks.map((week) => {
-		const effortAverage =
-			week.effortScores.length > 0
-				? Number(
-						(
-							week.effortScores.reduce((sum, score) => sum + score, 0) / week.effortScores.length
-						).toFixed(1)
-					)
-				: null;
-		if (effortAverage !== null) {
-			trendEffortSum += effortAverage;
-			trendEffortCount += 1;
-		}
-
-		const progressAverage =
-			week.performanceScores.length > 0
-				? Number(
-						(
-							week.performanceScores.reduce((sum, score) => sum + score, 0) /
-							week.performanceScores.length
-						).toFixed(1)
-					)
-				: null;
-		if (progressAverage !== null) {
-			trendProgressSum += progressAverage;
-			trendProgressCount += 1;
-		}
-
-		return {
-			weekNumber: week.weekNumber,
-			effortScore: effortAverage,
-			performanceScore: progressAverage
-		};
-	});
-
-	const reflectionTrendSummary = {
-		weeks: reflectionTrend,
-		avgEffort: trendEffortCount > 0 ? Number((trendEffortSum / trendEffortCount).toFixed(1)) : null,
-		avgProgress:
-			trendProgressCount > 0 ? Number((trendProgressSum / trendProgressCount).toFixed(1)) : null
-	};
-
-	const effortSeries = reflectionTrend
-		.map((week) => week.effortScore)
-		.filter((value): value is number => value !== null);
-	const progressSeries = reflectionTrend
-		.map((week) => week.performanceScore)
-		.filter((value): value is number => value !== null);
-
-	const effortStd = stdDev(effortSeries);
-	const progressStd = stdDev(progressSeries);
-
-	const stdValues = [effortStd, progressStd].filter((value): value is number => value !== null);
-	const combinedStd =
-		stdValues.length > 0
-			? stdValues.reduce((sum, value) => sum + value, 0) / stdValues.length
-			: null;
-	const stabilityScore =
-		combinedStd !== null ? Math.max(0, Math.round(100 - combinedStd * 10)) : null;
-
-	// Trajectory: linear regression slope of last 4 weeks combined effort+performance
-	let trajectoryScore: number | null = null;
-	if (trendWeeks.length >= 2) {
-		const points: { x: number; y: number }[] = [];
-		for (const week of trendWeeks) {
-			const effortAvg =
-				week.effortScores.length > 0
-					? week.effortScores.reduce((s, v) => s + v, 0) / week.effortScores.length
-					: null;
-			const perfAvg =
-				week.performanceScores.length > 0
-					? week.performanceScores.reduce((s, v) => s + v, 0) / week.performanceScores.length
-					: null;
-			const vals = [effortAvg, perfAvg].filter((v): v is number => v !== null);
-			if (vals.length > 0) {
-				points.push({ x: week.weekNumber, y: vals.reduce((a, b) => a + b, 0) / vals.length });
-			}
-		}
-		if (points.length >= 2) {
-			const n = points.length;
-			const sumX = points.reduce((s, p) => s + p.x, 0);
-			const sumY = points.reduce((s, p) => s + p.y, 0);
-			const sumXY = points.reduce((s, p) => s + p.x * p.y, 0);
-			const sumX2 = points.reduce((s, p) => s + p.x * p.x, 0);
-			const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
-			trajectoryScore = Math.max(-100, Math.min(100, Math.round(slope * 25)));
-		}
-	}
-
-	let respondedThisWeek = 0;
-	if (currentWeek) {
-		objective.stakeholders.forEach((stakeholder) => {
-			const latestFeedback = stakeholder.feedbacks[0] ?? null;
-			const latestReflectionWeek = latestFeedback?.reflection?.weekNumber ?? null;
-			const isCurrentWeekResponse =
-				currentWeek !== null &&
-				latestReflectionWeek === currentWeek &&
-				!!latestFeedback?.submittedAt;
-
-			if (isCurrentWeekResponse) {
-				respondedThisWeek += 1;
-			}
-		});
-	}
-
-	const alignmentRatio =
-		objective.stakeholders.length > 0 ? respondedThisWeek / objective.stakeholders.length : null;
 
 	// Prepare data for Correlation View and Gap Lens
 	let correlationData: {
@@ -478,40 +351,6 @@ export const load: PageServerLoad = async (event) => {
 		});
 	}
 
-	// Perception gap analysis — compare latest self-scores to rater averages
-	let perceptionGaps: PerceptionGap[] = [];
-	if (cycle && currentWeek) {
-		const latestWeek = reflectionTrend[0]; // Most recent week
-		if (latestWeek) {
-			const recentFeedbacks = allFeedbacks.filter(
-				(f) => f.reflection.weekNumber === latestWeek.weekNumber
-			);
-			if (recentFeedbacks.length > 0) {
-				const raterEffortScores = recentFeedbacks
-					.map((f) => f.effortScore)
-					.filter((s): s is number => s != null);
-				const raterPerfScores = recentFeedbacks
-					.map((f) => f.performanceScore)
-					.filter((s): s is number => s != null);
-				const raterEffortAvg =
-					raterEffortScores.length > 0
-						? raterEffortScores.reduce((a, b) => a + b, 0) / raterEffortScores.length
-						: null;
-				const raterPerfAvg =
-					raterPerfScores.length > 0
-						? raterPerfScores.reduce((a, b) => a + b, 0) / raterPerfScores.length
-						: null;
-
-				perceptionGaps = findSignificantGaps(
-					latestWeek.effortScore,
-					latestWeek.performanceScore,
-					raterEffortAvg,
-					raterPerfAvg
-				);
-			}
-		}
-	}
-
 	// History data: reflections grouped by week (merged from history page)
 	type HistoryWeek = {
 		weekNumber: number;
@@ -551,18 +390,9 @@ export const load: PageServerLoad = async (event) => {
 			id: objective.id,
 			title: objective.title
 		},
-		reflectionTrend: reflectionTrendSummary,
-		insights: {
-			avgEffort: reflectionTrendSummary.avgEffort,
-			avgProgress: reflectionTrendSummary.avgProgress,
-			stabilityScore,
-			trajectoryScore,
-			alignmentRatio
-		},
 		correlationData,
 		gapLensData,
 		cycleReport,
-		perceptionGaps,
 		historyWeeks
 	};
 };

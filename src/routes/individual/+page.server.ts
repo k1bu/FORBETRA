@@ -1,6 +1,6 @@
 import prisma from '$lib/server/prisma';
 import { requireRole } from '$lib/server/auth';
-import { stdDev, computeWeekNumber } from '$lib/server/coachUtils';
+import { computeWeekNumber } from '$lib/server/coachUtils';
 import { parseCheckInDays } from '$lib/utils/checkInDays';
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
@@ -389,51 +389,6 @@ export const load: PageServerLoad = async (event) => {
 			}
 		}
 
-		// --- Latest Scorecard: per-stakeholder latest scores ---
-		const latestScorecard: Array<{
-			stakeholderId: string;
-			stakeholderName: string;
-			stakeholderEffort: number | null;
-			stakeholderPerformance: number | null;
-			stakeholderWeek: number | null;
-		}> = [];
-
-		if (isOnboardingComplete && allFeedbacks.length > 0) {
-			// Group feedbacks by stakeholderId, pick highest weekNumber per stakeholder
-			const latestByStakeholder = new Map<
-				string,
-				{
-					effortScore: number | null;
-					performanceScore: number | null;
-					weekNumber: number;
-				}
-			>();
-
-			for (const fb of allFeedbacks) {
-				if (!fb.reflection) continue;
-				const existing = latestByStakeholder.get(fb.stakeholderId);
-				if (!existing || fb.reflection.weekNumber > existing.weekNumber) {
-					latestByStakeholder.set(fb.stakeholderId, {
-						effortScore: fb.effortScore,
-						performanceScore: fb.performanceScore,
-						weekNumber: fb.reflection.weekNumber
-					});
-				}
-			}
-
-			// Include all stakeholders (even those with no data yet)
-			for (const sh of objective.stakeholders) {
-				const data = latestByStakeholder.get(sh.id);
-				latestScorecard.push({
-					stakeholderId: sh.id,
-					stakeholderName: stakeholderNameMap.get(sh.id) ?? sh.name,
-					stakeholderEffort: data?.effortScore ?? null,
-					stakeholderPerformance: data?.performanceScore ?? null,
-					stakeholderWeek: data?.weekNumber ?? null
-				});
-			}
-		}
-
 		// --- Heat Map Data: weekly effort/performance averages ---
 		let heatMapWeeks: Array<{
 			weekNumber: number;
@@ -519,14 +474,7 @@ export const load: PageServerLoad = async (event) => {
 			visualizationData = { individual, stakeholders, stakeholderList };
 		}
 
-		// --- Stakeholder Heat Map: weekly avg + per-stakeholder breakdown ---
-		type WeekScore = { weekNumber: number; effort: number | null; performance: number | null };
-		let stakeholderAvgHeatMap: WeekScore[] | null = null;
-		let stakeholderDetail: Array<{
-			id: string;
-			name: string;
-			weeks: WeekScore[];
-		}> | null = null;
+		// --- Perception Gaps: per-stakeholder self-vs-stakeholder comparison ---
 		let perceptionGaps: Array<{
 			stakeholderId: string;
 			stakeholderName: string;
@@ -564,48 +512,7 @@ export const load: PageServerLoad = async (event) => {
 				if (fb.performanceScore !== null) w.performances.push(fb.performanceScore);
 			}
 
-			// Build aggregate stakeholder average per week
-			const aggWeekMap = new Map<number, { efforts: number[]; performances: number[] }>();
-			for (const [, sh] of shWeekMap) {
-				for (const [wk, scores] of sh.weeks) {
-					if (!aggWeekMap.has(wk)) {
-						aggWeekMap.set(wk, { efforts: [], performances: [] });
-					}
-					const agg = aggWeekMap.get(wk)!;
-					agg.efforts.push(...scores.efforts);
-					agg.performances.push(...scores.performances);
-				}
-			}
-
-			const avg = (arr: number[]) =>
-				arr.length > 0 ? Number((arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1)) : null;
-
-			stakeholderAvgHeatMap = [];
-			for (let wk = 1; wk <= totalWeeks; wk++) {
-				const d = aggWeekMap.get(wk);
-				stakeholderAvgHeatMap.push({
-					weekNumber: wk,
-					effort: d ? avg(d.efforts) : null,
-					performance: d ? avg(d.performances) : null
-				});
-			}
-
-			// Build per-stakeholder detail
-			stakeholderDetail = Array.from(shWeekMap.entries()).map(([id, sh]) => {
-				const weeks: WeekScore[] = [];
-				for (let wk = 1; wk <= totalWeeks!; wk++) {
-					const d = sh.weeks.get(wk);
-					weeks.push({
-						weekNumber: wk,
-						effort: d ? avg(d.efforts) : null,
-						performance: d ? avg(d.performances) : null
-					});
-				}
-				return { id, name: sh.name, weeks };
-			});
-
-			// --- Perception Gaps: per-stakeholder self-vs-stakeholder comparison ---
-			// We need self scores per week (from heatMapWeeks or cycle.reflections)
+			// Self scores per week
 			const selfWeekMap = new Map<number, { efforts: number[]; performances: number[] }>();
 			for (const r of cycle.reflections) {
 				if (!selfWeekMap.has(r.weekNumber)) {
@@ -618,7 +525,6 @@ export const load: PageServerLoad = async (event) => {
 
 			perceptionGaps = Array.from(shWeekMap.entries())
 				.map(([shId, sh]) => {
-					// Find weeks where both self and this stakeholder have data
 					const pairedWeeks: Array<{
 						weekNumber: number;
 						selfEffort: number;
@@ -678,7 +584,6 @@ export const load: PageServerLoad = async (event) => {
 					const effortGap = Number((latest.selfEffort - latest.stkEffort).toFixed(1));
 					const performanceGap = Number((latest.selfPerf - latest.stkPerf).toFixed(1));
 
-					// Trend: look at last 2-3 paired weeks
 					function computeTrend(
 						pairs: typeof pairedWeeks,
 						getSelfScore: (p: (typeof pairedWeeks)[0]) => number,
@@ -725,83 +630,7 @@ export const load: PageServerLoad = async (event) => {
 				.filter((g) => g.effortGap !== null || g.performanceGap !== null);
 		}
 
-		// --- Cycle Metrics: stability, trajectory, alignment ---
-		let stabilityScore: number | null = null;
-		let trajectoryScore: number | null = null;
-		let alignmentRatio: number | null = null;
-
-		if (cycle && currentWeek && isOnboardingComplete) {
-			const metricWeekMap = new Map<number, { efforts: number[]; performances: number[] }>();
-			for (const r of cycle.reflections) {
-				if (r.weekNumber > currentWeek - 4 && r.weekNumber <= currentWeek) {
-					if (!metricWeekMap.has(r.weekNumber)) {
-						metricWeekMap.set(r.weekNumber, { efforts: [], performances: [] });
-					}
-					const w = metricWeekMap.get(r.weekNumber)!;
-					if (r.effortScore !== null) w.efforts.push(r.effortScore);
-					if (r.performanceScore !== null) w.performances.push(r.performanceScore);
-				}
-			}
-
-			const last4Weeks = Array.from(metricWeekMap.entries())
-				.map(([wk, d]) => ({
-					weekNumber: wk,
-					effort:
-						d.efforts.length > 0 ? d.efforts.reduce((a, b) => a + b, 0) / d.efforts.length : null,
-					performance:
-						d.performances.length > 0
-							? d.performances.reduce((a, b) => a + b, 0) / d.performances.length
-							: null
-				}))
-				.sort((a, b) => a.weekNumber - b.weekNumber);
-
-			// Stability: 100 - (combined std dev * 10)
-			const effortValues = last4Weeks.map((w) => w.effort).filter((v): v is number => v !== null);
-			const perfValues = last4Weeks
-				.map((w) => w.performance)
-				.filter((v): v is number => v !== null);
-			const efStd = stdDev(effortValues);
-			const prStd = stdDev(perfValues);
-			const stds = [efStd, prStd].filter((v): v is number => v !== null);
-			const combinedStd = stds.length > 0 ? stds.reduce((a, b) => a + b, 0) / stds.length : null;
-			stabilityScore =
-				combinedStd !== null ? Math.max(0, Math.round(100 - combinedStd * 10)) : null;
-
-			// Trajectory: linear regression slope on last 4 weeks
-			if (last4Weeks.length >= 2) {
-				const points: { x: number; y: number }[] = [];
-				for (const week of last4Weeks) {
-					const vals = [week.effort, week.performance].filter((v): v is number => v !== null);
-					if (vals.length > 0) {
-						points.push({
-							x: week.weekNumber,
-							y: vals.reduce((a, b) => a + b, 0) / vals.length
-						});
-					}
-				}
-				if (points.length >= 2) {
-					const n = points.length;
-					const sumX = points.reduce((s, p) => s + p.x, 0);
-					const sumY = points.reduce((s, p) => s + p.y, 0);
-					const sumXY = points.reduce((s, p) => s + p.x * p.y, 0);
-					const sumX2 = points.reduce((s, p) => s + p.x * p.x, 0);
-					const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
-					trajectoryScore = Math.max(-100, Math.min(100, Math.round(slope * 25)));
-				}
-			}
-
-			// Alignment: ratio of stakeholders who responded this week
-			const totalStakeholders = objective.stakeholders.length;
-			if (totalStakeholders > 0 && allFeedbacks.length > 0) {
-				const thisWeekFeedbacks = allFeedbacks.filter(
-					(f) => f.reflection && f.reflection.weekNumber === currentWeek
-				);
-				const uniqueStakeholderIds = new Set(thisWeekFeedbacks.map((f) => f.stakeholderId));
-				alignmentRatio = Math.round((uniqueStakeholderIds.size / totalStakeholders) * 100);
-			}
-		}
-
-		// --- Parallel batch: Latest AI Insight + Recent Notes + Identity Anchor ---
+		// --- Latest AI Insight ---
 		let latestInsight: {
 			id: string;
 			content: string | null;
@@ -809,53 +638,18 @@ export const load: PageServerLoad = async (event) => {
 			weekNumber: number | null;
 			createdAt: string;
 		} | null = null;
-		let weeklyAction: string | null = null;
-		let recentNotes: Array<{
-			source: 'self' | 'stakeholder';
-			name: string | null;
-			text: string;
-			weekNumber: number;
-		}> = [];
-		let identityAnchor: string | null = null;
 
 		if (cycle && isOnboardingComplete) {
-			const [insight, selfNotes, stkComments, week1] = await Promise.all([
-				prisma.insight.findFirst({
-					where: {
-						userId: dbUser.id,
-						cycleId: cycle.id,
-						status: 'COMPLETED',
-						type: { in: ['CHECK_IN', 'WEEKLY_SYNTHESIS'] }
-					},
-					orderBy: { createdAt: 'desc' },
-					select: { id: true, content: true, type: true, weekNumber: true, createdAt: true }
-				}),
-				prisma.reflection.findMany({
-					where: { cycleId: cycle.id, userId: dbUser.id, notes: { not: null } },
-					orderBy: { submittedAt: 'desc' },
-					take: 3,
-					select: { notes: true, weekNumber: true }
-				}),
-				prisma.feedback.findMany({
-					where: {
-						stakeholder: { objectiveId: objective.id },
-						reflection: { cycleId: cycle.id },
-						comment: { not: null }
-					},
-					orderBy: { submittedAt: 'desc' },
-					take: 3,
-					select: {
-						comment: true,
-						stakeholder: { select: { name: true } },
-						reflection: { select: { weekNumber: true } }
-					}
-				}),
-				prisma.reflection.findFirst({
-					where: { cycleId: cycle.id, userId: dbUser.id, weekNumber: 1, notes: { not: null } },
-					select: { notes: true },
-					orderBy: { submittedAt: 'asc' }
-				})
-			]);
+			const insight = await prisma.insight.findFirst({
+				where: {
+					userId: dbUser.id,
+					cycleId: cycle.id,
+					status: 'COMPLETED',
+					type: { in: ['CHECK_IN', 'WEEKLY_SYNTHESIS'] }
+				},
+				orderBy: { createdAt: 'desc' },
+				select: { id: true, content: true, type: true, weekNumber: true, createdAt: true }
+			});
 
 			if (insight) {
 				latestInsight = {
@@ -865,108 +659,7 @@ export const load: PageServerLoad = async (event) => {
 					weekNumber: insight.weekNumber,
 					createdAt: insight.createdAt.toISOString()
 				};
-
-				// Extract weekly action from insight content (tagged with "ACTION: ")
-				if (insight.content) {
-					const actionMatch = insight.content.match(/^ACTION:\s*(.+)$/m);
-					if (actionMatch) {
-						weeklyAction = actionMatch[1].trim();
-					}
-				}
 			}
-
-			for (const n of selfNotes) {
-				if (n.notes && n.notes.trim().length > 0) {
-					recentNotes.push({
-						source: 'self',
-						name: null,
-						text: n.notes.trim(),
-						weekNumber: n.weekNumber
-					});
-				}
-			}
-			for (const c of stkComments) {
-				if (c.comment && c.comment.trim().length > 0) {
-					recentNotes.push({
-						source: 'stakeholder',
-						name: c.stakeholder.name,
-						text: c.comment.trim(),
-						weekNumber: c.reflection?.weekNumber ?? 0
-					});
-				}
-			}
-			recentNotes.sort((a, b) => b.weekNumber - a.weekNumber);
-			recentNotes = recentNotes.slice(0, 5);
-
-			identityAnchor = week1?.notes?.trim() || null;
-		}
-
-		// --- Journey Summary (for completed cycles) ---
-		let journeySummary: {
-			effortStart: number | null;
-			effortEnd: number | null;
-			performanceStart: number | null;
-			performanceEnd: number | null;
-			alignmentStart: number | null;
-			alignmentEnd: number | null;
-			checkInCount: number;
-			raterCount: number;
-			insightCount: number;
-			shareableTakeaway: string | null;
-		} | null = null;
-
-		if (cycle && cycle.status === 'COMPLETED' && isOnboardingComplete) {
-			const filledWeeks = (heatMapWeeks ?? []).filter(
-				(w) => w.effort !== null || w.performance !== null
-			);
-			const firstWeek = filledWeeks[0] ?? null;
-			const lastWeek = filledWeeks.length > 1 ? filledWeeks[filledWeeks.length - 1] : null;
-
-			// Alignment start/end from stakeholder heat map
-			const filledStkWeeks = (stakeholderAvgHeatMap ?? []).filter(
-				(w) => w.effort !== null || w.performance !== null
-			);
-			const stkFirst = filledStkWeeks[0] ?? null;
-			const stkLast = filledStkWeeks.length > 1 ? filledStkWeeks[filledStkWeeks.length - 1] : null;
-
-			// Count check-ins and insights (parallel)
-			const checkInCount = cycle.reflections.length;
-			const raterCount = objective.stakeholders.length;
-			const [insightCount, cycleReport] = await Promise.all([
-				prisma.insight.count({
-					where: { cycleId: cycle.id, userId: dbUser.id, status: 'COMPLETED' }
-				}),
-				prisma.insight.findFirst({
-					where: {
-						cycleId: cycle.id,
-						userId: dbUser.id,
-						type: 'CYCLE_REPORT',
-						status: 'COMPLETED'
-					},
-					select: { content: true }
-				})
-			]);
-
-			let shareableTakeaway: string | null = null;
-			if (cycleReport?.content) {
-				const takeawayMatch = cycleReport.content.match(/## Shareable Takeaway\s*\n+(.+)/);
-				if (takeawayMatch) {
-					shareableTakeaway = takeawayMatch[1].trim();
-				}
-			}
-
-			journeySummary = {
-				effortStart: firstWeek?.effort ?? null,
-				effortEnd: lastWeek?.effort ?? firstWeek?.effort ?? null,
-				performanceStart: firstWeek?.performance ?? null,
-				performanceEnd: lastWeek?.performance ?? firstWeek?.performance ?? null,
-				alignmentStart: stkFirst ? Math.round(((stkFirst.effort ?? 0) / 10) * 100) : null,
-				alignmentEnd: stkLast ? Math.round(((stkLast.effort ?? 0) / 10) * 100) : null,
-				checkInCount,
-				raterCount,
-				insightCount,
-				shareableTakeaway
-			};
 		}
 
 		// Compute the next check-in day name for the welcome card
@@ -1020,20 +713,9 @@ export const load: PageServerLoad = async (event) => {
 			nextAction,
 			myLastRatings,
 			stakeholdersLastRatings,
-			heatMapWeeks,
-			stakeholderAvgHeatMap,
-			stakeholderDetail,
 			perceptionGaps,
-			cycleMetrics: isOnboardingComplete
-				? { stabilityScore, trajectoryScore, completionRate, alignmentRatio }
-				: null,
 			latestInsight,
-			weeklyAction,
-			latestScorecard: isOnboardingComplete ? latestScorecard : [],
-			visualizationData: isOnboardingComplete ? visualizationData : null,
-			recentNotes,
-			identityAnchor,
-			journeySummary
+			visualizationData: isOnboardingComplete ? visualizationData : null
 		};
 	} catch (error: unknown) {
 		const errMsg = error instanceof Error ? error.message : 'Unknown error';

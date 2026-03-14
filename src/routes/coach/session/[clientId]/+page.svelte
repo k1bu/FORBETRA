@@ -274,11 +274,11 @@
 									<div class="min-w-0 flex-1">
 										{#if r.effortScore !== null || r.performanceScore !== null}
 											<span class="text-text-secondary">
-												{#if r.effortScore !== null}E: <strong>{r.effortScore}</strong>{/if}
+												{#if r.effortScore !== null}Effort: <strong>{r.effortScore}</strong>{/if}
 												{#if r.effortScore !== null && r.performanceScore !== null}
 													·
 												{/if}
-												{#if r.performanceScore !== null}P: <strong>{r.performanceScore}</strong
+												{#if r.performanceScore !== null}Perf: <strong>{r.performanceScore}</strong
 													>{/if}
 											</span>
 										{/if}
@@ -321,10 +321,10 @@
 							<p class="text-sm font-medium text-text-primary">{trend.name}</p>
 							<div class="flex gap-3 text-xs text-text-muted">
 								{#if trend.latestEffort !== null}
-									<span>E: {trend.latestEffort}</span>
+									<span>Effort: {trend.latestEffort}</span>
 								{/if}
 								{#if trend.latestPerformance !== null}
-									<span>P: {trend.latestPerformance}</span>
+									<span>Perf: {trend.latestPerformance}</span>
 								{/if}
 							</div>
 						</div>

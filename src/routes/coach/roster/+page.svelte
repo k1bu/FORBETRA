@@ -50,13 +50,13 @@
 </script>
 
 <svelte:head>
-	<title>Roster | Forbetra</title>
+	<title>Clients | Forbetra</title>
 </svelte:head>
 
 <section class="mx-auto max-w-3xl space-y-6 px-4 py-8 sm:px-6">
 	<!-- Header -->
 	<div>
-		<h1 class="text-2xl font-bold text-text-primary">Client Roster</h1>
+		<h1 class="text-2xl font-bold text-text-primary">Clients</h1>
 		<p class="mt-1 text-sm text-text-muted">
 			{activeCount} active{#if archivedCount > 0}, {archivedCount} archived{/if}
 		</p>
@@ -130,9 +130,28 @@
 						{#if client.objective?.title}
 							<p class="mt-0.5 text-sm text-text-muted">{client.objective.title}</p>
 						{/if}
-						<p class="mt-0.5 text-xs text-text-tertiary">
-							Joined {formatRelativeDays(client.joinedAt)}
-						</p>
+						<div class="mt-1 flex items-center gap-2">
+							{#if client.objective?.cycle?.currentWeek}
+								<span class="rounded-full bg-accent/10 px-2 py-0.5 text-xs font-medium text-accent">
+									Week {client.objective.cycle.currentWeek}
+								</span>
+							{/if}
+							{#if client.objective?.insights?.avgEffort !== null && client.objective?.insights?.avgEffort !== undefined}
+								<span class="text-xs text-text-muted tabular-nums"
+									>Effort: {client.objective.insights.avgEffort}</span
+								>
+							{/if}
+							{#if client.objective?.insights?.avgProgress !== null && client.objective?.insights?.avgProgress !== undefined}
+								<span class="text-xs text-text-muted tabular-nums"
+									>Perf: {client.objective.insights.avgProgress}</span
+								>
+							{/if}
+							{#if !client.objective?.cycle?.currentWeek && !client.objective?.insights}
+								<span class="text-xs text-text-tertiary"
+									>Joined {formatRelativeDays(client.joinedAt)}</span
+								>
+							{/if}
+						</div>
 					</div>
 					<ChevronRight
 						class="h-4 w-4 shrink-0 text-text-muted transition-transform group-hover:translate-x-0.5"

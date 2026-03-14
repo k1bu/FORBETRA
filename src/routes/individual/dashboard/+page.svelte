@@ -258,7 +258,7 @@
 							>
 						</p>
 						<p>
-							Progress: <span
+							Performance: <span
 								class="font-semibold {getScoreColor(
 									data.feedbackSummary.avgProgress,
 									'performance'

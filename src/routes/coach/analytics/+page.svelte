@@ -239,14 +239,14 @@
 		<div class="rounded-lg border border-border-default bg-surface-raised p-4">
 			<div class="mb-1 flex items-center gap-1.5">
 				<TrendingUp class="h-4 w-4 text-text-muted" />
-				<p class="text-xs font-medium text-text-tertiary">Avg. Progress</p>
+				<p class="text-xs font-medium text-text-tertiary">Avg. Performance</p>
 			</div>
 			<p class="text-3xl font-bold text-text-primary tabular-nums">
-				{formatAverage(data.analytics.overallAvgProgress)}/5
+				{formatAverage(data.analytics.overallAvgProgress)}/10
 			</p>
 			{#if data.analytics.overallAvgEffort !== null}
 				<p class="mt-1 text-xs text-text-muted">
-					Effort: {formatAverage(data.analytics.overallAvgEffort)}/5
+					Effort: {formatAverage(data.analytics.overallAvgEffort)}/10
 				</p>
 			{/if}
 		</div>

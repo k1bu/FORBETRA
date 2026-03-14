@@ -2,21 +2,12 @@
 	import type { ActionData, PageData } from './$types';
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import {
-		Compass,
-		Target,
-		PenLine,
-		Users,
-		BrainCircuit,
-		Mail,
-		Check,
-		Smartphone
-	} from 'lucide-svelte';
+	import { Compass, Mail, Check, Smartphone } from 'lucide-svelte';
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
 
-	type Step = 'welcome' | 'how-it-works' | 'invite';
-	const allSteps: Step[] = ['welcome', 'how-it-works', 'invite'];
+	type Step = 'welcome' | 'invite';
+	const allSteps: Step[] = ['welcome', 'invite'];
 	let currentStep = $state<Step>('welcome');
 
 	const currentStepIndex = $derived(allSteps.indexOf(currentStep));
@@ -55,7 +46,7 @@
 	);
 	let isSubmitting = $state(false);
 
-	const stepLabels = ['Welcome', 'Your Edge', 'Invite Client'];
+	const stepLabels = ['Welcome', 'Invite Client'];
 
 	// Handle successful invite creation — redirect to coach hub
 	$effect(() => {
@@ -158,65 +149,13 @@
 				onclick={goNext}
 				class="inline-flex items-center gap-2 rounded-xl bg-accent px-8 py-3.5 font-semibold text-white transition-all hover:bg-accent-hover"
 			>
-				See Your Coaching Edge
+				Invite Your First Client
 				<span>&#8594;</span>
 			</button>
 		</div>
 	{/if}
 
-	<!-- Step 2: Your Coaching Edge -->
-	{#if currentStep === 'how-it-works'}
-		<div class="w-full space-y-8 text-center">
-			<div class="space-y-3">
-				<h1 class="text-3xl font-bold text-text-primary">Your Coaching Edge</h1>
-				<p class="mx-auto max-w-md text-base text-text-secondary">
-					Imagine walking into every session already knowing what matters most. Here's how Forbetra
-					makes that happen.
-				</p>
-			</div>
-
-			<div class="mx-auto max-w-xl space-y-3">
-				{#each [{ num: 1, icon: BrainCircuit, title: 'Arrive at sessions already prepared', desc: 'AI-generated prep highlights talking points, blind spots, and momentum shifts — ready every Monday morning.' }, { num: 2, icon: Users, title: "Spot what they can't see", desc: 'Stakeholders rate the same dimensions your client does. Perception gaps surface the coaching conversations that matter.' }, { num: 3, icon: Target, title: 'Track real momentum, not just intentions', desc: 'Weekly effort and performance data shows whether change is happening — so you can adjust your approach in real time.' }, { num: 4, icon: PenLine, title: 'Scale without losing depth', desc: 'Alerts flag who needs attention. Your notes feed directly into AI analysis. Manage 5 or 30 clients with the same quality.' }, { num: 5, icon: Compass, title: 'See your impact with evidence', desc: 'Watch trajectories shift over weeks and cycles. Know exactly when your coaching is moving the needle.' }] as card (card.num)}
-					<div
-						class="flex items-start gap-4 rounded-xl border border-border-default bg-surface-raised p-5 text-left transition-all hover:border-accent/30"
-					>
-						<div
-							class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent-muted text-sm font-bold text-accent"
-						>
-							{card.num}
-						</div>
-						<div class="flex-1">
-							<div class="flex items-center gap-2">
-								<card.icon class="h-5 w-5 text-accent" />
-								<h3 class="text-sm font-bold text-text-primary">{card.title}</h3>
-							</div>
-							<p class="mt-1 text-xs leading-relaxed text-text-secondary">{card.desc}</p>
-						</div>
-					</div>
-				{/each}
-			</div>
-
-			<div class="flex items-center justify-center gap-4">
-				<button
-					type="button"
-					onclick={goBack}
-					class="rounded-xl border border-border-default px-6 py-3 text-sm font-semibold text-text-secondary transition-all hover:border-border-strong hover:bg-surface-subtle"
-				>
-					&#8592; Back
-				</button>
-				<button
-					type="button"
-					onclick={goNext}
-					class="inline-flex items-center gap-2 rounded-xl bg-accent px-8 py-3.5 font-semibold text-white transition-all hover:bg-accent-hover"
-				>
-					Invite Your First Client
-					<span>&#8594;</span>
-				</button>
-			</div>
-		</div>
-	{/if}
-
-	<!-- Step 3: Invite Your First Client -->
+	<!-- Step 2: Invite Your First Client -->
 	{#if currentStep === 'invite'}
 		<div class="w-full space-y-8 text-center">
 			<div class="space-y-3">

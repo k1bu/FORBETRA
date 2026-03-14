@@ -9,7 +9,8 @@
 		{ href: '/individual', label: 'Home', desc: 'Overview & status', icon: Home },
 		{ href: '/reflections/checkin', label: 'Check-in', desc: 'Record your week', icon: PenLine },
 		{ href: '/individual/feedback', label: 'Feedback', desc: 'Reviewers & gaps', icon: Users },
-		{ href: '/individual/insights', label: 'Insights', desc: 'AI analysis', icon: Lightbulb }
+		{ href: '/individual/insights', label: 'Insights', desc: 'AI analysis', icon: Lightbulb },
+		{ href: '/individual/settings', label: 'Settings', desc: 'Profile & prefs', icon: Settings }
 	];
 
 	const isActive = (href: string) => {

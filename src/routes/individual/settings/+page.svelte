@@ -36,14 +36,14 @@
 </script>
 
 <svelte:head>
-	<title>Settings | Forbetra</title>
+	<title>Profile & Notifications | Forbetra</title>
 </svelte:head>
 
 <section class="mx-auto flex max-w-2xl flex-col gap-6 p-4 pb-12">
 	<header>
 		<div class="flex items-center gap-2">
 			<Settings2 class="h-5 w-5 text-accent" />
-			<h1 class="text-2xl font-bold text-text-primary">Settings</h1>
+			<h1 class="text-2xl font-bold text-text-primary">Profile & Notifications</h1>
 		</div>
 		<p class="mt-1 text-sm text-text-muted">Manage your profile and notification preferences.</p>
 	</header>

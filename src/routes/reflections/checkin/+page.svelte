@@ -584,10 +584,7 @@
 								: isSubmitting
 									? 'Submitting...'
 									: undefined}
-						class="group relative overflow-hidden rounded-xl bg-accent px-8 py-3.5 font-semibold text-white shadow-lg transition-all hover:bg-accent-hover hover:shadow-xl focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 {bothScoresSelected &&
-						!data.isLocked
-							? 'animate-pulse'
-							: ''}"
+						class="group relative overflow-hidden rounded-xl bg-accent px-8 py-3.5 font-semibold text-white shadow-lg transition-all hover:bg-accent-hover hover:shadow-xl focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
 					>
 						<span class="relative z-10 flex items-center gap-2">
 							{#if isSubmitting}

@@ -21,4 +21,13 @@
 		The feedback token may have been used already or expired. If you believe this is a mistake,
 		reach out to the participant who invited you for a fresh link.
 	</p>
+
+	<!-- eslint-disable svelte/no-navigation-without-resolve -->
+	<a
+		href="/"
+		class="mt-4 rounded-xl bg-accent px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-accent-hover"
+	>
+		Return to Forbetra
+	</a>
+	<!-- eslint-enable svelte/no-navigation-without-resolve -->
 </section>

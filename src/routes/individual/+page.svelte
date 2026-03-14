@@ -253,7 +253,7 @@
 
 	<!-- ═══ ZONE 3: At-a-Glance scores ═══ -->
 	{#if data.isOnboardingComplete && (data.myLastRatings || data.stakeholdersLastRatings)}
-		<div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+		<div class="grid grid-cols-2 gap-3">
 			<!-- My Effort -->
 			<div class="rounded-xl border border-border-default bg-surface-raised p-4">
 				<p class="text-[10px] font-semibold tracking-wider text-text-muted uppercase">My Effort</p>
@@ -272,6 +272,7 @@
 						{data.myLastRatings.effortChange >= 0 ? '+' : ''}{data.myLastRatings.effortChange}
 					</p>
 				{/if}
+				<p class="mt-1 text-[10px] text-text-muted">Your self-rated effort this week</p>
 			</div>
 
 			<!-- My Performance -->
@@ -295,6 +296,7 @@
 							.performanceChange}
 					</p>
 				{/if}
+				<p class="mt-1 text-[10px] text-text-muted">Your self-rated performance this week</p>
 			</div>
 
 			<!-- Reviewer Effort -->
@@ -319,12 +321,13 @@
 							.effortChange}
 					</p>
 				{/if}
+				<p class="mt-1 text-[10px] text-text-muted">How reviewers see your effort</p>
 			</div>
 
 			<!-- Reviewer Performance -->
 			<div class="rounded-xl border border-border-default bg-surface-raised p-4">
 				<p class="text-[10px] font-semibold tracking-wider text-text-muted uppercase">
-					Reviewer Perf
+					Reviewer Performance
 				</p>
 				<p class="mt-1 text-2xl font-bold text-amber-400 tabular-nums">
 					{data.stakeholdersLastRatings?.performance ?? '—'}
@@ -343,6 +346,7 @@
 							.stakeholdersLastRatings.performanceChange}
 					</p>
 				{/if}
+				<p class="mt-1 text-[10px] text-text-muted">How reviewers see your performance</p>
 			</div>
 		</div>
 	{/if}

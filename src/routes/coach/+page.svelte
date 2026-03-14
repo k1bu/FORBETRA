@@ -7,7 +7,7 @@
 
 	coachAlertCount.value = data.analytics.totalAlerts;
 
-	const greeting = $derived(() => {
+	const greeting = $derived.by(() => {
 		const hour = new Date().getHours();
 		if (hour < 12) return 'Good morning';
 		if (hour < 17) return 'Good afternoon';
@@ -22,7 +22,7 @@
 <section class="mx-auto flex max-w-3xl flex-col gap-5 p-4 pb-12">
 	<!-- Header -->
 	<div>
-		<p class="text-sm text-text-tertiary">{greeting()}</p>
+		<p class="text-sm text-text-tertiary">{greeting}</p>
 		<h1 class="text-xl font-bold text-text-primary">{data.coach.name}</h1>
 		<p class="text-sm text-text-muted">
 			{data.rosterSummary.active} active client{data.rosterSummary.active !== 1 ? 's' : ''}

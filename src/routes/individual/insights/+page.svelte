@@ -2,35 +2,14 @@
 	import type { PageData } from './$types';
 	import CorrelationView from '$lib/components/CorrelationView.svelte';
 	import GapLensView from '$lib/components/GapLensView.svelte';
-	import {
-		FileText,
-		TrendingUp,
-		Sparkles,
-		ThumbsUp,
-		ThumbsDown,
-		History,
-		ChevronDown
-	} from 'lucide-svelte';
+	import { FileText, ThumbsUp, ThumbsDown, History, ChevronDown } from 'lucide-svelte';
 	import ErrorBoundary from '$lib/components/ErrorBoundary.svelte';
 
 	const { data }: { data: PageData } = $props();
 
 	let showHistory = $state(false);
 
-	const formatAverage = (value: number | null | undefined) => {
-		if (value === null || value === undefined) {
-			return '—';
-		}
-		return value.toFixed(1);
-	};
-
-	import { getScoreColorNullable } from '$lib/utils/scoreColors';
 	import { addToast } from '$lib/stores/toasts.svelte';
-
-	const getScoreColor = (
-		score: number | null | undefined,
-		type: 'effort' | 'performance' = 'effort'
-	) => getScoreColorNullable(score, type);
 
 	// AI Performance Report state
 	let generating = $state(false);
@@ -331,115 +310,6 @@
 		</div>
 	</ErrorBoundary>
 
-	<!-- Reflection Trend -->
-	{#if data.reflectionTrend.weeks.length}
-		<div class="rounded-lg border border-border-default bg-surface-raised p-6">
-			<div class="mb-4 flex items-center gap-2">
-				<TrendingUp class="h-4 w-4 text-text-muted" />
-				<h2 class="text-lg font-bold text-text-primary">Check-in Trend (Last 4 Weeks)</h2>
-			</div>
-			<div class="overflow-x-auto">
-				<table class="min-w-full text-sm">
-					<thead>
-						<tr class="border-b-2 border-border-default">
-							<th
-								class="px-4 py-3 text-left text-xs font-semibold tracking-wide text-text-tertiary uppercase"
-								>Week</th
-							>
-							<th
-								class="px-4 py-3 text-left text-xs font-semibold tracking-wide text-text-tertiary uppercase"
-								>Effort</th
-							>
-							<th
-								class="px-4 py-3 text-left text-xs font-semibold tracking-wide text-text-tertiary uppercase"
-								>Progress</th
-							>
-						</tr>
-					</thead>
-					<tbody>
-						{#each data.reflectionTrend.weeks as week (week.weekNumber)}
-							<tr class="border-b border-border-default transition-colors hover:bg-surface-subtle">
-								<td class="px-4 py-3 font-bold text-text-primary">Week {week.weekNumber}</td>
-								<td class="px-4 py-3">
-									<span class="font-semibold {getScoreColor(week.effortScore, 'effort')}"
-										>{formatAverage(week.effortScore)}</span
-									>
-								</td>
-								<td class="px-4 py-3">
-									<span class="font-semibold {getScoreColor(week.performanceScore, 'performance')}"
-										>{formatAverage(week.performanceScore)}</span
-									>
-								</td>
-							</tr>
-						{/each}
-					</tbody>
-				</table>
-			</div>
-			<div class="mt-4 flex gap-6 rounded-lg bg-surface-subtle px-4 py-3 text-sm">
-				<div>
-					<span class="text-text-tertiary">Effort avg:</span>
-					<span class="ml-2 font-bold {getScoreColor(data.reflectionTrend.avgEffort, 'effort')}"
-						>{formatAverage(data.reflectionTrend.avgEffort)}</span
-					>
-				</div>
-				<div>
-					<span class="text-text-tertiary">Progress avg:</span>
-					<span
-						class="ml-2 font-bold {getScoreColor(data.reflectionTrend.avgProgress, 'performance')}"
-						>{formatAverage(data.reflectionTrend.avgProgress)}</span
-					>
-				</div>
-			</div>
-		</div>
-	{/if}
-
-	<!-- Weekly Insights -->
-	{#if data.insights}
-		<div class="rounded-lg border border-border-default bg-surface-raised p-6">
-			<div class="mb-4 flex items-center justify-between">
-				<div class="flex items-center gap-2">
-					<Sparkles class="h-4 w-4 text-text-muted" />
-					<h2 class="text-lg font-bold text-text-primary">Weekly Insights</h2>
-				</div>
-				<span class="text-[10px] text-text-muted">
-					Based on {data.reflectionTrend.weeks.length} week{data.reflectionTrend.weeks.length !== 1
-						? 's'
-						: ''} of data
-				</span>
-			</div>
-			<div class="grid gap-4 md:grid-cols-2">
-				<div class="rounded-lg border border-border-default bg-surface-subtle p-4">
-					<p class="mb-1 text-xs font-semibold tracking-wide text-text-tertiary uppercase">
-						Avg. Effort (4-week)
-					</p>
-					<p class="text-2xl font-bold {getScoreColor(data.insights.avgEffort, 'effort')}">
-						{formatAverage(data.insights.avgEffort)}
-					</p>
-					{#if data.insights.avgEffort !== null && data.insights.avgEffort !== undefined}
-						<p class="mt-1 text-[10px] text-text-muted">
-							{#if data.insights.avgEffort >= 8}Strong commitment level{:else if data.insights.avgEffort >= 6}Moderate
-								effort — room to push{:else}Below average — worth exploring{/if}
-						</p>
-					{/if}
-				</div>
-				<div class="rounded-lg border border-border-default bg-surface-subtle p-4">
-					<p class="mb-1 text-xs font-semibold tracking-wide text-text-tertiary uppercase">
-						Avg. Progress (4-week)
-					</p>
-					<p class="text-2xl font-bold {getScoreColor(data.insights.avgProgress, 'performance')}">
-						{formatAverage(data.insights.avgProgress)}
-					</p>
-					{#if data.insights.avgProgress !== null && data.insights.avgProgress !== undefined}
-						<p class="mt-1 text-[10px] text-text-muted">
-							{#if data.insights.avgProgress >= 8}High-performing trajectory{:else if data.insights.avgProgress >= 6}Solid
-								— keep building{:else}Growing — each week counts{/if}
-						</p>
-					{/if}
-				</div>
-			</div>
-		</div>
-	{/if}
-
 	<!-- Correlation View -->
 	{#if data.correlationData && (data.correlationData.individual.length > 0 || data.correlationData.stakeholders.length > 0)}
 		<div class="rounded-lg border border-border-default bg-surface-raised p-6">
@@ -477,35 +347,6 @@
 		</div>
 	{/if}
 
-	<!-- Perception Gap Narrative -->
-	{#if data.perceptionGaps && data.perceptionGaps.length > 0}
-		{#each data.perceptionGaps as gap (gap.dimension)}
-			{@const direction = gap.gap > 0 ? 'higher' : 'lower'}
-			{@const absGap = Math.abs(gap.gap).toFixed(1)}
-			<div class="rounded-lg border-l-4 border-accent bg-accent-muted/30 p-5">
-				<div class="flex items-start gap-3">
-					<Sparkles class="mt-0.5 h-5 w-5 shrink-0 text-accent" />
-					<div>
-						<p class="text-sm font-semibold text-text-primary">
-							Perception Gap: {gap.dimension === 'effort' ? 'Effort' : 'Performance'}
-						</p>
-						<p class="mt-1 text-sm text-text-secondary">
-							You rated your {gap.dimension} at <strong>{gap.selfScore}/10</strong>, but your raters
-							averaged <strong>{gap.raterAvg.toFixed(1)}/10</strong> — a gap of {absGap} points.
-							{#if direction === 'higher'}
-								Your team may not see the {gap.dimension} you're putting in. Consider making your work
-								more visible.
-							{:else}
-								Your team rates your {gap.dimension} higher than you do. You may be underestimating your
-								impact.
-							{/if}
-						</p>
-					</div>
-				</div>
-			</div>
-		{/each}
-	{/if}
-
 	<!-- History Accordion -->
 	{#if data.historyWeeks && data.historyWeeks.length > 0}
 		<div class="rounded-2xl border border-border-default bg-surface-raised">
@@ -540,12 +381,13 @@
 											>
 											<div class="flex gap-4">
 												{#if reflection.effortScore !== null}
-													<span class="text-cyan-500 tabular-nums">E: {reflection.effortScore}</span
+													<span class="text-cyan-500 tabular-nums"
+														>Effort: {reflection.effortScore}</span
 													>
 												{/if}
 												{#if reflection.performanceScore !== null}
 													<span class="text-amber-500 tabular-nums"
-														>P: {reflection.performanceScore}</span
+														>Performance: {reflection.performanceScore}</span
 													>
 												{/if}
 											</div>

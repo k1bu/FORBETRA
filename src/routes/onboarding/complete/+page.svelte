@@ -132,7 +132,7 @@
 
 	<!-- Actions -->
 	<!-- eslint-disable svelte/no-navigation-without-resolve -->
-	<div class="flex w-full flex-col items-center gap-3 pt-2 sm:flex-row sm:justify-between">
+	<div class="flex w-full flex-col-reverse items-center gap-3 pt-2 sm:flex-row sm:justify-between">
 		<a
 			href="/onboarding"
 			class="rounded-xl border border-border-default bg-surface-raised px-5 py-2.5 text-sm font-semibold text-text-secondary transition-all hover:bg-surface-subtle"
@@ -140,7 +140,7 @@
 			Make changes
 		</a>
 		<a
-			href="/individual"
+			href="/reflections/checkin"
 			class="rounded-xl bg-accent px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-accent-hover"
 		>
 			Start Your First Check-in

@@ -12,7 +12,7 @@
 	const isFeedbackAction = formResult?.action === 'feedback';
 
 	function getRelativeDate(isoDate: string | null): string {
-		if (!isoDate) return 'Never';
+		if (!isoDate) return 'Awaiting first response';
 		const date = new Date(isoDate);
 		const now = new Date();
 		const diffMs = now.getTime() - date.getTime();
@@ -190,6 +190,15 @@
 				<p class="text-text-secondary">Complete a check-in this week to see perception gaps.</p>
 			</div>
 		{:else}
+			<div
+				class="rounded-xl border border-accent/20 bg-accent-muted/50 p-4 text-sm text-text-secondary"
+			>
+				<p>
+					<strong class="text-accent">Reading gaps:</strong> Positive means you rate yourself higher
+					than your reviewer. Negative means they rate you higher. Gaps closer to 0 show alignment.
+				</p>
+			</div>
+
 			<div class="overflow-hidden rounded-xl border border-border-default">
 				<table class="w-full text-left text-sm">
 					<thead class="bg-surface-subtle text-text-secondary">
@@ -235,15 +244,6 @@
 						{/each}
 					</tbody>
 				</table>
-			</div>
-
-			<div
-				class="rounded-xl border border-accent/20 bg-accent-muted/50 p-4 text-sm text-text-secondary"
-			>
-				<p>
-					<strong class="text-accent">Reading gaps:</strong> Positive means you rate yourself higher
-					than your reviewer. Negative means they rate you higher. Gaps closer to 0 show alignment.
-				</p>
 			</div>
 		{/if}
 	</section>

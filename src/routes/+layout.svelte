@@ -104,7 +104,9 @@
 							</a>
 						{/if}
 						{#if displayRole}
-							<span class="text-sm text-text-muted">Role: {displayRole}</span>
+							<span class="text-sm text-text-muted"
+								>Role: {displayRole.charAt(0) + displayRole.slice(1).toLowerCase()}</span
+							>
 						{/if}
 					</div>
 				{/if}
