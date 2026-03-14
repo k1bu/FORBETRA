@@ -47,9 +47,6 @@
 		performanceScore: number;
 		participantName: string;
 	} | null>(null);
-	let phoneInput = $state('');
-	let phoneSaved = $state(false);
-	let phoneSaving = $state(false);
 
 	const hasAtLeastOneScore = $derived(effortScore !== null || performanceScore !== null);
 
@@ -71,11 +68,10 @@
 		}
 	});
 
-	// Reset isSubmitting and phoneSaving on form response (success or error)
+	// Reset isSubmitting on form response (success or error)
 	$effect(() => {
 		if (form) {
 			isSubmitting = false;
-			phoneSaving = false;
 		}
 	});
 
@@ -369,40 +365,6 @@
 					{/if}
 				</div>
 
-				<!-- What happens next -->
-				<div class="anim-slide-up rounded-xl border border-border-default bg-surface-raised p-5">
-					<p class="mb-3 text-sm font-semibold text-text-primary">What you just unlocked</p>
-					<ul class="space-y-2.5 text-xs text-text-secondary">
-						<li class="anim-stagger flex items-start gap-2" style="--stagger: 0">
-							<span
-								class="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-accent/10 text-[9px] font-bold text-accent"
-								>1</span
-							>
-							A blind-spot comparison — your scores vs. {data.reflection.participantName}'s
-							self-ratings reveal gaps they can't see alone
-						</li>
-						<li class="anim-stagger flex items-start gap-2" style="--stagger: 1">
-							<span
-								class="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-accent/10 text-[9px] font-bold text-accent"
-								>2</span
-							>
-							AI-synthesized coaching insights — your input shapes personalized recommendations by Sunday
-							evening
-						</li>
-						<li class="anim-stagger flex items-start gap-2" style="--stagger: 2">
-							<span
-								class="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-accent/10 text-[9px] font-bold text-accent"
-								>3</span
-							>
-							A better coaching session — their coach uses your perspective to guide the next conversation
-						</li>
-					</ul>
-					<p class="mt-3 text-[10px] text-text-muted">
-						Your feedback is shared with {data.reflection.participantName} and their coach. Your name
-						is attached to your ratings.
-					</p>
-				</div>
-
 				<!-- Reveal Section (only when revealScores is enabled) -->
 				{#if showReveal && individualScores && data.revealScores !== false}
 					<div
@@ -537,93 +499,23 @@
 						</div>
 					</div>
 				{/if}
-
-				<!-- Phone opt-in (only if stakeholder has no phone on file) -->
-				{#if !data.stakeholder.phone && !data.isPreview}
-					<div class="rounded-2xl border border-border-default bg-surface-raised p-6">
-						{#if phoneSaved || form?.phoneSaved}
-							<div
-								class="rounded-lg border border-success/20 bg-success-muted px-4 py-3 text-sm text-success"
-							>
-								Phone saved! You'll get a text next time feedback is requested.
-							</div>
-						{:else}
-							<p class="mb-3 text-sm font-semibold text-text-primary">
-								Get future reminders via text?
-							</p>
-							<p class="mb-4 text-xs text-text-secondary">
-								We'll send a quick SMS when {data.reflection.participantName} requests feedback. ~1–2
-								msgs/month. Msg & data rates may apply. Reply STOP to opt out.
-								<!-- eslint-disable svelte/no-navigation-without-resolve -->
-								<a href="/sms-terms" target="_blank" class="text-accent underline">SMS Terms</a>
-								·
-								<a href="/privacy" target="_blank" class="text-accent underline">Privacy</a>
-								<!-- eslint-enable svelte/no-navigation-without-resolve -->
-							</p>
-							{#if form?.phoneError}
-								<p class="mb-3 text-xs text-error">{form.phoneError}</p>
-							{/if}
-							<form
-								method="post"
-								action="?/updatePhone"
-								onsubmit={() => {
-									phoneSaving = true;
-								}}
-								class="flex items-center gap-3"
-							>
-								<input type="hidden" name="stakeholderId" value={data.stakeholder.id} />
-								<input
-									name="phone"
-									type="tel"
-									placeholder="+1 (555) 123-4567"
-									bind:value={phoneInput}
-									class="flex-1 rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
-								/>
-								<button
-									type="submit"
-									disabled={!phoneInput.trim() || phoneSaving}
-									class="min-h-[44px] rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
-								>
-									{phoneSaving ? 'Saving...' : 'Save'}
-								</button>
-							</form>
-						{/if}
-					</div>
-				{/if}
-
-				<!-- Conversion prompt for engaged stakeholders (3+ feedbacks) -->
-				{#if form?.feedbackCount && form.feedbackCount >= 3 && !data.isPreview}
-					<div
-						class="rounded-2xl border border-accent/20 bg-gradient-to-b from-accent-muted to-surface-raised p-6 text-center"
-					>
-						<p class="text-sm text-text-secondary">
-							You've provided feedback {form.feedbackCount} times now.
-						</p>
-						<p class="text-sm text-text-secondary">
-							That means you care about {form.individualFirstName}'s growth.
-						</p>
-						<p class="mt-4 text-lg font-bold text-text-primary">What about yours?</p>
-						<p class="mt-2 text-sm text-text-secondary">
-							Most leaders have blind spots they can't see. Your colleagues could help you see yours
-							— the same way you're helping {form.individualFirstName}.
-						</p>
-						<div class="mt-5 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-							<!-- eslint-disable svelte/no-navigation-without-resolve -->
-							<a
-								href="/sign-up?ref=stakeholder&from={data.stakeholder.id}"
-								class="rounded-xl bg-accent px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-accent-hover"
-							>
-								Start My Own Journey
-							</a>
-							<!-- eslint-enable svelte/no-navigation-without-resolve -->
-						</div>
-					</div>
-				{/if}
 			</div>
 		{/if}
 
 		{#if !form?.success && !(data.isPreview && showReveal) && !showWelcome}
 			<div class="mx-auto w-full max-w-2xl space-y-6">
+				<!-- About Forbetra (context for first-time reviewers) -->
+				{#if data.isFirstFeedback}
+					<div class="rounded-xl border border-accent/20 bg-accent/5 px-5 py-4">
+						<p class="text-sm font-semibold text-text-primary">About Forbetra</p>
+						<p class="mt-1 text-sm leading-relaxed text-text-secondary">
+							{data.reflection.participantName} is working on a professional development goal and has
+							asked for your honest perspective. Your ratings help reveal blind spots between self-perception
+							and outside observation.
+						</p>
+					</div>
+				{/if}
+
 				<!-- Returning stakeholder impact summary -->
 				{#if !data.isFirstFeedback && data.historicRatings && data.historicRatings.length > 0}
 					{@const avgEffort =
