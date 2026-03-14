@@ -403,7 +403,7 @@
 										row.avgEffort >= 7
 											? 'text-success'
 											: row.avgEffort !== null && row.avgEffort < 4
-												? 'text-error'
+												? 'text-warning'
 												: 'text-text-secondary'}"
 									>
 										{formatAverage(row.avgEffort)}
@@ -413,7 +413,7 @@
 										row.avgProgress >= 7
 											? 'text-success'
 											: row.avgProgress !== null && row.avgProgress < 4
-												? 'text-error'
+												? 'text-warning'
 												: 'text-text-secondary'}"
 									>
 										{formatAverage(row.avgProgress)}
@@ -438,7 +438,7 @@
 										row.trajectory > 0
 											? 'text-success'
 											: row.trajectory !== null && row.trajectory < 0
-												? 'text-error'
+												? 'text-warning'
 												: 'text-text-tertiary'}"
 									>
 										{#if row.trajectory !== null}

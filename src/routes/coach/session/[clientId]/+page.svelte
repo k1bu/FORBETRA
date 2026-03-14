@@ -233,8 +233,8 @@
 							<TrendingUp class="h-4 w-4 text-success" />
 							<span class="text-sm font-semibold text-success">Up</span>
 						{:else if ins.trajectoryScore < -5}
-							<TrendingDown class="h-4 w-4 text-error" />
-							<span class="text-sm font-semibold text-error">Down</span>
+							<TrendingDown class="h-4 w-4 text-warning" />
+							<span class="text-sm font-semibold text-warning">Down</span>
 						{:else}
 							<Minus class="h-4 w-4 text-text-muted" />
 							<span class="text-sm font-semibold text-text-muted">Stable</span>

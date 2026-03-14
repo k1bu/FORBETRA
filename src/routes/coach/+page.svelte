@@ -54,6 +54,12 @@
 			/>
 		</a>
 		<!-- eslint-enable svelte/no-navigation-without-resolve -->
+	{:else if data.rosterSummary.active > 0}
+		<div
+			class="rounded-xl border border-success/20 bg-success/5 px-4 py-3 text-center text-sm text-success"
+		>
+			All clients on track — no alerts this week.
+		</div>
 	{/if}
 
 	<!-- Client List -->
@@ -82,7 +88,7 @@
 								class="text-xs tabular-nums {client.trajectory > 0
 									? 'text-success'
 									: client.trajectory < 0
-										? 'text-error'
+										? 'text-warning'
 										: 'text-text-muted'}"
 							>
 								{client.trajectory > 0 ? '↑' : client.trajectory < 0 ? '↓' : '→'}
