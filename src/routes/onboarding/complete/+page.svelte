@@ -84,9 +84,9 @@
 			<div class="rounded-2xl border border-border-default bg-surface-raised p-5">
 				<h2 class="text-xs font-semibold tracking-wide text-text-tertiary uppercase">
 					{#if data.stakeholders.length === 1}
-						Rater
+						Reviewer
 					{:else}
-						Raters ({data.stakeholders.length})
+						Reviewers ({data.stakeholders.length})
 					{/if}
 				</h2>
 				<div class="mt-2 space-y-3">
@@ -119,7 +119,7 @@
 			{#if data.stakeholders.length > 0}
 				<li class="flex items-start gap-2">
 					<span class="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent"></span>
-					Your {data.stakeholders.length} rater{data.stakeholders.length > 1 ? 's' : ''} will receive
+					Your {data.stakeholders.length} reviewer{data.stakeholders.length > 1 ? 's' : ''} will receive
 					feedback invitations
 				</li>
 			{/if}

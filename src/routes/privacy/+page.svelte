@@ -29,7 +29,7 @@
 					you enter into the platform.
 				</li>
 				<li>
-					<strong>Rater Feedback:</strong> Ratings and observations submitted by raters you invite.
+					<strong>Reviewer Feedback:</strong> Ratings and observations submitted by reviewers you invite.
 				</li>
 				<li>
 					<strong>Usage Data:</strong> Timezone preferences, reminder settings, and interaction patterns.
@@ -60,7 +60,7 @@
 			<ul class="ml-4 list-disc space-y-1">
 				<li>Feedback request invitations sent to reviewers.</li>
 				<li>Coaching invitation notifications.</li>
-				<li>Welcome messages when added as a rater.</li>
+				<li>Welcome messages when added as a reviewer.</li>
 			</ul>
 			<p class="mt-2">
 				Message frequency varies based on coaching activity. Message and data rates may apply. You

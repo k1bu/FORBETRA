@@ -148,7 +148,7 @@
 			<div class="min-w-0 flex-1">
 				<p class="text-base font-semibold text-text-primary">Complete your setup</p>
 				<p class="text-sm text-text-secondary">
-					Finish onboarding to start tracking your progress.
+					Finish onboarding to start tracking your performance.
 				</p>
 			</div>
 			<ArrowRight
@@ -167,7 +167,7 @@
 				<div class="min-w-0 flex-1">
 					<p class="text-base font-semibold text-text-primary">Journey complete!</p>
 					<p class="text-sm text-text-secondary">
-						You finished your cycle. View insights or start a new journey.
+						Your journey is complete! View your insights or start a new one.
 					</p>
 				</div>
 			</div>

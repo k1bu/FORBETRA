@@ -112,11 +112,11 @@
 				</p>
 			</div>
 
-			<!-- Focused Effort Rating -->
+			<!-- Effort Rating -->
 			<div class="rounded-2xl border border-border-default bg-surface-raised p-8">
 				<div class="mb-6">
 					<label for="effort-score" class="mb-3 block text-xl font-bold text-text-primary">
-						Focused Effort – Initial Rating
+						Effort – Initial Rating
 					</label>
 					<p class="text-base leading-relaxed text-text-secondary">
 						Over the past few weeks, how consistently have you been putting deliberate effort toward

@@ -754,7 +754,7 @@
 							<div class="space-y-3">
 								<p class="block text-sm font-semibold text-text-secondary">Feedback frequency</p>
 								<div class="grid gap-3 md:grid-cols-2">
-									{#each [{ value: 'weekly', label: 'Weekly', desc: 'Raters score you every week', rec: true }, { value: 'biweekly', label: 'Biweekly', desc: 'Every two weeks — less burden on raters', rec: false }] as opt (opt.value)}
+									{#each [{ value: 'weekly', label: 'Weekly', desc: 'Reviewers score you every week', rec: true }, { value: 'biweekly', label: 'Biweekly', desc: 'Every two weeks — less burden on reviewers', rec: false }] as opt (opt.value)}
 										<label
 											class="group relative flex cursor-pointer rounded-xl border p-4 transition-all {stakeholderCadence ===
 											opt.value

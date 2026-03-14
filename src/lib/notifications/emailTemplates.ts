@@ -75,12 +75,12 @@ export const emailTemplates = {
 				<div style="background: white; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
 					<p style="font-size: 16px; margin-top: 0;">Hi ${name},</p>
 					<p style="font-size: 16px;">You're all set! Your development journey starts now.</p>
-					<p style="font-size: 16px;">Forbetra helps you turn development goals into measurable behaviors through structured check-ins and rater feedback.</p>
+					<p style="font-size: 16px;">Forbetra helps you turn development goals into measurable behaviors through structured check-ins and reviewer feedback.</p>
 					<div style="background: #f1f5f9; padding: 20px; border-radius: 8px; margin: 24px 0;">
 						<p style="margin: 0; font-size: 14px; color: #64748b;"><strong>What's next?</strong></p>
 						<ul style="margin: 12px 0 0 0; padding-left: 20px; font-size: 14px; color: #64748b;">
-							<li>Complete your onboarding to set up your first objective</li>
-							<li>Add raters who can provide feedback</li>
+							<li>Complete your onboarding to set up your first goal</li>
+							<li>Add reviewers who can provide feedback</li>
 							<li>Start your weekly check-in journey</li>
 						</ul>
 					</div>
@@ -93,7 +93,7 @@ export const emailTemplates = {
 			</body>
 			</html>
 		`,
-			text: `Welcome to Forbetra!\n\nHi ${data.individualName || 'there'},\n\nYou're all set! Your development journey starts now.\n\nForbetra helps you turn development goals into measurable behaviors through structured check-ins and rater feedback.\n\nWhat's next?\n- Complete your onboarding to set up your first objective\n- Add raters who can provide feedback\n- Start your weekly check-in journey\n\nGet started: ${data.appUrl || baseUrl}\n\nQuestions? Just reply to this email.${textFooter()}`
+			text: `Welcome to Forbetra!\n\nHi ${data.individualName || 'there'},\n\nYou're all set! Your development journey starts now.\n\nForbetra helps you turn development goals into measurable behaviors through structured check-ins and reviewer feedback.\n\nWhat's next?\n- Complete your onboarding to set up your first goal\n- Add reviewers who can provide feedback\n- Start your weekly check-in journey\n\nGet started: ${data.appUrl || baseUrl}\n\nQuestions? Just reply to this email.${textFooter()}`
 		};
 	},
 
@@ -175,9 +175,9 @@ export const emailTemplates = {
 
 	stakeholderFeedbackReceived: (data: EmailTemplateData) => {
 		const indName = escapeHtml(data.individualName || 'there');
-		const shName = escapeHtml(data.stakeholderName || 'A rater');
+		const shName = escapeHtml(data.stakeholderName || 'A reviewer');
 		return {
-			subject: `${data.stakeholderName || 'A rater'} shared feedback on your progress`,
+			subject: `${data.stakeholderName || 'A reviewer'} shared feedback on your progress`,
 			html: `
 			<!DOCTYPE html>
 			<html>
@@ -203,7 +203,7 @@ export const emailTemplates = {
 			</body>
 			</html>
 		`,
-			text: `${data.stakeholderName || 'A rater'} shared feedback on your progress\n\nHi ${data.individualName || 'there'},\n\n${data.stakeholderName || 'A rater'} just shared feedback on your progress.\n\nView your updated insights and see how your self-assessment aligns with their perspective.\n\nView insights: ${data.appUrl || baseUrl}/individual/insights\n\nKeep up the great work!${textFooter()}`
+			text: `${data.stakeholderName || 'A reviewer'} shared feedback on your progress\n\nHi ${data.individualName || 'there'},\n\n${data.stakeholderName || 'A reviewer'} just shared feedback on your progress.\n\nView your updated insights and see how your self-assessment aligns with their perspective.\n\nView insights: ${data.appUrl || baseUrl}/individual/insights\n\nKeep up the great work!${textFooter()}`
 		};
 	},
 
@@ -462,7 +462,7 @@ export const emailTemplates = {
 					<div style="background: #f1f5f9; padding: 20px; border-radius: 8px; margin: 24px 0;">
 						<p style="margin: 0; font-size: 14px; color: #64748b;"><strong>What to expect:</strong></p>
 						<ul style="margin: 12px 0 0 0; padding-left: 20px; font-size: 14px; color: #64748b;">
-							<li>Set a development objective and break it into observable behaviors</li>
+							<li>Set a development goal and break it into observable behaviors</li>
 							<li>Track your effort and performance with weekly check-ins</li>
 							<li>Get feedback from stakeholders who see your work</li>
 							<li>Receive AI-powered insights and coaching from ${coach}</li>
@@ -477,7 +477,7 @@ export const emailTemplates = {
 			</body>
 			</html>
 		`,
-			text: `${data.coachName} invited you to join Forbetra\n\nHi ${data.recipientName || 'there'},\n\n${data.coachName} has invited you to join Forbetra — a platform for structured personal development.\n\n${data.message ? `"${data.message}"\n— ${data.coachName}\n\n` : ''}What to expect:\n- Set a development objective and break it into observable behaviors\n- Track your effort and performance with weekly check-ins\n- Get feedback from stakeholders who see your work\n- Receive AI-powered insights and coaching from ${data.coachName}\n\nAccept invitation: ${data.inviteUrl}\n\nThis invitation is valid for 30 days${textFooter()}`
+			text: `${data.coachName} invited you to join Forbetra\n\nHi ${data.recipientName || 'there'},\n\n${data.coachName} has invited you to join Forbetra — a platform for structured personal development.\n\n${data.message ? `"${data.message}"\n— ${data.coachName}\n\n` : ''}What to expect:\n- Set a development goal and break it into observable behaviors\n- Track your effort and performance with weekly check-ins\n- Get feedback from stakeholders who see your work\n- Receive AI-powered insights and coaching from ${data.coachName}\n\nAccept invitation: ${data.inviteUrl}\n\nThis invitation is valid for 30 days${textFooter()}`
 		};
 	},
 
@@ -518,10 +518,10 @@ export const emailTemplates = {
 	coachStakeholderFeedbackReceived: (data: CoachStakeholderFeedbackReceivedData) => {
 		const coach = escapeHtml(data.coachName);
 		const client = escapeHtml(data.individualName);
-		const stakeholder = escapeHtml(data.stakeholderName || 'A rater');
+		const stakeholder = escapeHtml(data.stakeholderName || 'A reviewer');
 		const week = data.weekNumber ? ` (Week ${data.weekNumber})` : '';
 		return {
-			subject: `Rater feedback received for ${data.individualName}${week}`,
+			subject: `Reviewer feedback received for ${data.individualName}${week}`,
 			html: `
 			<!DOCTYPE html>
 			<html>
@@ -530,9 +530,9 @@ export const emailTemplates = {
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 			</head>
 			<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #334155; max-width: 600px; margin: 0 auto; padding: 20px;">
-				<div style="display: none; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #ffffff;">New rater feedback for your client</div>
+				<div style="display: none; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #ffffff;">New reviewer feedback for your client</div>
 				<div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
-					<h1 style="color: white; margin: 0; font-size: 24px; font-weight: 600;">Rater Feedback Received</h1>
+					<h1 style="color: white; margin: 0; font-size: 24px; font-weight: 600;">Reviewer Feedback Received</h1>
 				</div>
 				<div style="background: white; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
 					<p style="font-size: 16px; margin-top: 0;">Hi ${coach},</p>
@@ -546,7 +546,7 @@ export const emailTemplates = {
 			</body>
 			</html>
 		`,
-			text: `Rater feedback received for ${data.individualName}${week}\n\nHi ${data.coachName},\n\n${data.stakeholderName || 'A rater'} just submitted feedback for your client ${data.individualName}${week}.\n\nCheck your coaching dashboard to review updated insights and identify coaching opportunities.\n\nView dashboard: ${data.appUrl || baseUrl}/coach/roster${textFooter()}`
+			text: `Reviewer feedback received for ${data.individualName}${week}\n\nHi ${data.coachName},\n\n${data.stakeholderName || 'A reviewer'} just submitted feedback for your client ${data.individualName}${week}.\n\nCheck your coaching dashboard to review updated insights and identify coaching opportunities.\n\nView dashboard: ${data.appUrl || baseUrl}/coach/roster${textFooter()}`
 		};
 	}
 };

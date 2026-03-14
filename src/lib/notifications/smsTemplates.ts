@@ -25,7 +25,7 @@ export const smsTemplates = {
 		appUrl?: string;
 	}) => {
 		const name = data.individualName || 'someone';
-		return `Forbetra: ${name} added you as a feedback provider. You'll occasionally be asked to rate their progress — takes <60 seconds.\n\nReply STOP to opt out`;
+		return `Forbetra: ${name} added you as a feedback provider. You'll occasionally be asked to rate their performance — takes <60 seconds.\n\nReply STOP to opt out`;
 	},
 
 	feedbackInvite: (data: { individualName?: string; feedbackLink: string }) => {
@@ -34,7 +34,7 @@ export const smsTemplates = {
 	},
 
 	stakeholderFeedbackReceived: (data: { stakeholderName?: string; appUrl?: string }) => {
-		const name = data.stakeholderName || 'A rater';
+		const name = data.stakeholderName || 'A reviewer';
 		return `Forbetra: ${name} just shared feedback on your progress. View insights: ${data.appUrl || baseUrl}/individual/insights`;
 	},
 

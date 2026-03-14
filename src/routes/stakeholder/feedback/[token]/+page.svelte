@@ -299,9 +299,7 @@
 					</div>
 
 					<div class="mb-5 rounded-xl border border-accent/30 bg-surface-raised p-4">
-						<p class="mb-1 text-xs font-semibold tracking-wide text-accent uppercase">
-							Their objective
-						</p>
+						<p class="mb-1 text-xs font-semibold tracking-wide text-accent uppercase">Their goal</p>
 						<p class="text-base font-bold text-text-primary">{data.reflection.objectiveTitle}</p>
 					</div>
 
@@ -421,11 +419,11 @@
 						</div>
 
 						<div class="grid gap-6 md:grid-cols-2">
-							<!-- Focused Effort Comparison -->
+							<!-- Effort Comparison -->
 							<div class="rounded-xl border border-border-default bg-surface-raised p-6">
 								<div class="mb-4 flex items-center justify-between">
 									<div>
-										<p class="text-sm font-semibold text-text-secondary">Focused Effort</p>
+										<p class="text-sm font-semibold text-text-secondary">Effort</p>
 										<p class="mt-1 text-xs text-text-tertiary">How much energy invested</p>
 									</div>
 								</div>
@@ -733,7 +731,7 @@
 							<Target class="h-5 w-5 text-accent" />
 							<span class="font-medium">Objective:</span>
 							<span class="text-lg font-semibold text-text-primary"
-								>{data.reflection.objectiveTitle || 'the objective'}</span
+								>{data.reflection.objectiveTitle || 'the goal'}</span
 							>
 						</div>
 					</div>
@@ -775,11 +773,11 @@
 								<Dumbbell class="h-6 w-6 text-accent" />
 								<div>
 									<label for="effort-score" class="text-lg font-bold text-text-primary">
-										Focused Effort
+										Effort
 									</label>
 									<p class="text-xs text-text-tertiary">
 										How much intentional effort have you noticed from {data.reflection
-											.participantName} on "{data.reflection.objectiveTitle || 'their objective'}"
+											.participantName} on "{data.reflection.objectiveTitle || 'their goal'}"
 										recently?
 									</p>
 								</div>
@@ -844,7 +842,7 @@
 									</label>
 									<p class="text-xs text-text-tertiary">
 										How effectively is {data.reflection.participantName} performing on "{data
-											.reflection.objectiveTitle || 'their objective'}" from your perspective?
+											.reflection.objectiveTitle || 'their goal'}" from your perspective?
 									</p>
 								</div>
 							</div>

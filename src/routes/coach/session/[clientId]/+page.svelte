@@ -222,7 +222,7 @@
 				<p class="text-lg font-bold text-amber-400 tabular-nums">{ins.avgProgress ?? '—'}</p>
 			</div>
 			<div class="rounded-lg border border-border-default bg-surface-raised px-3 py-2">
-				<p class="text-[10px] font-medium tracking-wider text-text-muted uppercase">Trajectory</p>
+				<p class="text-[10px] font-medium tracking-wider text-text-muted uppercase">Trend</p>
 				<div class="flex items-center gap-1">
 					{#if ins.trajectoryScore !== null}
 						{#if ins.trajectoryScore > 5}
@@ -300,7 +300,7 @@
 		</div>
 	{/if}
 
-	<!-- Rater feedback summary -->
+	<!-- Reviewer feedback summary -->
 	{#if data.stakeholderTrends.length > 0}
 		<div class="rounded-xl border border-border-default bg-surface-raised p-5">
 			<h2 class="mb-3 font-semibold text-text-primary">Reviewer Feedback</h2>

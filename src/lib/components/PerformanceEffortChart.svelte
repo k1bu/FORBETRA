@@ -432,10 +432,7 @@
 			// Stakeholder average effort (always shown when data exists)
 			if (stakeholderAveragesByWeek.length > 0) {
 				datasets.push({
-					label:
-						selectedStakeholderIds.size === 0
-							? 'Stakeholders (Avg)'
-							: 'Selected Stakeholders (Avg)',
+					label: selectedStakeholderIds.size === 0 ? 'Reviewers (Avg)' : 'Selected Reviewers (Avg)',
 					data: allWeeks.map((week: number) => {
 						const weekData = stakeholderAveragesByWeek.find((d) => d.weekNumber === week);
 						return weekData?.avgEffort ?? null;
@@ -612,10 +609,7 @@
 			// Stakeholder average performance (always shown when data exists)
 			if (stakeholderAveragesByWeek.length > 0) {
 				datasets.push({
-					label:
-						selectedStakeholderIds.size === 0
-							? 'Stakeholders (Avg)'
-							: 'Selected Stakeholders (Avg)',
+					label: selectedStakeholderIds.size === 0 ? 'Reviewers (Avg)' : 'Selected Reviewers (Avg)',
 					data: allWeeks.map((week: number) => {
 						const weekData = stakeholderAveragesByWeek.find((d) => d.weekNumber === week);
 						return weekData?.avgProgress ?? null;
@@ -877,7 +871,7 @@
 	<div class="mb-2">
 		<h3 class="text-lg font-bold text-text-primary">Effort and Performance Over Time</h3>
 		<p class="text-sm text-text-secondary">
-			Compare your self-assessments with stakeholder observations
+			Compare your self-assessments with reviewer observations
 		</p>
 	</div>
 
@@ -911,7 +905,7 @@
 			<div class="flex flex-wrap items-center gap-6 pt-3">
 				<div class="flex items-center gap-4">
 					<span class="text-xs font-semibold tracking-wide text-text-tertiary uppercase"
-						>Filter Stakeholders:</span
+						>Filter Reviewers:</span
 					>
 					<div class="flex flex-wrap gap-2">
 						{#each stakeholders as stakeholder (stakeholder.id)}
@@ -961,9 +955,7 @@
 							bind:checked={showIndividualLines}
 							class="h-4 w-4 rounded border-border-strong text-accent focus:ring-accent"
 						/>
-						<span class="text-sm font-semibold text-text-secondary"
-							>Show individual stakeholders</span
-						>
+						<span class="text-sm font-semibold text-text-secondary">Show individual reviewers</span>
 					</label>
 				</div>
 			</div>
@@ -1028,8 +1020,7 @@
 							bind:checked={showIndividualStakeholdersInTable}
 							class="h-4 w-4 rounded border-border-strong text-accent focus:ring-accent"
 						/>
-						<span class="text-xs font-medium text-text-secondary">Show individual stakeholders</span
-						>
+						<span class="text-xs font-medium text-text-secondary">Show individual reviewers</span>
 					</label>
 				{/if}
 			</div>
@@ -1100,7 +1091,7 @@
 								<!-- Stakeholder Average Effort -->
 								<tr class="bg-surface-subtle/50">
 									<td class="px-5 py-3 font-medium text-text-primary"
-										>Stakeholders Effort Rating (Avg)</td
+										>Reviewers Effort Rating (Avg)</td
 									>
 									<td class="px-5 py-3 text-center text-text-secondary">
 										{baseline.stakeholderEffort?.toFixed(1) ?? '—'}
@@ -1205,7 +1196,7 @@
 								<!-- Stakeholder Average Performance -->
 								<tr class="bg-surface-subtle/50">
 									<td class="px-5 py-3 font-medium text-text-primary"
-										>Stakeholders Performance Rating (Avg)</td
+										>Reviewers Performance Rating (Avg)</td
 									>
 									<td class="px-5 py-3 text-center text-text-secondary">
 										{baseline.stakeholderProgress?.toFixed(1) ?? '—'}

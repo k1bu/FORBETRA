@@ -215,7 +215,7 @@
 														<p
 															class="mb-2 text-xs font-semibold tracking-wider text-text-muted uppercase"
 														>
-															Rater Feedback
+															Reviewer Feedback
 														</p>
 														<div class="space-y-2">
 															{#each reflection.feedbacks as feedback (feedback.stakeholderName)}

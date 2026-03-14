@@ -123,7 +123,7 @@
 				{story.checkInCount} check-in{story.checkInCount !== 1 ? 's' : ''}
 			</span>
 			<span class="rounded-full bg-surface-subtle px-3 py-1">
-				{story.raterCount} rater{story.raterCount !== 1 ? 's' : ''}
+				{story.raterCount} reviewer{story.raterCount !== 1 ? 's' : ''}
 			</span>
 		</div>
 	</div>
@@ -185,12 +185,12 @@
 		</section>
 	{/if}
 
-	<!-- What Your Raters Said -->
+	<!-- What Your Reviewers Said -->
 	{#if story.topComments.length > 0}
 		<section class="mb-8 rounded-2xl border border-border-default bg-surface-raised p-5">
 			<div class="mb-3 flex items-center gap-2">
 				<Users class="h-5 w-5 text-accent" />
-				<h2 class="text-lg font-semibold text-text-primary">What Your Raters Said</h2>
+				<h2 class="text-lg font-semibold text-text-primary">What Your Reviewers Said</h2>
 			</div>
 			<div class="space-y-4">
 				{#each story.topComments as comment (comment.raterName + comment.weekNumber)}

@@ -181,7 +181,7 @@
 		</nav>
 		<!-- eslint-enable svelte/no-navigation-without-resolve -->
 		<h1 class="text-3xl font-bold text-text-primary">Insights</h1>
-		<p class="mt-1 text-text-secondary">Track your progress and stability over time</p>
+		<p class="mt-1 text-text-secondary">Track your performance and consistency over time</p>
 	</header>
 
 	<!-- AI Performance Report -->
@@ -293,8 +293,8 @@
 				<!-- Empty state -->
 				<div class="py-8 text-center">
 					<p class="mb-2 text-sm text-text-secondary">
-						Get a comprehensive AI analysis of your full journey — progress trajectory, perception
-						gaps, strengths, and actionable recommendations.
+						Get a comprehensive AI analysis of your full journey — performance trajectory,
+						perception gaps, strengths, and actionable recommendations.
 					</p>
 					{#if generateError}
 						<p class="mb-3 text-xs text-error">{generateError}</p>

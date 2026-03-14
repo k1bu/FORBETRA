@@ -70,7 +70,9 @@
 		<div>
 			<h1 class="text-lg font-bold text-text-primary">Scorecard</h1>
 			<p class="text-xs text-text-muted">{data.objectiveTitle}</p>
-			<p class="mt-0.5 text-[10px] text-text-tertiary">Your self-perception vs. rater feedback</p>
+			<p class="mt-0.5 text-[10px] text-text-tertiary">
+				Your self-perception vs. reviewer feedback
+			</p>
 		</div>
 		<div class="flex items-center gap-2">
 			<button
@@ -157,7 +159,7 @@
 		{/if}
 		<div class="flex items-center justify-between px-1 text-[10px] text-text-muted">
 			<span>Your self-rating</span>
-			<span>Rater</span>
+			<span>Reviewer</span>
 		</div>
 		<div class="grid gap-3 sm:grid-cols-2">
 			{#each data.scorecard as row (row.stakeholderId)}
@@ -349,10 +351,10 @@
 		>
 			<MessageSquare class="mx-auto mb-2 h-6 w-6 text-text-muted" />
 			<p class="text-sm font-medium text-text-secondary">
-				No rater data yet for week {data.viewWeek}
+				No reviewer data yet for week {data.viewWeek}
 			</p>
 			<p class="mt-1 text-xs text-text-tertiary">
-				Once your raters submit feedback, their scores will appear here alongside yours to show
+				Once your reviewers submit feedback, their scores will appear here alongside yours to show
 				perception gaps.
 			</p>
 		</div>
@@ -375,7 +377,7 @@
 	<!-- Legend -->
 	<div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-text-muted">
 		<span
-			>You <span class="font-bold">[ score ]</span>——gap——<span class="font-bold">[ score ]</span> Rater</span
+			>You <span class="font-bold">[ score ]</span>——gap——<span class="font-bold">[ score ]</span> Reviewer</span
 		>
 		<span class="text-success">Green = aligned (&le;1)</span>
 		<span class="text-warning">Amber = moderate (1-2)</span>

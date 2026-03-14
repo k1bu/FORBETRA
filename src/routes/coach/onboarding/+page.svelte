@@ -138,7 +138,7 @@
 						</li>
 						<li class="flex items-start gap-2">
 							<Check class="mt-0.5 h-4 w-4 shrink-0 text-accent" />
-							Rater feedback trends and blind-spot alerts
+							Reviewer feedback trends and blind-spot alerts
 						</li>
 					</ul>
 				</div>
@@ -333,7 +333,7 @@
 										onclick={addPrefillStakeholder}
 										class="mt-1.5 text-xs font-medium text-accent hover:underline"
 									>
-										+ Add rater
+										+ Add reviewer
 									</button>
 								{/if}
 							</div>

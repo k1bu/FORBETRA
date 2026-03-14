@@ -105,7 +105,7 @@
 			'Effort',
 			'Performance',
 			'Stability',
-			'Trajectory',
+			'Trend',
 			'Completion %',
 			'Alerts'
 		];
@@ -216,8 +216,8 @@
 			<div class="mb-1 flex items-center gap-1.5">
 				<BarChart3 class="h-4 w-4 text-text-muted" />
 				<p class="text-xs font-medium text-text-tertiary">
-					Avg. Stability <InfoTip
-						text="How consistent client scores are week-over-week. 70+ is strong stability."
+					Avg. Consistency <InfoTip
+						text="How steady client scores are week-over-week. 70+ is strong stability."
 					/>
 				</p>
 			</div>
@@ -325,7 +325,7 @@
 										class="flex items-center gap-1"
 										onclick={() => toggleSort('stability')}
 									>
-										<span title="Week-to-week score consistency (0-100)">Stability</span
+										<span title="How steady scores are week-to-week (0-100)">Consistency</span
 										>{sortIndicator('stability')}
 									</button>
 								</th>
@@ -342,8 +342,9 @@
 										class="flex items-center gap-1"
 										onclick={() => toggleSort('trajectory')}
 									>
-										<span title="Performance trend over recent weeks (+/-)">Trajectory</span
-										>{sortIndicator('trajectory')}
+										<span title="Score trend over recent weeks (+/-)">Trend</span>{sortIndicator(
+											'trajectory'
+										)}
 									</button>
 								</th>
 								<th

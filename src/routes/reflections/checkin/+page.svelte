@@ -360,7 +360,7 @@
 						<Dumbbell class="h-6 w-6 text-accent" />
 						<div>
 							<label for="effort-score" class="text-lg font-bold text-text-primary">
-								Focused Effort
+								Effort
 								{#if data.previousRatings?.effortScore !== null && data.previousRatings?.effortScore !== undefined}
 									<span class="ml-1 text-sm font-normal text-text-muted"
 										>(last: {data.previousRatings.effortScore})</span
