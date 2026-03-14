@@ -666,13 +666,13 @@
 							{#if avgEffort !== null}
 								<div class="flex items-center gap-1.5">
 									<span class="text-xs text-text-muted">Avg effort:</span>
-									<span class="text-xs font-bold text-cyan-300">{avgEffort}</span>
+									<span class="text-xs font-bold text-cyan-300">{avgEffort}/10</span>
 								</div>
 							{/if}
 							{#if avgPerf !== null}
 								<div class="flex items-center gap-1.5">
 									<span class="text-xs text-text-muted">Avg perf:</span>
-									<span class="text-xs font-bold text-amber-300">{avgPerf}</span>
+									<span class="text-xs font-bold text-amber-300">{avgPerf}/10</span>
 								</div>
 							{/if}
 						</div>

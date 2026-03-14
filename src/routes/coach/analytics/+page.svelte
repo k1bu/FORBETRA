@@ -62,7 +62,7 @@
 
 	const formatAverage = (value: number | null | undefined) => {
 		if (value === null || value === undefined) return '—';
-		return value.toFixed(1);
+		return `${value.toFixed(1)}/10`;
 	};
 
 	const portfolioNarrative = $derived(
@@ -242,11 +242,11 @@
 				<p class="text-xs font-medium text-text-tertiary">Avg. Performance</p>
 			</div>
 			<p class="text-3xl font-bold text-text-primary tabular-nums">
-				{formatAverage(data.analytics.overallAvgProgress)}/10
+				{formatAverage(data.analytics.overallAvgProgress)}
 			</p>
 			{#if data.analytics.overallAvgEffort !== null}
 				<p class="mt-1 text-xs text-text-muted">
-					Effort: {formatAverage(data.analytics.overallAvgEffort)}/10
+					Effort: {formatAverage(data.analytics.overallAvgEffort)}
 				</p>
 			{/if}
 		</div>

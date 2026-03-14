@@ -215,11 +215,15 @@
 		<div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
 			<div class="rounded-lg border border-border-default bg-surface-raised px-3 py-2">
 				<p class="text-[10px] font-medium tracking-wider text-text-muted uppercase">Effort</p>
-				<p class="text-lg font-bold text-cyan-400 tabular-nums">{ins.avgEffort ?? '—'}</p>
+				<p class="text-lg font-bold text-cyan-400 tabular-nums">
+					{ins.avgEffort != null ? `${ins.avgEffort.toFixed(1)}/10` : '—'}
+				</p>
 			</div>
 			<div class="rounded-lg border border-border-default bg-surface-raised px-3 py-2">
 				<p class="text-[10px] font-medium tracking-wider text-text-muted uppercase">Performance</p>
-				<p class="text-lg font-bold text-amber-400 tabular-nums">{ins.avgProgress ?? '—'}</p>
+				<p class="text-lg font-bold text-amber-400 tabular-nums">
+					{ins.avgProgress != null ? `${ins.avgProgress.toFixed(1)}/10` : '—'}
+				</p>
 			</div>
 			<div class="rounded-lg border border-border-default bg-surface-raised px-3 py-2">
 				<p class="text-[10px] font-medium tracking-wider text-text-muted uppercase">Trend</p>
@@ -274,7 +278,7 @@
 									<div class="min-w-0 flex-1">
 										{#if r.effortScore !== null || r.performanceScore !== null}
 											<span class="text-text-secondary">
-												{#if r.effortScore !== null}Effort: <strong>{r.effortScore}</strong>{/if}
+												{#if r.effortScore !== null}Effort: <strong>{r.effortScore}/10</strong>{/if}
 												{#if r.effortScore !== null && r.performanceScore !== null}
 													·
 												{/if}
@@ -321,10 +325,10 @@
 							<p class="text-sm font-medium text-text-primary">{trend.name}</p>
 							<div class="flex gap-3 text-xs text-text-muted">
 								{#if trend.latestEffort !== null}
-									<span>Effort: {trend.latestEffort}</span>
+									<span>Effort: {trend.latestEffort}/10</span>
 								{/if}
 								{#if trend.latestPerformance !== null}
-									<span>Perf: {trend.latestPerformance}</span>
+									<span>Perf: {trend.latestPerformance}/10</span>
 								{/if}
 							</div>
 						</div>

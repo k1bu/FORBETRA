@@ -258,7 +258,7 @@
 			<div class="rounded-xl border border-border-default bg-surface-raised p-4">
 				<p class="text-[10px] font-semibold tracking-wider text-text-muted uppercase">My Effort</p>
 				<p class="mt-1 text-2xl font-bold text-cyan-500 tabular-nums">
-					{data.myLastRatings?.effort ?? '—'}
+					{data.myLastRatings?.effort != null ? `${data.myLastRatings.effort}/10` : '—'}
 				</p>
 				{#if data.myLastRatings?.effortChange !== null && data.myLastRatings?.effortChange !== undefined}
 					<p
@@ -272,7 +272,7 @@
 						{data.myLastRatings.effortChange >= 0 ? '+' : ''}{data.myLastRatings.effortChange}
 					</p>
 				{/if}
-				<p class="mt-1 text-[10px] text-text-muted">Your self-rated effort this week</p>
+				<p class="mt-1 text-[10px] text-text-muted">How hard you felt you worked this week</p>
 			</div>
 
 			<!-- My Performance -->
@@ -281,7 +281,7 @@
 					My Performance
 				</p>
 				<p class="mt-1 text-2xl font-bold text-amber-500 tabular-nums">
-					{data.myLastRatings?.performance ?? '—'}
+					{data.myLastRatings?.performance != null ? `${data.myLastRatings.performance}/10` : '—'}
 				</p>
 				{#if data.myLastRatings?.performanceChange !== null && data.myLastRatings?.performanceChange !== undefined}
 					<p
@@ -296,7 +296,7 @@
 							.performanceChange}
 					</p>
 				{/if}
-				<p class="mt-1 text-[10px] text-text-muted">Your self-rated performance this week</p>
+				<p class="mt-1 text-[10px] text-text-muted">How effective you felt this week</p>
 			</div>
 
 			<!-- Reviewer Effort -->
@@ -305,7 +305,9 @@
 					Reviewer Effort
 				</p>
 				<p class="mt-1 text-2xl font-bold text-cyan-400 tabular-nums">
-					{data.stakeholdersLastRatings?.effort ?? '—'}
+					{data.stakeholdersLastRatings?.effort != null
+						? `${data.stakeholdersLastRatings.effort}/10`
+						: '—'}
 				</p>
 				{#if data.stakeholdersLastRatings?.effortChange !== null && data.stakeholdersLastRatings?.effortChange !== undefined}
 					<p
@@ -321,7 +323,7 @@
 							.effortChange}
 					</p>
 				{/if}
-				<p class="mt-1 text-[10px] text-text-muted">How reviewers see your effort</p>
+				<p class="mt-1 text-[10px] text-text-muted">How your reviewers rate your effort</p>
 			</div>
 
 			<!-- Reviewer Performance -->
@@ -330,7 +332,9 @@
 					Reviewer Performance
 				</p>
 				<p class="mt-1 text-2xl font-bold text-amber-400 tabular-nums">
-					{data.stakeholdersLastRatings?.performance ?? '—'}
+					{data.stakeholdersLastRatings?.performance != null
+						? `${data.stakeholdersLastRatings.performance}/10`
+						: '—'}
 				</p>
 				{#if data.stakeholdersLastRatings?.performanceChange !== null && data.stakeholdersLastRatings?.performanceChange !== undefined}
 					<p
@@ -346,7 +350,7 @@
 							.stakeholdersLastRatings.performanceChange}
 					</p>
 				{/if}
-				<p class="mt-1 text-[10px] text-text-muted">How reviewers see your performance</p>
+				<p class="mt-1 text-[10px] text-text-muted">How your reviewers rate your effectiveness</p>
 			</div>
 		</div>
 	{/if}

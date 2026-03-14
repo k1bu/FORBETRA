@@ -138,12 +138,12 @@
 							{/if}
 							{#if client.objective?.insights?.avgEffort !== null && client.objective?.insights?.avgEffort !== undefined}
 								<span class="text-xs text-text-muted tabular-nums"
-									>Effort: {client.objective.insights.avgEffort}</span
+									>Effort: {client.objective.insights.avgEffort}/10</span
 								>
 							{/if}
 							{#if client.objective?.insights?.avgProgress !== null && client.objective?.insights?.avgProgress !== undefined}
 								<span class="text-xs text-text-muted tabular-nums"
-									>Perf: {client.objective.insights.avgProgress}</span
+									>Perf: {client.objective.insights.avgProgress}/10</span
 								>
 							{/if}
 							{#if !client.objective?.cycle?.currentWeek && !client.objective?.insights}

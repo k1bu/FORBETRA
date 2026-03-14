@@ -382,12 +382,12 @@
 											<div class="flex gap-4">
 												{#if reflection.effortScore !== null}
 													<span class="text-cyan-500 tabular-nums"
-														>Effort: {reflection.effortScore}</span
+														>Effort: {reflection.effortScore}/10</span
 													>
 												{/if}
 												{#if reflection.performanceScore !== null}
 													<span class="text-amber-500 tabular-nums"
-														>Performance: {reflection.performanceScore}</span
+														>Performance: {reflection.performanceScore}/10</span
 													>
 												{/if}
 											</div>
