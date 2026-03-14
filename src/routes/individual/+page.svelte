@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { invalidateAll } from '$app/navigation';
+	import { onMount } from 'svelte';
 	import {
 		Flame,
 		AlertTriangle,
@@ -11,7 +12,8 @@
 		TrendingDown,
 		ArrowRight,
 		Sparkles,
-		ChevronRight
+		ChevronRight,
+		HelpCircle
 	} from 'lucide-svelte';
 	import PerformanceEffortChart from '$lib/components/PerformanceEffortChart.svelte';
 	import ErrorBoundary from '$lib/components/ErrorBoundary.svelte';
@@ -23,6 +25,20 @@
 	}
 
 	let showSubgoals = $state(false);
+
+	// Orientation card
+	let orientationDismissed = $state(true);
+	onMount(() => {
+		orientationDismissed = localStorage.getItem('forbetra-orientation-dismissed') === 'true';
+	});
+	function dismissOrientation() {
+		localStorage.setItem('forbetra-orientation-dismissed', 'true');
+		orientationDismissed = true;
+	}
+	function showOrientation() {
+		localStorage.removeItem('forbetra-orientation-dismissed');
+		orientationDismissed = false;
+	}
 
 	// Cycle extension
 	let extending = $state(false);
@@ -62,9 +78,20 @@
 	<!-- ═══ ZONE 1: Welcome + Goal + Week badge ═══ -->
 	<div class="flex flex-col gap-1">
 		<div class="flex items-center justify-between">
-			<p class="text-sm text-text-tertiary">
-				{#if data.isFirstVisit}Welcome to Forbetra{:else}Welcome back{/if}
-			</p>
+			<div class="flex items-center gap-1.5">
+				<p class="text-sm text-text-tertiary">
+					{#if data.isFirstVisit}Welcome to Forbetra{:else}Welcome back{/if}
+				</p>
+				{#if orientationDismissed}
+					<button
+						onclick={showOrientation}
+						class="rounded-full p-1 text-text-muted transition-colors hover:bg-surface-subtle hover:text-text-secondary"
+						title="What is Forbetra?"
+					>
+						<HelpCircle class="h-3.5 w-3.5" />
+					</button>
+				{/if}
+			</div>
 			<div class="flex items-center gap-2">
 				{#if data.summary?.currentStreak && data.summary.currentStreak > 0}
 					<span
@@ -134,6 +161,23 @@
 			{/if}
 		{/if}
 	</div>
+
+	<!-- ═══ Orientation Card ═══ -->
+	{#if !orientationDismissed}
+		<div class="rounded-2xl border border-accent/20 bg-accent/5 p-5">
+			<h2 class="text-sm font-semibold text-text-primary">How Forbetra works</h2>
+			<p class="mt-2 text-sm leading-relaxed text-text-secondary">
+				Each week, you rate your own effort and performance (0–10). Your reviewers do the same —
+				independently. Over time, the gap between your view and theirs reveals your blind spots.
+			</p>
+			<button
+				onclick={dismissOrientation}
+				class="mt-3 rounded-lg bg-accent px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
+			>
+				Got it
+			</button>
+		</div>
+	{/if}
 
 	<!-- ═══ ZONE 2: Check-in CTA ═══ -->
 	{#if !data.isOnboardingComplete}
@@ -351,6 +395,20 @@
 					</p>
 				{/if}
 				<p class="mt-1 text-[10px] text-text-muted">How your reviewers rate your effectiveness</p>
+			</div>
+		</div>
+	{/if}
+
+	<!-- ═══ Journey Progress ═══ -->
+	{#if data.isOnboardingComplete && data.currentWeek && data.totalWeeks && !data.cycle?.isCycleCompleted}
+		{@const pct = Math.min(100, Math.round((data.currentWeek / data.totalWeeks) * 100))}
+		<div class="rounded-xl border border-border-default bg-surface-raised px-4 py-3">
+			<div class="flex items-center justify-between text-xs text-text-secondary">
+				<span>Journey progress</span>
+				<span class="tabular-nums">{pct}% — week {data.currentWeek} of {data.totalWeeks}</span>
+			</div>
+			<div class="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-subtle">
+				<div class="h-full rounded-full bg-accent transition-all" style="width: {pct}%"></div>
 			</div>
 		</div>
 	{/if}
