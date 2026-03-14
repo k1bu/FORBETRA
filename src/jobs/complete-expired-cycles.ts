@@ -32,7 +32,7 @@ export async function completeExpiredCycles(): Promise<{
 		},
 		include: {
 			user: {
-				select: { id: true, email: true, name: true, phone: true }
+				select: { id: true, email: true, name: true, phone: true, deliveryMethod: true }
 			},
 			objective: {
 				select: { title: true }
@@ -76,35 +76,41 @@ export async function completeExpiredCycles(): Promise<{
 				skipped++;
 			}
 
-			// Send completion email
+			// Send completion notifications
 			const baseUrl =
 				process.env.PUBLIC_APP_URL || process.env.VERCEL_URL
 					? `https://${process.env.PUBLIC_APP_URL || process.env.VERCEL_URL}`
 					: 'https://app.forbetra.com';
 
-			try {
-				const template = emailTemplates.cycleCompleted({
-					individualName: cycle.user.name || undefined,
-					objectiveTitle: cycle.objective.title,
-					cycleLabel: cycle.label || undefined,
-					appUrl: baseUrl
-				});
-				await sendEmail({
-					to: cycle.user.email,
-					...template
-				});
-			} catch (emailError) {
-				console.error(`[cycles:complete] Failed to send email for cycle ${cycle.id}`, emailError);
+			const delivery = cycle.user.deliveryMethod ?? 'both';
+
+			if (delivery !== 'sms') {
+				try {
+					const template = emailTemplates.cycleCompleted({
+						individualName: cycle.user.name || undefined,
+						objectiveTitle: cycle.objective.title,
+						cycleLabel: cycle.label || undefined,
+						appUrl: baseUrl
+					});
+					await sendEmail({
+						to: cycle.user.email,
+						...template
+					});
+				} catch (emailError) {
+					console.error(`[cycles:complete] Failed to send email for cycle ${cycle.id}`, emailError);
+				}
 			}
 
 			// Send SMS notification
-			await trySendSms(
-				cycle.user.phone,
-				smsTemplates.cycleCompleted({
-					objectiveTitle: cycle.objective.title,
-					appUrl: baseUrl
-				})
-			);
+			if (delivery !== 'email') {
+				await trySendSms(
+					cycle.user.phone,
+					smsTemplates.cycleCompleted({
+						objectiveTitle: cycle.objective.title,
+						appUrl: baseUrl
+					})
+				);
+			}
 
 			completed++;
 		} catch (error) {

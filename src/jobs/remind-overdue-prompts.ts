@@ -49,6 +49,8 @@ export const remindOverduePrompts = async () => {
 		});
 
 		if (overdue.length > 0) {
+			const delivery = objective.user.deliveryMethod ?? 'both';
+
 			// Compute current streak for motivational messaging
 			let currentStreak = 0;
 			try {
@@ -81,28 +83,32 @@ export const remindOverduePrompts = async () => {
 					? `https://${process.env.PUBLIC_APP_URL || process.env.VERCEL_URL}`
 					: 'https://app.forbetra.com';
 
-			try {
-				const template = emailTemplates.reminderOverdue({
-					individualName: objective.user.name || undefined,
-					objectiveTitle: objective.title,
-					currentStreak,
-					appUrl
-				});
-				await sendEmail({
-					to: objective.user.email,
-					...template
-				});
-				console.info('[job:remind-overdue-prompts] Sent reminder to', objective.user.email);
-			} catch (error) {
-				console.error(
-					'[job:remind-overdue-prompts] Failed to send reminder to',
-					objective.user.email,
-					error
-				);
+			if (delivery !== 'sms') {
+				try {
+					const template = emailTemplates.reminderOverdue({
+						individualName: objective.user.name || undefined,
+						objectiveTitle: objective.title,
+						currentStreak,
+						appUrl
+					});
+					await sendEmail({
+						to: objective.user.email,
+						...template
+					});
+					console.info('[job:remind-overdue-prompts] Sent reminder to', objective.user.email);
+				} catch (error) {
+					console.error(
+						'[job:remind-overdue-prompts] Failed to send reminder to',
+						objective.user.email,
+						error
+					);
+				}
 			}
 
 			// Send SMS reminder
-			await trySendSms(objective.user.phone, smsTemplates.reminderOverdue({ appUrl }));
+			if (delivery !== 'email') {
+				await trySendSms(objective.user.phone, smsTemplates.reminderOverdue({ appUrl }));
+			}
 		}
 	}
 };

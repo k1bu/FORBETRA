@@ -47,12 +47,13 @@ const emailFooter = (settingsUrl?: string) => {
 		<p style="font-size: 11px; color: #94a3b8; margin: 8px 0 0 0;">
 			<a href="${url}" style="color: #94a3b8; text-decoration: underline;">Manage notification preferences</a>
 		</p>
+		<p style="font-size: 10px; color: #94a3b8; margin: 8px 0 0 0;">2358 University Ave., #265, San Diego, CA 92104</p>
 	</div>`;
 };
 
 const textFooter = (settingsUrl?: string) => {
 	const url = settingsUrl || `${baseUrl}/settings`;
-	return `\n---\nForbetra — You. And Improved.\nManage notification preferences: ${url}`;
+	return `\n---\nForbetra — You. And Improved.\nManage notification preferences: ${url}\n2358 University Ave., #265, San Diego, CA 92104`;
 };
 
 export const emailTemplates = {

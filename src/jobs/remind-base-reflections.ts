@@ -123,38 +123,44 @@ export const remindBaseReflections = async () => {
 			// Streak computation is non-critical
 		}
 
+		const delivery = objective.user.deliveryMethod ?? 'both';
+
 		// Send reminder email
-		try {
-			const template = emailTemplates.reminderBase({
-				individualName: objective.user.name || undefined,
-				objectiveTitle: objective.title,
-				reflectionType: reflectionType.toLowerCase(),
-				weekNumber: currentWeek,
-				appUrl: baseUrl,
-				currentStreak
-			});
-			await sendEmail({
-				to: objective.user.email,
-				...template
-			});
-			console.info(
-				`[job:remind-base-reflections] Sent ${reflectionType} reminder to ${objective.user.email} for week ${currentWeek}`
-			);
-		} catch (error) {
-			console.error(
-				`[job:remind-base-reflections] Failed to send reminder to ${objective.user.email}`,
-				error
-			);
+		if (delivery !== 'sms') {
+			try {
+				const template = emailTemplates.reminderBase({
+					individualName: objective.user.name || undefined,
+					objectiveTitle: objective.title,
+					reflectionType: reflectionType.toLowerCase(),
+					weekNumber: currentWeek,
+					appUrl: baseUrl,
+					currentStreak
+				});
+				await sendEmail({
+					to: objective.user.email,
+					...template
+				});
+				console.info(
+					`[job:remind-base-reflections] Sent ${reflectionType} reminder to ${objective.user.email} for week ${currentWeek}`
+				);
+			} catch (error) {
+				console.error(
+					`[job:remind-base-reflections] Failed to send reminder to ${objective.user.email}`,
+					error
+				);
+			}
 		}
 
 		// Send SMS reminder if user has a phone number
-		await trySendSms(
-			objective.user.phone,
-			smsTemplates.reminderBase({
-				reflectionType: reflectionType.toLowerCase(),
-				weekNumber: currentWeek,
-				appUrl: baseUrl
-			})
-		);
+		if (delivery !== 'email') {
+			await trySendSms(
+				objective.user.phone,
+				smsTemplates.reminderBase({
+					reflectionType: reflectionType.toLowerCase(),
+					weekNumber: currentWeek,
+					appUrl: baseUrl
+				})
+			);
+		}
 	}
 };
