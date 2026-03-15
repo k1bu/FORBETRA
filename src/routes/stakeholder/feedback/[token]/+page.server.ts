@@ -101,11 +101,17 @@ export const load: PageServerLoad = async ({ params, url }) => {
 		}
 	});
 
-	if (!token || !token.stakeholder || !token.reflection || token.expiresAt < new Date()) {
+	if (!token || !token.stakeholder || !token.reflection) {
 		throw redirect(302, '/stakeholder/invalid');
 	}
 
 	const isAlreadySubmitted = !!token.usedAt;
+
+	// Check expiry AFTER usedAt — so returning stakeholders who already submitted
+	// see "already submitted" instead of a confusing "invalid link" error
+	if (!isAlreadySubmitted && token.expiresAt < new Date()) {
+		throw redirect(302, '/stakeholder/invalid');
+	}
 
 	// Fetch previous feedback ratings from this stakeholder (only if not Week 1)
 	let previousRatings: {

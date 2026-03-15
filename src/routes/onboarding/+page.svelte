@@ -210,23 +210,23 @@
 		<div class="mb-4">
 			<div class="mb-1 flex items-center justify-between text-sm text-text-secondary">
 				<span class="font-medium">
-					Step {currentStep === 'goal' ? 1 : 2} of 2: {currentStep === 'goal'
+					Step {currentStep === 'goal' ? 1 : 2} of 3: {currentStep === 'goal'
 						? 'Set your goal'
 						: 'Add reviewers'}
 				</span>
-				<span class="text-text-muted">{currentStep === 'goal' ? '50' : '100'}%</span>
+				<span class="text-text-muted">{currentStep === 'goal' ? '33' : '66'}%</span>
 			</div>
 			<div
 				class="h-2 overflow-hidden rounded-full bg-surface-subtle"
 				role="progressbar"
-				aria-valuenow={currentStep === 'goal' ? 50 : 100}
+				aria-valuenow={currentStep === 'goal' ? 33 : 66}
 				aria-valuemin={0}
 				aria-valuemax={100}
 				aria-label="Onboarding progress"
 			>
 				<div
 					class="h-full rounded-full bg-accent transition-all duration-500 ease-out"
-					style="width: {currentStep === 'goal' ? 50 : 100}%"
+					style="width: {currentStep === 'goal' ? 33 : 66}%"
 				></div>
 			</div>
 		</div>

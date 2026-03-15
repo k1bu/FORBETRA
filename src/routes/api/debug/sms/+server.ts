@@ -22,6 +22,13 @@ const isAuthorized = (request: Request) => {
 };
 
 export const POST: RequestHandler = async ({ request }) => {
+	if (process.env.NODE_ENV === 'production') {
+		return json(
+			{ ok: false, error: 'Debug endpoints are disabled in production' },
+			{ status: 403 }
+		);
+	}
+
 	if (!isAuthorized(request)) {
 		return json({ ok: false, error: 'Unauthorized' }, { status: 401 });
 	}

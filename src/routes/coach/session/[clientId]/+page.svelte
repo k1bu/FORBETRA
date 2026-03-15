@@ -248,7 +248,7 @@
 				<p class="text-[10px] font-medium tracking-wider text-text-muted uppercase">Completion</p>
 				<p class="text-lg font-bold text-accent tabular-nums">
 					{data.client.objective.cycle
-						? `${Math.round(data.client.objective.cycle.completion * 100)}%`
+						? `${Math.round(data.client.objective.cycle.completion)}%`
 						: '—'}
 				</p>
 			</div>

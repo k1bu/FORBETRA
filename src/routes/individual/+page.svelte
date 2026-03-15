@@ -223,6 +223,12 @@
 				>
 					View Insights
 				</a>
+				<a
+					href="/individual/new-cycle"
+					class="rounded-lg border border-accent/30 bg-accent-muted px-4 py-2 text-sm font-semibold text-accent transition-colors hover:border-accent/50"
+				>
+					Start New Journey
+				</a>
 				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 				<button
 					type="button"

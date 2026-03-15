@@ -1,5 +1,6 @@
 import { json, error } from '@sveltejs/kit';
 import prisma from '$lib/server/prisma';
+import { rateLimit } from '$lib/server/rateLimit';
 import type { RequestHandler } from './$types';
 
 const IMPERSONATE_COOKIE = 'forbetra_impersonate';
@@ -9,6 +10,10 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
 	const admin = locals.realUser ?? locals.dbUser;
 	if (!admin || admin.role !== 'ADMIN') {
 		throw error(403, 'Admin access required');
+	}
+
+	if (!rateLimit(`impersonate:${admin.id}`, 10, 60_000)) {
+		throw error(429, 'Too many impersonation requests. Try again in a minute.');
 	}
 
 	const { userId } = await request.json();

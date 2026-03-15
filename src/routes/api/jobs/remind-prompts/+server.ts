@@ -1,6 +1,5 @@
 import type { RequestHandler } from '@sveltejs/kit';
 import { remindOverduePrompts } from '$jobs/remind-overdue-prompts';
-import { remindStakeholderFeedback } from '$jobs/remind-stakeholder-feedback';
 import { rateLimit } from '$lib/server/rateLimit';
 
 const isAuthorized = (request: Request) => {
@@ -20,8 +19,7 @@ export const GET: RequestHandler = async ({ request, url }) => {
 		return new Response('Too many requests', { status: 429 });
 	}
 
-	// Run both reminder jobs
-	await Promise.all([remindOverduePrompts(), remindStakeholderFeedback()]);
+	await remindOverduePrompts();
 
 	return new Response(null, { status: 204 });
 };

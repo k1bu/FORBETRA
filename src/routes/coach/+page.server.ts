@@ -157,7 +157,7 @@ export const load: PageServerLoad = async (event) => {
 				(a, b) => (severityOrder[b.severity] ?? 0) - (severityOrder[a.severity] ?? 0)
 			)[0],
 			trajectory: c.objective?.insights?.trajectoryScore ?? null,
-			completionPct: c.objective?.cycle ? Math.round(c.objective.cycle.completion * 100) : null
+			completionPct: c.objective?.cycle ? Math.round(c.objective.cycle.completion) : null
 		}));
 
 	return {

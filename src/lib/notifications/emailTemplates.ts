@@ -161,6 +161,7 @@ export const emailTemplates = {
 					<p style="font-size: 16px;"><strong>${indName}</strong> just completed a check-in and would love your feedback.</p>
 					${objTitle ? `<p style="font-size: 14px; color: #64748b; background: #f1f5f9; padding: 12px; border-radius: 6px; margin: 20px 0;"><strong>Objective:</strong> ${objTitle}</p>` : ''}
 					<p style="font-size: 16px;">This will take less than 60 seconds — just two quick questions about effort and progress.</p>
+					<p style="font-size: 13px; color: #64748b; margin-top: 16px;">Forbetra is a secure coaching platform. Your feedback is shared only with ${indName} and their coach — never sold or used for any other purpose.</p>
 					<div style="text-align: center; margin: 30px 0;">
 						<a href="${data.feedbackLink}" style="display: inline-block; background: #3b82f6; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Share Feedback</a>
 					</div>
@@ -170,7 +171,7 @@ export const emailTemplates = {
 			</body>
 			</html>
 		`,
-			text: `60-Second Feedback: How's ${data.individualName || 'Your Participant'} Doing?\n\nHi ${data.stakeholderName || 'there'},\n\n${data.individualName || 'Your participant'} just completed a check-in and would love your feedback.\n\n${data.objectiveTitle ? `Objective: ${data.objectiveTitle}\n\n` : ''}This will take less than 60 seconds — just two quick questions about effort and progress.\n\nShare feedback: ${data.feedbackLink}\n\nThis link expires in 10 days${textFooter()}`
+			text: `60-Second Feedback: How's ${data.individualName || 'Your Participant'} Doing?\n\nHi ${data.stakeholderName || 'there'},\n\n${data.individualName || 'Your participant'} just completed a check-in and would love your feedback.\n\n${data.objectiveTitle ? `Objective: ${data.objectiveTitle}\n\n` : ''}This will take less than 60 seconds — just two quick questions about effort and progress.\n\nForbetra is a secure coaching platform. Your feedback is shared only with ${data.individualName || 'them'} and their coach — never sold or used for any other purpose.\n\nShare feedback: ${data.feedbackLink}\n\nThis link expires in 10 days${textFooter()}`
 		};
 	},
 
