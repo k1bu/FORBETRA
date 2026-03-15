@@ -86,8 +86,11 @@
 		Calendar,
 		CircleCheck,
 		CircleX,
-		RotateCcw
+		RotateCcw,
+		ChevronDown
 	} from 'lucide-svelte';
+
+	let showWeeklyDetails = $state(false);
 	import PerformanceEffortChart from '$lib/components/PerformanceEffortChart.svelte';
 	import { getScoreColorNullable, getStabilityColor } from '$lib/utils/scoreColors';
 
@@ -104,7 +107,7 @@
 <!-- eslint-disable svelte/no-navigation-without-resolve -->
 <section class="mx-auto flex max-w-6xl flex-col gap-8 p-4 pb-12">
 	<!-- Page Header -->
-	<header>
+	<header class="anim-slide-up">
 		<nav aria-label="Breadcrumb" class="mb-2">
 			<ol class="flex items-center gap-1.5 text-sm text-text-tertiary">
 				<li>
@@ -114,20 +117,11 @@
 						>Hub</a
 					>
 				</li>
-				<li aria-hidden="true" class="text-text-muted">
-					<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-						><path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M9 5l7 7-7 7"
-						/></svg
-					>
-				</li>
+				<li aria-hidden="true" class="text-text-muted">/</li>
 				<li><span class="font-medium text-text-primary">Dashboard</span></li>
 			</ol>
 		</nav>
-		<h1 class="text-3xl font-bold text-text-primary">{data.objective.title}</h1>
+		<h1 class="text-2xl font-bold text-text-primary">{data.objective.title}</h1>
 		{#if data.objective.description}
 			<p class="mt-1 text-text-secondary">{data.objective.description}</p>
 		{/if}
@@ -164,7 +158,10 @@
 
 	{#if data.cycle}
 		<!-- Quick Stats Grid -->
-		<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+		<div
+			class="anim-slide-up grid gap-4 md:grid-cols-2 lg:grid-cols-4"
+			style="animation-delay: 50ms"
+		>
 			<!-- Next Prompt Card -->
 			{#if data.nextPrompt}
 				<div
@@ -215,7 +212,7 @@
 						<div class="pointer-events-none absolute inset-y-0 left-[50%] w-px bg-white/10"></div>
 						<div class="pointer-events-none absolute inset-y-0 left-[75%] w-px bg-white/10"></div>
 					</div>
-					<div class="mt-0.5 flex justify-between text-[9px] text-text-muted" aria-hidden="true">
+					<div class="text-2xs mt-0.5 flex justify-between text-text-muted" aria-hidden="true">
 						<span>0</span>
 						<span>25%</span>
 						<span>50%</span>
@@ -227,11 +224,11 @@
 					<span class="font-semibold">{data.cycle.reflectionsRecorded}</span> check-ins submitted
 				</p>
 				{#if data.cycle.completion >= Math.round((data.cycle.weeksElapsed / data.cycle.totalWeeks) * 100)}
-					<p class="mt-1 text-[10px] text-success">On pace or ahead</p>
+					<p class="text-2xs mt-1 text-success">On pace or ahead</p>
 				{:else if data.cycle.completion >= Math.round((data.cycle.weeksElapsed / data.cycle.totalWeeks) * 100) - 15}
-					<p class="mt-1 text-[10px] text-text-muted">Slightly behind pace</p>
+					<p class="text-2xs mt-1 text-text-muted">Slightly behind pace</p>
 				{:else}
-					<p class="mt-1 text-[10px] text-warning">Behind pace — catch up this week</p>
+					<p class="text-2xs mt-1 text-warning">Behind pace — catch up this week</p>
 				{/if}
 			</div>
 
@@ -331,77 +328,88 @@
 				</div>
 				{#if data.weeklyExperiences.length}
 					<div class="space-y-3">
-						<h3 class="text-sm font-semibold tracking-wide text-text-tertiary uppercase">
+						<button
+							type="button"
+							onclick={() => (showWeeklyDetails = !showWeeklyDetails)}
+							class="flex w-full items-center justify-between text-sm font-semibold tracking-wide text-text-tertiary uppercase transition-colors hover:text-text-secondary"
+							aria-expanded={showWeeklyDetails}
+						>
 							This Week's Check-ins
-						</h3>
-						<div class="grid gap-3 md:grid-cols-3">
-							{#each data.weeklyExperiences as experience (experience.type)}
-								{@const stateLabels = {
-									open: 'Open',
-									completed: 'Completed',
-									missed: 'Missed',
-									upcoming: 'Upcoming',
-									catchup: 'Catch Up'
-								}}
-								<div
-									class="rounded-xl border border-border-default bg-surface-raised p-4 transition-all"
-								>
-									<div class="mb-2 flex items-center gap-2">
-										{#if experience.state === 'open'}
-											<span class="h-2 w-2 rounded-full bg-accent"></span>
-										{:else if experience.state === 'completed'}
-											<CircleCheck class="h-4 w-4 text-success" />
-										{:else if experience.state === 'missed'}
-											<CircleX class="h-4 w-4 text-text-muted" />
-										{:else if experience.state === 'upcoming'}
-											<Clock class="h-4 w-4 text-text-muted" />
-										{:else if experience.state === 'catchup'}
-											<RotateCcw class="h-4 w-4 text-warning" />
-										{/if}
-										<span class="text-xs font-semibold tracking-wide text-text-secondary uppercase"
-											>{stateLabels[experience.state]}</span
-										>
-									</div>
-									<p class="mb-2 font-semibold text-text-primary">{experience.label}</p>
-									{#if experience.availableDate}
-										<p class="mb-3 text-xs text-text-secondary">
-											Available: {formatDate(experience.availableDate)}
-										</p>
-									{/if}
-									{#if experience.deadlineDate && experience.state !== 'completed'}
-										<p class="mb-3 text-xs text-text-secondary">
-											Deadline: {formatDate(experience.deadlineDate)}
-										</p>
-									{/if}
-									{#if experience.url && (experience.state === 'open' || experience.state === 'completed')}
-										<a
-											href={experience.url}
-											class="inline-flex items-center gap-1 rounded-lg bg-surface-raised px-3 py-1.5 text-xs font-semibold text-text-secondary transition-all hover:bg-surface-subtle"
-										>
-											{experience.state === 'open' ? 'Complete →' : 'View →'}
-										</a>
-									{:else if experience.state === 'catchup' && experience.url}
-										<a
-											href={experience.url}
-											class="inline-flex items-center gap-1 rounded-lg bg-warning-muted px-3 py-1.5 text-xs font-semibold text-warning transition-all hover:bg-warning-muted/80"
-										>
-											Catch up →
-										</a>
-										{#if experience.catchupDeadline}
-											<p class="mt-2 text-xs text-warning">
-												You have until {formatDateTime(experience.catchupDeadline)} to complete this
+							<ChevronDown
+								class="h-4 w-4 transition-transform {showWeeklyDetails ? 'rotate-180' : ''}"
+							/>
+						</button>
+						{#if showWeeklyDetails}
+							<div class="grid gap-3 md:grid-cols-3">
+								{#each data.weeklyExperiences as experience (experience.type)}
+									{@const stateLabels = {
+										open: 'Open',
+										completed: 'Completed',
+										missed: 'Missed',
+										upcoming: 'Upcoming',
+										catchup: 'Catch Up'
+									}}
+									<div
+										class="rounded-xl border border-border-default bg-surface-raised p-4 transition-all"
+									>
+										<div class="mb-2 flex items-center gap-2">
+											{#if experience.state === 'open'}
+												<span class="h-2 w-2 rounded-full bg-accent"></span>
+											{:else if experience.state === 'completed'}
+												<CircleCheck class="h-4 w-4 text-success" />
+											{:else if experience.state === 'missed'}
+												<CircleX class="h-4 w-4 text-text-muted" />
+											{:else if experience.state === 'upcoming'}
+												<Clock class="h-4 w-4 text-text-muted" />
+											{:else if experience.state === 'catchup'}
+												<RotateCcw class="h-4 w-4 text-warning" />
+											{/if}
+											<span
+												class="text-xs font-semibold tracking-wide text-text-secondary uppercase"
+												>{stateLabels[experience.state]}</span
+											>
+										</div>
+										<p class="mb-2 font-semibold text-text-primary">{experience.label}</p>
+										{#if experience.availableDate}
+											<p class="mb-3 text-xs text-text-secondary">
+												Available: {formatDate(experience.availableDate)}
 											</p>
 										{/if}
-									{:else if experience.state === 'missed'}
-										<p class="text-xs font-medium text-text-secondary">
-											Window closed — keep going this week!
-										</p>
-									{:else if experience.state === 'upcoming'}
-										<p class="text-xs font-medium text-text-tertiary">Closed/Not Yet Available</p>
-									{/if}
-								</div>
-							{/each}
-						</div>
+										{#if experience.deadlineDate && experience.state !== 'completed'}
+											<p class="mb-3 text-xs text-text-secondary">
+												Deadline: {formatDate(experience.deadlineDate)}
+											</p>
+										{/if}
+										{#if experience.url && (experience.state === 'open' || experience.state === 'completed')}
+											<a
+												href={experience.url}
+												class="inline-flex items-center gap-1 rounded-lg bg-surface-raised px-3 py-1.5 text-xs font-semibold text-text-secondary transition-all hover:bg-surface-subtle"
+											>
+												{experience.state === 'open' ? 'Complete →' : 'View →'}
+											</a>
+										{:else if experience.state === 'catchup' && experience.url}
+											<a
+												href={experience.url}
+												class="inline-flex items-center gap-1 rounded-lg bg-warning-muted px-3 py-1.5 text-xs font-semibold text-warning transition-all hover:bg-warning-muted/80"
+											>
+												Catch up →
+											</a>
+											{#if experience.catchupDeadline}
+												<p class="mt-2 text-xs text-warning">
+													You have until {formatDateTime(experience.catchupDeadline)} to complete this
+												</p>
+											{/if}
+										{:else if experience.state === 'missed'}
+											<p class="text-xs font-medium text-text-secondary">
+												Window closed — keep going this week!
+											</p>
+										{:else if experience.state === 'upcoming'}
+											<p class="text-xs font-medium text-text-tertiary">Closed/Not Yet Available</p>
+										{/if}
+									</div>
+								{/each}
+							</div>
+						{/if}
 					</div>
 				{/if}
 			</div>

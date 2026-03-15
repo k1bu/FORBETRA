@@ -13,9 +13,11 @@
 		ArrowRight,
 		Sparkles,
 		ChevronRight,
-		HelpCircle
+		HelpCircle,
+		ShieldCheck
 	} from 'lucide-svelte';
 	import PerformanceEffortChart from '$lib/components/PerformanceEffortChart.svelte';
+	import InfoTip from '$lib/components/InfoTip.svelte';
 	import ErrorBoundary from '$lib/components/ErrorBoundary.svelte';
 
 	const { data }: { data: PageData } = $props();
@@ -26,10 +28,12 @@
 
 	let showSubgoals = $state(false);
 
-	// Orientation card
+	// Orientation card — gate on mounted to avoid SSR hydration flash
+	let orientationMounted = $state(false);
 	let orientationDismissed = $state(true);
 	onMount(() => {
 		orientationDismissed = localStorage.getItem('forbetra-orientation-dismissed') === 'true';
+		orientationMounted = true;
 	});
 	function dismissOrientation() {
 		localStorage.setItem('forbetra-orientation-dismissed', 'true');
@@ -44,6 +48,7 @@
 	let extending = $state(false);
 	let extendError = $state<string | null>(null);
 	let extendSuccess = $state(false);
+	let confirmExtend = $state(false);
 
 	async function extendCycle(weeks: number) {
 		if (!data.cycle) return;
@@ -71,22 +76,24 @@
 </script>
 
 <svelte:head>
-	<title>Home | Forbetra</title>
+	<title>Your Development Hub | Forbetra</title>
 </svelte:head>
 
-<section class="mx-auto flex max-w-3xl flex-col gap-5 p-4 pb-12">
+<section class="mx-auto flex max-w-4xl flex-col gap-5 p-4 pb-12">
 	<!-- ═══ ZONE 1: Welcome + Goal + Week badge ═══ -->
-	<div class="flex flex-col gap-1">
+	<div class="anim-slide-up flex flex-col gap-1">
 		<div class="flex items-center justify-between">
 			<div class="flex items-center gap-1.5">
 				<p class="text-sm text-text-tertiary">
-					{#if data.isFirstVisit}Welcome to Forbetra{:else}Welcome back{/if}
+					{#if data.isFirstVisit}Welcome to Forbetra{:else if data.summary?.currentStreak && data.summary.currentStreak >= 3}Welcome
+						back — {data.summary.currentStreak}-week streak!{:else}Welcome back{/if}
 				</p>
 				{#if orientationDismissed}
 					<button
 						onclick={showOrientation}
 						class="rounded-full p-1 text-text-muted transition-colors hover:bg-surface-subtle hover:text-text-secondary"
 						title="What is Forbetra?"
+						aria-label="Show orientation guide"
 					>
 						<HelpCircle class="h-3.5 w-3.5" />
 					</button>
@@ -96,6 +103,7 @@
 				{#if data.summary?.currentStreak && data.summary.currentStreak > 0}
 					<span
 						class="flex items-center gap-1 rounded-full bg-surface-subtle px-2.5 py-0.5 text-xs font-semibold text-warning"
+						title="{data.summary.currentStreak}-week streak"
 					>
 						<Flame class="h-3 w-3" />
 						{data.summary.currentStreak}
@@ -163,13 +171,27 @@
 	</div>
 
 	<!-- ═══ Orientation Card ═══ -->
-	{#if !orientationDismissed}
+	{#if orientationMounted && !orientationDismissed}
 		<div class="rounded-2xl border border-accent/20 bg-accent/5 p-5">
 			<h2 class="text-sm font-semibold text-text-primary">How Forbetra works</h2>
 			<p class="mt-2 text-sm leading-relaxed text-text-secondary">
 				Each week, you rate your own effort and performance (0–10). Your reviewers do the same —
 				independently. Over time, the gap between your view and theirs reveals your blind spots.
 			</p>
+			<div class="mt-3 rounded-lg border border-accent/20 bg-surface-raised px-4 py-3">
+				<p class="text-xs font-semibold text-accent">Why it works</p>
+				<p class="mt-1 text-xs text-text-secondary">
+					Research shows that self-perception gaps are the #1 barrier to leadership growth. Forbetra
+					makes these gaps visible, measurable, and actionable — so you grow faster with less
+					guesswork.
+				</p>
+			</div>
+			<!-- eslint-disable svelte/no-navigation-without-resolve -->
+			<p class="mt-1.5 text-xs text-text-tertiary">
+				Your data is TLS encrypted and shared only with your coach. Hosted on enterprise-grade
+				infrastructure. <a href="/privacy" class="text-accent hover:underline">Privacy policy</a>
+			</p>
+			<!-- eslint-enable svelte/no-navigation-without-resolve -->
 			<button
 				onclick={dismissOrientation}
 				class="mt-3 rounded-lg bg-accent px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
@@ -192,7 +214,7 @@
 			<div class="min-w-0 flex-1">
 				<p class="text-base font-semibold text-text-primary">Complete your setup</p>
 				<p class="text-sm text-text-secondary">
-					Finish onboarding to start tracking your performance.
+					Set your goal, invite reviewers, and log your first check-in.
 				</p>
 			</div>
 			<ArrowRight
@@ -211,10 +233,40 @@
 				<div class="min-w-0 flex-1">
 					<p class="text-base font-semibold text-text-primary">Journey complete!</p>
 					<p class="text-sm text-text-secondary">
-						Your journey is complete! View your insights or start a new one.
+						{#if data.summary && data.summary.completionRate != null && data.summary.completionRate >= 80}
+							Exceptional dedication — {Math.round(data.summary.completionRate)}% completion rate
+							shows real commitment to growth.
+						{:else if data.summary && data.summary.completionRate != null && data.summary.completionRate >= 50}
+							You showed up consistently and built a meaningful data picture. View your insights to
+							see what emerged.
+						{:else}
+							You showed up and did the work. View your insights or start a new journey.
+						{/if}
 					</p>
 				</div>
 			</div>
+			{#if data.summary}
+				<div class="mt-3 grid grid-cols-3 gap-3">
+					<div class="rounded-lg bg-surface-base px-3 py-2 text-center">
+						<p class="text-lg font-bold text-accent tabular-nums">{data.summary.totalCompleted}</p>
+						<p class="text-2xs text-text-muted">Check-ins</p>
+					</div>
+					<div class="rounded-lg bg-surface-base px-3 py-2 text-center">
+						<p class="text-lg font-bold text-accent tabular-nums">
+							{data.summary.completionRate != null
+								? `${Math.round(data.summary.completionRate)}%`
+								: '—'}
+						</p>
+						<p class="text-2xs text-text-muted">Completion</p>
+					</div>
+					<div class="rounded-lg bg-surface-base px-3 py-2 text-center">
+						<p class="text-lg font-bold text-accent tabular-nums">
+							{data.summary.totalStakeholders}
+						</p>
+						<p class="text-2xs text-text-muted">Reviewers</p>
+					</div>
+				</div>
+			{/if}
 			<div class="mt-4 flex flex-wrap gap-2">
 				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<a
@@ -232,12 +284,37 @@
 				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 				<button
 					type="button"
-					onclick={() => extendCycle(4)}
+					onclick={() => (confirmExtend = true)}
 					disabled={extending || extendSuccess}
 					class="rounded-lg border border-border-default bg-surface-raised px-4 py-2 text-sm font-semibold text-text-secondary transition-colors hover:bg-surface-subtle disabled:opacity-60"
 				>
-					{#if extendSuccess}Extended!{:else if extending}Extending...{:else}Extend 4 Weeks{/if}
+					{#if extendSuccess}Extended!{:else}Extend 4 Weeks{/if}
 				</button>
+				{#if confirmExtend}
+					<div
+						class="flex items-center gap-2 rounded-lg border border-accent/30 bg-accent-muted px-3 py-2"
+					>
+						<span class="text-xs text-accent">Add 4 more weeks to this cycle?</span>
+						<button
+							type="button"
+							onclick={() => {
+								confirmExtend = false;
+								extendCycle(4);
+							}}
+							disabled={extending}
+							class="rounded-md bg-accent px-3 py-1 text-xs font-semibold text-white hover:bg-accent-hover disabled:opacity-60"
+						>
+							{extending ? 'Extending...' : 'Yes, extend'}
+						</button>
+						<button
+							type="button"
+							onclick={() => (confirmExtend = false)}
+							class="text-xs font-medium text-text-muted hover:text-text-secondary"
+						>
+							Cancel
+						</button>
+					</div>
+				{/if}
 			</div>
 			{#if extendError}
 				<p class="mt-2 text-sm text-error">{extendError}</p>
@@ -303,11 +380,19 @@
 
 	<!-- ═══ ZONE 3: At-a-Glance scores ═══ -->
 	{#if data.isOnboardingComplete && (data.myLastRatings || data.stakeholdersLastRatings)}
-		<div class="grid grid-cols-2 gap-3">
+		<div
+			id="scores"
+			class="scroll-anchor anim-slide-up grid grid-cols-2 gap-3"
+			role="region"
+			aria-label="Score summary"
+			style="animation-delay: 50ms"
+		>
 			<!-- My Effort -->
 			<div class="rounded-xl border border-border-default bg-surface-raised p-4">
-				<p class="text-[10px] font-semibold tracking-wider text-text-muted uppercase">My Effort</p>
-				<p class="mt-1 text-2xl font-bold text-cyan-500 tabular-nums">
+				<p class="text-2xs font-semibold tracking-wider text-text-muted uppercase">
+					My Effort <InfoTip text="Your self-rated investment of energy and focus this week" />
+				</p>
+				<p class="mt-1 text-2xl font-bold text-data-effort tabular-nums">
 					{data.myLastRatings?.effort != null ? `${data.myLastRatings.effort}/10` : '—'}
 				</p>
 				{#if data.myLastRatings?.effortChange !== null && data.myLastRatings?.effortChange !== undefined}
@@ -322,15 +407,17 @@
 						{data.myLastRatings.effortChange >= 0 ? '+' : ''}{data.myLastRatings.effortChange}
 					</p>
 				{/if}
-				<p class="mt-1 text-[10px] text-text-muted">How hard you felt you worked this week</p>
+				<p class="text-2xs mt-1 text-text-muted">How hard you felt you worked this week</p>
 			</div>
 
 			<!-- My Performance -->
 			<div class="rounded-xl border border-border-default bg-surface-raised p-4">
-				<p class="text-[10px] font-semibold tracking-wider text-text-muted uppercase">
-					My Performance
+				<p class="text-2xs font-semibold tracking-wider text-text-muted uppercase">
+					My Performance <InfoTip
+						text="Your self-rated satisfaction with progress toward your goal this week"
+					/>
 				</p>
-				<p class="mt-1 text-2xl font-bold text-amber-500 tabular-nums">
+				<p class="mt-1 text-2xl font-bold text-data-performance tabular-nums">
 					{data.myLastRatings?.performance != null ? `${data.myLastRatings.performance}/10` : '—'}
 				</p>
 				{#if data.myLastRatings?.performanceChange !== null && data.myLastRatings?.performanceChange !== undefined}
@@ -346,15 +433,17 @@
 							.performanceChange}
 					</p>
 				{/if}
-				<p class="mt-1 text-[10px] text-text-muted">How effective you felt this week</p>
+				<p class="text-2xs mt-1 text-text-muted">How effective you felt this week</p>
 			</div>
 
 			<!-- Reviewer Effort -->
 			<div class="rounded-xl border border-border-default bg-surface-raised p-4">
-				<p class="text-[10px] font-semibold tracking-wider text-text-muted uppercase">
-					Reviewer Effort
+				<p class="text-2xs font-semibold tracking-wider text-text-muted uppercase">
+					Reviewer Effort <InfoTip
+						text="How your reviewers rate your effort — compare with your own to spot gaps"
+					/>
 				</p>
-				<p class="mt-1 text-2xl font-bold text-cyan-400 tabular-nums">
+				<p class="mt-1 text-2xl font-bold text-data-effort/80 tabular-nums">
 					{data.stakeholdersLastRatings?.effort != null
 						? `${data.stakeholdersLastRatings.effort}/10`
 						: '—'}
@@ -373,15 +462,17 @@
 							.effortChange}
 					</p>
 				{/if}
-				<p class="mt-1 text-[10px] text-text-muted">How your reviewers rate your effort</p>
+				<p class="text-2xs mt-1 text-text-muted">How your reviewers rate your effort</p>
 			</div>
 
 			<!-- Reviewer Performance -->
 			<div class="rounded-xl border border-border-default bg-surface-raised p-4">
-				<p class="text-[10px] font-semibold tracking-wider text-text-muted uppercase">
-					Reviewer Performance
+				<p class="text-2xs font-semibold tracking-wider text-text-muted uppercase">
+					Reviewer Performance <InfoTip
+						text="How your reviewers rate your effectiveness — compare with your own to spot gaps"
+					/>
 				</p>
-				<p class="mt-1 text-2xl font-bold text-amber-400 tabular-nums">
+				<p class="mt-1 text-2xl font-bold text-data-performance/80 tabular-nums">
 					{data.stakeholdersLastRatings?.performance != null
 						? `${data.stakeholdersLastRatings.performance}/10`
 						: '—'}
@@ -400,9 +491,49 @@
 							.stakeholdersLastRatings.performanceChange}
 					</p>
 				{/if}
-				<p class="mt-1 text-[10px] text-text-muted">How your reviewers rate your effectiveness</p>
+				<p class="text-2xs mt-1 text-text-muted">How your reviewers rate your effectiveness</p>
 			</div>
+			<p class="text-2xs col-span-2 text-center text-text-muted">
+				Reviewer scores are averaged across all active reviewers
+			</p>
 		</div>
+	{/if}
+
+	<!-- ═══ Score Interpretation ═══ -->
+	{#if data.isOnboardingComplete && data.myLastRatings && data.stakeholdersLastRatings}
+		{@const selfAvg =
+			((data.myLastRatings.effort ?? 0) + (data.myLastRatings.performance ?? 0)) / 2}
+		{@const reviewerAvg =
+			((data.stakeholdersLastRatings.effort ?? 0) +
+				(data.stakeholdersLastRatings.performance ?? 0)) /
+			2}
+		{@const overallGap = Math.abs(selfAvg - reviewerAvg)}
+		{#if overallGap > 2}
+			<div
+				class="flex items-center gap-2 rounded-xl border border-warning/20 bg-warning/5 px-4 py-2.5"
+			>
+				<AlertTriangle class="h-4 w-4 shrink-0 text-warning" />
+				<!-- eslint-disable svelte/no-navigation-without-resolve -->
+				<p class="text-xs text-text-secondary">
+					There's a perception gap worth exploring — this is exactly the kind of insight that
+					accelerates growth. See your
+					<a href="/individual/scorecard" class="font-semibold text-accent hover:underline"
+						>scorecard</a
+					>
+					for details.
+				</p>
+				<!-- eslint-enable svelte/no-navigation-without-resolve -->
+			</div>
+		{:else if selfAvg >= 7 && reviewerAvg >= 7}
+			<div
+				class="flex items-center gap-2 rounded-xl border border-success/20 bg-success/5 px-4 py-2.5"
+			>
+				<CircleCheck class="h-4 w-4 shrink-0 text-success" />
+				<p class="text-xs text-text-secondary">
+					Strong scores from both you and your reviewers — keep this momentum going.
+				</p>
+			</div>
+		{/if}
 	{/if}
 
 	<!-- ═══ Journey Progress ═══ -->
@@ -419,9 +550,62 @@
 		</div>
 	{/if}
 
+	<!-- ═══ Early Journey Guidance ═══ -->
+	{#if data.isOnboardingComplete && !data.myLastRatings && !data.visualizationData}
+		<div class="rounded-2xl border border-dashed border-accent/30 bg-accent-muted/30 p-5">
+			<p class="text-center text-sm font-semibold text-text-primary">
+				You've taken the first step — that matters
+			</p>
+			<p class="mt-1 text-center text-xs text-text-secondary">
+				Most people never get honest feedback on how they're really showing up. You just chose to.
+				Here's what happens next:
+			</p>
+			<div class="mt-3 space-y-2">
+				<div class="flex items-start gap-2 text-xs text-text-secondary">
+					<span
+						class="text-2xs mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent font-bold text-white"
+						>1</span
+					>
+					<span
+						><strong>First check-in</strong> — sets your baseline effort and performance scores</span
+					>
+				</div>
+				<div class="flex items-start gap-2 text-xs text-text-secondary">
+					<span
+						class="text-2xs mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent/60 font-bold text-white"
+						>2</span
+					>
+					<span
+						><strong>Reviewer feedback arrives</strong> — reveals perception gaps between how you see
+						yourself and how others see you</span
+					>
+				</div>
+				<div class="flex items-start gap-2 text-xs text-text-secondary">
+					<span
+						class="text-2xs mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent/40 font-bold text-white"
+						>3</span
+					>
+					<span
+						><strong>Week 2+</strong> — trends emerge, AI insights unlock, and the real growth begins</span
+					>
+				</div>
+			</div>
+			<div class="mt-3 rounded-lg bg-surface-raised px-4 py-3">
+				<p class="text-xs font-medium text-text-primary">Tip for your first check-in</p>
+				<p class="mt-1 text-xs leading-relaxed text-text-muted">
+					Rate where you genuinely are, not where you want to be. Honest baselines lead to more
+					meaningful growth — the numbers are for you, not for judgment.
+				</p>
+			</div>
+		</div>
+	{/if}
+
 	<!-- ═══ ZONE 4: Trend Chart ═══ -->
 	{#if data.isOnboardingComplete && data.visualizationData}
-		<div class="rounded-2xl border border-border-default bg-surface-raised p-5">
+		<div
+			id="trend"
+			class="scroll-anchor rounded-2xl border border-border-default bg-surface-raised p-5"
+		>
 			<h2 class="mb-3 text-sm font-semibold text-text-secondary">Trend</h2>
 			<ErrorBoundary>
 				<PerformanceEffortChart
@@ -440,7 +624,10 @@
 			.sort((a, b) => b.maxAbsGap - a.maxAbsGap)
 			.slice(0, 3)}
 		{#if significantGaps.length > 0}
-			<div class="rounded-2xl border border-border-default bg-surface-raised p-5">
+			<div
+				id="gaps"
+				class="scroll-anchor rounded-2xl border border-border-default bg-surface-raised p-5"
+			>
 				<div class="mb-3 flex items-center justify-between">
 					<h2 class="text-sm font-semibold text-text-secondary">Top Perception Gaps</h2>
 					<!-- eslint-disable svelte/no-navigation-without-resolve -->
@@ -477,7 +664,7 @@
 							<div class="flex gap-4 text-right">
 								{#if gap.effortGap !== null}
 									<div>
-										<p class="text-[10px] text-text-muted">Effort</p>
+										<p class="text-2xs text-text-muted">Effort</p>
 										<p
 											class="text-sm font-semibold tabular-nums {Math.abs(gap.effortGap) <= 0.5
 												? 'text-success'
@@ -491,7 +678,7 @@
 								{/if}
 								{#if gap.performanceGap !== null}
 									<div>
-										<p class="text-[10px] text-text-muted">Perf</p>
+										<p class="text-2xs text-text-muted">Perf</p>
 										<p
 											class="text-sm font-semibold tabular-nums {Math.abs(gap.performanceGap) <= 0.5
 												? 'text-success'
@@ -522,9 +709,14 @@
 				<Sparkles class="h-4 w-4 text-accent" />
 			</div>
 			<div class="min-w-0 flex-1">
-				<p class="mb-1 text-xs font-semibold tracking-wider text-accent uppercase">
-					Latest Insight
-				</p>
+				<div class="mb-1 flex items-center gap-2">
+					<p class="text-xs font-semibold tracking-wider text-accent uppercase">Latest Insight</p>
+					<span class="text-2xs text-text-tertiary"
+						>{new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(
+							new Date(data.latestInsight.createdAt)
+						)}</span
+					>
+				</div>
 				<p class="line-clamp-2 text-sm text-text-secondary">
 					{(data.latestInsight.content ?? '').slice(0, 150)}{(data.latestInsight.content ?? '')
 						.length > 150
@@ -537,5 +729,23 @@
 			/>
 		</a>
 		<!-- eslint-enable svelte/no-navigation-without-resolve -->
+	{/if}
+
+	<!-- ═══ Trust & Security ═══ -->
+	{#if data.isOnboardingComplete}
+		<div class="flex items-center justify-center gap-4 py-2 text-text-muted">
+			<div class="flex items-center gap-1.5">
+				<ShieldCheck class="h-3 w-3" />
+				<span class="text-2xs">TLS encrypted · Enterprise-grade security</span>
+			</div>
+			{#if data.coachName}
+				<span class="text-2xs"
+					>Coach: <span class="font-medium text-text-secondary">{data.coachName}</span></span
+				>
+			{/if}
+			<!-- eslint-disable svelte/no-navigation-without-resolve -->
+			<a href="/privacy" class="text-2xs hover:text-text-secondary hover:underline">Privacy</a>
+			<!-- eslint-enable svelte/no-navigation-without-resolve -->
+		</div>
 	{/if}
 </section>

@@ -1,21 +1,9 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { Search, AlertTriangle, ChevronRight } from 'lucide-svelte';
+	import { formatRelativeDays } from '$lib/utils/dates';
 
 	const { data }: { data: PageData } = $props();
-
-	const formatRelativeDays = (value: string | null | undefined) => {
-		if (!value) return '—';
-		const created = new Date(value);
-		const diff = Date.now() - created.getTime();
-		const days = Math.floor(diff / (24 * 60 * 60 * 1000));
-		if (days <= 0) return 'Today';
-		if (days === 1) return '1 day ago';
-		if (days < 14) return `${days} days ago`;
-		const weeks = Math.floor(days / 7);
-		if (weeks < 8) return `${weeks} wk${weeks === 1 ? '' : 's'} ago`;
-		return new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(created);
-	};
 
 	const activeCount = $derived(data.clients.filter((c) => !c.archived).length);
 	const archivedCount = $derived(data.clients.filter((c) => c.archived).length);
@@ -56,6 +44,21 @@
 <section class="mx-auto max-w-3xl space-y-6 px-4 py-8 sm:px-6">
 	<!-- Header -->
 	<div>
+		<!-- eslint-disable svelte/no-navigation-without-resolve -->
+		<nav aria-label="Breadcrumb" class="mb-2">
+			<ol class="flex items-center gap-1.5 text-sm text-text-tertiary">
+				<li>
+					<a
+						href="/coach"
+						class="rounded transition-colors hover:text-text-primary focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
+						>Dashboard</a
+					>
+				</li>
+				<li aria-hidden="true" class="text-text-muted">/</li>
+				<li><span class="font-medium text-text-primary">Clients</span></li>
+			</ol>
+		</nav>
+		<!-- eslint-enable svelte/no-navigation-without-resolve -->
 		<h1 class="text-2xl font-bold text-text-primary">Clients</h1>
 		<p class="mt-1 text-sm text-text-muted">
 			{activeCount} active{#if archivedCount > 0}, {archivedCount} archived{/if}

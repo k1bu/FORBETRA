@@ -199,10 +199,26 @@ export const load: PageServerLoad = async (event) => {
 		};
 	});
 
+	// Load sibling client list for prev/next navigation
+	const siblingClients = await prisma.coachClient.findMany({
+		where: { coachId: dbUser.id, archivedAt: null },
+		select: { individualId: true, individual: { select: { name: true } } },
+		orderBy: { individual: { name: 'asc' } }
+	});
+	const siblingList = siblingClients.map((s) => ({
+		id: s.individualId,
+		name: s.individual.name ?? 'Client'
+	}));
+	const currentIndex = siblingList.findIndex((s) => s.id === clientId);
+	const prevClient = currentIndex > 0 ? siblingList[currentIndex - 1] : null;
+	const nextClient = currentIndex < siblingList.length - 1 ? siblingList[currentIndex + 1] : null;
+
 	return {
 		client,
 		subgoals,
 		stakeholderTrends,
+		prevClient,
+		nextClient,
 		coachPrep: coachPrep
 			? {
 					id: coachPrep.id,
@@ -276,6 +292,47 @@ export const actions: Actions = {
 			}
 		});
 
-		return { noteSuccess: true };
+		return { noteSuccess: true, noteAction: 'created' as const };
+	},
+
+	editNote: async (event) => {
+		const { dbUser } = requireRole(event, 'COACH');
+		const formData = await event.request.formData();
+		const noteId = String(formData.get('noteId') ?? '').trim();
+		const content = String(formData.get('content') ?? '').trim();
+
+		if (!noteId) return fail(400, { noteError: 'Missing note ID.' });
+		if (!content || content.length < 10) {
+			return fail(400, { noteError: 'Note content must be at least 10 characters.' });
+		}
+
+		const note = await prisma.coachNote.findUnique({ where: { id: noteId } });
+		if (!note || note.coachId !== dbUser.id) {
+			return fail(403, { noteError: 'You cannot edit this note.' });
+		}
+
+		await prisma.coachNote.update({
+			where: { id: noteId },
+			data: { content }
+		});
+
+		return { noteSuccess: true, noteAction: 'updated' as const };
+	},
+
+	deleteNote: async (event) => {
+		const { dbUser } = requireRole(event, 'COACH');
+		const formData = await event.request.formData();
+		const noteId = String(formData.get('noteId') ?? '').trim();
+
+		if (!noteId) return fail(400, { noteError: 'Missing note ID.' });
+
+		const note = await prisma.coachNote.findUnique({ where: { id: noteId } });
+		if (!note || note.coachId !== dbUser.id) {
+			return fail(403, { noteError: 'You cannot delete this note.' });
+		}
+
+		await prisma.coachNote.delete({ where: { id: noteId } });
+
+		return { noteSuccess: true, noteAction: 'deleted' as const };
 	}
 };

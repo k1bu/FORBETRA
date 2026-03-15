@@ -1,49 +1,48 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { AlertTriangle, ArrowLeft, RotateCcw } from 'lucide-svelte';
 </script>
 
 <section
-	class="mx-auto flex min-h-[60vh] max-w-lg flex-col items-center justify-center gap-6 p-4 text-center"
+	class="mx-auto flex max-w-md flex-col items-center justify-center gap-6 p-4 py-20 text-center"
 >
-	<div class="rounded-2xl border border-border-default bg-surface-raised p-8" role="alert">
-		<div
-			class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-error-muted"
-		>
-			<svg class="h-8 w-8 text-error" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
-				/>
-			</svg>
-		</div>
-		{#if $page.status === 404}
+	<div class="flex h-14 w-14 items-center justify-center rounded-full bg-error/10">
+		<AlertTriangle class="h-7 w-7 text-error" />
+	</div>
+
+	{#if $page.status === 404}
+		<div>
 			<h1 class="text-2xl font-bold text-text-primary">Page not found</h1>
 			<p class="mt-2 text-sm text-text-secondary">
 				The page you're looking for doesn't exist or has been moved.
 			</p>
-		{:else}
+		</div>
+	{:else}
+		<div>
 			<h1 class="text-2xl font-bold text-text-primary">Something went wrong</h1>
 			<p class="mt-2 text-sm text-text-secondary">
-				{$page.error?.message || 'An unexpected error occurred.'}
+				{$page.error?.message ?? 'An unexpected error occurred. Please try again.'}
 			</p>
-		{/if}
-		<div class="mt-6 flex items-center justify-center gap-3">
-			<!-- eslint-disable svelte/no-navigation-without-resolve -->
-			<a
-				href="/individual"
-				class="rounded-xl bg-accent px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-accent-hover"
-			>
-				Return to Hub
-			</a>
-			<!-- eslint-enable svelte/no-navigation-without-resolve -->
-			<button
-				onclick={() => window.location.reload()}
-				class="rounded-xl border border-border-default bg-surface-raised px-6 py-2.5 text-sm font-semibold text-text-secondary transition-all hover:bg-surface-subtle"
-			>
-				Try Again
-			</button>
 		</div>
+	{/if}
+
+	<div class="flex gap-3">
+		<!-- eslint-disable svelte/no-navigation-without-resolve -->
+		<a
+			href="/individual"
+			class="inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-accent-hover"
+		>
+			<ArrowLeft class="h-4 w-4" />
+			Back to Home
+		</a>
+		<!-- eslint-enable svelte/no-navigation-without-resolve -->
+		<button
+			type="button"
+			onclick={() => location.reload()}
+			class="inline-flex items-center gap-2 rounded-lg border border-border-default bg-surface-raised px-5 py-2.5 text-sm font-semibold text-text-secondary transition-colors hover:bg-surface-subtle"
+		>
+			<RotateCcw class="h-4 w-4" />
+			Try Again
+		</button>
 	</div>
 </section>

@@ -44,7 +44,7 @@
 <!-- eslint-disable svelte/no-navigation-without-resolve -->
 <section class="mx-auto flex max-w-5xl flex-col gap-6 p-4 pb-12">
 	<!-- Header + week navigator -->
-	<nav aria-label="Breadcrumb" class="mb--2">
+	<nav aria-label="Breadcrumb" class="mb-2">
 		<ol class="flex items-center gap-1.5 text-sm text-text-tertiary">
 			<li>
 				<a
@@ -53,31 +53,21 @@
 					>Hub</a
 				>
 			</li>
-			<li aria-hidden="true" class="text-text-muted">
-				<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-					><path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M9 5l7 7-7 7"
-					/></svg
-				>
-			</li>
+			<li aria-hidden="true" class="text-text-muted">/</li>
 			<li><span class="font-medium text-text-primary">Scorecard</span></li>
 		</ol>
 	</nav>
 	<div class="flex items-center justify-between">
 		<div>
-			<h1 class="text-lg font-bold text-text-primary">Scorecard</h1>
+			<h1 class="text-2xl font-bold text-text-primary">Scorecard</h1>
 			<p class="text-xs text-text-muted">{data.objectiveTitle}</p>
-			<p class="mt-0.5 text-[10px] text-text-tertiary">
-				Your self-perception vs. reviewer feedback
-			</p>
+			<p class="text-2xs mt-0.5 text-text-tertiary">Your self-perception vs. reviewer feedback</p>
 		</div>
 		<div class="flex items-center gap-2">
 			<button
 				onclick={() => goToWeek(data.viewWeek - 1)}
 				disabled={data.viewWeek <= 1}
+				aria-label="Previous week"
 				class="rounded-lg p-1.5 text-text-muted hover:bg-surface-subtle hover:text-text-primary disabled:opacity-30 disabled:hover:bg-transparent"
 			>
 				<ChevronLeft class="h-4 w-4" />
@@ -93,6 +83,7 @@
 			<button
 				onclick={() => goToWeek(data.viewWeek + 1)}
 				disabled={data.viewWeek >= data.totalWeeks}
+				aria-label="Next week"
 				class="rounded-lg p-1.5 text-text-muted hover:bg-surface-subtle hover:text-text-primary disabled:opacity-30 disabled:hover:bg-transparent"
 			>
 				<ChevronRight class="h-4 w-4" />
@@ -104,12 +95,10 @@
 	<div
 		class="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-lg border border-border-default bg-surface-raised px-4 py-3"
 	>
-		<span class="text-[10px] font-semibold tracking-wider text-text-muted uppercase"
-			>Your Scores</span
-		>
+		<span class="text-2xs font-semibold tracking-wider text-text-muted uppercase">Your Scores</span>
 		{#if data.myEffort !== null}
 			<div class="flex items-center gap-1.5">
-				<span class="text-[10px] text-text-muted">Effort</span>
+				<span class="text-2xs text-text-muted">Effort</span>
 				<div
 					class="flex h-7 w-7 items-center justify-center rounded text-xs font-bold {effortBg(
 						data.myEffort
@@ -121,7 +110,7 @@
 		{/if}
 		{#if data.myPerformance !== null}
 			<div class="flex items-center gap-1.5">
-				<span class="text-[10px] text-text-muted">Performance</span>
+				<span class="text-2xs text-text-muted">Performance</span>
 				<div
 					class="flex h-7 w-7 items-center justify-center rounded text-xs font-bold {perfBg(
 						data.myPerformance
@@ -145,7 +134,7 @@
 				class="flex items-center gap-2 rounded-lg border border-success/20 bg-success-muted px-4 py-2.5"
 			>
 				<span class="text-sm text-success"
-					>Well-aligned this week — you and your raters see eye-to-eye.</span
+					>Well-aligned this week — you and your reviewers see eye-to-eye.</span
 				>
 			</div>
 		{:else if anyLarge}
@@ -153,11 +142,21 @@
 				class="flex items-center gap-2 rounded-lg border border-warning/20 bg-warning-muted px-4 py-2.5"
 			>
 				<span class="text-xs text-warning"
-					>Large gaps detected. Consider discussing these with your coach in your next session.</span
+					>Large gaps detected — your reviewers see things differently than you do. This is a
+					coaching opportunity. Discuss with your coach in your next session.</span
+				>
+			</div>
+		{:else}
+			<div
+				class="flex items-center gap-2 rounded-lg border border-accent/20 bg-accent-muted/50 px-4 py-2.5"
+			>
+				<span class="text-xs text-text-secondary"
+					>Some moderate gaps — small differences between self-perception and reviewer feedback are
+					normal and can sharpen your self-awareness over time.</span
 				>
 			</div>
 		{/if}
-		<div class="flex items-center justify-between px-1 text-[10px] text-text-muted">
+		<div class="text-2xs flex items-center justify-between px-1 text-text-muted">
 			<span>Your self-rating</span>
 			<span>Reviewer</span>
 		</div>
@@ -186,11 +185,11 @@
 
 					<!-- Gap visualization: Effort -->
 					<div class="mb-2">
-						<p class="mb-1 text-[10px] font-medium text-text-tertiary">Effort</p>
+						<p class="text-2xs mb-1 font-medium text-text-tertiary">Effort</p>
 						<div class="flex items-center gap-1">
 							{#if data.myEffort !== null}
 								<div
-									class="flex h-7 w-7 shrink-0 items-center justify-center rounded text-[10px] font-bold {effortBg(
+									class="text-2xs flex h-7 w-7 shrink-0 items-center justify-center rounded font-bold {effortBg(
 										data.myEffort
 									)}"
 								>
@@ -198,7 +197,7 @@
 								</div>
 							{:else}
 								<div
-									class="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-surface-subtle text-[10px] text-text-muted"
+									class="text-2xs flex h-7 w-7 shrink-0 items-center justify-center rounded bg-surface-subtle text-text-muted"
 								>
 									--
 								</div>
@@ -213,7 +212,7 @@
 												: 'bg-error/40'}"
 									></div>
 									<span
-										class="text-[10px] font-bold {Math.abs(row.effortGap) <= 1
+										class="text-2xs font-bold {Math.abs(row.effortGap) <= 1
 											? 'text-success'
 											: Math.abs(row.effortGap) <= 2
 												? 'text-warning'
@@ -236,7 +235,7 @@
 							{/if}
 							{#if row.stakeholderEffort !== null}
 								<div
-									class="flex h-7 w-7 shrink-0 items-center justify-center rounded text-[10px] font-bold {effortBg(
+									class="text-2xs flex h-7 w-7 shrink-0 items-center justify-center rounded font-bold {effortBg(
 										row.stakeholderEffort
 									)}"
 								>
@@ -244,7 +243,7 @@
 								</div>
 							{:else}
 								<div
-									class="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-surface-subtle text-[10px] text-text-muted"
+									class="text-2xs flex h-7 w-7 shrink-0 items-center justify-center rounded bg-surface-subtle text-text-muted"
 								>
 									--
 								</div>
@@ -254,11 +253,11 @@
 
 					<!-- Gap visualization: Performance -->
 					<div>
-						<p class="mb-1 text-[10px] font-medium text-text-tertiary">Performance</p>
+						<p class="text-2xs mb-1 font-medium text-text-tertiary">Performance</p>
 						<div class="flex items-center gap-1">
 							{#if data.myPerformance !== null}
 								<div
-									class="flex h-7 w-7 shrink-0 items-center justify-center rounded text-[10px] font-bold {perfBg(
+									class="text-2xs flex h-7 w-7 shrink-0 items-center justify-center rounded font-bold {perfBg(
 										data.myPerformance
 									)}"
 								>
@@ -266,7 +265,7 @@
 								</div>
 							{:else}
 								<div
-									class="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-surface-subtle text-[10px] text-text-muted"
+									class="text-2xs flex h-7 w-7 shrink-0 items-center justify-center rounded bg-surface-subtle text-text-muted"
 								>
 									--
 								</div>
@@ -281,7 +280,7 @@
 												: 'bg-error/40'}"
 									></div>
 									<span
-										class="text-[10px] font-bold {Math.abs(row.performanceGap) <= 1
+										class="text-2xs font-bold {Math.abs(row.performanceGap) <= 1
 											? 'text-success'
 											: Math.abs(row.performanceGap) <= 2
 												? 'text-warning'
@@ -304,7 +303,7 @@
 							{/if}
 							{#if row.stakeholderPerformance !== null}
 								<div
-									class="flex h-7 w-7 shrink-0 items-center justify-center rounded text-[10px] font-bold {perfBg(
+									class="text-2xs flex h-7 w-7 shrink-0 items-center justify-center rounded font-bold {perfBg(
 										row.stakeholderPerformance
 									)}"
 								>
@@ -312,7 +311,7 @@
 								</div>
 							{:else}
 								<div
-									class="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-surface-subtle text-[10px] text-text-muted"
+									class="text-2xs flex h-7 w-7 shrink-0 items-center justify-center rounded bg-surface-subtle text-text-muted"
 								>
 									--
 								</div>
@@ -326,7 +325,7 @@
 							Math.abs(row.effortGap ?? 0) > Math.abs(row.performanceGap ?? 0)
 								? row.effortGap
 								: row.performanceGap}
-						<p class="mt-2 text-[10px] text-text-tertiary">
+						<p class="text-2xs mt-2 text-text-tertiary">
 							{#if biggestGap !== null && biggestGap > 0}You rate yourself higher than {row.stakeholderName}
 								— explore what they're not seeing.{:else}They see more than you give yourself credit
 								for.{/if}
@@ -367,7 +366,7 @@
 				Your Notes This Week
 			</p>
 			<div class="flex flex-col gap-2">
-				{#each data.selfNotes as note, i (i)}
+				{#each data.selfNotes as note (note)}
 					<p class="text-sm text-text-secondary">{note}</p>
 				{/each}
 			</div>
@@ -375,7 +374,7 @@
 	{/if}
 
 	<!-- Legend -->
-	<div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-text-muted">
+	<div class="text-2xs flex flex-wrap items-center gap-x-4 gap-y-1 text-text-muted">
 		<span
 			>You <span class="font-bold">[ score ]</span>——gap——<span class="font-bold">[ score ]</span> Reviewer</span
 		>

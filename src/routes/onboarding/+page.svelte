@@ -57,6 +57,7 @@
 
 	let isSubmitting = $state(false);
 	let draftRestored = $state(false);
+	let mobileTemplatesOpen = $state(false);
 
 	// Client validation
 	let clientErrors: Record<string, string> = $state({});
@@ -139,7 +140,7 @@
 	}
 
 	function addReviewer() {
-		if (reviewerForms.length >= 3) return;
+		if (reviewerForms.length >= 5) return;
 		reviewerForms = [...reviewerForms, { name: '', email: '' }];
 	}
 
@@ -210,23 +211,23 @@
 		<div class="mb-4">
 			<div class="mb-1 flex items-center justify-between text-sm text-text-secondary">
 				<span class="font-medium">
-					Step {currentStep === 'goal' ? 1 : 2} of 3: {currentStep === 'goal'
+					Step {currentStep === 'goal' ? 1 : 2} of 2: {currentStep === 'goal'
 						? 'Set your goal'
 						: 'Add reviewers'}
 				</span>
-				<span class="text-text-muted">{currentStep === 'goal' ? '33' : '66'}%</span>
+				<span class="text-text-muted">{currentStep === 'goal' ? '50' : '100'}%</span>
 			</div>
 			<div
 				class="h-2 overflow-hidden rounded-full bg-surface-subtle"
 				role="progressbar"
-				aria-valuenow={currentStep === 'goal' ? 33 : 66}
+				aria-valuenow={currentStep === 'goal' ? 50 : 100}
 				aria-valuemin={0}
 				aria-valuemax={100}
 				aria-label="Onboarding progress"
 			>
 				<div
 					class="h-full rounded-full bg-accent transition-all duration-500 ease-out"
-					style="width: {currentStep === 'goal' ? 33 : 66}%"
+					style="width: {currentStep === 'goal' ? 50 : 100}%"
 				></div>
 			</div>
 		</div>
@@ -340,9 +341,46 @@
 										"communicate decisions clearly and inspire my team to take ownership."
 									</p>
 								</div>
+
+								<div
+									class="rounded-xl border border-border-default bg-surface-subtle p-4 text-sm text-text-secondary"
+								>
+									<p class="font-medium text-text-primary">How scoring works</p>
+									<p class="mt-1 text-xs">
+										Each week, you'll rate your effort and performance on a 0–10 scale. Your
+										reviewers do the same independently. The gap between your view and theirs
+										reveals blind spots that drive real growth.
+									</p>
+									<div class="text-2xs mt-2 flex flex-wrap gap-x-3 gap-y-1 text-text-muted">
+										<span><span class="font-semibold">0–2</span> Minimal</span>
+										<span><span class="font-semibold">3–4</span> Below average</span>
+										<span><span class="font-semibold">5–6</span> Moderate</span>
+										<span><span class="font-semibold">7–8</span> Strong</span>
+										<span><span class="font-semibold">9–10</span> Exceptional</span>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
+				{/if}
+
+				<!-- Mobile: Browse Templates button (visible below lg breakpoint) -->
+				{#if currentStep === 'goal'}
+					<button
+						type="button"
+						onclick={() => (mobileTemplatesOpen = true)}
+						class="flex w-full items-center justify-center gap-2 rounded-xl border border-accent/30 bg-accent-muted px-4 py-3 text-sm font-semibold text-accent transition-all hover:border-accent/50 lg:hidden"
+					>
+						<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M4 6h16M4 12h16M4 18h7"
+							></path>
+						</svg>
+						Browse Templates
+					</button>
 				{/if}
 
 				<!-- Step 2: Add reviewers -->
@@ -358,6 +396,10 @@
 								<p class="text-text-secondary">
 									Add 1–3 people who regularly see you in action. They'll provide feedback on your
 									progress. You can always add more later.
+								</p>
+								<p class="text-xs text-text-muted">
+									Each reviewer receives a simple email with a link to rate your effort and
+									performance (takes ~60 seconds).
 								</p>
 							</div>
 
@@ -452,7 +494,7 @@
 									</div>
 								{/each}
 
-								{#if reviewerForms.length < 3}
+								{#if reviewerForms.length < 5}
 									<button
 										type="button"
 										onclick={addReviewer}
@@ -661,4 +703,136 @@
 			{/if}
 		</div>
 	</section>
+
+	<!-- Mobile Template Drawer -->
+	{#if mobileTemplatesOpen}
+		<div
+			class="fixed inset-0 z-50 lg:hidden"
+			role="dialog"
+			aria-modal="true"
+			aria-label="Browse templates"
+			onkeydown={(e) => e.key === 'Escape' && (mobileTemplatesOpen = false)}
+		>
+			<!-- Backdrop -->
+			<!-- svelte-ignore a11y_no_static_element_interactions -->
+			<div
+				class="absolute inset-0 bg-black/40"
+				onclick={() => (mobileTemplatesOpen = false)}
+				onkeydown={(e) => e.key === 'Escape' && (mobileTemplatesOpen = false)}
+			></div>
+			<!-- Drawer -->
+			<div
+				class="absolute right-0 bottom-0 left-0 max-h-[85vh] overflow-y-auto rounded-t-2xl bg-surface-raised"
+			>
+				<div
+					class="sticky top-0 z-10 flex items-center justify-between border-b border-border-default bg-surface-raised px-5 py-4"
+				>
+					<h2 class="text-lg font-bold text-text-primary">Browse Templates</h2>
+					<button
+						type="button"
+						onclick={() => (mobileTemplatesOpen = false)}
+						class="rounded-lg p-2 text-text-muted transition-colors hover:bg-surface-subtle"
+						aria-label="Close templates"
+					>
+						<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M6 18L18 6M6 6l12 12"
+							></path>
+						</svg>
+					</button>
+				</div>
+				<div class="space-y-6 p-5">
+					<div class="space-y-3">
+						<p class="text-sm text-text-secondary">Choose a context to explore curated goals.</p>
+						<div class="flex flex-wrap gap-2">
+							{#each contexts as context (context.id)}
+								<button
+									type="button"
+									class="rounded-full border px-3 py-1.5 text-sm font-semibold transition-all {selectedContextId ===
+									context.id
+										? 'border-accent bg-accent text-white'
+										: 'border-border-strong bg-surface-raised text-text-secondary hover:border-accent/30 hover:bg-accent-muted'}"
+									onclick={() => selectContext(context.id)}
+								>
+									{context.title}
+								</button>
+							{/each}
+						</div>
+					</div>
+
+					{#if selectedContext}
+						<div class="space-y-3">
+							{#each selectedContext.objectives as objective (objective.id)}
+								<article
+									class="rounded-xl border p-4 transition-all {appliedObjectiveId === objective.id
+										? 'border-success/30 bg-success-muted'
+										: 'border-border-default bg-surface-subtle'}"
+								>
+									<h3 class="font-bold text-text-primary">{objective.title}</h3>
+									<p class="mt-1 text-sm leading-relaxed text-text-secondary">
+										{objective.description}
+									</p>
+									<div class="mt-3 flex flex-wrap gap-2">
+										<button
+											type="button"
+											class="rounded-lg px-3 py-1.5 text-sm font-semibold transition-all {appliedObjectiveId ===
+											objective.id
+												? 'bg-success text-white'
+												: 'bg-accent text-white hover:bg-accent-hover'}"
+											onclick={() => {
+												if (selectedContext) applyObjective(selectedContext.id, objective);
+												mobileTemplatesOpen = false;
+											}}
+										>
+											{appliedObjectiveId === objective.id ? 'Applied' : 'Use this goal'}
+										</button>
+										<button
+											type="button"
+											class="rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-sm font-semibold text-text-secondary transition-all hover:border-accent/30"
+											onclick={() =>
+												selectedContext && toggleObjective(selectedContext.id, objective.id)}
+										>
+											{expandedObjectiveId === objective.id ? 'Hide details' : 'View details'}
+										</button>
+									</div>
+
+									{#if expandedObjectiveId === objective.id}
+										<div
+											class="mt-3 space-y-2 rounded-lg border border-dashed border-border-strong bg-surface-raised p-3"
+										>
+											<p class="text-xs font-bold tracking-wide text-text-tertiary uppercase">
+												Focus Areas
+											</p>
+											{#each objective.subgoals as subgoal (subgoal.label)}
+												<div
+													class="rounded-lg border border-border-default bg-surface-subtle p-2.5"
+												>
+													<p class="text-sm font-semibold text-text-primary">{subgoal.label}</p>
+													<p class="mt-0.5 text-xs text-text-secondary">{subgoal.description}</p>
+												</div>
+											{/each}
+										</div>
+									{/if}
+								</article>
+							{/each}
+						</div>
+					{/if}
+
+					<button
+						type="button"
+						onclick={() => {
+							startCustomBuild();
+							mobileTemplatesOpen = false;
+						}}
+						class="w-full rounded-xl border border-border-default bg-surface-subtle px-4 py-3 text-sm font-medium text-text-secondary transition-all hover:border-accent/30"
+					>
+						Start from scratch
+					</button>
+				</div>
+			</div>
+		</div>
+	{/if}
 </div>

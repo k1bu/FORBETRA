@@ -50,11 +50,15 @@ export const remindBaseReflections = async () => {
 			: 'https://app.forbetra.com';
 
 	// Find all active objectives with users who need reminders
+	// Include users with null reminderDays (default to wednesday_friday)
 	const objectives = await prisma.objective.findMany({
 		where: {
 			active: true,
 			user: {
-				reminderDays: reminderDays || undefined
+				OR: [
+					{ reminderDays: reminderDays || undefined },
+					...(reminderDays === 'wednesday_friday' ? [{ reminderDays: null }] : [])
+				]
 			}
 		},
 		include: {

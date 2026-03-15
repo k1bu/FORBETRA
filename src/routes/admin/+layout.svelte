@@ -19,7 +19,8 @@
 		{ href: '/admin/coaches', label: 'Coach Assignments', icon: 'link' },
 		{ href: '/admin/insights', label: 'Insights', icon: 'sparkle' },
 		{ href: '/admin/organizations', label: 'Organizations', icon: 'building' },
-		{ href: '/admin/seed', label: 'Seed Data', icon: 'database' }
+		{ href: '/admin/seed', label: 'Seed Data', icon: 'database' },
+		{ href: '/admin/settings', label: 'Settings', icon: 'settings' }
 	];
 </script>
 

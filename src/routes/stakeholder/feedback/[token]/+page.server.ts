@@ -468,7 +468,7 @@ export const actions: Actions = {
 
 					await trySendSms(
 						coachClient.coach.phone,
-						`Forbetra: ${stakeholder.name || 'A stakeholder'} submitted feedback for your client ${stakeholder.individual.name || 'a client'} (Week ${reflection.weekNumber}). ${url.origin}/coach/roster`
+						`Forbetra: ${stakeholder.name || 'A reviewer'} submitted feedback for your client ${stakeholder.individual.name || 'a client'} (Week ${reflection.weekNumber}). ${url.origin}/coach/roster`
 					);
 				}
 			} catch (error) {

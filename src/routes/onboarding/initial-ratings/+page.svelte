@@ -138,11 +138,12 @@
 						<button
 							type="button"
 							onclick={() => (effortScore = i)}
-							aria-pressed={isSelected}
+							role="radio"
+							aria-checked={isSelected}
 							class="flex h-10 w-full items-center justify-center rounded-lg border-2 text-sm font-semibold transition-all {isSelected
 								? buttonColors + ' shadow-md'
 								: 'border-border-default bg-surface-raised text-text-secondary ' +
-									hoverColors} focus:ring-2 focus:outline-none {focusRing} focus:ring-offset-2"
+									hoverColors} focus-visible:ring-2 focus-visible:outline-none {focusRing} focus-visible:ring-offset-2"
 						>
 							{i}
 						</button>
@@ -191,11 +192,12 @@
 						<button
 							type="button"
 							onclick={() => (performanceScore = i)}
-							aria-pressed={isSelected}
+							role="radio"
+							aria-checked={isSelected}
 							class="flex h-10 w-full items-center justify-center rounded-lg border-2 text-sm font-semibold transition-all {isSelected
 								? buttonColors + ' shadow-md'
 								: 'border-border-default bg-surface-raised text-text-secondary ' +
-									hoverColors} focus:ring-2 focus:outline-none {focusRing} focus:ring-offset-2"
+									hoverColors} focus-visible:ring-2 focus-visible:outline-none {focusRing} focus-visible:ring-offset-2"
 						>
 							{i}
 						</button>

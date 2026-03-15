@@ -118,7 +118,7 @@ export const emailTemplates = {
 				<div style="background: white; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
 					<p style="font-size: 16px; margin-top: 0;">Hi ${shName},</p>
 					<p style="font-size: 16px;"><strong>${indName}</strong> has invited you to be a feedback provider in their development journey.</p>
-					<p style="font-size: 16px;">Your role is simple: twice a week, you'll receive a quick link to share feedback on their progress. It takes less than 60 seconds.</p>
+					<p style="font-size: 16px;">Your role is simple: each time they check in, you'll receive a quick link to share feedback on their progress. It takes less than 60 seconds.</p>
 					<div style="background: #f1f5f9; padding: 20px; border-radius: 8px; margin: 24px 0;">
 						<p style="margin: 0; font-size: 14px; color: #64748b;"><strong>What to expect:</strong></p>
 						<ul style="margin: 12px 0 0 0; padding-left: 20px; font-size: 14px; color: #64748b;">
@@ -134,7 +134,7 @@ export const emailTemplates = {
 			</body>
 			</html>
 		`,
-			text: `You've been invited to support ${data.individualName || 'someone'}'s growth journey\n\nHi ${data.stakeholderName || 'there'},\n\n${data.individualName || 'Someone'} has invited you to be a stakeholder in their development journey.\n\nYour role is simple: twice a week, you'll receive a quick link to share feedback on their progress. It takes less than 60 seconds.\n\nWhat to expect:\n- Brief feedback requests (2 quick questions)\n- No account creation required\n- Your feedback helps them track real progress\n\nYou'll receive your first feedback request when ${data.individualName || 'they'} submits their first reflection.\n\nThank you for supporting their growth!${textFooter()}`
+			text: `You've been invited to support ${data.individualName || 'someone'}'s growth journey\n\nHi ${data.stakeholderName || 'there'},\n\n${data.individualName || 'Someone'} has invited you to be a feedback provider in their development journey.\n\nYour role is simple: each time they check in, you'll receive a quick link to share feedback on their progress. It takes less than 60 seconds.\n\nWhat to expect:\n- Brief feedback requests (2 quick questions)\n- No account creation required\n- Your feedback helps them track real progress\n\nYou'll receive your first feedback request when ${data.individualName || 'they'} submits their first reflection.\n\nThank you for supporting their growth!${textFooter()}`
 		};
 	},
 

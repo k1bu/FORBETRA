@@ -26,7 +26,7 @@
 				copiedInviteUrl = false;
 			}, 2000);
 		} catch {
-			// Fallback: do nothing
+			addToast('Could not copy to clipboard.', 'error');
 		}
 	}
 
@@ -114,9 +114,7 @@
 	$effect(() => {
 		if (!form || form === toastShownForForm) return;
 		toastShownForForm = form;
-		if (form.action === 'createInvite' && form.success) {
-			addToast(`Invitation sent to ${form.email}`, 'success');
-		} else if (form.action === 'cancelInvite' && form.success) {
+		if (form.action === 'cancelInvite' && form.success) {
 			addToast('Invitation cancelled', 'success');
 		} else if (form.action === 'resendInvite' && form.success) {
 			addToast(`Invitation resent to ${form.email}`, 'success');
@@ -408,9 +406,7 @@
 						: 'text-text-tertiary hover:text-text-secondary'}"
 				>
 					{tab.label}
-					<span class="ml-1 text-[10px] {activeFilter === tab.key ? 'text-accent' : ''}"
-						>{count}</span
-					>
+					<span class="text-2xs ml-1 {activeFilter === tab.key ? 'text-accent' : ''}">{count}</span>
 				</button>
 			{/each}
 		</div>

@@ -12,11 +12,11 @@ export const smsTemplates = {
 	reminderBase: (data: { reflectionType: string; weekNumber: number; appUrl?: string }) => {
 		const dayLabel = data.reflectionType === 'rating_a' ? 'Wednesday' : 'Friday';
 		const url = `${data.appUrl || baseUrl}/reflections/checkin?type=${data.reflectionType.toUpperCase()}`;
-		return `Forbetra: Time for your ${dayLabel} check-in (Week ${data.weekNumber}). ${url}`;
+		return `Forbetra: Time for your ${dayLabel} check-in (Week ${data.weekNumber}). ${url}\n\nReply STOP to opt out`;
 	},
 
 	reminderOverdue: (data: { appUrl?: string }) => {
-		return `Forbetra: You have overdue reflections. Catch up now: ${data.appUrl || baseUrl}/individual`;
+		return `Forbetra: You have overdue reflections. Catch up now: ${data.appUrl || baseUrl}/individual\n\nReply STOP to opt out`;
 	},
 
 	welcomeStakeholder: (data: {
@@ -35,12 +35,12 @@ export const smsTemplates = {
 
 	stakeholderFeedbackReceived: (data: { stakeholderName?: string; appUrl?: string }) => {
 		const name = data.stakeholderName || 'A reviewer';
-		return `Forbetra: ${name} just shared feedback on your progress. View insights: ${data.appUrl || baseUrl}/individual/insights`;
+		return `Forbetra: ${name} just shared feedback on your progress. View insights: ${data.appUrl || baseUrl}/individual/insights\n\nReply STOP to opt out`;
 	},
 
 	stakeholderThankYou: (data: { individualName?: string; weekNumber: number }) => {
 		const name = data.individualName || 'your participant';
-		return `Forbetra: Thanks for your Week ${data.weekNumber} feedback on ${name}. Your perspective helps them grow.`;
+		return `Forbetra: Thanks for your Week ${data.weekNumber} feedback on ${name}. Your perspective helps them grow.\n\nReply STOP to opt out`;
 	},
 
 	reminderStakeholderFeedback: (data: { individualName?: string; feedbackLink: string }) => {
@@ -54,20 +54,20 @@ export const smsTemplates = {
 		totalFeedbacks: number;
 	}) => {
 		const name = data.individualName || 'your participant';
-		return `Forbetra: Your monthly impact on ${name} — ${data.weeksContributed} weeks, ${data.totalFeedbacks} feedbacks. Thank you!`;
+		return `Forbetra: Your monthly impact on ${name} — ${data.weeksContributed} weeks, ${data.totalFeedbacks} feedbacks. Thank you!\n\nReply STOP to opt out`;
 	},
 
 	cycleCompleted: (data: { objectiveTitle?: string; appUrl?: string }) => {
 		const obj = data.objectiveTitle ? ` for "${data.objectiveTitle}"` : '';
-		return `Forbetra: Your journey${obj} is complete! View your growth report: ${data.appUrl || baseUrl}/individual/insights`;
+		return `Forbetra: Your journey${obj} is complete! View your growth report: ${data.appUrl || baseUrl}/individual/insights\n\nReply STOP to opt out`;
 	},
 
 	coachInvitation: (data: { coachName?: string; inviteUrl: string }) => {
 		const coach = data.coachName || 'Your coach';
-		return `Forbetra: ${coach} invited you to join their development program. Get started: ${data.inviteUrl}`;
+		return `Forbetra: ${coach} invited you to join their development program. Get started: ${data.inviteUrl}\n\nReply STOP to opt out`;
 	},
 
 	coachClientAccepted: (data: { clientName: string; appUrl?: string }) => {
-		return `Forbetra: ${data.clientName} accepted your invitation and joined your roster. ${data.appUrl || baseUrl}/coach/roster`;
+		return `Forbetra: ${data.clientName} accepted your invitation and joined your roster. ${data.appUrl || baseUrl}/coach/roster\n\nReply STOP to opt out`;
 	}
 };

@@ -5,10 +5,13 @@
 		getScoreBgColor,
 		getButtonSelectedColors,
 		getButtonHoverColors,
-		getFocusRing
+		getFocusRing,
+		getScoreLabel
 	} from '$lib/utils/scoreColors';
 
+	import { enhance } from '$app/forms';
 	import { onMount } from 'svelte';
+	import { fly } from 'svelte/transition';
 	import {
 		Eye,
 		Gift,
@@ -35,6 +38,7 @@
 	let performanceScore = $state<number | null>(data.previousRatings?.performanceScore ?? null);
 	let notes = $state('');
 	let showComment = $state(false);
+	let showPrivacyDetails = $state(false);
 	let isSubmitting = $state(false);
 	let showReveal = $state(false);
 	let scoresRequired = $state(false);
@@ -50,16 +54,39 @@
 
 	const hasAtLeastOneScore = $derived(effortScore !== null || performanceScore !== null);
 
-	const handleSubmit = (e: Event) => {
+	const enhanceSubmit = ({ cancel }: { cancel: () => void }) => {
 		if (!hasAtLeastOneScore && !notes.trim()) {
-			e.preventDefault();
+			cancel();
 			scoresRequired = true;
 			return;
 		}
 		scoresRequired = false;
 		isSubmitting = true;
 		stakeholderScores = { effortScore, performanceScore };
+		return async ({ update }: { update: () => Promise<void> }) => {
+			isSubmitting = false;
+			await update();
+		};
 	};
+
+	// Arrow key navigation for radiogroup (roving tabindex pattern)
+	function handleRadiogroupKeydown(e: KeyboardEvent, dimension: 'effort' | 'performance') {
+		if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) return;
+		e.preventDefault();
+		const current = dimension === 'effort' ? effortScore : performanceScore;
+		let next: number;
+		if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+			next = current === null ? 0 : Math.min(current + 1, 10);
+		} else {
+			next = current === null ? 10 : Math.max(current - 1, 0);
+		}
+		if (dimension === 'effort') effortScore = next;
+		else performanceScore = next;
+		// Focus the newly selected button
+		const container = e.currentTarget as HTMLElement;
+		const buttons = container.querySelectorAll<HTMLButtonElement>('[role="radio"]');
+		buttons[next]?.focus();
+	}
 
 	// Clear validation error when user selects a score or types notes
 	$effect(() => {
@@ -98,9 +125,10 @@
 	$effect(() => {
 		if (form?.success && form?.individualScores && data.revealScores !== false) {
 			// Small delay for better UX
-			setTimeout(() => {
+			const timer = setTimeout(() => {
 				showReveal = true;
 			}, 500);
+			return () => clearTimeout(timer);
 		}
 	});
 
@@ -126,6 +154,7 @@
 					if (typeof draft.effortScore === 'number') effortScore = draft.effortScore;
 					if (typeof draft.performanceScore === 'number') performanceScore = draft.performanceScore;
 					if (typeof draft.notes === 'string') notes = draft.notes;
+					if (notes) showComment = true;
 					draftRestored = true;
 					setTimeout(() => {
 						draftRestored = false;
@@ -140,7 +169,6 @@
 	});
 
 	// Auto-save draft to localStorage (debounced)
-	let saveTimeout: ReturnType<typeof setTimeout> | null = null;
 	$effect(() => {
 		// Track reactive dependencies
 		const e = effortScore;
@@ -148,8 +176,7 @@
 		const n = notes;
 
 		if (data.isPreview) return;
-		if (saveTimeout) clearTimeout(saveTimeout);
-		saveTimeout = setTimeout(() => {
+		const timeout = setTimeout(() => {
 			try {
 				localStorage.setItem(
 					DRAFT_KEY,
@@ -164,8 +191,15 @@
 				/* expected */
 			}
 		}, 1000);
+		return () => clearTimeout(timeout);
 	});
 </script>
+
+<svelte:document
+	onkeydown={(e) => {
+		if (e.key === 'Escape' && showWelcome) showWelcome = false;
+	}}
+/>
 
 <svelte:head>
 	<title>Feedback for {data.reflection.participantName} | Forbetra</title>
@@ -187,18 +221,41 @@
 					<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
 				</svg>
 			</div>
-			<h1 class="mb-2 text-xl font-bold text-text-primary">Feedback Already Submitted</h1>
+			<h1 class="mb-2 text-xl font-bold text-text-primary">
+				You've already shared your perspective
+			</h1>
 			<p class="text-sm text-text-secondary">
 				You've already submitted your feedback for {data.reflection?.participantName ??
-					'this person'}. Thank you for your input!
+					'this person'} this week. Thank you!
 			</p>
 			{#if data.historicRatings && data.historicRatings.length > 0}
-				<p class="mt-2 text-xs text-text-muted">
-					You've contributed {data.historicRatings.length} time{data.historicRatings.length !== 1
-						? 's'
-						: ''} this journey — that consistency makes a real difference.
-				</p>
+				<div class="mt-3 rounded-lg bg-surface-subtle px-4 py-3">
+					<p class="text-xs font-semibold text-accent">
+						Contribution #{data.historicRatings.length}
+					</p>
+					<p class="mt-1 text-xs text-text-secondary">
+						{#if data.historicRatings.length >= 4}
+							Your consistent feedback is building a detailed picture — that's exactly what drives
+							real growth.
+						{:else if data.historicRatings.length >= 2}
+							You've contributed {data.historicRatings.length} times — that consistency makes a real
+							difference.
+						{:else}
+							Your first contribution is in — every data point helps {data.reflection
+								?.participantName ?? 'them'} see what they can't see alone.
+						{/if}
+					</p>
+				</div>
 			{/if}
+			<div class="mt-3 rounded-lg border border-border-default bg-surface-subtle px-4 py-3">
+				<p class="text-xs text-text-secondary">
+					We'll send you a quick link next week — same ~60 seconds, same real impact.
+				</p>
+			</div>
+			<p class="text-2xs mt-3 text-text-tertiary">
+				Need to change your response? Ask {data.reflection?.participantName ??
+					'the person who invited you'} to request a new link for you.
+			</p>
 		</div>
 	</div>
 {:else}
@@ -206,9 +263,9 @@
 		<!-- Forbetra brand header -->
 		<div class="pt-2 pb-1 text-center">
 			<p
-				class="text-lg text-text-primary"
-				style="font-style: italic; font-weight: 700; letter-spacing: 0.02em;"
+				class="flex items-center justify-center gap-1.5 text-lg font-bold tracking-[0.02em] text-text-primary italic"
 			>
+				<Shield class="h-5 w-5 text-accent" />
 				forbetra
 			</p>
 			<p class="text-xs text-text-tertiary">You. And Improved.</p>
@@ -248,7 +305,7 @@
 				</div>
 				{#if !data.isFirstFeedback && data.historicRatings && data.historicRatings.length > 0}
 					<span
-						class="rounded-full bg-success-muted px-3 py-1.5 text-[10px] font-semibold text-success"
+						class="text-2xs rounded-full bg-success-muted px-3 py-1.5 font-semibold text-success"
 					>
 						Contribution #{data.historicRatings.length + 1}
 					</span>
@@ -270,15 +327,8 @@
 			{/if}
 		</div>
 
-		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 		{#if showWelcome && !form?.success}
-			<div
-				class="mx-auto max-w-2xl space-y-6"
-				role="region"
-				onkeydown={(e) => {
-					if (e.key === 'Escape') showWelcome = false;
-				}}
-			>
+			<div class="mx-auto max-w-2xl space-y-6" role="region" aria-label="Welcome and instructions">
 				<div class="rounded-2xl border border-accent/30 bg-surface-base p-8">
 					<div class="mb-5 text-center">
 						<div
@@ -319,15 +369,21 @@
 						</ul>
 					</div>
 
-					<div class="mb-5 flex items-center gap-2 text-xs text-text-muted">
-						<Shield class="h-3.5 w-3.5 shrink-0" />
-						<span
-							>Your feedback goes to {data.reflection.participantName} and their coach. No anonymous
-							aggregation — your name is attached, which keeps feedback honest and actionable.</span
-						>
+					<div class="mb-5 space-y-2">
+						<div class="flex items-center gap-2 text-xs text-text-muted">
+							<Shield class="h-3.5 w-3.5 shrink-0" />
+							<span
+								>Your feedback goes to {data.reflection.participantName} and their coach. No anonymous
+								aggregation — your name is attached, which keeps feedback honest and actionable.</span
+							>
+						</div>
+						<p class="text-2xs text-center text-text-muted">
+							Powered by <strong class="text-text-secondary">Forbetra</strong> — a coaching platform
+							that turns 360 feedback into measurable growth.
+						</p>
 					</div>
 
-					<div class="text-center">
+					<div class="flex flex-col items-center gap-2">
 						<button
 							type="button"
 							onclick={() => {
@@ -337,6 +393,15 @@
 						>
 							Rate now &middot; ~60 sec
 							<span>&#8594;</span>
+						</button>
+						<button
+							type="button"
+							onclick={() => {
+								showWelcome = false;
+							}}
+							class="text-xs text-text-muted underline decoration-dotted underline-offset-4 transition-colors hover:text-text-secondary"
+						>
+							Skip intro
 						</button>
 					</div>
 				</div>
@@ -357,6 +422,10 @@
 						Thank you, {data.stakeholder.name}!
 					</p>
 					<p class="mt-1 text-sm text-success">Your perspective matters more than you know.</p>
+					<p class="mt-2 text-xs text-text-secondary">
+						Your ratings are combined with {data.reflection.participantName}'s self-assessment to
+						reveal perception gaps — the blind spots that drive real growth.
+					</p>
 					{#if data.historicRatings && data.historicRatings.length > 0}
 						<p class="mt-2 text-xs text-success/80">
 							Contribution #{data.historicRatings.length + 1} this journey — your consistency amplifies
@@ -365,10 +434,46 @@
 					{/if}
 				</div>
 
+				<!-- What happens with your feedback -->
+				<div class="rounded-xl border border-border-default bg-surface-raised p-5">
+					<p class="mb-3 text-sm font-semibold text-text-primary">
+						What happens with your feedback
+					</p>
+					<div class="space-y-2.5">
+						<div class="flex items-start gap-2.5 text-xs text-text-secondary">
+							<span
+								class="text-2xs mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent font-bold text-white"
+								>1</span
+							>
+							<span
+								>Your scores are compared with {data.reflection.participantName}'s self-rating to
+								surface blind spots</span
+							>
+						</div>
+						<div class="flex items-start gap-2.5 text-xs text-text-secondary">
+							<span
+								class="text-2xs mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent/70 font-bold text-white"
+								>2</span
+							>
+							<span>Their coach uses the gap to guide more targeted coaching conversations</span>
+						</div>
+						<div class="flex items-start gap-2.5 text-xs text-text-secondary">
+							<span
+								class="text-2xs mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent/50 font-bold text-white"
+								>3</span
+							>
+							<span
+								>Over weeks, your ongoing perspective helps track whether real change is happening</span
+							>
+						</div>
+					</div>
+				</div>
+
 				<!-- Reveal Section (only when revealScores is enabled) -->
 				{#if showReveal && individualScores && data.revealScores !== false}
 					<div
-						class="slide-in-from-bottom-4 rounded-2xl border border-accent/30 bg-surface-base p-8"
+						class="rounded-2xl border border-accent/30 bg-surface-base p-8"
+						transition:fly={{ y: 16, duration: 400 }}
 					>
 						<div class="mb-6 text-center">
 							<Gift class="mx-auto mb-3 h-12 w-12 text-accent" />
@@ -407,7 +512,7 @@
 														'effort'
 													)}"
 												>
-													{stakeholderScores?.effortScore ?? 0}
+													{stakeholderScores?.effortScore ?? '—'}
 												</span>
 											</div>
 										</div>
@@ -465,7 +570,7 @@
 														'performance'
 													)}"
 												>
-													{stakeholderScores?.performanceScore ?? 0}
+													{stakeholderScores?.performanceScore ?? '—'}
 												</span>
 											</div>
 										</div>
@@ -498,7 +603,63 @@
 							</div>
 						</div>
 					</div>
+				{:else}
+					<!-- Non-reveal value message with score echo -->
+					<div class="rounded-xl border border-accent/20 bg-accent-muted/50 px-5 py-4">
+						<p class="text-center text-sm font-semibold text-accent">
+							Your perspective is shaping real change
+						</p>
+						{#if stakeholderScores}
+							<div class="mt-3 flex justify-center gap-6">
+								{#if stakeholderScores.effortScore !== null}
+									<div class="text-center">
+										<p class="text-2xs font-medium tracking-wider text-text-muted uppercase">
+											Effort
+										</p>
+										<p
+											class="text-lg font-bold {getScoreColor(
+												stakeholderScores.effortScore ?? 0,
+												'effort'
+											)}"
+										>
+											{stakeholderScores.effortScore}/10
+										</p>
+									</div>
+								{/if}
+								{#if stakeholderScores.performanceScore !== null}
+									<div class="text-center">
+										<p class="text-2xs font-medium tracking-wider text-text-muted uppercase">
+											Performance
+										</p>
+										<p
+											class="text-lg font-bold {getScoreColor(
+												stakeholderScores.performanceScore ?? 0,
+												'performance'
+											)}"
+										>
+											{stakeholderScores.performanceScore}/10
+										</p>
+									</div>
+								{/if}
+							</div>
+						{/if}
+						<p class="mt-3 text-center text-xs text-text-secondary">
+							Your ratings have been shared with {data.reflection.participantName}'s coach and are
+							already informing their next session.
+						</p>
+					</div>
 				{/if}
+
+				<!-- Forward path -->
+				<div
+					class="rounded-xl border border-border-default bg-surface-subtle px-5 py-4 text-center"
+				>
+					<p class="text-sm font-medium text-text-primary">Thank you for your time</p>
+					<p class="mt-1 text-xs text-text-secondary">
+						Your honest perspective makes a real difference. We'll send you a quick link next week —
+						same ~60 seconds, same real impact.
+					</p>
+				</div>
 			</div>
 		{/if}
 
@@ -509,14 +670,16 @@
 					<div class="rounded-xl border border-accent/20 bg-accent/5 px-5 py-4">
 						<p class="text-sm font-semibold text-text-primary">About Forbetra</p>
 						<p class="mt-1 text-sm leading-relaxed text-text-secondary">
+							Forbetra is a coaching platform that combines weekly self-reflection with 360-degree
+							feedback from people like you.
 							{data.reflection.participantName} is working on a professional development goal and has
 							asked for your honest perspective. Your ratings help reveal blind spots between self-perception
-							and outside observation.
+							and outside observation — the kind of insight that drives real growth.
 						</p>
 					</div>
 				{/if}
 
-				<!-- Returning stakeholder impact summary -->
+				<!-- Returning stakeholder welcome-back + impact summary -->
 				{#if !data.isFirstFeedback && data.historicRatings && data.historicRatings.length > 0}
 					{@const avgEffort =
 						data.historicRatings.filter((r) => r.effortScore !== null).length > 0
@@ -538,16 +701,37 @@
 										10
 								) / 10
 							: null}
+					{@const firstEffort =
+						data.historicRatings.find((r) => r.effortScore !== null)?.effortScore ?? null}
+					{@const lastEffort =
+						[...data.historicRatings].reverse().find((r) => r.effortScore !== null)?.effortScore ??
+						null}
+					{@const firstPerf =
+						data.historicRatings.find((r) => r.performanceScore !== null)?.performanceScore ?? null}
+					{@const lastPerf =
+						[...data.historicRatings].reverse().find((r) => r.performanceScore !== null)
+							?.performanceScore ?? null}
+					{@const effortTrend =
+						firstEffort !== null && lastEffort !== null && data.historicRatings.length >= 2
+							? lastEffort - firstEffort
+							: null}
+					{@const perfTrend =
+						firstPerf !== null && lastPerf !== null && data.historicRatings.length >= 2
+							? lastPerf - firstPerf
+							: null}
 					<div
 						class="rounded-xl border border-accent/20 bg-gradient-to-r from-accent/5 to-transparent p-4"
 					>
-						<p class="mb-2 text-xs font-semibold tracking-wide text-accent uppercase">
-							Your impact so far
+						<p class="text-sm font-semibold text-text-primary">
+							Welcome back, {data.stakeholder.name}
+						</p>
+						<p class="mt-0.5 mb-2 text-xs text-text-secondary">
+							Your impact on {data.reflection.participantName}'s journey so far:
 						</p>
 						<div class="flex flex-wrap items-center gap-x-5 gap-y-2">
 							<div class="flex items-center gap-1.5">
 								<span
-									class="flex h-6 w-6 items-center justify-center rounded-full bg-accent/20 text-[10px] font-bold text-accent"
+									class="text-2xs flex h-6 w-6 items-center justify-center rounded-full bg-accent/20 font-bold text-accent"
 								>
 									{data.historicRatings.length}
 								</span>
@@ -557,57 +741,95 @@
 							</div>
 							{#if avgEffort !== null}
 								<div class="flex items-center gap-1.5">
-									<span class="text-xs text-text-muted">Avg effort:</span>
-									<span class="text-xs font-bold text-cyan-300">{avgEffort}/10</span>
+									<span class="text-xs text-text-muted">Effort:</span>
+									<span class="text-xs font-bold {getScoreColor(avgEffort, 'effort')}"
+										>{avgEffort}/10</span
+									>
+									{#if effortTrend !== null && effortTrend !== 0}
+										<span class="text-2xs {effortTrend > 0 ? 'text-success' : 'text-warning'}"
+											>{effortTrend > 0 ? '↑' : '↓'}</span
+										>
+									{/if}
 								</div>
 							{/if}
 							{#if avgPerf !== null}
 								<div class="flex items-center gap-1.5">
-									<span class="text-xs text-text-muted">Avg perf:</span>
-									<span class="text-xs font-bold text-amber-300">{avgPerf}/10</span>
+									<span class="text-xs text-text-muted">Perf:</span>
+									<span class="text-xs font-bold {getScoreColor(avgPerf, 'performance')}"
+										>{avgPerf}/10</span
+									>
+									{#if perfTrend !== null && perfTrend !== 0}
+										<span class="text-2xs {perfTrend > 0 ? 'text-success' : 'text-warning'}"
+											>{perfTrend > 0 ? '↑' : '↓'}</span
+										>
+									{/if}
 								</div>
 							{/if}
 						</div>
-						<p class="mt-2 text-[10px] text-text-tertiary">
-							Your ongoing perspective helps {data.reflection.participantName}'s coach track real
-							progress over time.
-						</p>
+						{#if (effortTrend !== null && effortTrend > 0) || (perfTrend !== null && perfTrend > 0)}
+							<p class="text-2xs mt-2 text-success">
+								Your feedback is part of {data.reflection.participantName}'s upward trajectory —
+								they're growing, and your perspective is helping.
+							</p>
+						{:else}
+							<p class="text-2xs mt-2 text-text-tertiary">
+								Your ongoing perspective helps {data.reflection.participantName}'s coach track real
+								progress over time.
+							</p>
+						{/if}
 					</div>
+				{:else if !data.isFirstFeedback}
+					<p class="text-center text-sm font-semibold text-text-primary">
+						Welcome back, {data.stakeholder.name}
+					</p>
 				{/if}
 
 				<!-- Step indicator -->
 				<div class="flex items-center justify-center gap-2">
 					<div class="flex items-center gap-1.5">
 						<span
-							class="flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold {effortScore !==
+							class="text-2xs flex h-6 w-6 items-center justify-center rounded-full font-bold {effortScore !==
 							null
 								? 'bg-accent text-white'
 								: 'bg-surface-subtle text-text-muted'}">1</span
 						>
-						<span class="text-[10px] text-text-muted">Effort</span>
+						<span class="text-2xs text-text-muted">Effort</span>
 					</div>
 					<div class="h-px w-6 bg-border-default"></div>
 					<div class="flex items-center gap-1.5">
 						<span
-							class="flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold {performanceScore !==
+							class="text-2xs flex h-6 w-6 items-center justify-center rounded-full font-bold {performanceScore !==
 							null
 								? 'bg-accent text-white'
 								: 'bg-surface-subtle text-text-muted'}">2</span
 						>
-						<span class="text-[10px] text-text-muted">Performance</span>
+						<span class="text-2xs text-text-muted">Performance</span>
 					</div>
 					<div class="h-px w-6 bg-border-default"></div>
 					<div class="flex items-center gap-1.5">
 						<span
-							class="flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold {notes.trim()
+							class="text-2xs flex h-6 w-6 items-center justify-center rounded-full font-bold {notes.trim()
 								? 'bg-accent text-white'
 								: 'bg-surface-subtle text-text-muted'}">3</span
 						>
-						<span class="text-[10px] text-text-muted">Comment</span>
+						<span class="text-2xs text-text-muted"
+							>Comment <span class="text-text-tertiary">(optional)</span></span
+						>
 					</div>
 				</div>
 
-				<form method="post" onsubmit={handleSubmit} class="space-y-6">
+				<!-- Persistent attribution notice (visible throughout form) -->
+				<div
+					class="flex items-center gap-2 rounded-lg border border-border-default bg-surface-subtle px-3 py-2 text-xs text-text-secondary"
+				>
+					<Shield class="h-3.5 w-3.5 shrink-0 text-text-muted" />
+					<span
+						>Your name is attached to this feedback — shared only with {data.reflection
+							.participantName} and their coach.</span
+					>
+				</div>
+
+				<form method="post" use:enhance={enhanceSubmit} class="space-y-6">
 					<input type="hidden" name="token" value={data.token} />
 					<!-- Hidden inputs for form submission (only included when a score is selected) -->
 					{#if effortScore !== null}
@@ -619,9 +841,11 @@
 
 					<!-- Objective Display -->
 					<div class="rounded-xl border border-border-default bg-surface-subtle px-5 py-4">
-						<div class="flex items-center gap-3 text-base text-text-secondary">
-							<Target class="h-5 w-5 text-accent" />
-							<span class="font-medium">Objective:</span>
+						<div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-base text-text-secondary">
+							<div class="flex items-center gap-2">
+								<Target class="h-5 w-5 shrink-0 text-accent" />
+								<span class="font-medium">Objective:</span>
+							</div>
 							<span class="text-lg font-semibold text-text-primary"
 								>{data.reflection.objectiveTitle || 'the goal'}</span
 							>
@@ -664,9 +888,9 @@
 							<div class="flex items-center gap-3">
 								<Dumbbell class="h-6 w-6 text-accent" />
 								<div>
-									<label for="effort-score" class="text-lg font-bold text-text-primary">
+									<span id="effort-label" class="text-lg font-bold text-text-primary">
 										Effort
-									</label>
+									</span>
 									<p class="text-xs text-text-tertiary">
 										How much intentional effort have you noticed from {data.reflection
 											.participantName} on "{data.reflection.objectiveTitle || 'their goal'}"
@@ -688,11 +912,25 @@
 							</div>
 						</div>
 
+						<!-- Calibration Guide -->
+						<div
+							id="effort-calibration"
+							class="mb-3 flex flex-wrap gap-x-3 gap-y-1 text-xs text-text-muted"
+						>
+							<span><span class="font-semibold">0–2</span> Rarely intentional</span>
+							<span><span class="font-semibold">3–4</span> Sporadic effort</span>
+							<span><span class="font-semibold">5–6</span> Steady practice</span>
+							<span><span class="font-semibold">7–8</span> Highly disciplined</span>
+							<span><span class="font-semibold">9–10</span> Relentless commitment</span>
+						</div>
+
 						<!-- Button Grid (Primary Input) -->
 						<div
 							class="mb-4 grid grid-cols-6 gap-2 sm:grid-cols-11"
 							role="radiogroup"
-							aria-label="Effort score selection"
+							aria-labelledby="effort-label"
+							aria-describedby="effort-calibration"
+							onkeydown={(e) => handleRadiogroupKeydown(e, 'effort')}
 						>
 							{#each Array.from({ length: 11 }, (_, i) => i) as i (i)}
 								{@const isSelected = effortScore === i}
@@ -702,23 +940,32 @@
 								<button
 									type="button"
 									onclick={() => (effortScore = i)}
-									aria-pressed={isSelected}
-									aria-label="Score {i} out of 10"
+									role="radio"
+									aria-checked={isSelected}
+									aria-label="Effort score {i} out of 10"
+									tabindex={isSelected || (effortScore === null && i === 0) ? 0 : -1}
 									class="flex min-h-[44px] w-full items-center justify-center rounded-lg border-2 text-sm font-semibold transition-all {isSelected
-										? buttonColors
+										? buttonColors + ' scale-105'
 										: 'border-border-default bg-surface-raised text-text-secondary ' +
-											hoverColors} focus:ring-2 focus:outline-none {focusRing} focus:ring-offset-2"
+											hoverColors} focus-visible:ring-2 focus-visible:outline-none {focusRing} focus-visible:ring-offset-2"
 								>
 									{i}
 								</button>
 							{/each}
 						</div>
 
-						<div class="flex items-center justify-between text-[10px] text-text-muted">
+						<div class="text-2xs flex items-center justify-between text-text-muted">
 							<span>Not at all</span>
 							<span>Moderately</span>
 							<span>Exceptionally</span>
 						</div>
+						{#if effortScore !== null}
+							<p
+								class="mt-2 text-center text-xs font-medium {getScoreColor(effortScore, 'effort')}"
+							>
+								{getScoreLabel(effortScore, 'effort')}
+							</p>
+						{/if}
 					</div>
 
 					<!-- Progress Score with Enhanced UI -->
@@ -729,9 +976,9 @@
 							<div class="flex items-center gap-3">
 								<TrendingUp class="h-6 w-6 text-accent" />
 								<div>
-									<label for="progress-score" class="text-lg font-bold text-text-primary">
+									<span id="performance-label" class="text-lg font-bold text-text-primary">
 										Performance
-									</label>
+									</span>
 									<p class="text-xs text-text-tertiary">
 										How effectively is {data.reflection.participantName} performing on "{data
 											.reflection.objectiveTitle || 'their goal'}" from your perspective?
@@ -752,11 +999,25 @@
 							</div>
 						</div>
 
+						<!-- Calibration Guide -->
+						<div
+							id="performance-calibration"
+							class="mb-3 flex flex-wrap gap-x-3 gap-y-1 text-xs text-text-muted"
+						>
+							<span><span class="font-semibold">0–2</span> Not yet visible</span>
+							<span><span class="font-semibold">3–4</span> Early signs</span>
+							<span><span class="font-semibold">5–6</span> Noticeable progress</span>
+							<span><span class="font-semibold">7–8</span> Consistent results</span>
+							<span><span class="font-semibold">9–10</span> Transformative impact</span>
+						</div>
+
 						<!-- Button Grid (Primary Input) -->
 						<div
 							class="mb-4 grid grid-cols-6 gap-2 sm:grid-cols-11"
 							role="radiogroup"
-							aria-label="Performance score selection"
+							aria-labelledby="performance-label"
+							aria-describedby="performance-calibration"
+							onkeydown={(e) => handleRadiogroupKeydown(e, 'performance')}
 						>
 							{#each Array.from({ length: 11 }, (_, i) => i) as i (i)}
 								{@const isSelected = performanceScore === i}
@@ -766,23 +1027,35 @@
 								<button
 									type="button"
 									onclick={() => (performanceScore = i)}
-									aria-pressed={isSelected}
-									aria-label="Score {i} out of 10"
+									role="radio"
+									aria-checked={isSelected}
+									aria-label="Performance score {i} out of 10"
+									tabindex={isSelected || (performanceScore === null && i === 0) ? 0 : -1}
 									class="flex min-h-[44px] w-full items-center justify-center rounded-lg border-2 text-sm font-semibold transition-all {isSelected
-										? buttonColors
+										? buttonColors + ' scale-105'
 										: 'border-border-default bg-surface-raised text-text-secondary ' +
-											hoverColors} focus:ring-2 focus:outline-none {focusRing} focus:ring-offset-2"
+											hoverColors} focus-visible:ring-2 focus-visible:outline-none {focusRing} focus-visible:ring-offset-2"
 								>
 									{i}
 								</button>
 							{/each}
 						</div>
 
-						<div class="flex items-center justify-between text-[10px] text-text-muted">
+						<div class="text-2xs flex items-center justify-between text-text-muted">
 							<span>Not at all</span>
 							<span>Moderately</span>
 							<span>Exceptionally</span>
 						</div>
+						{#if performanceScore !== null}
+							<p
+								class="mt-2 text-center text-xs font-medium {getScoreColor(
+									performanceScore,
+									'performance'
+								)}"
+							>
+								{getScoreLabel(performanceScore, 'performance')}
+							</p>
+						{/if}
 					</div>
 
 					<!-- Impact reinforcement (appears after both scores are filled) -->
@@ -803,6 +1076,9 @@
 						<div
 							class="rounded-2xl border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30"
 						>
+							<label for="comment" class="mb-2 block text-sm font-medium text-text-secondary"
+								>Optional comment</label
+							>
 							<textarea
 								name="comment"
 								id="comment"
@@ -823,22 +1099,39 @@
 						<button
 							type="button"
 							onclick={() => (showComment = true)}
-							class="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-border-default py-3 text-sm font-medium text-text-muted transition-colors hover:border-accent/30 hover:text-accent"
+							class="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border border-border-default bg-surface-raised py-3 text-sm font-medium text-text-secondary transition-colors hover:border-accent/30 hover:bg-accent-muted/30 hover:text-accent"
 						>
 							<PenLine class="h-4 w-4" />
-							Add a comment
+							Add a comment <span class="text-xs text-text-muted">(optional)</span>
 						</button>
 					{/if}
 
-					<!-- Validation message -->
-					{#if scoresRequired}
-						<div class="rounded-xl border border-error-muted bg-error-muted p-4 text-sm text-error">
-							<p class="font-medium">
-								<AlertTriangle class="inline h-4 w-4" /> Please select at least one score or write an
-								observation before submitting.
-							</p>
+					{#if data.revealScores !== false}
+						<div
+							class="flex items-center gap-2 rounded-lg bg-accent-muted px-3 py-2 text-xs text-accent"
+						>
+							<Eye class="h-3.5 w-3.5 shrink-0" />
+							<span
+								>After submitting, you'll see how {data.reflection.participantName} rated themselves
+								for comparison.</span
+							>
 						</div>
 					{/if}
+
+					<!-- Validation message -->
+					<div aria-live="assertive">
+						{#if scoresRequired}
+							<div
+								class="rounded-xl border border-error-muted bg-error-muted p-4 text-sm text-error"
+								role="alert"
+							>
+								<p class="font-medium">
+									<AlertTriangle class="inline h-4 w-4" /> Please select at least one score or write
+									an observation before submitting.
+								</p>
+							</div>
+						{/if}
+					</div>
 
 					<!-- Submit Button with Enhanced Design -->
 					<div
@@ -849,7 +1142,46 @@
 							<p class="mt-1 flex items-center gap-1.5 text-xs text-text-secondary">
 								<Shield class="h-3.5 w-3.5 shrink-0 text-success" />
 								Shared only with {data.reflection.participantName} and their coach.
+								<button
+									type="button"
+									onclick={() => (showPrivacyDetails = !showPrivacyDetails)}
+									class="ml-1 font-medium text-accent underline decoration-solid underline-offset-2 hover:text-accent-hover"
+								>
+									{showPrivacyDetails ? 'Hide details' : 'Learn more'}
+								</button>
 							</p>
+							{#if showPrivacyDetails}
+								<div
+									class="text-2xs mt-2 rounded-lg bg-surface-subtle px-3 py-2 leading-relaxed text-text-tertiary"
+								>
+									<ul class="space-y-1">
+										<li>
+											Your name and scores are visible to {data.reflection.participantName} and their
+											coach.
+										</li>
+										<li>
+											Your feedback is never shared with HR, management, or anyone outside the
+											coaching relationship.
+										</li>
+										<li>
+											Data is encrypted in transit and at rest, hosted on enterprise-grade
+											infrastructure.
+										</li>
+										<li>Data is retained for the duration of the coaching engagement.</li>
+									</ul>
+									<!-- eslint-disable svelte/no-navigation-without-resolve -->
+									<p class="mt-2">
+										<a
+											href="/privacy"
+											target="_blank"
+											rel="noopener noreferrer"
+											class="text-accent underline decoration-dotted hover:text-accent-hover"
+											>Full privacy policy</a
+										>
+									</p>
+									<!-- eslint-enable svelte/no-navigation-without-resolve -->
+								</div>
+							{/if}
 						</div>
 						<div class="flex items-center gap-3">
 							<button

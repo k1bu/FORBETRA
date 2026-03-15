@@ -9,7 +9,7 @@ export const load: PageServerLoad = async (event) => {
 	try {
 		const { dbUser } = requireRole(event, 'INDIVIDUAL');
 
-		const [objective, hasAnyObjective] = await Promise.all([
+		const [objective, hasAnyObjective, coachClient] = await Promise.all([
 			prisma.objective.findFirst({
 				where: { userId: dbUser.id, active: true },
 				orderBy: { createdAt: 'desc' },
@@ -38,6 +38,10 @@ export const load: PageServerLoad = async (event) => {
 			prisma.objective.findFirst({
 				where: { userId: dbUser.id },
 				select: { id: true }
+			}),
+			prisma.coachClient.findFirst({
+				where: { individualId: dbUser.id },
+				select: { coach: { select: { name: true } } }
 			})
 		]);
 		const isFirstVisit = !hasAnyObjective;
@@ -76,7 +80,6 @@ export const load: PageServerLoad = async (event) => {
 		let totalExpected: number = 0;
 		let totalCompleted: number = 0;
 		let openExperiences: number = 0;
-		const missedExperiences: number = 0;
 
 		if (cycle && currentWeek) {
 			totalExpected = currentWeek * checksPerWeek;
@@ -675,12 +678,20 @@ export const load: PageServerLoad = async (event) => {
 		const checkInDayLabels = cycle
 			? parseCheckInDays(cycle.checkInFrequency ?? '3x').map((d) => dayNameMap[d] ?? d)
 			: [];
-		const nextCheckInDay = checkInDayLabels.length > 0 ? checkInDayLabels[0] : 'Friday';
+		const dayOrder = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+		const todayIndex = new Date().getDay();
+		const nextCheckInDay =
+			checkInDayLabels.length > 0
+				? checkInDayLabels
+						.map((d) => ({ day: d, dist: (dayOrder.indexOf(d) - todayIndex + 7) % 7 || 7 }))
+						.sort((a, b) => a.dist - b.dist)[0].day
+				: 'Friday';
 
 		return {
 			isFirstVisit,
 			isOnboardingComplete,
 			nextCheckInDay,
+			coachName: coachClient?.coach?.name ?? null,
 			objective: objective
 				? {
 						id: objective.id,
@@ -695,7 +706,6 @@ export const load: PageServerLoad = async (event) => {
 						totalCompleted,
 						totalExpected,
 						openExperiences,
-						missedExperiences,
 						totalStakeholders: objective.stakeholders.length
 					}
 				: null,

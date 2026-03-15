@@ -19,7 +19,17 @@ export const GET: RequestHandler = async ({ request, url }) => {
 		return new Response('Too many requests', { status: 429 });
 	}
 
-	await remindOverduePrompts();
-
-	return new Response(null, { status: 204 });
+	try {
+		await remindOverduePrompts();
+		return new Response(JSON.stringify({ status: 'success' }), {
+			status: 200,
+			headers: { 'Content-Type': 'application/json' }
+		});
+	} catch (error) {
+		console.error('[job:remind-prompts] Failed', error);
+		return new Response(JSON.stringify({ status: 'error', error: String(error) }), {
+			status: 500,
+			headers: { 'Content-Type': 'application/json' }
+		});
+	}
 };

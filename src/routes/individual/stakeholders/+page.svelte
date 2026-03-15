@@ -62,21 +62,12 @@
 						>Hub</a
 					>
 				</li>
-				<li aria-hidden="true" class="text-text-muted">
-					<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-						><path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M9 5l7 7-7 7"
-						/></svg
-					>
-				</li>
+				<li aria-hidden="true" class="text-text-muted">/</li>
 				<li><span class="font-medium text-text-primary">Reviewers</span></li>
 			</ol>
 		</nav>
 		<!-- eslint-enable svelte/no-navigation-without-resolve -->
-		<h1 class="text-3xl font-bold text-text-primary">Reviewers</h1>
+		<h1 class="text-2xl font-bold text-text-primary">Reviewers</h1>
 		<p class="mt-1 text-text-secondary">Manage the people who provide feedback on your progress</p>
 	</header>
 
@@ -337,7 +328,7 @@
 							</li>
 						</ul>
 					</div>
-					<p class="mt-3 text-center text-[10px] text-text-muted">
+					<p class="text-2xs mt-3 text-center text-text-muted">
 						All feedback is anonymous. Reviewers receive a simple 60-second form.
 					</p>
 				</div>
@@ -395,7 +386,7 @@
 							value={stakeholderFormValues.email}
 							required
 						/>
-						<p class="mt-1 text-[10px] text-text-muted">
+						<p class="text-2xs mt-1 text-text-muted">
 							They'll receive a link to provide anonymous feedback
 						</p>
 					</div>

@@ -10,6 +10,8 @@
 	/* Typography */
 	--font-sans: 'Geist Sans', ui-sans-serif, system-ui, sans-serif;
 	--font-mono: 'Geist Mono', ui-monospace, monospace;
+	--font-size-2xs: 11px;
+	--font-size-2xs--line-height: 15px;
 
 	/* Surface palette (dark-first) */
 	--color-surface-base: #09090b;
@@ -76,6 +78,9 @@
 @layer utilities {
 	.focus-ring {
 		@apply focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface-base focus-visible:outline-none;
+	}
+	.scroll-anchor {
+		scroll-margin-top: 1rem;
 	}
 }
 

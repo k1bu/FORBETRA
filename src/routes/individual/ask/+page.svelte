@@ -2,12 +2,14 @@
 	import type { PageData } from './$types';
 
 	import { MessageSquare } from 'lucide-svelte';
+	import { renderMarkdown } from '$lib/utils/markdown';
 
 	const { data }: { data: PageData } = $props();
 
-	type Message = { role: 'user' | 'assistant'; content: string };
+	type Message = { id: number; role: 'user' | 'assistant'; content: string };
 
 	let messages = $state<Message[]>([]);
+	let nextMessageId = $state(0);
 	let input = $state('');
 	let isStreaming = $state(false);
 	let scrollContainer = $state<HTMLElement | null>(null);
@@ -26,7 +28,7 @@
 		const text = input.trim();
 		if (!text || isStreaming) return;
 
-		const userMessage: Message = { role: 'user', content: text };
+		const userMessage: Message = { id: nextMessageId++, role: 'user', content: text };
 		messages = [...messages, userMessage];
 		input = '';
 		isStreaming = true;
@@ -37,10 +39,13 @@
 		streamingTimeout = setTimeout(() => {
 			if (isStreaming) {
 				isStreaming = false;
+				messages[messages.length - 1].content =
+					messages[messages.length - 1].content || 'Response timed out. Please try again.';
+				messages = [...messages];
 			}
 		}, 30000);
 
-		const assistantMessage: Message = { role: 'assistant', content: '' };
+		const assistantMessage: Message = { id: nextMessageId++, role: 'assistant', content: '' };
 		messages = [...messages, assistantMessage];
 
 		try {
@@ -131,9 +136,24 @@
 	<title>Ask | Forbetra</title>
 </svelte:head>
 
-<section class="mx-auto flex h-[calc(100vh-2rem)] max-w-3xl flex-col p-4">
+<section class="mx-auto flex h-[calc(100vh-2rem)] max-w-3xl flex-col p-4 pb-24 lg:pb-4">
 	<div class="mb-4">
-		<h1 class="text-center text-lg font-bold text-text-primary">Ask About Your Data</h1>
+		<!-- eslint-disable svelte/no-navigation-without-resolve -->
+		<nav aria-label="Breadcrumb" class="mb-2">
+			<ol class="flex items-center gap-1.5 text-sm text-text-tertiary">
+				<li>
+					<a
+						href="/individual"
+						class="rounded transition-colors hover:text-text-primary focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
+						>Hub</a
+					>
+				</li>
+				<li aria-hidden="true" class="text-text-muted">/</li>
+				<li><span class="font-medium text-text-primary">Ask</span></li>
+			</ol>
+		</nav>
+		<!-- eslint-enable svelte/no-navigation-without-resolve -->
+		<h1 class="text-2xl font-bold text-text-primary">Ask About Your Data</h1>
 	</div>
 
 	<!-- eslint-disable svelte/no-navigation-without-resolve -->
@@ -182,7 +202,7 @@
 					</div>
 				</div>
 			{:else}
-				{#each messages as message, idx (idx)}
+				{#each messages as message (message.id)}
 					<div class="flex {message.role === 'user' ? 'justify-end' : 'justify-start'}">
 						<div
 							class="max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed {message.role ===
@@ -203,7 +223,9 @@
 									></div>
 								</div>
 							{:else}
-								<div class="whitespace-pre-wrap">{message.content}</div>
+								<!-- eslint-disable svelte/no-at-html-tags -->
+								<div class="prose-chat">{@html renderMarkdown(message.content)}</div>
+								<!-- eslint-enable svelte/no-at-html-tags -->
 							{/if}
 						</div>
 					</div>
@@ -217,6 +239,7 @@
 				<textarea
 					bind:value={input}
 					onkeydown={handleKeydown}
+					aria-label="Ask a question about your data"
 					placeholder="Ask about your progress, patterns, or what to focus on..."
 					rows="1"
 					disabled={isStreaming}
@@ -239,7 +262,7 @@
 					</svg>
 				</button>
 			</div>
-			<p class="mt-2 text-center text-[10px] text-text-muted">
+			<p class="text-2xs mt-2 text-center text-text-muted">
 				AI responses are based on your actual data. Not a substitute for professional coaching.
 			</p>
 		</div>

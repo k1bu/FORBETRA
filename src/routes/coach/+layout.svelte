@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { page } from '$app/stores';
-	import { Home, Users, Mail, BarChart3 } from 'lucide-svelte';
+	import { Home, Mail, Users, BarChart3, Settings } from 'lucide-svelte';
 	import { coachAlertCount } from '$lib/stores/coachAlerts.svelte';
 
 	const { children }: { children: Snippet } = $props();
@@ -10,7 +10,8 @@
 		{ href: '/coach', label: 'Dashboard', icon: Home },
 		{ href: '/coach/roster', label: 'Clients', icon: Users },
 		{ href: '/coach/invitations', label: 'Invitations', icon: Mail },
-		{ href: '/coach/analytics', label: 'Analytics', icon: BarChart3 }
+		{ href: '/coach/analytics', label: 'Analytics', icon: BarChart3 },
+		{ href: '/coach/settings', label: 'Settings', icon: Settings }
 	];
 
 	const isActive = (href: string) => {
@@ -20,6 +21,7 @@
 	};
 </script>
 
+<!-- Skip-to-content is provided by the root layout -->
 <div class="flex min-h-screen bg-surface-base">
 	<!-- Desktop Sidebar -->
 	<aside class="hidden w-52 shrink-0 border-r border-border-default bg-surface-raised lg:block">
@@ -42,7 +44,7 @@
 						{item.label}
 						{#if item.href === '/coach' && coachAlertCount.value > 0}
 							<span
-								class="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-error px-1 text-[10px] font-bold text-white"
+								class="text-2xs ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-error px-1 font-bold text-white"
 							>
 								{coachAlertCount.value}
 							</span>
@@ -56,9 +58,9 @@
 
 	<!-- Main Content -->
 	<div class="flex flex-1 flex-col overflow-x-hidden">
-		<main class="flex-1 pb-20 lg:pb-0">
+		<div class="flex-1 pb-20 lg:pb-0">
 			{@render children()}
-		</main>
+		</div>
 
 		<!-- Mobile Bottom Tab Bar -->
 		<nav
@@ -70,7 +72,7 @@
 			{#each navItems as item (item.href)}
 				<a
 					href={item.href}
-					class="flex flex-1 flex-col items-center gap-0.5 rounded-lg py-1.5 text-[10px] font-medium transition-colors
+					class="text-2xs flex flex-1 flex-col items-center gap-0.5 rounded-lg py-1.5 font-medium transition-colors
 						{isActive(item.href) ? 'text-accent' : 'text-text-muted'}"
 					aria-current={isActive(item.href) ? 'page' : undefined}
 				>
@@ -78,7 +80,7 @@
 						<item.icon class="h-5 w-5" />
 						{#if item.href === '/coach' && coachAlertCount.value > 0}
 							<span
-								class="absolute -top-1 -right-1.5 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-error px-0.5 text-[8px] font-bold text-white"
+								class="text-2xs absolute -top-1 -right-1.5 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-error px-0.5 leading-none font-bold text-white"
 							>
 								{coachAlertCount.value}
 							</span>

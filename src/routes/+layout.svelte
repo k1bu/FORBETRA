@@ -5,7 +5,7 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import type { Snippet } from 'svelte';
 	import { ClerkProvider, SignedIn, UserButton } from 'svelte-clerk';
-	import { page } from '$app/stores';
+	import { navigating, page } from '$app/stores';
 	import { afterNavigate, goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import type { LayoutData } from './$types';
@@ -52,6 +52,11 @@
 </svelte:head>
 
 <ClerkProvider>
+	{#if $navigating}
+		<div class="fixed top-0 left-0 z-[60] h-0.5 w-full">
+			<div class="nav-progress h-full bg-accent"></div>
+		</div>
+	{/if}
 	<SignedIn>
 		{#if isImpersonating}
 			<div
@@ -134,7 +139,17 @@
 			<span class="mx-2">·</span>
 			<a href={resolve('/terms')} class="hover:text-text-secondary hover:underline">Terms</a>
 			<span class="mx-2">·</span>
-			<span>Your data is encrypted and stored securely.</span>
+			<span>TLS encrypted · Enterprise-grade security.</span>
+		</footer>
+	{:else if $page.url.pathname.startsWith('/stakeholder')}
+		<footer
+			class="border-t border-border-default bg-surface-base px-4 py-3 text-center text-xs text-text-muted"
+		>
+			<a href={resolve('/privacy')} class="hover:text-text-secondary hover:underline">Privacy</a>
+			<span class="mx-2">·</span>
+			<a href={resolve('/terms')} class="hover:text-text-secondary hover:underline">Terms</a>
+			<span class="mx-2">·</span>
+			<span>Enterprise-grade security.</span>
 		</footer>
 	{/if}
 	<ToastContainer />
@@ -154,9 +169,29 @@
 		}
 	}
 
+	.nav-progress {
+		animation: navProgress 2s ease-in-out infinite;
+	}
+
+	@keyframes navProgress {
+		0% {
+			width: 0%;
+		}
+		50% {
+			width: 70%;
+		}
+		100% {
+			width: 95%;
+		}
+	}
+
 	@media (prefers-reduced-motion: reduce) {
 		:global(.animate-fade-in) {
 			animation: none !important;
+		}
+		.nav-progress {
+			animation: none !important;
+			width: 100% !important;
 		}
 	}
 </style>

@@ -18,6 +18,28 @@
 	let sortKey = $state<SortKey>('name');
 	let sortAsc = $state(true);
 	let showAllWeeks = $state(false);
+	let scrollContainer = $state<HTMLElement | null>(null);
+	let canScrollLeft = $state(false);
+	let canScrollRight = $state(true);
+
+	function updateScrollShadows() {
+		if (!scrollContainer) return;
+		canScrollLeft = scrollContainer.scrollLeft > 0;
+		canScrollRight =
+			scrollContainer.scrollLeft < scrollContainer.scrollWidth - scrollContainer.clientWidth - 1;
+	}
+
+	$effect(() => {
+		if (!scrollContainer) return;
+		updateScrollShadows();
+		scrollContainer.addEventListener('scroll', updateScrollShadows, { passive: true });
+		const ro = new ResizeObserver(updateScrollShadows);
+		ro.observe(scrollContainer);
+		return () => {
+			scrollContainer?.removeEventListener('scroll', updateScrollShadows);
+			ro.disconnect();
+		};
+	});
 
 	const MAX_VISIBLE_WEEKS = 16;
 	const visibleTimeSeries = $derived(
@@ -138,9 +160,9 @@
 	<title>Analytics | Forbetra</title>
 </svelte:head>
 
-<section class="mx-auto flex max-w-7xl flex-col gap-8 p-4 pb-12">
+<section class="mx-auto flex max-w-4xl flex-col gap-8 p-4 pb-12">
 	<!-- Header -->
-	<header class="flex items-center justify-between">
+	<header class="flex flex-wrap items-center justify-between gap-4">
 		<div>
 			<nav aria-label="Breadcrumb" class="mb-2">
 				<!-- eslint-disable svelte/no-navigation-without-resolve -->
@@ -152,21 +174,12 @@
 							>Dashboard</a
 						>
 					</li>
-					<li aria-hidden="true" class="text-text-muted">
-						<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-							><path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M9 5l7 7-7 7"
-							/></svg
-						>
-					</li>
+					<li aria-hidden="true" class="text-text-muted">/</li>
 					<li><span class="font-medium text-text-primary">Analytics</span></li>
 				</ol>
 				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 			</nav>
-			<h1 class="text-3xl font-bold text-text-primary">Analytics Dashboard</h1>
+			<h1 class="text-2xl font-bold text-text-primary">Analytics Dashboard</h1>
 			<p class="mt-2 text-text-secondary">
 				Track effort, performance, and engagement patterns across your portfolio
 			</p>
@@ -183,6 +196,7 @@
 			<button
 				type="button"
 				onclick={downloadCSV}
+				aria-label="Export client comparison data as CSV"
 				class="inline-flex items-center gap-2 rounded-lg border border-border-default bg-surface-raised px-4 py-2 text-sm font-semibold text-text-secondary transition-all hover:border-accent/30 hover:text-accent"
 			>
 				<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -200,10 +214,14 @@
 
 	<!-- Overall Analytics Cards -->
 	<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-		<div class="rounded-lg border border-border-default bg-surface-raised p-4">
+		<div class="rounded-xl border border-border-default bg-surface-raised p-4">
 			<div class="mb-1 flex items-center gap-1.5">
 				<AlertTriangle class="h-4 w-4 text-text-muted" />
-				<p class="text-xs font-medium text-text-tertiary">Total Alerts</p>
+				<p class="text-xs font-medium text-text-tertiary">
+					Total Alerts <InfoTip
+						text="AI-detected patterns that may need coaching attention. Sorted by severity."
+					/>
+				</p>
 			</div>
 			<p class="text-3xl font-bold text-text-primary tabular-nums">{data.analytics.totalAlerts}</p>
 			<div class="mt-1 flex gap-2 text-xs">
@@ -212,7 +230,7 @@
 				<span class="text-text-secondary">Low: {data.analytics.lowPriorityAlerts}</span>
 			</div>
 		</div>
-		<div class="rounded-lg border border-border-default bg-surface-raised p-4">
+		<div class="rounded-xl border border-border-default bg-surface-raised p-4">
 			<div class="mb-1 flex items-center gap-1.5">
 				<BarChart3 class="h-4 w-4 text-text-muted" />
 				<p class="text-xs font-medium text-text-tertiary">
@@ -224,22 +242,30 @@
 			<p class="text-3xl font-bold text-text-primary tabular-nums">
 				{formatScore(data.analytics.avgStability)}
 			</p>
-			<p class="mt-1 text-[10px] text-text-muted">Week-to-week score consistency</p>
+			<p class="text-2xs mt-1 text-text-muted">Week-to-week score consistency</p>
 		</div>
-		<div class="rounded-lg border border-border-default bg-surface-raised p-4">
+		<div class="rounded-xl border border-border-default bg-surface-raised p-4">
 			<div class="mb-1 flex items-center gap-1.5">
 				<Target class="h-4 w-4 text-text-muted" />
-				<p class="text-xs font-medium text-text-tertiary">Avg. Alignment</p>
+				<p class="text-xs font-medium text-text-tertiary">
+					Feedback Rate <InfoTip
+						text="How often reviewers respond to feedback requests. 80%+ means strong engagement."
+					/>
+				</p>
 			</div>
 			<p class="text-3xl font-bold text-text-primary tabular-nums">
 				{formatPercent(data.analytics.avgAlignment)}
 			</p>
-			<p class="mt-1 text-[10px] text-text-muted">Reviewer response rate</p>
+			<p class="text-2xs mt-1 text-text-muted">Reviewer response rate</p>
 		</div>
-		<div class="rounded-lg border border-border-default bg-surface-raised p-4">
+		<div class="rounded-xl border border-border-default bg-surface-raised p-4">
 			<div class="mb-1 flex items-center gap-1.5">
 				<TrendingUp class="h-4 w-4 text-text-muted" />
-				<p class="text-xs font-medium text-text-tertiary">Avg. Performance</p>
+				<p class="text-xs font-medium text-text-tertiary">
+					Avg. Performance <InfoTip
+						text="Average self-rated performance across all clients (last 4 weeks). 7+ is strong."
+					/>
+				</p>
 			</div>
 			<p class="text-3xl font-bold text-text-primary tabular-nums">
 				{formatAverage(data.analytics.overallAvgProgress)}
@@ -254,15 +280,20 @@
 
 	<!-- Client Comparison Table -->
 	{#if data.clientComparison.length > 0}
-		<section class="rounded-lg border border-border-default bg-surface-raised p-6">
+		<section class="rounded-xl border border-border-default bg-surface-raised p-6">
 			<h2 class="mb-4 text-2xl font-bold text-text-primary">Client Comparison</h2>
-			<div class="scroll-shadow-container relative">
-				<div class="overflow-x-auto">
+			<p class="mb-3 text-xs text-text-muted sm:hidden">Swipe to see all columns &rarr;</p>
+			<div
+				class="scroll-shadow-container relative {canScrollLeft
+					? 'show-left-shadow'
+					: ''} {canScrollRight ? 'show-right-shadow' : ''}"
+			>
+				<div class="overflow-x-auto" bind:this={scrollContainer}>
 					<table class="w-full border-collapse text-sm">
 						<thead>
 							<tr class="border-b border-border-default">
 								<th
-									class="px-3 py-2 text-left text-xs font-semibold tracking-wider text-text-tertiary uppercase"
+									class="sticky left-0 z-10 bg-surface-raised px-3 py-2 text-left text-xs font-semibold tracking-wider text-text-tertiary uppercase"
 									aria-sort={sortKey === 'name' ? (sortAsc ? 'ascending' : 'descending') : 'none'}
 								>
 									<button
@@ -388,13 +419,20 @@
 								<tr
 									class="cursor-pointer border-b border-border-default transition-colors hover:bg-accent-muted/50 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface-base focus-visible:outline-none"
 									tabindex="0"
-									role="link"
+									role="row"
+									aria-label="View session for {row.name}"
 									onclick={() => goto(`/coach/session/${row.clientId}`)}
 									onkeydown={(e) => {
-										if (e.key === 'Enter') goto(`/coach/session/${row.clientId}`);
+										if (e.key === 'Enter' || e.key === ' ') {
+											e.preventDefault();
+											goto(`/coach/session/${row.clientId}`);
+										}
 									}}
 								>
-									<td class="px-3 py-2.5 font-semibold text-accent hover:underline">{row.name}</td>
+									<td
+										class="sticky left-0 z-10 bg-surface-raised px-3 py-2.5 font-semibold text-accent hover:underline"
+										>{row.name}</td
+									>
 									<td class="max-w-[200px] truncate px-3 py-2.5 text-text-secondary"
 										>{row.objective}</td
 									>
@@ -471,9 +509,10 @@
 				<div class="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-accent-muted">
 					<BarChart3 class="h-7 w-7 text-accent" />
 				</div>
-				<h3 class="mb-1 text-lg font-bold text-text-primary">No client data yet</h3>
+				<h3 class="mb-1 text-lg font-bold text-text-primary">Your analytics are waiting</h3>
 				<p class="mb-6 max-w-sm text-sm text-text-secondary">
-					Invite clients to see performance analytics here.
+					Once your first client completes a check-in, you'll see trends, comparisons, and portfolio
+					insights here. The data gets richer every week.
 				</p>
 				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<a
@@ -489,36 +528,61 @@
 
 	<!-- Portfolio Trends -->
 	{#if data.portfolioTimeSeries.length > 0}
-		<section class="rounded-lg border border-border-default bg-surface-raised p-6">
+		<section class="rounded-xl border border-border-default bg-surface-raised p-6">
 			<h2 class="mb-1 text-2xl font-bold text-text-primary">Portfolio Trends</h2>
 			<p class="mb-4 text-xs text-text-tertiary">Weekly averages across all active clients</p>
-			<div class="overflow-x-auto">
-				<div
-					class="flex items-end gap-1"
-					style="min-width: {visibleTimeSeries.length * 60}px; height: 200px;"
-				>
-					{#each visibleTimeSeries as week (week.weekNumber)}
-						{@const maxScore = 10}
-						{@const effortHeight = week.avgEffort !== null ? (week.avgEffort / maxScore) * 160 : 0}
-						{@const perfHeight =
-							week.avgPerformance !== null ? (week.avgPerformance / maxScore) * 160 : 0}
-						<div class="flex min-w-[50px] flex-1 flex-col items-center gap-1">
-							<div class="flex items-end gap-0.5" style="height: 160px;">
+			<div
+				class="overflow-x-auto"
+				role="img"
+				aria-label="Portfolio effort and performance trends by week"
+			>
+				<div class="flex" style="min-width: {visibleTimeSeries.length * 60 + 30}px; height: 200px;">
+					<!-- Y-axis labels -->
+					<div
+						class="flex w-7 shrink-0 flex-col justify-between pb-[38px]"
+						style="height: 160px;"
+						aria-hidden="true"
+					>
+						<span class="text-2xs text-right text-text-muted">10</span>
+						<span class="text-2xs text-right text-text-muted">5</span>
+						<span class="text-2xs text-right text-text-muted">0</span>
+					</div>
+					<div class="flex flex-1 items-end gap-1">
+						{#each visibleTimeSeries as week (week.weekNumber)}
+							{@const maxScore = 10}
+							{@const effortHeight =
+								week.avgEffort !== null ? (week.avgEffort / maxScore) * 160 : 0}
+							{@const perfHeight =
+								week.avgPerformance !== null ? (week.avgPerformance / maxScore) * 160 : 0}
+							<div class="group relative flex min-w-[50px] flex-1 flex-col items-center gap-1">
+								<div class="flex items-end gap-0.5" style="height: 160px;">
+									<div
+										class="w-5 rounded-t bg-data-effort transition-all"
+										style="height: {effortHeight}px;"
+										title="Effort: {week.avgEffort !== null ? week.avgEffort.toFixed(1) : '—'}"
+									></div>
+									<div
+										class="w-5 rounded-t bg-data-performance transition-all"
+										style="height: {perfHeight}px;"
+										title="Performance: {week.avgPerformance !== null
+											? week.avgPerformance.toFixed(1)
+											: '—'}"
+									></div>
+								</div>
+								<!-- Hover value tooltip -->
 								<div
-									class="w-5 rounded-t bg-data-effort transition-all"
-									style="height: {effortHeight}px;"
-									title="Effort: {week.avgEffort ?? '—'}"
-								></div>
-								<div
-									class="w-5 rounded-t bg-data-performance transition-all"
-									style="height: {perfHeight}px;"
-									title="Performance: {week.avgPerformance ?? '—'}"
-								></div>
+									class="text-2xs pointer-events-none absolute -top-1 left-1/2 z-10 hidden -translate-x-1/2 rounded bg-surface-subtle px-1.5 py-0.5 font-semibold text-text-primary shadow group-hover:block"
+								>
+									{week.avgEffort !== null ? week.avgEffort.toFixed(1) : '—'} / {week.avgPerformance !==
+									null
+										? week.avgPerformance.toFixed(1)
+										: '—'}
+								</div>
+								<span class="text-2xs text-text-tertiary">Wk {week.weekNumber}</span>
+								<span class="text-2xs text-text-muted">{week.clientCount}c</span>
 							</div>
-							<span class="text-[10px] text-text-tertiary">Wk {week.weekNumber}</span>
-							<span class="text-[9px] text-text-muted">{week.clientCount}c</span>
-						</div>
-					{/each}
+						{/each}
+					</div>
 				</div>
 			</div>
 			<div class="mt-3 flex items-center gap-4 text-xs text-text-tertiary">
@@ -565,9 +629,17 @@
 		opacity: 0;
 	}
 
+	.scroll-shadow-container.show-left-shadow::before {
+		opacity: 1;
+	}
+
 	.scroll-shadow-container::after {
 		right: 0;
 		background: linear-gradient(to left, var(--color-surface-raised, transparent), transparent);
+		opacity: 0;
+	}
+
+	.scroll-shadow-container.show-right-shadow::after {
 		opacity: 1;
 	}
 </style>

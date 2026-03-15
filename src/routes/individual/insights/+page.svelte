@@ -2,8 +2,18 @@
 	import type { PageData } from './$types';
 	import CorrelationView from '$lib/components/CorrelationView.svelte';
 	import GapLensView from '$lib/components/GapLensView.svelte';
-	import { FileText, ThumbsUp, ThumbsDown, History, ChevronDown, BarChart3 } from 'lucide-svelte';
+	import {
+		FileText,
+		ThumbsUp,
+		ThumbsDown,
+		History,
+		ChevronDown,
+		BarChart3,
+		MessageCircle,
+		ChevronRight
+	} from 'lucide-svelte';
 	import ErrorBoundary from '$lib/components/ErrorBoundary.svelte';
+	import { renderMarkdown } from '$lib/utils/markdown';
 
 	const { data }: { data: PageData } = $props();
 
@@ -167,22 +177,17 @@
 						>Hub</a
 					>
 				</li>
-				<li aria-hidden="true" class="text-text-muted">
-					<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-						><path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M9 5l7 7-7 7"
-						/></svg
-					>
-				</li>
+				<li aria-hidden="true" class="text-text-muted">/</li>
 				<li><span class="font-medium text-text-primary">Insights</span></li>
 			</ol>
 		</nav>
 		<!-- eslint-enable svelte/no-navigation-without-resolve -->
-		<h1 class="text-3xl font-bold text-text-primary">Insights</h1>
+		<h1 class="text-2xl font-bold text-text-primary">Insights</h1>
 		<p class="mt-1 text-text-secondary">Track your performance and consistency over time</p>
+		<p class="mt-0.5 text-xs text-text-tertiary">
+			AI reports, correlation charts, and perception gap analysis — all built from your check-ins
+			and reviewer feedback.
+		</p>
 	</header>
 
 	<!-- AI Performance Report -->
@@ -254,8 +259,9 @@
 							class="rounded-lg border-l-4 bg-surface-subtle p-4 {getSectionColor(section.title)}"
 						>
 							<h3 class="mb-2 text-sm font-bold text-text-primary">{section.title}</h3>
-							<div class="text-sm leading-relaxed whitespace-pre-line text-text-secondary">
-								{section.body}
+							<!-- eslint-disable svelte/no-at-html-tags -->
+							<div class="prose-sm text-sm leading-relaxed text-text-secondary">
+								{@html renderMarkdown(section.body)}
 							</div>
 						</div>
 					{/each}
@@ -396,12 +402,12 @@
 												>
 												<div class="flex gap-4">
 													{#if reflection.effortScore !== null}
-														<span class="text-cyan-500 tabular-nums"
+														<span class="text-data-effort tabular-nums"
 															>Effort: {reflection.effortScore}/10</span
 														>
 													{/if}
 													{#if reflection.performanceScore !== null}
-														<span class="text-amber-500 tabular-nums"
+														<span class="text-data-performance tabular-nums"
 															>Performance: {reflection.performanceScore}/10</span
 														>
 													{/if}
@@ -420,4 +426,25 @@
 			</div>
 		{/if}
 	{/if}
+
+	<!-- Ask AI Bridge CTA -->
+	<!-- eslint-disable svelte/no-navigation-without-resolve -->
+	<a
+		href="/individual/ask"
+		class="group flex items-center gap-4 rounded-2xl border border-accent/20 bg-gradient-to-r from-accent/5 to-transparent p-5 transition-all hover:border-accent/40"
+	>
+		<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent/10">
+			<MessageCircle class="h-5 w-5 text-accent" />
+		</div>
+		<div class="min-w-0 flex-1">
+			<p class="text-sm font-semibold text-text-primary">Have questions about your data?</p>
+			<p class="text-xs text-text-secondary">
+				Ask AI to explain trends, explore patterns, or dig deeper into your feedback.
+			</p>
+		</div>
+		<ChevronRight
+			class="h-4 w-4 shrink-0 text-accent transition-transform group-hover:translate-x-0.5"
+		/>
+	</a>
+	<!-- eslint-enable svelte/no-navigation-without-resolve -->
 </section>

@@ -29,8 +29,8 @@
 		}
 	});
 
-	let effortScore = $state(data.previousEntry?.effortScore ?? 5);
-	let performanceScore = $state(data.previousEntry?.performanceScore ?? 5);
+	let effortScore: number | null = $state(data.previousEntry?.effortScore ?? null);
+	let performanceScore: number | null = $state(data.previousEntry?.performanceScore ?? null);
 	let notes = $state(data.previousEntry?.notes ?? '');
 	let isSubmitting = $state(false);
 	// Auto-expand on first check-in, collapse thereafter
@@ -50,8 +50,8 @@
 	// Update scores when previousEntry changes
 	$effect(() => {
 		if (data.previousEntry) {
-			effortScore = data.previousEntry.effortScore ?? 5;
-			performanceScore = data.previousEntry.performanceScore ?? 5;
+			effortScore = data.previousEntry.effortScore ?? null;
+			performanceScore = data.previousEntry.performanceScore ?? null;
 		}
 	});
 
@@ -59,6 +59,10 @@
 		new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(new Date(value));
 
 	const notePrompt = $derived(() => {
+		// No prompt until scores are selected
+		if (effortScore === null || performanceScore === null) {
+			return "What went well? What's challenging? What stood out this week?";
+		}
 		// Midpoint identity reflection override
 		if (data.isMidpoint && data.identityAnchor) {
 			return `In Week 1, you said you were becoming: "${data.identityAnchor}". Halfway through your journey \u2014 does that still feel true? Has it evolved? Write what feels right now.`;
@@ -169,9 +173,11 @@
 				<CircleCheck class="mx-auto mb-2 h-10 w-10 text-success" />
 				<p class="text-lg font-semibold text-success">Week {data.currentWeek} check-in saved</p>
 				{#if data.previousRatings}
-					{@const eDiff = effortScore - (data.previousRatings.effortScore ?? effortScore)}
+					{@const eDiff =
+						(effortScore ?? 0) - (data.previousRatings.effortScore ?? effortScore ?? 0)}
 					{@const pDiff =
-						performanceScore - (data.previousRatings.performanceScore ?? performanceScore)}
+						(performanceScore ?? 0) -
+						(data.previousRatings.performanceScore ?? performanceScore ?? 0)}
 					<p class="mt-1 text-sm text-text-secondary">
 						Effort {effortScore}{#if eDiff > 0}
 							<span class="text-success">(↑{eDiff})</span>{:else if eDiff < 0}
@@ -242,42 +248,13 @@
 	</div>
 
 	<div class="mx-auto w-full max-w-2xl space-y-6">
-		{#if data.identityAnchor}
-			<div class="rounded-xl border border-accent/20 bg-accent-muted/50 px-5 py-3 text-center">
-				<p class="text-xs font-medium tracking-wide text-accent uppercase">Becoming</p>
-				<p class="mt-1 text-sm text-text-primary italic">"{data.identityAnchor}"</p>
-			</div>
-		{/if}
-		<!-- Interactive Check-in Form -->
-		<form method="post" onsubmit={handleSubmit} class="space-y-6">
-			<!-- Hidden inputs for form submission -->
-			<input type="hidden" name="effortScore" value={effortScore} />
-			<input type="hidden" name="performanceScore" value={performanceScore} />
-
-			<!-- Simple Objective Display -->
-			<div class="rounded-xl border border-border-default bg-surface-subtle px-5 py-4">
-				<div class="flex items-center gap-3 text-base text-text-secondary">
-					<Target class="h-5 w-5 text-accent" />
-					<span class="font-medium">Goal:</span>
-					<span class="text-lg font-semibold text-text-primary">{data.objective.title}</span>
-				</div>
-			</div>
-
-			<!-- Collapsible Behavioral Indicators -->
-			<div class="rounded-xl border border-border-default bg-surface-raised">
-				<button
-					type="button"
-					onclick={() => (showBehavioralIndicators = !showBehavioralIndicators)}
-					class="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-surface-subtle"
+		{#if !data.isPreview && !data.isAvailable && !data.previousEntry}
+			<div class="rounded-2xl border border-border-default bg-surface-raised p-8 text-center">
+				<div
+					class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-surface-subtle"
 				>
-					<div class="flex items-center gap-2">
-						<ClipboardList class="h-5 w-5 text-text-secondary" />
-						<span class="text-sm font-medium text-text-secondary">View behavioral indicators</span>
-					</div>
 					<svg
-						class="h-5 w-5 text-text-tertiary transition-transform {showBehavioralIndicators
-							? 'rotate-180'
-							: ''}"
+						class="h-8 w-8 text-text-muted"
 						fill="none"
 						stroke="currentColor"
 						viewBox="0 0 24 24"
@@ -286,324 +263,402 @@
 							stroke-linecap="round"
 							stroke-linejoin="round"
 							stroke-width="2"
-							d="M19 9l-7 7-7-7"
+							d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
 						/>
 					</svg>
-				</button>
-				{#if showBehavioralIndicators}
-					<div class="border-t border-border-default px-4 py-4">
-						<p class="mb-3 text-xs leading-relaxed text-text-secondary">
-							Use these as reference points when rating your overall effort and progress. They help
-							define what success looks like for your goal.
-						</p>
-						<div class="space-y-2">
-							{#each data.subgoals as subgoal, index (subgoal.id)}
-								<div
-									class="flex items-start gap-3 rounded-lg border border-border-default bg-surface-subtle p-3"
-								>
-									<span
-										class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent-muted text-xs font-bold text-accent"
+				</div>
+				<h2 class="text-lg font-semibold text-text-primary">Check-in opens soon</h2>
+				<p class="mt-2 text-sm text-text-secondary">
+					Your next check-in will be available on {formatDate(data.availableDate)}.
+				</p>
+				<!-- eslint-disable svelte/no-navigation-without-resolve -->
+				<a
+					href="/individual"
+					class="mt-6 inline-flex items-center gap-2 rounded-xl bg-accent px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-accent-hover"
+				>
+					Back to Home
+				</a>
+				<!-- eslint-enable svelte/no-navigation-without-resolve -->
+			</div>
+		{:else}
+			{#if data.identityAnchor}
+				<div class="rounded-xl border border-accent/20 bg-accent-muted/50 px-5 py-3 text-center">
+					<p class="text-xs font-medium tracking-wide text-accent uppercase">Becoming</p>
+					<p class="mt-1 text-sm text-text-primary italic">"{data.identityAnchor}"</p>
+				</div>
+			{/if}
+			<!-- Interactive Check-in Form -->
+			<form method="post" onsubmit={handleSubmit} class="space-y-6">
+				<!-- Hidden inputs for form submission -->
+				<input type="hidden" name="effortScore" value={effortScore ?? ''} />
+				<input type="hidden" name="performanceScore" value={performanceScore ?? ''} />
+
+				<!-- Simple Objective Display -->
+				<div class="rounded-xl border border-border-default bg-surface-subtle px-5 py-4">
+					<div class="flex items-center gap-3 text-base text-text-secondary">
+						<Target class="h-5 w-5 text-accent" />
+						<span class="font-medium">Goal:</span>
+						<span class="text-lg font-semibold text-text-primary">{data.objective.title}</span>
+					</div>
+				</div>
+
+				<!-- Collapsible Behavioral Indicators -->
+				<div class="rounded-xl border border-border-default bg-surface-raised">
+					<button
+						type="button"
+						onclick={() => (showBehavioralIndicators = !showBehavioralIndicators)}
+						class="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-surface-subtle"
+					>
+						<div class="flex items-center gap-2">
+							<ClipboardList class="h-5 w-5 text-text-secondary" />
+							<span class="text-sm font-medium text-text-secondary">View behavioral indicators</span
+							>
+						</div>
+						<svg
+							class="h-5 w-5 text-text-tertiary transition-transform {showBehavioralIndicators
+								? 'rotate-180'
+								: ''}"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M19 9l-7 7-7-7"
+							/>
+						</svg>
+					</button>
+					{#if showBehavioralIndicators}
+						<div class="border-t border-border-default px-4 py-4">
+							<p class="mb-3 text-xs leading-relaxed text-text-secondary">
+								Use these as reference points when rating your overall effort and progress. They
+								help define what success looks like for your goal.
+							</p>
+							<div class="space-y-2">
+								{#each data.subgoals as subgoal, index (subgoal.id)}
+									<div
+										class="flex items-start gap-3 rounded-lg border border-border-default bg-surface-subtle p-3"
 									>
-										{index + 1}
-									</span>
-									<div class="flex-1">
-										<p class="font-semibold text-text-primary">{subgoal.label}</p>
-										{#if subgoal.description}
-											<p class="mt-1 text-xs text-text-secondary">{subgoal.description}</p>
-										{/if}
+										<span
+											class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent-muted text-xs font-bold text-accent"
+										>
+											{index + 1}
+										</span>
+										<div class="flex-1">
+											<p class="font-semibold text-text-primary">{subgoal.label}</p>
+											{#if subgoal.description}
+												<p class="mt-1 text-xs text-text-secondary">{subgoal.description}</p>
+											{/if}
+										</div>
 									</div>
-								</div>
-							{/each}
-						</div>
-					</div>
-				{/if}
-			</div>
-
-			{#if data.currentWeek > 1 && data.previousRatings}
-				{@const historicRatings = data.historicRatings ?? []}
-				<div class="rounded-xl border border-accent/30 bg-accent-muted p-4">
-					<div class="mb-3">
-						<p class="text-sm font-semibold text-accent">Your last ratings:</p>
-					</div>
-					<div class="flex gap-6 text-sm">
-						<div class="flex items-center gap-2">
-							<span class="text-accent">Effort:</span>
-							<span class="text-lg font-bold text-accent">
-								{data.previousRatings.effortScore !== null ? data.previousRatings.effortScore : '—'}
-							</span>
-						</div>
-						<div class="flex items-center gap-2">
-							<span class="text-accent">Performance:</span>
-							<span class="text-lg font-bold text-accent">
-								{data.previousRatings.performanceScore !== null
-									? data.previousRatings.performanceScore
-									: '—'}
-							</span>
-						</div>
-					</div>
-					<p class="mt-2 text-xs text-accent">
-						Use this as context - adjust freely based on this week.
-					</p>
-					{#if historicRatings.length > 1}
-						<div class="mt-4">
-							<HistoricRatingsChart {historicRatings} />
+								{/each}
+							</div>
 						</div>
 					{/if}
 				</div>
-			{/if}
-			<!-- Effort Score with Enhanced UI -->
-			<div
-				class="group rounded-2xl border border-border-default bg-surface-raised p-6 transition-all hover:border-border-strong"
-			>
-				<div class="mb-4 flex items-center justify-between">
-					<div class="flex items-center gap-3">
-						<Dumbbell class="h-6 w-6 text-accent" />
-						<div>
-							<label for="effort-score" class="text-lg font-bold text-text-primary">
-								Effort
-								{#if data.previousRatings?.effortScore !== null && data.previousRatings?.effortScore !== undefined}
-									<span class="ml-1 text-sm font-normal text-text-muted"
-										>(last: {data.previousRatings.effortScore})</span
-									>
-								{/if}
-							</label>
-							<p class="text-xs text-text-tertiary">
-								How much attention did you give to your goal this week?
-							</p>
+
+				{#if data.currentWeek > 1 && data.previousRatings}
+					{@const historicRatings = data.historicRatings ?? []}
+					<div class="rounded-xl border border-accent/30 bg-accent-muted p-4">
+						<div class="mb-3">
+							<p class="text-sm font-semibold text-accent">Your last ratings:</p>
 						</div>
-					</div>
-					<div
-						class="flex h-16 w-16 items-center justify-center rounded-full border-2 transition-all {getScoreBgColor(
-							effortScore,
-							'effort'
-						)}"
-						aria-valuetext="Effort score: {effortScore} out of 10"
-					>
-						<span class="text-2xl font-bold {getScoreColor(effortScore, 'effort')}"
-							>{effortScore}</span
-						>
-					</div>
-				</div>
-
-				<!-- Button Grid (Primary Input) -->
-				<div
-					class="mb-4 grid grid-cols-6 gap-2 sm:grid-cols-11"
-					role="radiogroup"
-					aria-label="Effort score selection"
-				>
-					{#each Array.from({ length: 11 }, (_, i) => i) as i (i)}
-						{@const isSelected = effortScore === i}
-						{@const buttonColors = getButtonSelectedColors(i, 'effort')}
-						{@const hoverColors = getButtonHoverColors(i, 'effort')}
-						{@const focusRing = getFocusRing(i, 'effort')}
-						<button
-							type="button"
-							onclick={() => (effortScore = i)}
-							disabled={!data.isAvailable || data.isLocked}
-							aria-pressed={isSelected}
-							aria-label="Score {i} out of 10"
-							class="flex min-h-[44px] w-full items-center justify-center rounded-lg border-2 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-60 {isSelected
-								? buttonColors + ' anim-pop shadow-md'
-								: 'border-border-default bg-surface-raised text-text-secondary ' +
-									hoverColors} focus:ring-2 focus:outline-none {focusRing} focus:ring-offset-2"
-						>
-							{i}
-						</button>
-					{/each}
-				</div>
-
-				<div class="flex items-center justify-between text-[10px] text-text-muted">
-					<span>Not at all</span>
-					<span>Moderately</span>
-					<span>Exceptionally</span>
-				</div>
-				{#if data.previousRatings?.effortScore != null}
-					<button
-						type="button"
-						onclick={() => (effortScore = data.previousRatings!.effortScore!)}
-						disabled={!data.isAvailable || data.isLocked}
-						class="mt-2 min-h-[44px] rounded-full border border-accent/30 bg-accent-muted px-4 py-2.5 text-xs font-medium text-accent transition-colors hover:bg-accent/20 disabled:opacity-60"
-					>
-						Same as last week: {data.previousRatings.effortScore}
-					</button>
-				{/if}
-			</div>
-
-			<!-- Progress Score with Enhanced UI -->
-			<div
-				class="group rounded-2xl border border-border-default bg-surface-raised p-6 transition-all hover:border-border-strong"
-			>
-				<div class="mb-4 flex items-center justify-between">
-					<div class="flex items-center gap-3">
-						<TrendingUp class="h-6 w-6 text-accent" />
-						<div>
-							<label for="progress-score" class="text-lg font-bold text-text-primary">
-								Performance
-								{#if data.previousRatings?.performanceScore !== null && data.previousRatings?.performanceScore !== undefined}
-									<span class="ml-1 text-sm font-normal text-text-muted"
-										>(last: {data.previousRatings.performanceScore})</span
-									>
-								{/if}
-							</label>
-							<p class="text-xs text-text-tertiary">
-								How effective was your performance related to your goal this week?
-							</p>
+						<div class="flex gap-6 text-sm">
+							<div class="flex items-center gap-2">
+								<span class="text-accent">Effort:</span>
+								<span class="text-lg font-bold text-accent">
+									{data.previousRatings.effortScore !== null
+										? data.previousRatings.effortScore
+										: '—'}
+								</span>
+							</div>
+							<div class="flex items-center gap-2">
+								<span class="text-accent">Performance:</span>
+								<span class="text-lg font-bold text-accent">
+									{data.previousRatings.performanceScore !== null
+										? data.previousRatings.performanceScore
+										: '—'}
+								</span>
+							</div>
 						</div>
+						<p class="mt-2 text-xs text-accent">
+							Use this as context - adjust freely based on this week.
+						</p>
+						{#if historicRatings.length > 1}
+							<div class="mt-4">
+								<HistoricRatingsChart {historicRatings} />
+							</div>
+						{/if}
 					</div>
-					<div
-						class="flex h-16 w-16 items-center justify-center rounded-full border-2 transition-all {getScoreBgColor(
-							performanceScore,
-							'performance'
-						)}"
-						aria-valuetext="Performance score: {performanceScore} out of 10"
-					>
-						<span class="text-2xl font-bold {getScoreColor(performanceScore, 'performance')}"
-							>{performanceScore}</span
-						>
-					</div>
-				</div>
-
-				<!-- Button Grid (Primary Input) -->
-				<div
-					class="mb-4 grid grid-cols-6 gap-2 sm:grid-cols-11"
-					role="radiogroup"
-					aria-label="Performance score selection"
-				>
-					{#each Array.from({ length: 11 }, (_, i) => i) as i (i)}
-						{@const isSelected = performanceScore === i}
-						{@const buttonColors = getButtonSelectedColors(i, 'performance')}
-						{@const hoverColors = getButtonHoverColors(i, 'performance')}
-						{@const focusRing = getFocusRing(i, 'performance')}
-						<button
-							type="button"
-							onclick={() => (performanceScore = i)}
-							disabled={!data.isAvailable || data.isLocked}
-							aria-pressed={isSelected}
-							aria-label="Score {i} out of 10"
-							class="flex min-h-[44px] w-full items-center justify-center rounded-lg border-2 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-60 {isSelected
-								? buttonColors + ' anim-pop shadow-md'
-								: 'border-border-default bg-surface-raised text-text-secondary ' +
-									hoverColors} focus:ring-2 focus:outline-none {focusRing} focus:ring-offset-2"
-						>
-							{i}
-						</button>
-					{/each}
-				</div>
-
-				<div class="flex items-center justify-between text-[10px] text-text-muted">
-					<span>Not at all</span>
-					<span>Moderately</span>
-					<span>Exceptionally</span>
-				</div>
-				{#if data.previousRatings?.performanceScore != null}
-					<button
-						type="button"
-						onclick={() => (performanceScore = data.previousRatings!.performanceScore!)}
-						disabled={!data.isAvailable || data.isLocked}
-						class="mt-2 min-h-[44px] rounded-full border border-accent/30 bg-accent-muted px-4 py-2.5 text-xs font-medium text-accent transition-colors hover:bg-accent/20 disabled:opacity-60"
-					>
-						Same as last week: {data.previousRatings.performanceScore}
-					</button>
 				{/if}
-			</div>
-
-			<!-- Notes (collapsed by default) -->
-			{#if showNotes}
+				<!-- Effort Score with Enhanced UI -->
 				<div
-					class="rounded-2xl border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30"
+					class="group rounded-2xl border border-border-default bg-surface-raised p-6 transition-all hover:border-border-strong"
 				>
-					<div class="mb-3 flex items-center gap-2">
-						<PenLine class="h-5 w-5 text-accent" />
-						<label for="notes" class="text-base font-semibold text-text-primary">
-							{data.isMidpoint && data.identityAnchor
-								? 'Midpoint Reflection'
-								: 'Reflect on your week'}
-						</label>
-					</div>
-					<textarea
-						name="notes"
-						id="notes"
-						rows="3"
-						maxlength="500"
-						bind:value={notes}
-						disabled={!data.isAvailable || data.isLocked}
-						class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:bg-surface-raised focus:ring-2 focus:ring-accent/30 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
-						placeholder={notePrompt()}
-					></textarea>
-					<div class="mt-2 flex items-center justify-between">
-						<p class="text-xs text-text-tertiary">Only you and your coach can see this.</p>
-						<p class="shrink-0 text-right text-xs text-text-muted">{notes.length}/500</p>
-					</div>
-				</div>
-			{:else}
-				<button
-					type="button"
-					onclick={() => (showNotes = true)}
-					class="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-border-default py-3 text-sm font-medium text-text-muted transition-colors hover:border-accent/30 hover:text-accent"
-				>
-					<PenLine class="h-4 w-4" />
-					Add a note (optional)
-				</button>
-			{/if}
-
-			<!-- Submit Button with Enhanced Design -->
-			<div
-				class="flex flex-col gap-4 rounded-2xl border border-border-default bg-accent-muted p-6 sm:flex-row sm:items-center sm:justify-between"
-			>
-				<div class="flex-1">
-					{#if data.isLocked || data.previousEntry}
-						<p class="font-semibold text-text-primary">Viewing completed check-in</p>
-						<p class="mt-1 text-xs text-text-secondary">
-							This check-in has been completed and can no longer be edited.
-						</p>
-					{:else}
-						<p class="font-semibold text-text-primary">Ready to save your check-in?</p>
-						<p class="mt-1 text-xs text-text-secondary">
-							Your scores and notes feed AI-generated weekly insights, help your coach prepare for
-							sessions, and reveal patterns over time.
-						</p>
-					{/if}
-				</div>
-				<div class="flex items-center gap-3">
-					<!-- eslint-disable svelte/no-navigation-without-resolve -->
-					<a
-						href="/individual"
-						class="rounded-xl border border-border-default bg-surface-raised px-6 py-3.5 text-sm font-semibold text-text-secondary transition-all hover:border-border-strong hover:bg-surface-subtle"
-					>
-						Cancel
-					</a>
-					<!-- eslint-enable svelte/no-navigation-without-resolve -->
-					<button
-						type="submit"
-						bind:this={submitBtnEl}
-						disabled={!data.isAvailable || data.isLocked || isSubmitting}
-						title={data.isLocked
-							? 'Check-in already submitted'
-							: !data.isAvailable
-								? 'This check-in is not yet available'
-								: isSubmitting
-									? 'Submitting...'
-									: undefined}
-						class="group relative overflow-hidden rounded-xl bg-accent px-8 py-3.5 font-semibold text-white shadow-lg transition-all hover:bg-accent-hover hover:shadow-xl focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-					>
-						<span class="relative z-10 flex items-center gap-2">
-							{#if isSubmitting}
-								<span
-									class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
-								></span>
-								Saving...
-							{:else}
-								<Send class="h-4 w-4" />
-								Save Check-in
-							{/if}
-						</span>
+					<div class="mb-4 flex items-center justify-between">
+						<div class="flex items-center gap-3">
+							<Dumbbell class="h-6 w-6 text-accent" />
+							<div>
+								<label for="effort-score" class="text-lg font-bold text-text-primary">
+									Effort
+									{#if data.previousRatings?.effortScore !== null && data.previousRatings?.effortScore !== undefined}
+										<span class="ml-1 text-sm font-normal text-text-muted"
+											>(last: {data.previousRatings.effortScore})</span
+										>
+									{/if}
+								</label>
+								<p class="text-xs text-text-tertiary">
+									How much attention did you give to your goal this week?
+								</p>
+							</div>
+						</div>
 						<div
-							class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 opacity-0 transition-opacity group-hover:opacity-100"
-						></div>
-					</button>
+							class="flex h-16 w-16 items-center justify-center rounded-full border-2 transition-all {effortScore !==
+							null
+								? getScoreBgColor(effortScore, 'effort')
+								: 'border-border-default bg-surface-subtle'}"
+							aria-valuetext={effortScore !== null
+								? `Effort score: ${effortScore} out of 10`
+								: 'No score selected'}
+						>
+							<span
+								class="text-2xl font-bold {effortScore !== null
+									? getScoreColor(effortScore, 'effort')
+									: 'text-text-muted'}">{effortScore !== null ? effortScore : '—'}</span
+							>
+						</div>
+					</div>
+
+					<!-- Button Grid (Primary Input) -->
+					<div
+						class="mb-4 grid grid-cols-6 gap-2 sm:grid-cols-11"
+						role="radiogroup"
+						aria-label="Effort score selection"
+					>
+						{#each Array.from({ length: 11 }, (_, i) => i) as i (i)}
+							{@const isSelected = effortScore === i}
+							{@const buttonColors = getButtonSelectedColors(i, 'effort')}
+							{@const hoverColors = getButtonHoverColors(i, 'effort')}
+							{@const focusRing = getFocusRing(i, 'effort')}
+							<button
+								type="button"
+								onclick={() => (effortScore = i)}
+								disabled={!data.isAvailable || data.isLocked}
+								role="radio"
+								aria-checked={isSelected}
+								aria-label="Effort score {i} out of 10"
+								class="flex min-h-[44px] w-full items-center justify-center rounded-lg border-2 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-60 {isSelected
+									? buttonColors + ' anim-pop shadow-md'
+									: 'border-border-default bg-surface-raised text-text-secondary ' +
+										hoverColors} focus-visible:ring-2 focus-visible:outline-none {focusRing} focus-visible:ring-offset-2"
+							>
+								{i}
+							</button>
+						{/each}
+					</div>
+
+					<div class="text-2xs flex items-center justify-between text-text-muted">
+						<span>Not at all</span>
+						<span>Moderately</span>
+						<span>Exceptionally</span>
+					</div>
+					{#if data.previousRatings?.effortScore != null}
+						<button
+							type="button"
+							onclick={() => (effortScore = data.previousRatings!.effortScore!)}
+							disabled={!data.isAvailable || data.isLocked}
+							class="mt-2 min-h-[44px] rounded-full border border-accent/30 bg-accent-muted px-4 py-2.5 text-xs font-medium text-accent transition-colors hover:bg-accent/20 disabled:opacity-60"
+						>
+							Same as last week: {data.previousRatings.effortScore}
+						</button>
+					{/if}
 				</div>
-			</div>
-		</form>
+
+				<!-- Progress Score with Enhanced UI -->
+				<div
+					class="group rounded-2xl border border-border-default bg-surface-raised p-6 transition-all hover:border-border-strong"
+				>
+					<div class="mb-4 flex items-center justify-between">
+						<div class="flex items-center gap-3">
+							<TrendingUp class="h-6 w-6 text-accent" />
+							<div>
+								<label for="progress-score" class="text-lg font-bold text-text-primary">
+									Performance
+									{#if data.previousRatings?.performanceScore !== null && data.previousRatings?.performanceScore !== undefined}
+										<span class="ml-1 text-sm font-normal text-text-muted"
+											>(last: {data.previousRatings.performanceScore})</span
+										>
+									{/if}
+								</label>
+								<p class="text-xs text-text-tertiary">
+									How effective was your performance related to your goal this week?
+								</p>
+							</div>
+						</div>
+						<div
+							class="flex h-16 w-16 items-center justify-center rounded-full border-2 transition-all {performanceScore !==
+							null
+								? getScoreBgColor(performanceScore, 'performance')
+								: 'border-border-default bg-surface-subtle'}"
+							aria-valuetext={performanceScore !== null
+								? `Performance score: ${performanceScore} out of 10`
+								: 'No score selected'}
+						>
+							<span
+								class="text-2xl font-bold {performanceScore !== null
+									? getScoreColor(performanceScore, 'performance')
+									: 'text-text-muted'}">{performanceScore !== null ? performanceScore : '—'}</span
+							>
+						</div>
+					</div>
+
+					<!-- Button Grid (Primary Input) -->
+					<div
+						class="mb-4 grid grid-cols-6 gap-2 sm:grid-cols-11"
+						role="radiogroup"
+						aria-label="Performance score selection"
+					>
+						{#each Array.from({ length: 11 }, (_, i) => i) as i (i)}
+							{@const isSelected = performanceScore === i}
+							{@const buttonColors = getButtonSelectedColors(i, 'performance')}
+							{@const hoverColors = getButtonHoverColors(i, 'performance')}
+							{@const focusRing = getFocusRing(i, 'performance')}
+							<button
+								type="button"
+								onclick={() => (performanceScore = i)}
+								disabled={!data.isAvailable || data.isLocked}
+								role="radio"
+								aria-checked={isSelected}
+								aria-label="Performance score {i} out of 10"
+								class="flex min-h-[44px] w-full items-center justify-center rounded-lg border-2 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-60 {isSelected
+									? buttonColors + ' anim-pop shadow-md'
+									: 'border-border-default bg-surface-raised text-text-secondary ' +
+										hoverColors} focus-visible:ring-2 focus-visible:outline-none {focusRing} focus-visible:ring-offset-2"
+							>
+								{i}
+							</button>
+						{/each}
+					</div>
+
+					<div class="text-2xs flex items-center justify-between text-text-muted">
+						<span>Not at all</span>
+						<span>Moderately</span>
+						<span>Exceptionally</span>
+					</div>
+					{#if data.previousRatings?.performanceScore != null}
+						<button
+							type="button"
+							onclick={() => (performanceScore = data.previousRatings!.performanceScore!)}
+							disabled={!data.isAvailable || data.isLocked}
+							class="mt-2 min-h-[44px] rounded-full border border-accent/30 bg-accent-muted px-4 py-2.5 text-xs font-medium text-accent transition-colors hover:bg-accent/20 disabled:opacity-60"
+						>
+							Same as last week: {data.previousRatings.performanceScore}
+						</button>
+					{/if}
+				</div>
+
+				<!-- Notes (collapsed by default) -->
+				{#if showNotes}
+					<div
+						class="rounded-2xl border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30"
+					>
+						<div class="mb-3 flex items-center gap-2">
+							<PenLine class="h-5 w-5 text-accent" />
+							<label for="notes" class="text-base font-semibold text-text-primary">
+								{data.isMidpoint && data.identityAnchor
+									? 'Midpoint Reflection'
+									: 'Reflect on your week'}
+							</label>
+						</div>
+						<textarea
+							name="notes"
+							id="notes"
+							rows="3"
+							maxlength="500"
+							bind:value={notes}
+							disabled={!data.isAvailable || data.isLocked}
+							class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:bg-surface-raised focus:ring-2 focus:ring-accent/30 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+							placeholder={notePrompt()}
+						></textarea>
+						<div class="mt-2 flex items-center justify-between">
+							<p class="text-xs text-text-tertiary">Only you and your coach can see this.</p>
+							<p class="shrink-0 text-right text-xs text-text-muted">{notes.length}/500</p>
+						</div>
+					</div>
+				{:else}
+					<button
+						type="button"
+						onclick={() => (showNotes = true)}
+						class="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-border-default py-3 text-sm font-medium text-text-muted transition-colors hover:border-accent/30 hover:text-accent"
+					>
+						<PenLine class="h-4 w-4" />
+						Add a note (optional)
+					</button>
+				{/if}
+
+				<!-- Submit Button with Enhanced Design -->
+				<div
+					class="flex flex-col gap-4 rounded-2xl border border-border-default bg-accent-muted p-6 sm:flex-row sm:items-center sm:justify-between"
+				>
+					<div class="flex-1">
+						{#if data.isLocked || data.previousEntry}
+							<p class="font-semibold text-text-primary">Viewing completed check-in</p>
+							<p class="mt-1 text-xs text-text-secondary">
+								This check-in has been completed and can no longer be edited.
+							</p>
+						{:else}
+							<p class="font-semibold text-text-primary">Ready to save your check-in?</p>
+							<p class="mt-1 text-xs text-text-secondary">
+								Your scores and notes feed AI-generated weekly insights, help your coach prepare for
+								sessions, and reveal patterns over time.
+							</p>
+						{/if}
+					</div>
+					<div class="flex items-center gap-3">
+						<!-- eslint-disable svelte/no-navigation-without-resolve -->
+						<a
+							href="/individual"
+							class="rounded-xl border border-border-default bg-surface-raised px-6 py-3.5 text-sm font-semibold text-text-secondary transition-all hover:border-border-strong hover:bg-surface-subtle"
+						>
+							Cancel
+						</a>
+						<!-- eslint-enable svelte/no-navigation-without-resolve -->
+						<button
+							type="submit"
+							bind:this={submitBtnEl}
+							disabled={!data.isAvailable || data.isLocked || isSubmitting || !bothScoresSelected}
+							title={data.isLocked
+								? 'Check-in already submitted'
+								: !data.isAvailable
+									? 'This check-in is not yet available'
+									: !bothScoresSelected
+										? 'Select both scores to submit'
+										: isSubmitting
+											? 'Submitting...'
+											: undefined}
+							class="group relative overflow-hidden rounded-xl bg-accent px-8 py-3.5 font-semibold text-white shadow-lg transition-all hover:bg-accent-hover hover:shadow-xl focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+						>
+							<span class="relative z-10 flex items-center gap-2">
+								{#if isSubmitting}
+									<span
+										class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
+									></span>
+									Saving...
+								{:else}
+									<Send class="h-4 w-4" />
+									Save Check-in
+								{/if}
+							</span>
+							<div
+								class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 opacity-0 transition-opacity group-hover:opacity-100"
+							></div>
+						</button>
+					</div>
+				</div>
+			</form>
+		{/if}
 	</div>
 </section>
 

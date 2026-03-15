@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { ActionData, PageData } from './$types';
+	import { addToast } from '$lib/stores/toasts.svelte';
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
 
@@ -13,7 +14,7 @@
 			body: JSON.stringify({ userId })
 		});
 		if (!res.ok) {
-			alert('Failed to start impersonation. Please try again.');
+			addToast('Failed to start impersonation. Please try again.', 'error');
 			return;
 		}
 		window.open(path, '_blank');

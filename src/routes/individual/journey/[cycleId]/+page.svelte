@@ -140,7 +140,7 @@
 			</div>
 			<div class="mt-4 grid grid-cols-2 gap-4">
 				<div class="rounded-xl bg-surface-subtle px-4 py-3">
-					<p class="text-[10px] font-semibold tracking-wider text-text-muted uppercase">Effort</p>
+					<p class="text-2xs font-semibold tracking-wider text-text-muted uppercase">Effort</p>
 					<p class="text-lg font-bold text-text-primary tabular-nums">
 						{story.effortStart ?? '--'} &rarr; {story.effortEnd ?? '--'}
 					</p>
@@ -149,9 +149,7 @@
 					</p>
 				</div>
 				<div class="rounded-xl bg-surface-subtle px-4 py-3">
-					<p class="text-[10px] font-semibold tracking-wider text-text-muted uppercase">
-						Performance
-					</p>
+					<p class="text-2xs font-semibold tracking-wider text-text-muted uppercase">Performance</p>
 					<p class="text-lg font-bold text-text-primary tabular-nums">
 						{story.performanceStart ?? '--'} &rarr; {story.performanceEnd ?? '--'}
 					</p>

@@ -35,7 +35,7 @@
 	const formatDate = (value: string) =>
 		new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(new Date(value));
 
-	const filteredWeeks = $derived(() => {
+	const filteredWeeks = $derived.by(() => {
 		const q = searchQuery.trim().toLowerCase();
 		if (!q) return data.weeks;
 		return data.weeks
@@ -78,7 +78,22 @@
 
 <!-- eslint-disable svelte/no-navigation-without-resolve -->
 <section class="mx-auto flex max-w-4xl flex-col gap-6 p-4 pb-12">
-	<div class="text-center">
+	<div>
+		<!-- eslint-disable svelte/no-navigation-without-resolve -->
+		<nav aria-label="Breadcrumb" class="mb-2">
+			<ol class="flex items-center gap-1.5 text-sm text-text-tertiary">
+				<li>
+					<a
+						href="/individual"
+						class="rounded transition-colors hover:text-text-primary focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
+						>Hub</a
+					>
+				</li>
+				<li aria-hidden="true" class="text-text-muted">/</li>
+				<li><span class="font-medium text-text-primary">History</span></li>
+			</ol>
+		</nav>
+		<!-- eslint-enable svelte/no-navigation-without-resolve -->
 		<h1 class="text-2xl font-bold text-text-primary">Check-in History</h1>
 		<p class="mt-1 text-sm text-text-tertiary">
 			{data.cycleLabel} &middot; {data.objectiveTitle}
@@ -92,12 +107,14 @@
 			<p class="mt-1 text-sm text-text-tertiary">
 				Complete your first check-in to see your history here.
 			</p>
+			<!-- eslint-disable svelte/no-navigation-without-resolve -->
 			<a
 				href="/individual"
 				class="mt-4 inline-block rounded-lg bg-accent px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-hover"
 			>
 				Go to Dashboard
 			</a>
+			<!-- eslint-enable svelte/no-navigation-without-resolve -->
 		</div>
 	{:else}
 		<!-- Search -->
@@ -105,15 +122,16 @@
 			<div class="relative">
 				<Search class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-text-muted" />
 				<input
-					type="text"
+					type="search"
 					bind:value={searchQuery}
+					aria-label="Search check-in history"
 					placeholder="Search notes and feedback..."
 					class="w-full rounded-xl border border-border-default bg-surface-raised py-2.5 pr-3 pl-9 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
 				/>
 			</div>
 		{/if}
 
-		{#if filteredWeeks().length === 0}
+		{#if filteredWeeks.length === 0}
 			<div class="rounded-2xl border border-border-default bg-surface-raised p-8 text-center">
 				<p class="text-sm text-text-secondary">
 					No results for "{searchQuery}". Try a different search.
@@ -126,12 +144,12 @@
 				<div class="absolute top-0 bottom-0 left-6 w-0.5 bg-border-default"></div>
 
 				<div class="space-y-6">
-					{#each filteredWeeks() as week (week.weekNumber)}
+					{#each filteredWeeks as week (week.weekNumber)}
 						{@const isExpanded = expandedWeeks.has(week.weekNumber) || searchQuery.trim() !== ''}
 						<div class="relative pl-14">
 							<!-- Week marker -->
 							<div
-								class="absolute top-1 left-3.5 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-white ring-4 ring-surface-base"
+								class="text-2xs absolute top-1 left-3.5 flex h-5 w-5 items-center justify-center rounded-full bg-accent font-bold text-white ring-4 ring-surface-base"
 							>
 								{week.weekNumber}
 							</div>

@@ -6,6 +6,28 @@
 	let showAddForm = $state(false);
 	let addName = $state('');
 	let addEmail = $state('');
+	let addEmailError = $state('');
+	let copiedLink = $state<string | null>(null);
+
+	function validateAddEmail(email: string) {
+		if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+			addEmailError = 'Please enter a valid email address';
+		} else {
+			addEmailError = '';
+		}
+	}
+
+	const copyFeedbackLink = async (url: string) => {
+		try {
+			await navigator.clipboard.writeText(url);
+			copiedLink = url;
+			setTimeout(() => {
+				copiedLink = null;
+			}, 2000);
+		} catch {
+			// Clipboard API not available
+		}
+	};
 
 	const formResult = form as Record<string, unknown> | null;
 	const isStakeholderAction = formResult?.action === 'stakeholder';
@@ -53,6 +75,21 @@
 
 <div class="mx-auto max-w-4xl space-y-8 px-4 py-8 sm:px-6">
 	<div>
+		<!-- eslint-disable svelte/no-navigation-without-resolve -->
+		<nav aria-label="Breadcrumb" class="mb-2">
+			<ol class="flex items-center gap-1.5 text-sm text-text-tertiary">
+				<li>
+					<a
+						href="/individual"
+						class="rounded transition-colors hover:text-text-primary focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
+						>Hub</a
+					>
+				</li>
+				<li aria-hidden="true" class="text-text-muted">/</li>
+				<li><span class="font-medium text-text-primary">Feedback</span></li>
+			</ol>
+		</nav>
+		<!-- eslint-enable svelte/no-navigation-without-resolve -->
 		<h1 class="text-2xl font-bold text-text-primary">Feedback</h1>
 		<p class="mt-1 text-sm text-text-secondary">
 			Manage your reviewers and see how your self-assessment compares to their ratings.
@@ -119,9 +156,18 @@
 							type="email"
 							required
 							placeholder="john@example.com"
-							class="w-full rounded-lg border border-border-default bg-surface-raised px-4 py-2.5 text-text-primary transition-all focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
+							class="w-full rounded-lg border {addEmailError
+								? 'border-error'
+								: 'border-border-default'} bg-surface-raised px-4 py-2.5 text-text-primary transition-all focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
 							bind:value={addEmail}
+							onblur={() => validateAddEmail(addEmail)}
+							oninput={() => {
+								if (addEmailError) validateAddEmail(addEmail);
+							}}
 						/>
+						{#if addEmailError}
+							<p class="text-xs text-error" aria-live="polite">{addEmailError}</p>
+						{/if}
 					</div>
 				</div>
 				<div class="mt-4 flex justify-end">
@@ -153,15 +199,32 @@
 								Last feedback: {getRelativeDate(reviewer.lastFeedbackDate)}
 							</p>
 						</div>
-						<form method="post" action="?/generateFeedback">
-							<input type="hidden" name="stakeholderId" value={reviewer.id} />
-							<button
-								type="submit"
-								class="shrink-0 rounded-lg border border-accent bg-accent-muted px-4 py-2 text-sm font-medium text-accent transition-colors hover:bg-accent hover:text-white"
-							>
-								Request Feedback
-							</button>
-						</form>
+						<div class="flex shrink-0 items-center gap-2">
+							{#if reviewer.pendingFeedbackLink}
+								<button
+									type="button"
+									onclick={() => {
+										if (reviewer.pendingFeedbackLink)
+											copyFeedbackLink(reviewer.pendingFeedbackLink);
+									}}
+									class="rounded-lg border px-3 py-2 text-sm font-medium transition-colors {copiedLink ===
+									reviewer.pendingFeedbackLink
+										? 'border-success text-success'
+										: 'border-border-default text-text-secondary hover:border-accent hover:text-accent'}"
+								>
+									{copiedLink === reviewer.pendingFeedbackLink ? 'Copied!' : 'Copy Link'}
+								</button>
+							{/if}
+							<form method="post" action="?/generateFeedback">
+								<input type="hidden" name="stakeholderId" value={reviewer.id} />
+								<button
+									type="submit"
+									class="shrink-0 rounded-lg border border-accent bg-accent-muted px-4 py-2 text-sm font-medium text-accent transition-colors hover:bg-accent hover:text-white"
+								>
+									Request Feedback
+								</button>
+							</form>
+						</div>
 					</div>
 				{/each}
 			</div>
@@ -199,14 +262,14 @@
 				</p>
 			</div>
 
-			<div class="overflow-hidden rounded-xl border border-border-default">
+			<div class="overflow-x-auto rounded-xl border border-border-default">
 				<table class="w-full text-left text-sm">
 					<thead class="bg-surface-subtle text-text-secondary">
 						<tr>
 							<th class="px-4 py-3 font-medium">Reviewer</th>
 							<th class="px-4 py-3 font-medium">Effort Gap</th>
 							<th class="px-4 py-3 font-medium">Performance Gap</th>
-							<th class="hidden px-4 py-3 font-medium sm:table-cell">Trend</th>
+							<th class="px-4 py-3 font-medium">Trend</th>
 						</tr>
 					</thead>
 					<tbody class="divide-y divide-border-default bg-surface-raised">
@@ -231,7 +294,7 @@
 										<span class="text-text-muted">—</span>
 									{/if}
 								</td>
-								<td class="hidden px-4 py-3 sm:table-cell">
+								<td class="px-4 py-3">
 									{#if gap.effortGapTrend || gap.performanceGapTrend}
 										<span class={trendColor(gap.effortGapTrend ?? gap.performanceGapTrend)}>
 											{trendLabel(gap.effortGapTrend ?? gap.performanceGapTrend)}

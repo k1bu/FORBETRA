@@ -5,7 +5,22 @@ import { trySendSms } from '$lib/notifications/sms';
 import { smsTemplates } from '$lib/notifications/smsTemplates';
 import { computeWeekNumber } from '$lib/server/coachUtils';
 
+// Track overdue reminders sent this week to avoid spamming
+const overdueRemindersSent = new Map<string, number>();
+
+function getWeekKey(): string {
+	const now = new Date();
+	const year = now.getFullYear();
+	const startOfYear = new Date(year, 0, 1);
+	const weekNum = Math.ceil(
+		((now.getTime() - startOfYear.getTime()) / 86400000 + startOfYear.getDay() + 1) / 7
+	);
+	return `${year}-W${weekNum}`;
+}
+
 export const remindOverduePrompts = async () => {
+	const weekKey = getWeekKey();
+
 	const objectives = await prisma.objective.findMany({
 		where: { active: true },
 		include: {
@@ -49,6 +64,17 @@ export const remindOverduePrompts = async () => {
 		});
 
 		if (overdue.length > 0) {
+			// Limit overdue reminders to max 2 per user per week
+			const userWeekKey = `${objective.user.id}:${weekKey}`;
+			const sentCount = overdueRemindersSent.get(userWeekKey) ?? 0;
+			if (sentCount >= 2) {
+				console.info(
+					`[job:remind-overdue-prompts] Already sent ${sentCount} reminders to ${objective.user.email} this week, skipping`
+				);
+				continue;
+			}
+			overdueRemindersSent.set(userWeekKey, sentCount + 1);
+
 			const delivery = objective.user.deliveryMethod ?? 'both';
 
 			// Compute current streak for motivational messaging

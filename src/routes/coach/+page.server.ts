@@ -138,9 +138,10 @@ export const load: PageServerLoad = async (event) => {
 	// Calculate summary metrics
 	const totalAlerts = clientSummaries.reduce((sum, client) => sum + client.alerts.length, 0);
 
-	// Build at-risk client list (top 5 with alerts, sorted by severity)
 	const activeSummaries = clientSummaries.filter((c) => !c.archived);
 	const severityOrder: Record<string, number> = { high: 3, medium: 2, low: 1 };
+
+	// Build at-risk client list (top alert banner)
 	const atRiskClients = activeSummaries
 		.filter((c) => c.alerts.length > 0)
 		.sort((a, b) => {
@@ -160,6 +161,47 @@ export const load: PageServerLoad = async (event) => {
 			completionPct: c.objective?.cycle ? Math.round(c.objective.cycle.completion) : null
 		}));
 
+	// Build full active client list (at-risk first, then healthy, sorted by name)
+	const atRiskIds = new Set(atRiskClients.map((c) => c.id));
+	const healthyClients = activeSummaries
+		.filter((c) => !atRiskIds.has(c.id))
+		.sort((a, b) => a.name.localeCompare(b.name))
+		.map((c) => ({
+			id: c.id,
+			name: c.name,
+			objective: c.objective?.title ?? null,
+			trajectory: c.objective?.insights?.trajectoryScore ?? null,
+			completionPct: c.objective?.cycle ? Math.round(c.objective.cycle.completion) : null
+		}));
+
+	// Portfolio metrics
+	const completionValues = activeSummaries
+		.map((c) => c.objective?.cycle?.completion)
+		.filter((v): v is number => v != null);
+	const avgCompletion =
+		completionValues.length > 0
+			? Math.round(completionValues.reduce((s, v) => s + v, 0) / completionValues.length)
+			: null;
+
+	const totalStakeholders = activeSummaries.reduce(
+		(sum, c) => sum + (c.objective?.stakeholderCount ?? 0),
+		0
+	);
+	const respondedStakeholders = activeSummaries.reduce(
+		(sum, c) => sum + (c.objective?.respondedStakeholders ?? 0),
+		0
+	);
+	const feedbackRate =
+		totalStakeholders > 0 ? Math.round((respondedStakeholders / totalStakeholders) * 100) : null;
+
+	const totalReflectionsThisWeek = activeSummaries.reduce((sum, c) => {
+		const cycle = c.objective?.cycle;
+		if (!cycle?.recentReflections?.length) return sum;
+		const currentWeek = cycle.currentWeek;
+		if (currentWeek == null) return sum;
+		return sum + cycle.recentReflections.filter((r) => r.weekNumber === currentWeek).length;
+	}, 0);
+
 	return {
 		coach: {
 			name: dbUser.name ?? 'Coach'
@@ -175,6 +217,12 @@ export const load: PageServerLoad = async (event) => {
 		analytics: {
 			totalAlerts
 		},
-		atRiskClients
+		portfolio: {
+			avgCompletion,
+			feedbackRate,
+			reflectionsThisWeek: totalReflectionsThisWeek
+		},
+		atRiskClients,
+		healthyClients
 	};
 };

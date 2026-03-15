@@ -125,6 +125,8 @@
 							>{user.role}</span
 						>
 					</li>
+				{:else}
+					<li class="py-4 text-center text-text-tertiary">No users yet</li>
 				{/each}
 			</ul>
 		</div>
@@ -149,6 +151,8 @@
 							Week {refl.weekNumber} &middot; {formatDate(refl.submittedAt)}
 						</p>
 					</li>
+				{:else}
+					<li class="py-4 text-center text-text-tertiary">No check-ins yet</li>
 				{/each}
 			</ul>
 		</div>
@@ -166,6 +170,8 @@
 						</p>
 						<p class="text-xs text-text-tertiary">{formatDate(fb.submittedAt)}</p>
 					</li>
+				{:else}
+					<li class="py-4 text-center text-text-tertiary">No feedback yet</li>
 				{/each}
 			</ul>
 		</div>

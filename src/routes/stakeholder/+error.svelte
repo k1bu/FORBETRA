@@ -31,21 +31,18 @@
 				{$page.error?.message ?? 'This feedback link may be invalid or expired.'}
 			</p>
 		{/if}
-		<div class="mt-6 flex items-center justify-center gap-3">
-			<!-- eslint-disable svelte/no-navigation-without-resolve -->
-			<a
-				href="/"
-				class="rounded-xl bg-accent px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-accent-hover"
-			>
-				Return to Forbetra
-			</a>
-			<!-- eslint-enable svelte/no-navigation-without-resolve -->
-			<button
-				onclick={() => window.location.reload()}
-				class="rounded-xl border border-border-default bg-surface-raised px-6 py-2.5 text-sm font-semibold text-text-secondary transition-all hover:bg-surface-subtle"
-			>
-				Try Again
-			</button>
+		<div class="mt-4 space-y-3">
+			<div class="flex items-center justify-center gap-3">
+				<button
+					onclick={() => window.location.reload()}
+					class="rounded-xl bg-accent px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-accent-hover"
+				>
+					Try Again
+				</button>
+			</div>
+			<p class="text-xs text-text-tertiary">
+				If this keeps happening, ask the person who invited you to send a fresh link.
+			</p>
 		</div>
 	</div>
 </section>

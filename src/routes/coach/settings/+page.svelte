@@ -42,6 +42,21 @@
 
 <section class="mx-auto flex max-w-2xl flex-col gap-6 p-4 pb-12">
 	<header>
+		<!-- eslint-disable svelte/no-navigation-without-resolve -->
+		<nav aria-label="Breadcrumb" class="mb-2">
+			<ol class="flex items-center gap-1.5 text-sm text-text-tertiary">
+				<li>
+					<a
+						href="/coach"
+						class="rounded transition-colors hover:text-text-primary focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
+						>Dashboard</a
+					>
+				</li>
+				<li aria-hidden="true" class="text-text-muted">/</li>
+				<li><span class="font-medium text-text-primary">Settings</span></li>
+			</ol>
+		</nav>
+		<!-- eslint-enable svelte/no-navigation-without-resolve -->
 		<div class="flex items-center gap-2">
 			<Settings2 class="h-5 w-5 text-accent" />
 			<h1 class="text-2xl font-bold text-text-primary">Settings</h1>
@@ -84,7 +99,7 @@
 		}}
 		class="flex flex-col gap-6"
 	>
-		<div class="rounded-2xl border border-border-default bg-surface-raised p-6">
+		<div class="rounded-xl border border-border-default bg-surface-raised p-6">
 			<div class="mb-4 flex items-center gap-2">
 				<User class="h-4 w-4 text-accent" />
 				<h2 class="text-sm font-semibold tracking-wide text-text-tertiary uppercase">Profile</h2>
@@ -133,7 +148,7 @@
 			</div>
 		</div>
 
-		<div class="rounded-2xl border border-border-default bg-surface-raised p-6">
+		<div class="rounded-xl border border-border-default bg-surface-raised p-6">
 			<div class="mb-4 flex items-center gap-2">
 				<Globe class="h-4 w-4 text-accent" />
 				<h2 class="text-sm font-semibold tracking-wide text-text-tertiary uppercase">

@@ -16,6 +16,8 @@
 		);
 	};
 
+	import { addToast } from '$lib/stores/toasts.svelte';
+
 	const impersonateAndOpen = async (path = '/') => {
 		const res = await fetch('/api/admin/impersonate', {
 			method: 'POST',
@@ -23,7 +25,7 @@
 			body: JSON.stringify({ userId: user.id })
 		});
 		if (!res.ok) {
-			alert('Failed to start impersonation. Please try again.');
+			addToast('Failed to start impersonation. Please try again.', 'error');
 			return;
 		}
 		window.open(path, '_blank');

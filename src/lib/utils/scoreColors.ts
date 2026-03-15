@@ -74,17 +74,17 @@ export const getButtonHoverColors = (score: number, type: ScoreType): string => 
 // --- Focus ring color ---
 export const getFocusRing = (score: number, type: ScoreType): string => {
 	if (type === 'effort') {
-		if (score <= 2) return 'focus:ring-cyan-300';
-		if (score <= 4) return 'focus:ring-cyan-400';
-		if (score <= 6) return 'focus:ring-cyan-500';
-		if (score <= 8) return 'focus:ring-cyan-600';
-		return 'focus:ring-cyan-700';
+		if (score <= 2) return 'focus-visible:ring-cyan-300';
+		if (score <= 4) return 'focus-visible:ring-cyan-400';
+		if (score <= 6) return 'focus-visible:ring-cyan-500';
+		if (score <= 8) return 'focus-visible:ring-cyan-600';
+		return 'focus-visible:ring-cyan-700';
 	} else {
-		if (score <= 2) return 'focus:ring-amber-300';
-		if (score <= 4) return 'focus:ring-amber-400';
-		if (score <= 6) return 'focus:ring-amber-500';
-		if (score <= 8) return 'focus:ring-amber-600';
-		return 'focus:ring-amber-700';
+		if (score <= 2) return 'focus-visible:ring-amber-300';
+		if (score <= 4) return 'focus-visible:ring-amber-400';
+		if (score <= 6) return 'focus-visible:ring-amber-500';
+		if (score <= 8) return 'focus-visible:ring-amber-600';
+		return 'focus-visible:ring-amber-700';
 	}
 };
 

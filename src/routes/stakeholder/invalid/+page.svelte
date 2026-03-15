@@ -1,16 +1,21 @@
+<script lang="ts">
+	import { Shield } from 'lucide-svelte';
+</script>
+
 <svelte:head>
 	<title>Invalid Link | Forbetra</title>
 </svelte:head>
 
 <section
 	class="mx-auto flex min-h-screen max-w-xl flex-col items-center justify-center gap-4 p-6 text-center"
+	role="alert"
 >
 	<!-- Forbetra brand header -->
 	<div class="pb-2 text-center">
 		<p
-			class="text-lg text-text-primary"
-			style="font-style: italic; font-weight: 700; letter-spacing: 0.02em;"
+			class="flex items-center justify-center gap-1.5 text-lg font-bold tracking-[0.02em] text-text-primary italic"
 		>
+			<Shield class="h-5 w-5 text-accent" />
 			forbetra
 		</p>
 		<p class="text-xs text-text-tertiary">You. And Improved.</p>

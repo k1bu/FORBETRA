@@ -166,7 +166,7 @@
 				Back to hub
 			</a>
 			<!-- eslint-enable svelte/no-navigation-without-resolve -->
-			<h1 class="text-3xl font-bold text-text-primary">Start a New Journey</h1>
+			<h1 class="text-2xl font-bold text-text-primary">Start a New Journey</h1>
 		</div>
 
 		{#if showQuickStart}
@@ -174,14 +174,14 @@
 			<div
 				class="mb-8 rounded-2xl border border-accent/30 bg-gradient-to-r from-accent-muted to-surface-raised p-8"
 			>
-				<p class="text-[10px] font-semibold tracking-wider text-accent uppercase">
+				<p class="text-2xs font-semibold tracking-wider text-accent uppercase">
 					Continue your journey
 				</p>
 				<p class="mt-3 text-lg font-bold text-text-primary">
 					Same goal: "{data.objective.title}"
 				</p>
 				<p class="mt-1 text-sm text-text-secondary">
-					Same focus areas, same raters, {data.defaults.durationWeeks} weeks starting {cycleStartDate}.
+					Same focus areas, same reviewers, {data.defaults.durationWeeks} weeks starting {cycleStartDate}.
 				</p>
 				<div class="mt-6 flex items-center gap-3">
 					<form
@@ -354,7 +354,7 @@
 
 						{#if cycleMode === 'continue'}
 							<div class="rounded-2xl border border-border-default bg-surface-raised p-6">
-								<p class="mb-1 text-[10px] font-semibold tracking-wider text-text-muted uppercase">
+								<p class="text-2xs mb-1 font-semibold tracking-wider text-text-muted uppercase">
 									Your Goal
 								</p>
 								<h2 class="text-xl font-bold text-text-primary">{data.objective.title}</h2>
@@ -386,7 +386,7 @@
 							</div>
 						{:else}
 							<div class="space-y-4 rounded-2xl border border-border-default bg-surface-raised p-6">
-								<p class="text-[10px] font-semibold tracking-wider text-text-muted uppercase">
+								<p class="text-2xs font-semibold tracking-wider text-text-muted uppercase">
 									New Goal
 								</p>
 								<div class="space-y-2">
@@ -512,7 +512,7 @@
 											<div class="text-lg font-bold text-text-primary">{weeks}</div>
 											<div class="text-xs text-text-tertiary">weeks</div>
 											{#if weeks === 12}
-												<div class="mt-1 text-[10px] font-semibold text-accent">recommended</div>
+												<div class="text-2xs mt-1 font-semibold text-accent">recommended</div>
 											{/if}
 										</button>
 									{/each}
@@ -784,9 +784,7 @@
 													<div class="font-semibold text-text-primary">{opt.label}</div>
 													<div class="text-xs text-text-tertiary">{opt.desc}</div>
 													{#if opt.rec}
-														<div class="mt-1 text-[10px] font-semibold text-accent">
-															recommended
-														</div>
+														<div class="text-2xs mt-1 font-semibold text-accent">recommended</div>
 													{/if}
 												</div>
 											</div>

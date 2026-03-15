@@ -1,10 +1,26 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import { Chart, registerables, type ChartConfiguration } from 'chart.js';
+	import {
+		Chart,
+		registerables,
+		type ChartConfiguration,
+		type ChartDataset,
+		type TooltipItem
+	} from 'chart.js';
 	import { CHART_COLORS } from '$lib/utils/scoreColors';
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
 	Chart.register(...registerables);
+
+	// Chart.js renders on <canvas> and cannot read CSS custom properties.
+	// These constants mirror the design tokens from app.css for maintainability.
+	const THEME = {
+		textMuted: '#a1a1aa', // --color-text-muted
+		textPrimary: '#f4f5f8', // --color-text-primary
+		surfaceOverlay: '#1c1c20', // --color-surface-overlay
+		borderSubtle: 'rgba(255,255,255,0.08)',
+		gridLine: 'rgba(255, 255, 255, 0.06)'
+	} as const;
 
 	type Props = {
 		individualData?: Array<{
@@ -142,21 +158,19 @@
 		})()
 	);
 
-	// Get all unique week numbers and sort them, excluding Week 13
+	// Get all unique week numbers and sort them
 	// Pad to minimum 4 weeks so early-cycle charts look intentional
 	const allWeeks = $derived(
 		(() => {
 			const weeks = new SvelteSet<number>();
 			individualData.forEach((d) => weeks.add(d.weekNumber));
 			stakeholderData.forEach((d) => weeks.add(d.weekNumber));
-			const sorted = Array.from(weeks)
-				.filter((week) => week !== 13) // Exclude Week 13
-				.sort((a, b) => a - b);
+			const sorted = Array.from(weeks).sort((a, b) => a - b);
 			// Pad to at least 4 weeks
 			if (sorted.length > 0 && sorted.length < 4) {
 				const maxWeek = sorted[sorted.length - 1];
 				for (let w = maxWeek + 1; sorted.length < 4; w++) {
-					if (w !== 13) sorted.push(w);
+					sorted.push(w);
 				}
 			}
 			return sorted;
@@ -323,10 +337,6 @@
 					stakeholderDataWeeks.add(d.weekNumber);
 				}
 			});
-			const sortedStakeholderWeeks = Array.from(stakeholderDataWeeks).sort((a, b) => b - a);
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			const _latestWeekWithStakeholderData = sortedStakeholderWeeks[0];
-
 			const stakeholderSummaries: Array<{
 				stakeholderId: string;
 				stakeholderName: string;
@@ -410,8 +420,7 @@
 			if (!showEffort) return null;
 
 			const labels = allWeeks.map((w) => (w === 0 ? 'Initial' : `Week ${w}`));
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			const datasets: any[] = [];
+			const datasets: ChartDataset<'line'>[] = [];
 
 			// Individual effort (bold, prominent)
 			datasets.push({
@@ -486,7 +495,7 @@
 						legend: {
 							position: 'top',
 							labels: {
-								color: '#a1a1aa',
+								color: THEME.textMuted,
 								usePointStyle: true,
 								padding: 15,
 								font: {
@@ -496,10 +505,10 @@
 							}
 						},
 						tooltip: {
-							backgroundColor: '#1c1c20',
-							titleColor: '#f4f5f8',
-							bodyColor: '#a1a1aa',
-							borderColor: 'rgba(255,255,255,0.08)',
+							backgroundColor: THEME.surfaceOverlay,
+							titleColor: THEME.textPrimary,
+							bodyColor: THEME.textMuted,
+							borderColor: THEME.borderSubtle,
 							borderWidth: 1,
 							padding: 12,
 							titleFont: {
@@ -510,17 +519,13 @@
 								size: 13
 							},
 							callbacks: {
-								label: function (context: unknown) {
-									const ctx = context as {
-										dataset: { label: string };
-										parsed: { y: number | null };
-									};
-									let label = ctx.dataset.label || '';
+								label: function (context: TooltipItem<'line'>) {
+									let label = context.dataset.label || '';
 									if (label) {
 										label += ': ';
 									}
-									if (ctx.parsed.y !== null) {
-										label += ctx.parsed.y.toFixed(1);
+									if (context.parsed.y !== null) {
+										label += context.parsed.y.toFixed(1);
 									} else {
 										label += 'No data';
 									}
@@ -536,7 +541,7 @@
 							title: {
 								display: true,
 								text: 'Effort Score',
-								color: '#a1a1aa',
+								color: THEME.textMuted,
 								font: {
 									size: 12,
 									weight: 600
@@ -545,34 +550,34 @@
 							min: 0,
 							max: 10,
 							ticks: {
-								color: '#a1a1aa',
+								color: THEME.textMuted,
 								stepSize: 2,
 								font: {
 									size: 11
 								}
 							},
 							grid: {
-								color: 'rgba(255, 255, 255, 0.06)'
+								color: THEME.gridLine
 							}
 						},
 						x: {
 							title: {
 								display: true,
 								text: 'Week',
-								color: '#a1a1aa',
+								color: THEME.textMuted,
 								font: {
 									size: 12,
 									weight: 600
 								}
 							},
 							ticks: {
-								color: '#a1a1aa',
+								color: THEME.textMuted,
 								font: {
 									size: 11
 								}
 							},
 							grid: {
-								color: 'rgba(255, 255, 255, 0.06)'
+								color: THEME.gridLine
 							}
 						}
 					}
@@ -587,8 +592,7 @@
 			if (!showPerformance) return null;
 
 			const labels = allWeeks.map((w) => (w === 0 ? 'Initial' : `Week ${w}`));
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			const datasets: any[] = [];
+			const datasets: ChartDataset<'line'>[] = [];
 
 			// Individual performance (bold, prominent)
 			datasets.push({
@@ -663,7 +667,7 @@
 						legend: {
 							position: 'top',
 							labels: {
-								color: '#a1a1aa',
+								color: THEME.textMuted,
 								usePointStyle: true,
 								padding: 15,
 								font: {
@@ -673,10 +677,10 @@
 							}
 						},
 						tooltip: {
-							backgroundColor: '#1c1c20',
-							titleColor: '#f4f5f8',
-							bodyColor: '#a1a1aa',
-							borderColor: 'rgba(255,255,255,0.08)',
+							backgroundColor: THEME.surfaceOverlay,
+							titleColor: THEME.textPrimary,
+							bodyColor: THEME.textMuted,
+							borderColor: THEME.borderSubtle,
 							borderWidth: 1,
 							padding: 12,
 							titleFont: {
@@ -687,17 +691,13 @@
 								size: 13
 							},
 							callbacks: {
-								label: function (context: unknown) {
-									const ctx = context as {
-										dataset: { label: string };
-										parsed: { y: number | null };
-									};
-									let label = ctx.dataset.label || '';
+								label: function (context: TooltipItem<'line'>) {
+									let label = context.dataset.label || '';
 									if (label) {
 										label += ': ';
 									}
-									if (ctx.parsed.y !== null) {
-										label += ctx.parsed.y.toFixed(1);
+									if (context.parsed.y !== null) {
+										label += context.parsed.y.toFixed(1);
 									} else {
 										label += 'No data';
 									}
@@ -713,7 +713,7 @@
 							title: {
 								display: true,
 								text: 'Performance Score',
-								color: '#a1a1aa',
+								color: THEME.textMuted,
 								font: {
 									size: 12,
 									weight: 600
@@ -722,34 +722,34 @@
 							min: 0,
 							max: 10,
 							ticks: {
-								color: '#a1a1aa',
+								color: THEME.textMuted,
 								stepSize: 2,
 								font: {
 									size: 11
 								}
 							},
 							grid: {
-								color: 'rgba(255, 255, 255, 0.06)'
+								color: THEME.gridLine
 							}
 						},
 						x: {
 							title: {
 								display: true,
 								text: 'Week',
-								color: '#a1a1aa',
+								color: THEME.textMuted,
 								font: {
 									size: 12,
 									weight: 600
 								}
 							},
 							ticks: {
-								color: '#a1a1aa',
+								color: THEME.textMuted,
 								font: {
 									size: 11
 								}
 							},
 							grid: {
-								color: 'rgba(255, 255, 255, 0.06)'
+								color: THEME.gridLine
 							}
 						}
 					}
@@ -965,11 +965,11 @@
 	<!-- Chart Container -->
 	<div class="rounded-xl border border-border-default bg-surface-raised p-6">
 		{#if showEffort || showPerformance}
-			<div class="grid gap-6 {showEffort && showPerformance ? 'md:grid-cols-2' : 'grid-cols-1'}">
+			<div class="grid gap-6 {showEffort && showPerformance ? 'lg:grid-cols-2' : 'grid-cols-1'}">
 				{#if showEffort}
 					<div>
 						<h4 class="mb-2 text-sm font-semibold text-text-secondary">Effort</h4>
-						<div class="h-[350px] w-full">
+						<div class="h-[280px] w-full sm:h-[350px]">
 							{#if effortChartConfig && effortChartConfig.data.labels && effortChartConfig.data.labels.length > 0}
 								<canvas bind:this={effortChartCanvas}></canvas>
 							{:else}
@@ -984,7 +984,7 @@
 				{#if showPerformance}
 					<div>
 						<h4 class="mb-2 text-sm font-semibold text-text-secondary">Performance</h4>
-						<div class="h-[350px] w-full">
+						<div class="h-[280px] w-full sm:h-[350px]">
 							{#if performanceChartConfig && performanceChartConfig.data.labels && performanceChartConfig.data.labels.length > 0}
 								<canvas bind:this={performanceChartCanvas}></canvas>
 							{:else}
@@ -997,7 +997,7 @@
 				{/if}
 			</div>
 		{:else}
-			<div class="flex h-[350px] items-center justify-center text-text-tertiary">
+			<div class="flex h-[280px] items-center justify-center text-text-tertiary sm:h-[350px]">
 				<p class="text-sm">Select at least one metric (Effort or Performance) to view</p>
 			</div>
 		{/if}
@@ -1024,6 +1024,7 @@
 					</label>
 				{/if}
 			</div>
+			<p class="mb-2 text-xs text-text-muted sm:hidden">Swipe to see all columns &rarr;</p>
 			<div class="overflow-x-auto rounded-xl border border-border-default bg-surface-raised">
 				<table class="w-full text-sm">
 					<thead class="bg-surface-raised">

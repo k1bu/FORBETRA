@@ -225,7 +225,7 @@ export const load: PageServerLoad = async (event) => {
 		checkInFrequency,
 		isAvailable: checkInInfo.isAvailable,
 		availableDate: checkInInfo.availableDate.toISOString(),
-		isLocked: false,
+		isLocked: !!existingReflection,
 		isPreview,
 		identityAnchor,
 		isMidpoint: currentWeek === Math.ceil(totalWeeks / 2) && currentWeek > 1,
@@ -413,7 +413,7 @@ export const actions: Actions = {
 			let microMoment: {
 				type:
 					| 'insight_preview'
-					| 'rater_pulse'
+					| 'reviewer_pulse'
 					| 'streak_milestone'
 					| 'growth_signal'
 					| 'identity_echo'
@@ -461,7 +461,7 @@ export const actions: Actions = {
 						};
 					}
 				} else if (microMomentType === 2) {
-					// Rater Pulse — feedback count for this cycle
+					// Reviewer Pulse — feedback count for this cycle
 					const reflection = await prisma.reflection.findFirst({
 						where: {
 							cycleId: cycle.id,
@@ -475,17 +475,17 @@ export const actions: Actions = {
 						const feedbackCount = await prisma.feedback.count({
 							where: { reflectionId: reflection.id }
 						});
-						const totalRaters = await prisma.stakeholder.count({
+						const totalReviewers = await prisma.stakeholder.count({
 							where: { individualId: dbUser.id }
 						});
-						if (totalRaters > 0) {
+						if (totalReviewers > 0) {
 							microMoment = {
-								type: 'rater_pulse',
-								title: 'Rater Pulse',
+								type: 'reviewer_pulse',
+								title: 'Reviewer Pulse',
 								message:
 									feedbackCount > 0
-										? `This week, ${feedbackCount} of your ${totalRaters} rater${totalRaters !== 1 ? 's' : ''} ${feedbackCount !== 1 ? 'have' : 'has'} provided feedback. Their perspective adds depth to your data.`
-										: `You have ${totalRaters} rater${totalRaters !== 1 ? 's' : ''} invited. As they submit feedback, you'll see how their perception compares with yours.`
+										? `This week, ${feedbackCount} of your ${totalReviewers} reviewer${totalReviewers !== 1 ? 's' : ''} ${feedbackCount !== 1 ? 'have' : 'has'} provided feedback. Their perspective adds depth to your data.`
+										: `You have ${totalReviewers} reviewer${totalReviewers !== 1 ? 's' : ''} invited. As they submit feedback, you'll see how their perception compares with yours.`
 							};
 						}
 					}

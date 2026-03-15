@@ -2,7 +2,7 @@
 	import type { ActionData, PageData } from './$types';
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import { Compass, Mail, Check, Smartphone } from 'lucide-svelte';
+	import { Compass, Mail, Smartphone, Users, BarChart3, MessageSquare } from 'lucide-svelte';
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
 
@@ -23,14 +23,18 @@
 	}
 
 	// Pre-fill state
-	type PrefillStakeholder = { name: string; email: string };
-	let showPrefill = $state(true);
+	type PrefillStakeholder = { id: number; name: string; email: string };
+	let showPrefill = $state(false);
 	let prefillObjectiveTitle = $state('');
-	let prefillStakeholders = $state<PrefillStakeholder[]>([{ name: '', email: '' }]);
+	let nextStakeholderId = $state(1);
+	let prefillStakeholders = $state<PrefillStakeholder[]>([{ id: 0, name: '', email: '' }]);
 
 	function addPrefillStakeholder() {
 		if (prefillStakeholders.length < 3) {
-			prefillStakeholders = [...prefillStakeholders, { name: '', email: '' }];
+			prefillStakeholders = [
+				...prefillStakeholders,
+				{ id: nextStakeholderId++, name: '', email: '' }
+			];
 		}
 	}
 	function removePrefillStakeholder(index: number) {
@@ -87,7 +91,7 @@
 							: 'bg-surface-subtle'}"
 				></span>
 				<span
-					class="text-[10px] font-medium {i === currentStepIndex
+					class="text-2xs font-medium {i === currentStepIndex
 						? 'text-accent'
 						: i < currentStepIndex
 							? 'text-text-secondary'
@@ -98,6 +102,7 @@
 			</button>
 		{/each}
 	</div>
+	<p class="text-xs text-text-muted">Step {currentStepIndex + 1} of {allSteps.length}</p>
 
 	<!-- Step 1: Welcome -->
 	{#if currentStep === 'welcome'}
@@ -117,28 +122,69 @@
 
 			<div class="mx-auto max-w-xl space-y-4">
 				<div class="rounded-2xl border border-border-default bg-surface-raised p-6 text-left">
-					<h3 class="mb-3 text-sm font-semibold tracking-wide text-accent uppercase">Your role</h3>
-					<p class="text-sm leading-relaxed text-text-secondary">
-						Guide individuals through development cycles, review their progress data, and provide
-						targeted feedback that helps them grow.
-					</p>
+					<h3 class="mb-3 text-sm font-semibold tracking-wide text-accent uppercase">
+						How it works
+					</h3>
+					<div class="space-y-4">
+						<div class="flex items-start gap-3">
+							<div
+								class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent text-sm font-bold text-white"
+							>
+								1
+							</div>
+							<div>
+								<p class="text-sm font-semibold text-text-primary">Invite a client</p>
+								<p class="text-xs text-text-secondary">
+									They set a goal, add reviewers, and start weekly check-ins.
+								</p>
+							</div>
+						</div>
+						<div class="flex items-start gap-3">
+							<div
+								class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent/70 text-sm font-bold text-white"
+							>
+								2
+							</div>
+							<div>
+								<p class="text-sm font-semibold text-text-primary">
+									Your dashboard fills with data
+								</p>
+								<p class="text-xs text-text-secondary">
+									Self-ratings, reviewer scores, perception gaps, and AI-generated coaching prep —
+									all updated automatically.
+								</p>
+							</div>
+						</div>
+						<div class="flex items-start gap-3">
+							<div
+								class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent/50 text-sm font-bold text-white"
+							>
+								3
+							</div>
+							<div>
+								<p class="text-sm font-semibold text-text-primary">Coach with precision</p>
+								<p class="text-xs text-text-secondary">
+									Use data-driven insights to guide each conversation. Track real change over weeks,
+									not assumptions.
+								</p>
+							</div>
+						</div>
+					</div>
 				</div>
 				<div class="rounded-2xl border border-border-default bg-surface-raised p-6 text-left">
-					<h3 class="mb-3 text-sm font-semibold tracking-wide text-accent uppercase">
-						What you'll have access to
-					</h3>
+					<h3 class="mb-3 text-sm font-semibold tracking-wide text-accent uppercase">Your tools</h3>
 					<ul class="space-y-2 text-sm text-text-secondary">
 						<li class="flex items-start gap-2">
-							<Check class="mt-0.5 h-4 w-4 shrink-0 text-accent" />
-							Real-time tracking of client effort and performance
+							<Users class="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+							Client roster with at-a-glance status and alerts
 						</li>
 						<li class="flex items-start gap-2">
-							<Check class="mt-0.5 h-4 w-4 shrink-0 text-accent" />
-							AI-generated insights and coaching prep
+							<BarChart3 class="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+							Portfolio analytics — consistency trends, cross-client patterns
 						</li>
 						<li class="flex items-start gap-2">
-							<Check class="mt-0.5 h-4 w-4 shrink-0 text-accent" />
-							Reviewer feedback trends and blind-spot alerts
+							<MessageSquare class="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+							AI coaching prep generated before every session
 						</li>
 					</ul>
 				</div>
@@ -167,7 +213,7 @@
 				<h1 class="text-3xl font-bold text-text-primary">Invite Your First Client</h1>
 				<p class="mx-auto max-w-md text-base text-text-secondary">
 					Send an invitation to an individual you'd like to coach. They'll set up their own goal and
-					stakeholders.
+					reviewers, and you'll see their data on your dashboard within minutes.
 				</p>
 				<p class="mx-auto max-w-md text-xs text-text-tertiary">
 					You can optionally pre-fill their goal and stakeholders below.
@@ -302,7 +348,7 @@
 
 							<div>
 								<p class="text-xs font-semibold text-text-secondary">Stakeholders</p>
-								{#each prefillStakeholders as sh, i (i)}
+								{#each prefillStakeholders as sh, i (sh.id)}
 									<div class="mt-1.5 flex items-center gap-2">
 										<input
 											type="text"

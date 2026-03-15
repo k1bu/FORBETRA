@@ -29,7 +29,7 @@
 			<p>
 				Message frequency varies based on your coaching activity. Typical usage is
 				<strong>1–4 messages per week</strong> for individuals and
-				<strong>1–2 messages per month</strong> for reviewers/raters.
+				<strong>1–2 messages per month</strong> for reviewers.
 			</p>
 		</div>
 

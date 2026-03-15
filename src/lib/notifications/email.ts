@@ -94,6 +94,35 @@ const getProvider = (): { name: EmailProviderName; provider: EmailProvider } => 
 	return cachedProvider;
 };
 
+function getFallbackProvider(
+	primaryName: EmailProviderName
+): { name: EmailProviderName; provider: EmailProvider } | null {
+	try {
+		if (primaryName === 'sendgrid' && process.env.POSTMARK_API_KEY) {
+			const fromEmail = process.env.POSTMARK_FROM_EMAIL || defaultFromEmail;
+			const messageStream = process.env.POSTMARK_MESSAGE_STREAM || 'outbound';
+			return {
+				name: 'postmark',
+				provider: new PostmarkProvider({
+					apiKey: process.env.POSTMARK_API_KEY,
+					fromEmail,
+					messageStream
+				})
+			};
+		}
+		if (primaryName === 'postmark' && process.env.SENDGRID_API_KEY) {
+			const fromEmail = process.env.SENDGRID_FROM_EMAIL || defaultFromEmail;
+			return {
+				name: 'sendgrid',
+				provider: new SendGridProvider({ apiKey: process.env.SENDGRID_API_KEY, fromEmail })
+			};
+		}
+	} catch {
+		// Fallback provider not available
+	}
+	return null;
+}
+
 export async function sendEmail(payload: EmailPayload): Promise<void> {
 	const mode = getEmailMode();
 	if (mode === 'mock') {
@@ -101,13 +130,33 @@ export async function sendEmail(payload: EmailPayload): Promise<void> {
 		return;
 	}
 
-	const { provider } = getProvider();
+	const { name, provider } = getProvider();
 
 	try {
 		await provider.send(payload);
-		console.info('[email:sent]', { to: payload.to, subject: payload.subject });
+		console.info('[email:sent]', { to: payload.to, subject: payload.subject, provider: name });
 	} catch (error) {
-		console.error('[email:error]', error);
+		console.error(`[email:error] Primary provider ${name} failed`, error);
+
+		// Try fallback provider
+		const fallback = getFallbackProvider(name);
+		if (fallback) {
+			try {
+				await fallback.provider.send(payload);
+				console.info('[email:sent:fallback]', {
+					to: payload.to,
+					subject: payload.subject,
+					provider: fallback.name
+				});
+				return;
+			} catch (fallbackError) {
+				console.error(
+					`[email:error] Fallback provider ${fallback.name} also failed`,
+					fallbackError
+				);
+			}
+		}
+
 		throw error;
 	}
 }

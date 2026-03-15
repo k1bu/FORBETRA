@@ -19,10 +19,17 @@ export const GET: RequestHandler = async ({ request, url }) => {
 		return new Response('Too many requests', { status: 429 });
 	}
 
-	const result = await generateCoachPrepInsights();
-
-	return new Response(JSON.stringify(result), {
-		status: 200,
-		headers: { 'Content-Type': 'application/json' }
-	});
+	try {
+		const result = await generateCoachPrepInsights();
+		return new Response(JSON.stringify({ status: 'success', ...result }), {
+			status: 200,
+			headers: { 'Content-Type': 'application/json' }
+		});
+	} catch (error) {
+		console.error('[job:coach-prep] Failed', error);
+		return new Response(JSON.stringify({ status: 'error', error: String(error) }), {
+			status: 500,
+			headers: { 'Content-Type': 'application/json' }
+		});
+	}
 };

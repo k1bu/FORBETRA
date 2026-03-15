@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import { addToast } from '$lib/stores/toasts.svelte';
 
 	const { data }: { data: PageData } = $props();
 
@@ -22,7 +23,7 @@
 			body: JSON.stringify({ userId })
 		});
 		if (!res.ok) {
-			alert('Failed to start impersonation. Please try again.');
+			addToast('Failed to start impersonation. Please try again.', 'error');
 			return;
 		}
 		window.open(path, '_blank');
@@ -57,7 +58,7 @@
 	const individualFlows = $derived<FlowCard[]>([
 		{
 			label: 'Onboarding',
-			description: 'Objective setup, focus areas, journey config, rater invites',
+			description: 'Objective setup, focus areas, journey config, reviewer invites',
 			action: () => impersonateAndOpen(selectedIndividualId, '/onboarding?preview=true')
 		},
 		{
