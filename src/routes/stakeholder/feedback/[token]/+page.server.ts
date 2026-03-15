@@ -5,7 +5,6 @@ import { sendEmail } from '$lib/notifications/email';
 import { emailTemplates } from '$lib/notifications/emailTemplates';
 import { trySendSms } from '$lib/notifications/sms';
 import { smsTemplates } from '$lib/notifications/smsTemplates';
-import { validatePhone, normalizePhone } from '$lib/utils/phone';
 import { rateLimit } from '$lib/server/rateLimit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -221,51 +220,6 @@ export const load: PageServerLoad = async ({ params, url }) => {
 };
 
 export const actions: Actions = {
-	updatePhone: async ({ params, request }) => {
-		const tokenParam = sanitizeToken(params.token);
-		if (!tokenParam) {
-			return fail(400, { phoneError: 'Invalid token.' });
-		}
-
-		// Verify the token belongs to this stakeholder
-		const token = await prisma.token.findUnique({
-			where: { tokenHash: tokenParam },
-			select: { stakeholderId: true, expiresAt: true, usedAt: true }
-		});
-
-		if (!token) {
-			return fail(400, { phoneError: 'Invalid token.' });
-		}
-
-		if (token.expiresAt < new Date()) {
-			return fail(400, { phoneError: 'This feedback link has expired.' });
-		}
-
-		const formData = await request.formData();
-		const stakeholderId = String(formData.get('stakeholderId') ?? '').trim();
-		const phone = String(formData.get('phone') ?? '').trim();
-
-		if (!stakeholderId || !phone) {
-			return fail(400, { phoneError: 'Please enter a valid phone number.' });
-		}
-
-		// Ensure the stakeholder ID matches the token's stakeholder
-		if (token.stakeholderId !== stakeholderId) {
-			return fail(403, { phoneError: 'Unauthorized.' });
-		}
-
-		if (!validatePhone(phone)) {
-			return fail(400, { phoneError: 'Please enter a valid phone number.' });
-		}
-
-		const normalized = normalizePhone(phone);
-		await prisma.stakeholder.update({
-			where: { id: stakeholderId },
-			data: { phone: normalized }
-		});
-
-		return { phoneSaved: true };
-	},
 	default: async ({ params, request, url, getClientAddress }) => {
 		const clientIP = getClientAddress();
 		if (!rateLimit(`feedback:${clientIP}`, 10, 60_000)) {

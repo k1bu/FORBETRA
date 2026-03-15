@@ -428,7 +428,7 @@
 					</p>
 					{#if data.historicRatings && data.historicRatings.length > 0}
 						<p class="mt-2 text-xs text-success/80">
-							Contribution #{data.historicRatings.length + 1} this journey — your consistency amplifies
+							Contribution #{data.historicRatings.length + 1} on this journey — your consistency amplifies
 							impact.
 						</p>
 					{/if}
