@@ -234,7 +234,7 @@ export const emailTemplates = {
 						${data.currentStreak && data.currentStreak >= 3 ? `<p style="font-size: 16px; color: #c2410c; font-weight: 600;">You're on a ${data.currentStreak} check-in streak — keep it going!</p>` : ''}
 						<p style="font-size: 16px;">Take a moment to check in on your effort and progress this week.</p>
 						<div style="text-align: center; margin: 30px 0;">
-							<a href="${data.appUrl || baseUrl}/reflections/checkin?type=${(data.reflectionType ?? 'RATING_A').toUpperCase()}" style="display: inline-block; background: #f59e0b; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Complete Check-in</a>
+							<a href="${data.appUrl || baseUrl}/individual/checkin?type=${(data.reflectionType ?? 'RATING_A').toUpperCase()}" style="display: inline-block; background: #f59e0b; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Complete Check-in</a>
 						</div>
 						<p style="font-size: 14px; color: #64748b; margin-top: 30px;">Staying consistent helps you track your growth.</p>
 					</div>
@@ -242,7 +242,7 @@ export const emailTemplates = {
 				</body>
 				</html>
 			`,
-			text: `Reminder: Time for your ${dayLabel} check-in\n\nHi ${data.individualName || 'there'},\n\nIt's ${dayLabel} — time for your weekly check-in!\n\n${data.currentStreak && data.currentStreak >= 3 ? `You're on a ${data.currentStreak} check-in streak — keep it going!\n\n` : ''}${data.objectiveTitle ? `Objective: ${data.objectiveTitle}\n\n` : ''}Take a moment to check in on your effort and progress this week.\n\nComplete check-in: ${data.appUrl || baseUrl}/reflections/checkin?type=${(data.reflectionType ?? 'RATING_A').toUpperCase()}\n\nThis helps you stay consistent and track your growth.${textFooter()}`
+			text: `Reminder: Time for your ${dayLabel} check-in\n\nHi ${data.individualName || 'there'},\n\nIt's ${dayLabel} — time for your weekly check-in!\n\n${data.currentStreak && data.currentStreak >= 3 ? `You're on a ${data.currentStreak} check-in streak — keep it going!\n\n` : ''}${data.objectiveTitle ? `Objective: ${data.objectiveTitle}\n\n` : ''}Take a moment to check in on your effort and progress this week.\n\nComplete check-in: ${data.appUrl || baseUrl}/individual/checkin?type=${(data.reflectionType ?? 'RATING_A').toUpperCase()}\n\nThis helps you stay consistent and track your growth.${textFooter()}`
 		};
 	},
 
@@ -370,11 +370,11 @@ export const emailTemplates = {
 					</div>
 					<p style="font-size: 14px; color: #64748b;">You'll receive the next feedback request when ${indName} completes their next check-in.</p>
 				</div>
-			${emailFooter()}
+			${emailFooter(baseUrl)}
 			</body>
 			</html>
 		`,
-			text: `Your feedback is now shaping ${data.individualName || 'your participant'}'s insights\n\nHi ${data.stakeholderName || 'there'},\n\nYour Week ${data.weekNumber ?? ''} feedback for ${data.individualName || 'your participant'} has been recorded.\n\nYour perspective matters — it helps reveal blind spots and validate progress that might otherwise go unnoticed.\n\nYou'll receive the next feedback request when ${data.individualName || 'they'} completes their next check-in.${textFooter()}`
+			text: `Your feedback is now shaping ${data.individualName || 'your participant'}'s insights\n\nHi ${data.stakeholderName || 'there'},\n\nYour Week ${data.weekNumber ?? ''} feedback for ${data.individualName || 'your participant'} has been recorded.\n\nYour perspective matters — it helps reveal blind spots and validate progress that might otherwise go unnoticed.\n\nYou'll receive the next feedback request when ${data.individualName || 'they'} completes their next check-in.${textFooter(baseUrl)}`
 		};
 	},
 
@@ -431,11 +431,11 @@ export const emailTemplates = {
 						</div>
 						<p style="font-size: 14px; color: #64748b;">Your continued feedback helps ${indName} stay accountable and see the full picture of their growth. Thank you!</p>
 					</div>
-				${emailFooter()}
+				${emailFooter(baseUrl)}
 				</body>
 				</html>
 			`,
-			text: `Your impact on ${data.individualName || 'your participant'}'s growth — monthly summary\n\nHi ${data.stakeholderName || 'there'},\n\nHere's a snapshot of your contribution to ${data.individualName || 'your participant'}'s development this month.\n\nWeeks contributed: ${data.weeksContributed}\nTotal feedbacks: ${data.totalFeedbacks}\n\nTrends (based on your ratings):\n${trendIcon(data.effortTrend)} Effort: ${trendLabel(data.effortTrend)}\n${trendIcon(data.performanceTrend)} Performance: ${trendLabel(data.performanceTrend)}\n\nYour continued feedback helps ${data.individualName || 'them'} stay accountable and see the full picture of their growth. Thank you!${textFooter()}`
+			text: `Your impact on ${data.individualName || 'your participant'}'s growth — monthly summary\n\nHi ${data.stakeholderName || 'there'},\n\nHere's a snapshot of your contribution to ${data.individualName || 'your participant'}'s development this month.\n\nWeeks contributed: ${data.weeksContributed}\nTotal feedbacks: ${data.totalFeedbacks}\n\nTrends (based on your ratings):\n${trendIcon(data.effortTrend)} Effort: ${trendLabel(data.effortTrend)}\n${trendIcon(data.performanceTrend)} Performance: ${trendLabel(data.performanceTrend)}\n\nYour continued feedback helps ${data.individualName || 'them'} stay accountable and see the full picture of their growth. Thank you!${textFooter(baseUrl)}`
 		};
 	},
 

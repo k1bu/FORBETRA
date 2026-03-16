@@ -1,45 +1,13 @@
 import { redirect } from '@sveltejs/kit';
 import prisma from '$lib/server/prisma';
-import { requireRole } from '$lib/server/auth';
-import { computeWeekNumber } from '$lib/server/coachUtils';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
-	const { dbUser } = requireRole(event, 'INDIVIDUAL');
+	const { objective, cycle, currentWeek } = await event.parent();
 
-	const objective = await prisma.objective.findFirst({
-		where: { userId: dbUser.id, active: true },
-		orderBy: { createdAt: 'desc' },
-		include: {
-			subgoals: { orderBy: { createdAt: 'asc' } },
-			cycles: {
-				orderBy: { startDate: 'desc' },
-				take: 1,
-				include: {
-					reflections: {
-						select: {
-							id: true,
-							reflectionType: true,
-							weekNumber: true,
-							effortScore: true,
-							performanceScore: true,
-							notes: true
-						}
-					}
-				}
-			},
-			stakeholders: {
-				orderBy: { createdAt: 'asc' }
-			}
-		}
-	});
-
-	if (!objective || objective.cycles.length === 0) {
+	if (!cycle || !currentWeek) {
 		throw redirect(303, '/individual');
 	}
-
-	const cycle = objective.cycles[0];
-	const currentWeek = computeWeekNumber(cycle.startDate);
 
 	const cycleEnd = cycle.endDate ?? null;
 	const totalWeeks = cycleEnd
@@ -181,14 +149,14 @@ export const load: PageServerLoad = async (event) => {
 			? computeTrend(
 					shWeeks,
 					(wk) => selfWeekMap.get(wk)?.effort ?? null,
-					(wk, data) => avg(data.efforts)
+					(_wk, data) => avg(data.efforts)
 				)
 			: null;
 		const performanceGapTrend = shWeeks
 			? computeTrend(
 					shWeeks,
 					(wk) => selfWeekMap.get(wk)?.performance ?? null,
-					(wk, data) => avg(data.performances)
+					(_wk, data) => avg(data.performances)
 				)
 			: null;
 

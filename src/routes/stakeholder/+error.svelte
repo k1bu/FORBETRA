@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { Shield } from 'lucide-svelte';
 </script>
 
 <svelte:head>
@@ -7,8 +8,18 @@
 </svelte:head>
 
 <section
-	class="mx-auto flex min-h-[60vh] max-w-lg flex-col items-center justify-center gap-6 p-4 text-center"
+	class="mx-auto flex min-h-screen max-w-xl flex-col items-center justify-center gap-4 p-6 text-center"
 >
+	<div class="pb-2 text-center">
+		<p
+			class="flex items-center justify-center gap-1.5 text-lg font-bold tracking-[0.02em] text-text-primary italic"
+		>
+			<Shield class="h-5 w-5 text-accent" />
+			forbetra
+		</p>
+		<p class="text-xs text-text-tertiary">You. And Improved.</p>
+	</div>
+
 	<div class="rounded-2xl border border-border-default bg-surface-raised p-8" role="alert">
 		<div
 			class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-error-muted"

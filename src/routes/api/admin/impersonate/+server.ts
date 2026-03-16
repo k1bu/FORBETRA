@@ -12,7 +12,7 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
 		throw error(403, 'Admin access required');
 	}
 
-	if (!rateLimit(`impersonate:${admin.id}`, 10, 60_000)) {
+	if (!(await rateLimit(`impersonate:${admin.id}`, 10, 60_000))) {
 		throw error(429, 'Too many impersonation requests. Try again in a minute.');
 	}
 

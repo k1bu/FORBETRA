@@ -36,12 +36,14 @@
 			performanceScore: number | null;
 		}>;
 		stakeholders?: Array<{ id: string; name: string }>;
+		selfLabel?: string;
 	};
 
 	const props: Props = $props();
 	const individualData = props.individualData ?? [];
 	const stakeholderData = props.stakeholderData ?? [];
 	const stakeholders = props.stakeholders ?? [];
+	const selfLabel = props.selfLabel ?? 'My';
 
 	let selectedStakeholderIds = new SvelteSet<string>();
 	let showEffort = $state(true);
@@ -424,7 +426,7 @@
 
 			// Individual effort (bold, prominent)
 			datasets.push({
-				label: 'My Effort',
+				label: `${selfLabel} Effort`,
 				data: allWeeks.map((week: number) => {
 					const weekData = individualData.find((d) => d.weekNumber === week);
 					return weekData?.effortScore ?? null;
@@ -596,7 +598,7 @@
 
 			// Individual performance (bold, prominent)
 			datasets.push({
-				label: 'My Performance',
+				label: `${selfLabel} Performance`,
 				data: allWeeks.map((week: number) => {
 					const weekData = individualData.find((d) => d.weekNumber === week);
 					return weekData?.performanceScore ?? null;
@@ -1060,7 +1062,7 @@
 						{#if showEffort}
 							<!-- My Effort -->
 							<tr class="bg-accent-muted/30">
-								<td class="px-5 py-3 font-semibold text-text-primary">My Effort Rating</td>
+								<td class="px-5 py-3 font-semibold text-text-primary">{selfLabel} Effort Rating</td>
 								<td class="px-5 py-3 text-center font-medium text-text-secondary">
 									{baseline.individualEffort?.toFixed(1) ?? '—'}
 								</td>
@@ -1165,7 +1167,9 @@
 						{#if showPerformance}
 							<!-- My Performance -->
 							<tr class="bg-warning-muted/30">
-								<td class="px-5 py-3 font-semibold text-text-primary">My Performance Rating</td>
+								<td class="px-5 py-3 font-semibold text-text-primary"
+									>{selfLabel} Performance Rating</td
+								>
 								<td class="px-5 py-3 text-center font-medium text-text-secondary">
 									{baseline.individualProgress?.toFixed(1) ?? '—'}
 								</td>

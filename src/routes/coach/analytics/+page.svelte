@@ -248,8 +248,8 @@
 			<div class="mb-1 flex items-center gap-1.5">
 				<Target class="h-4 w-4 text-text-muted" />
 				<p class="text-xs font-medium text-text-tertiary">
-					Feedback Rate <InfoTip
-						text="How often reviewers respond to feedback requests. 80%+ means strong engagement."
+					Reviewer Response <InfoTip
+						text="Average reviewer response rate across clients this week. 80%+ means strong engagement."
 					/>
 				</p>
 			</div>

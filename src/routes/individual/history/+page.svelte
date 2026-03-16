@@ -112,7 +112,7 @@
 				href="/individual"
 				class="mt-4 inline-block rounded-lg bg-accent px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-hover"
 			>
-				Go to Dashboard
+				Go to Today
 			</a>
 			<!-- eslint-enable svelte/no-navigation-without-resolve -->
 		</div>

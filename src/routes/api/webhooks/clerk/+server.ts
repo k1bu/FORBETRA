@@ -41,7 +41,7 @@ const verifyClerkWebhook = async (request: Request): Promise<ClerkWebhookEvent |
 };
 
 export const POST: RequestHandler = async ({ request }) => {
-	if (!rateLimit('webhook:clerk', 30, 60_000)) {
+	if (!(await rateLimit('webhook:clerk', 30, 60_000))) {
 		return new Response('Too many requests', { status: 429 });
 	}
 

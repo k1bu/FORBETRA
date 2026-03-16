@@ -65,7 +65,7 @@
 		switch (type) {
 			case 'RATING_A':
 			case 'RATING_B':
-				return '/reflections/checkin';
+				return '/individual/checkin';
 			default:
 				return '/individual';
 		}

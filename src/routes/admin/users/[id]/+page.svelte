@@ -83,7 +83,7 @@
 				Initial Ratings
 			</button>
 			<button
-				onclick={() => impersonateAndOpen('/reflections/checkin?preview=true')}
+				onclick={() => impersonateAndOpen('/individual/checkin?preview=true')}
 				class="rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-accent hover:bg-accent-muted"
 			>
 				Check-in / Ratings

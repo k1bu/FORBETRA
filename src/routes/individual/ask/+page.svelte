@@ -136,7 +136,7 @@
 	<title>Ask | Forbetra</title>
 </svelte:head>
 
-<section class="mx-auto flex h-[calc(100vh-2rem)] max-w-3xl flex-col p-4 pb-24 lg:pb-4">
+<section class="mx-auto flex h-[calc(100dvh-2rem)] max-w-3xl flex-col p-4 pb-24 lg:pb-4">
 	<div class="mb-4">
 		<!-- eslint-disable svelte/no-navigation-without-resolve -->
 		<nav aria-label="Breadcrumb" class="mb-2">

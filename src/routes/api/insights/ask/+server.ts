@@ -9,7 +9,7 @@ import { rateLimit } from '$lib/server/rateLimit';
 export const POST: RequestHandler = async (event) => {
 	const { dbUser } = requireRole(event, 'INDIVIDUAL');
 
-	if (!rateLimit(`insight:${dbUser.id}`, 5, 60_000)) {
+	if (!(await rateLimit(`insight:${dbUser.id}`, 5, 60_000))) {
 		return json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
 	}
 

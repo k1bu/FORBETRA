@@ -222,7 +222,7 @@ export const load: PageServerLoad = async ({ params, url }) => {
 export const actions: Actions = {
 	default: async ({ params, request, url, getClientAddress }) => {
 		const clientIP = getClientAddress();
-		if (!rateLimit(`feedback:${clientIP}`, 10, 60_000)) {
+		if (!(await rateLimit(`feedback:${clientIP}`, 10, 60_000))) {
 			return fail(429, { error: 'Too many requests. Please try again later.' });
 		}
 

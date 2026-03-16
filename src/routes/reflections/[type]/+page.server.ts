@@ -17,7 +17,7 @@ function resolveRedirect(param: string | undefined): string {
 
 	const mapped = typeMap[normalized];
 	if (mapped) {
-		return `/reflections/checkin?type=${mapped}`;
+		return `/individual/checkin?type=${mapped}`;
 	}
 
 	return '/individual';

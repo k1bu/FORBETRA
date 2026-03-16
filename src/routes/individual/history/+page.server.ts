@@ -1,61 +1,40 @@
 import { redirect } from '@sveltejs/kit';
 import prisma from '$lib/server/prisma';
-import { requireRole } from '$lib/server/auth';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async (event) => {
-	const { dbUser } = requireRole(event, 'INDIVIDUAL');
+export const load: PageServerLoad = async ({ parent }) => {
+	const { objective, cycle } = await parent();
 
-	const objective = await prisma.objective.findFirst({
-		where: { userId: dbUser.id, active: true },
-		orderBy: { createdAt: 'desc' },
+	if (!cycle) {
+		throw redirect(302, '/individual');
+	}
+
+	// History needs feedbacks per reflection — fetch separately
+	const reflections = await prisma.reflection.findMany({
+		where: { cycleId: cycle.id, userId: objective.userId },
+		orderBy: [{ weekNumber: 'desc' }, { checkInDate: 'desc' }],
 		select: {
 			id: true,
-			title: true,
-			cycles: {
-				orderBy: { startDate: 'desc' },
-				take: 1,
+			reflectionType: true,
+			weekNumber: true,
+			effortScore: true,
+			performanceScore: true,
+			notes: true,
+			checkInDate: true,
+			feedbacks: {
 				select: {
 					id: true,
-					label: true,
-					startDate: true,
-					reflections: {
-						where: { userId: dbUser.id },
-						orderBy: [{ weekNumber: 'desc' }, { checkInDate: 'desc' }],
-						select: {
-							id: true,
-							reflectionType: true,
-							weekNumber: true,
-							effortScore: true,
-							performanceScore: true,
-							notes: true,
-							checkInDate: true,
-							feedbacks: {
-								select: {
-									id: true,
-									effortScore: true,
-									performanceScore: true,
-									comment: true,
-									submittedAt: true,
-									stakeholder: {
-										select: {
-											name: true
-										}
-									}
-								}
-							}
-						}
+					effortScore: true,
+					performanceScore: true,
+					comment: true,
+					submittedAt: true,
+					stakeholder: {
+						select: { name: true }
 					}
 				}
 			}
 		}
 	});
-
-	if (!objective || objective.cycles.length === 0) {
-		throw redirect(302, '/individual');
-	}
-
-	const cycle = objective.cycles[0];
 
 	// Group reflections by week number
 	const weekMap = new Map<
@@ -78,7 +57,7 @@ export const load: PageServerLoad = async (event) => {
 		}
 	>();
 
-	for (const r of cycle.reflections) {
+	for (const r of reflections) {
 		if (!weekMap.has(r.weekNumber)) {
 			weekMap.set(r.weekNumber, { reflections: [] });
 		}

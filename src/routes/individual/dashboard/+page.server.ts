@@ -177,9 +177,9 @@ const getWeeklyExperiences = async (
 			reflectionId: matchingReflection?.id ?? null,
 			url:
 				ratingState === 'open' || ratingState === 'completed'
-					? '/reflections/checkin?type=RATING_A'
+					? '/individual/checkin?type=RATING_A'
 					: ratingState === 'catchup'
-						? `/reflections/checkin?type=RATING_A&week=${currentWeek}`
+						? `/individual/checkin?type=RATING_A&week=${currentWeek}`
 						: null,
 			catchupDeadline: ratingState === 'catchup' ? catchupDeadline : null
 		});

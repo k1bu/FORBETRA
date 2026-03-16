@@ -221,6 +221,11 @@
 					<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
 				</svg>
 			</div>
+			<span
+				class="mb-3 inline-block rounded-full bg-accent-muted px-3 py-1 text-xs font-semibold text-accent"
+			>
+				Week {data.reflection.weekNumber} Check-in
+			</span>
 			<h1 class="mb-2 text-xl font-bold text-text-primary">
 				You've already shared your perspective
 			</h1>

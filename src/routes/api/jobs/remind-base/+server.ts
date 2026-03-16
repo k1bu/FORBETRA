@@ -15,7 +15,7 @@ export const GET: RequestHandler = async ({ request, url }) => {
 		return new Response('Unauthorized', { status: 401 });
 	}
 
-	if (!rateLimit(`job:${url.pathname}`, 1, 60_000)) {
+	if (!(await rateLimit(`job:${url.pathname}`, 1, 60_000))) {
 		return new Response('Too many requests', { status: 429 });
 	}
 

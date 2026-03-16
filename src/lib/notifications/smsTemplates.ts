@@ -11,7 +11,7 @@ export const smsTemplates = {
 
 	reminderBase: (data: { reflectionType: string; weekNumber: number; appUrl?: string }) => {
 		const dayLabel = data.reflectionType === 'rating_a' ? 'Wednesday' : 'Friday';
-		const url = `${data.appUrl || baseUrl}/reflections/checkin?type=${data.reflectionType.toUpperCase()}`;
+		const url = `${data.appUrl || baseUrl}/individual/checkin?type=${data.reflectionType.toUpperCase()}`;
 		return `Forbetra: Time for your ${dayLabel} check-in (Week ${data.weekNumber}). ${url}\n\nReply STOP to opt out`;
 	},
 

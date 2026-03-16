@@ -323,7 +323,7 @@
 	{:else if data.cycle?.isOverdue}
 		<!-- eslint-disable svelte/no-navigation-without-resolve -->
 		<a
-			href="/reflections/checkin"
+			href="/individual/checkin"
 			class="group flex items-center gap-4 rounded-2xl border border-warning/30 bg-gradient-to-r from-warning/10 to-transparent p-5 transition-all hover:border-warning/50"
 		>
 			<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-warning/15">

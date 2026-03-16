@@ -925,6 +925,7 @@
 						individualData={data.client.visualizationData.individual}
 						stakeholderData={data.client.visualizationData.stakeholders}
 						stakeholders={data.client.visualizationData.stakeholderList}
+						selfLabel="Self-rated"
 					/>
 				</div>
 			{/if}

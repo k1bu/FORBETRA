@@ -71,13 +71,13 @@
 			label: 'Check-in (Effort)',
 			description: 'Mid-week effort rating',
 			action: () =>
-				impersonateAndOpen(selectedIndividualId, '/reflections/checkin?type=RATING_A&preview=true')
+				impersonateAndOpen(selectedIndividualId, '/individual/checkin?type=RATING_A&preview=true')
 		},
 		{
 			label: 'Check-in (Performance)',
 			description: 'End-of-week performance rating',
 			action: () =>
-				impersonateAndOpen(selectedIndividualId, '/reflections/checkin?type=RATING_B&preview=true')
+				impersonateAndOpen(selectedIndividualId, '/individual/checkin?type=RATING_B&preview=true')
 		},
 		{
 			label: 'Individual Hub',

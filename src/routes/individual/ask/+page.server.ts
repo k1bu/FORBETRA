@@ -1,20 +1,19 @@
 import prisma from '$lib/server/prisma';
-import { requireRole } from '$lib/server/auth';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async (event) => {
-	const { dbUser } = requireRole(event, 'INDIVIDUAL');
+export const load: PageServerLoad = async ({ parent }) => {
+	const { dbUserId, dbUserName } = await parent();
 
 	const activeCycle = await prisma.cycle.findFirst({
 		where: {
-			userId: dbUser.id,
+			userId: dbUserId,
 			status: 'ACTIVE'
 		},
 		select: { id: true }
 	});
 
 	return {
-		userName: dbUser.name || 'there',
+		userName: dbUserName || 'there',
 		hasActiveCycle: !!activeCycle
 	};
 };

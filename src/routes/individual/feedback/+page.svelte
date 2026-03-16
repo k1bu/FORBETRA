@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
+	import { enhance } from '$app/forms';
 
 	let { data, form }: { data: PageData; form: ActionData | null } = $props();
 
@@ -8,6 +9,8 @@
 	let addEmail = $state('');
 	let addEmailError = $state('');
 	let copiedLink = $state<string | null>(null);
+	let addingReviewer = $state(false);
+	let requestingFeedbackId = $state<string | null>(null);
 
 	function validateAddEmail(email: string) {
 		if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
@@ -131,6 +134,13 @@
 			<form
 				method="post"
 				action="?/addStakeholder"
+				use:enhance={() => {
+					addingReviewer = true;
+					return async ({ update }) => {
+						addingReviewer = false;
+						await update();
+					};
+				}}
 				class="rounded-xl border border-border-default bg-surface-raised p-5"
 			>
 				<div class="grid gap-4 sm:grid-cols-2">
@@ -173,9 +183,10 @@
 				<div class="mt-4 flex justify-end">
 					<button
 						type="submit"
-						class="rounded-lg bg-accent px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-hover"
+						disabled={addingReviewer}
+						class="rounded-lg bg-accent px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-hover disabled:opacity-50"
 					>
-						Add Reviewer
+						{addingReviewer ? 'Adding...' : 'Add Reviewer'}
 					</button>
 				</div>
 			</form>
@@ -215,13 +226,24 @@
 									{copiedLink === reviewer.pendingFeedbackLink ? 'Copied!' : 'Copy Link'}
 								</button>
 							{/if}
-							<form method="post" action="?/generateFeedback">
+							<form
+								method="post"
+								action="?/generateFeedback"
+								use:enhance={() => {
+									requestingFeedbackId = reviewer.id;
+									return async ({ update }) => {
+										requestingFeedbackId = null;
+										await update();
+									};
+								}}
+							>
 								<input type="hidden" name="stakeholderId" value={reviewer.id} />
 								<button
 									type="submit"
-									class="shrink-0 rounded-lg border border-accent bg-accent-muted px-4 py-2 text-sm font-medium text-accent transition-colors hover:bg-accent hover:text-white"
+									disabled={requestingFeedbackId === reviewer.id}
+									class="shrink-0 rounded-lg border border-accent bg-accent-muted px-4 py-2 text-sm font-medium text-accent transition-colors hover:bg-accent hover:text-white disabled:opacity-50"
 								>
-									Request Feedback
+									{requestingFeedbackId === reviewer.id ? 'Sending...' : 'Request Feedback'}
 								</button>
 							</form>
 						</div>

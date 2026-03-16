@@ -140,7 +140,7 @@
 			Make changes
 		</a>
 		<a
-			href="/reflections/checkin"
+			href="/individual/checkin"
 			class="rounded-xl bg-accent px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-accent-hover"
 		>
 			Start Your First Check-in
