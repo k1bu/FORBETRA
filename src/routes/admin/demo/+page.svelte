@@ -8,24 +8,38 @@
 	let selectedIndividualId = $state(data.defaults.individualId);
 	let selectedCoachId = $state(data.defaults.coachId);
 
-	let windowCounter = 0;
-	const impersonateAndOpen = async (userId: string, path: string) => {
-		const res = await fetch('/api/admin/impersonate', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ userId })
-		});
-		if (!res.ok) {
-			addToast('Failed to start impersonation. Please try again.', 'error');
-			return;
+	// Single demo window — all steps navigate in the same tab
+	let demoWindow: Window | null = null;
+	let lastImpersonatedUserId = '';
+
+	const openInDemoWindow = (path: string) => {
+		if (!demoWindow || demoWindow.closed) {
+			demoWindow = window.open(path, 'forbetra-demo');
+		} else {
+			demoWindow.location.href = path;
+			demoWindow.focus();
 		}
-		windowCounter++;
-		window.open(path, `demo-${windowCounter}`);
+	};
+
+	const impersonateAndOpen = async (userId: string, path: string) => {
+		// Only re-impersonate if switching users
+		if (userId !== lastImpersonatedUserId) {
+			const res = await fetch('/api/admin/impersonate', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ userId })
+			});
+			if (!res.ok) {
+				addToast('Failed to start impersonation. Please try again.', 'error');
+				return;
+			}
+			lastImpersonatedUserId = userId;
+		}
+		openInDemoWindow(path);
 	};
 
 	const openNew = (path: string) => {
-		windowCounter++;
-		window.open(path, `demo-${windowCounter}`);
+		openInDemoWindow(path);
 	};
 
 	type DemoStep = {
