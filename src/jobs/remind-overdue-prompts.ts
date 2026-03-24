@@ -4,23 +4,9 @@ import { emailTemplates } from '$lib/notifications/emailTemplates';
 import { trySendSms } from '$lib/notifications/sms';
 import { smsTemplates } from '$lib/notifications/smsTemplates';
 import { computeWeekNumber } from '$lib/server/coachUtils';
-
-// Track overdue reminders sent this week to avoid spamming
-const overdueRemindersSent = new Map<string, number>();
-
-function getWeekKey(): string {
-	const now = new Date();
-	const year = now.getFullYear();
-	const startOfYear = new Date(year, 0, 1);
-	const weekNum = Math.ceil(
-		((now.getTime() - startOfYear.getTime()) / 86400000 + startOfYear.getDay() + 1) / 7
-	);
-	return `${year}-W${weekNum}`;
-}
+import { rateLimit } from '$lib/server/rateLimit';
 
 export const remindOverduePrompts = async () => {
-	const weekKey = getWeekKey();
-
 	const objectives = await prisma.objective.findMany({
 		where: { active: true },
 		include: {
@@ -64,16 +50,18 @@ export const remindOverduePrompts = async () => {
 		});
 
 		if (overdue.length > 0) {
-			// Limit overdue reminders to max 2 per user per week
-			const userWeekKey = `${objective.user.id}:${weekKey}`;
-			const sentCount = overdueRemindersSent.get(userWeekKey) ?? 0;
-			if (sentCount >= 2) {
+			// Limit overdue reminders to max 2 per user per week (persisted via Redis/rateLimit)
+			const allowed = await rateLimit(
+				`overdue-remind:${objective.user.id}`,
+				2,
+				7 * 24 * 60 * 60 * 1000
+			);
+			if (!allowed) {
 				console.info(
-					`[job:remind-overdue-prompts] Already sent ${sentCount} reminders to ${objective.user.email} this week, skipping`
+					`[job:remind-overdue-prompts] Weekly limit reached for ${objective.user.email}, skipping`
 				);
 				continue;
 			}
-			overdueRemindersSent.set(userWeekKey, sentCount + 1);
 
 			const delivery = objective.user.deliveryMethod ?? 'both';
 

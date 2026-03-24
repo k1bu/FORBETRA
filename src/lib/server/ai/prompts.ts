@@ -35,6 +35,8 @@ type StakeholderWeekScore = {
 	stakeholderName: string;
 	effort: number | null;
 	performance: number | null;
+	behavioralObservation?: string | null;
+	suggestion?: string | null;
 };
 
 export type CheckInContext = {
@@ -85,10 +87,12 @@ export function buildCheckInPrompt(context: CheckInContext): string {
 	const stakeholderLines =
 		context.stakeholderFeedback.length > 0
 			? context.stakeholderFeedback
-					.map(
-						(s) =>
-							`  ${s.stakeholderName}: Effort ${s.effort ?? '--'}, Performance ${s.performance ?? '--'}`
-					)
+					.map((s) => {
+						let line = `  ${s.stakeholderName}: Effort ${s.effort ?? '--'}, Performance ${s.performance ?? '--'}`;
+						if (s.behavioralObservation) line += `\n    Observation: "${s.behavioralObservation}"`;
+						if (s.suggestion) line += `\n    Suggestion: "${s.suggestion}"`;
+						return line;
+					})
 					.join('\n')
 			: '  No stakeholder feedback for this week yet.';
 
@@ -131,10 +135,12 @@ export function buildWeeklySynthesisPrompt(context: WeeklySynthesisContext): str
 	const stakeholderLines =
 		context.stakeholderFeedback.length > 0
 			? context.stakeholderFeedback
-					.map(
-						(s) =>
-							`  ${s.stakeholderName} (Week ${s.weekNumber}): Effort ${s.effort ?? '--'}, Performance ${s.performance ?? '--'}`
-					)
+					.map((s) => {
+						let line = `  ${s.stakeholderName} (Week ${s.weekNumber}): Effort ${s.effort ?? '--'}, Performance ${s.performance ?? '--'}`;
+						if (s.behavioralObservation) line += `\n    Observation: "${s.behavioralObservation}"`;
+						if (s.suggestion) line += `\n    Suggestion: "${s.suggestion}"`;
+						return line;
+					})
 					.join('\n')
 			: '  No stakeholder feedback this week.';
 

@@ -231,25 +231,39 @@ async function createAndGenerateInsightStreaming(
 		const rawStream = callClaudeStreaming(prompt, maxTokens);
 		let accumulated = '';
 
+		let cancelled = false;
 		const wrappedStream = new ReadableStream<string>({
 			async start(controller) {
 				const reader = rawStream.getReader();
 				try {
 					while (true) {
+						if (cancelled) break;
 						const { done, value } = await reader.read();
 						if (done) break;
 						accumulated += value;
 						controller.enqueue(value);
 					}
 
-					await prisma.insight.update({
-						where: { id: insight.id },
-						data: {
-							status: 'COMPLETED',
-							content: accumulated,
-							promptHash: simpleHash(prompt)
-						}
-					});
+					if (cancelled && accumulated) {
+						// Client disconnected but we have partial content — save it
+						await prisma.insight.update({
+							where: { id: insight.id },
+							data: {
+								status: 'COMPLETED',
+								content: accumulated,
+								promptHash: simpleHash(prompt)
+							}
+						});
+					} else {
+						await prisma.insight.update({
+							where: { id: insight.id },
+							data: {
+								status: 'COMPLETED',
+								content: accumulated,
+								promptHash: simpleHash(prompt)
+							}
+						});
+					}
 					controller.close();
 				} catch (error) {
 					await prisma.insight.update({
@@ -260,6 +274,43 @@ async function createAndGenerateInsightStreaming(
 						}
 					});
 					controller.error(error);
+				}
+			},
+			cancel() {
+				cancelled = true;
+				// Save whatever we accumulated so far
+				if (accumulated) {
+					prisma.insight
+						.update({
+							where: { id: insight.id },
+							data: {
+								status: 'COMPLETED',
+								content: accumulated,
+								promptHash: simpleHash(prompt)
+							}
+						})
+						.catch(() => {
+							// Last resort: mark as failed if save fails
+							prisma.insight
+								.update({
+									where: { id: insight.id },
+									data: {
+										status: 'FAILED',
+										metadata: { error: 'Client disconnected, save failed' }
+									}
+								})
+								.catch(() => {});
+						});
+				} else {
+					prisma.insight
+						.update({
+							where: { id: insight.id },
+							data: {
+								status: 'FAILED',
+								metadata: { error: 'Client disconnected before content received' }
+							}
+						})
+						.catch(() => {});
 				}
 			}
 		});
@@ -399,7 +450,9 @@ export async function generateCheckInInsight(
 				weekNumber,
 				stakeholderName: f.stakeholder.name,
 				effort: f.effortScore,
-				performance: f.performanceScore
+				performance: f.performanceScore,
+				behavioralObservation: f.behavioralObservation,
+				suggestion: f.suggestion
 			})),
 			weeklyPromptTopic: `Week ${weekNumber}`
 		};
@@ -485,7 +538,9 @@ async function buildWeeklySynthesisContext(
 				weekNumber: f.reflection.weekNumber,
 				stakeholderName: f.stakeholder.name,
 				effort: f.effortScore,
-				performance: f.performanceScore
+				performance: f.performanceScore,
+				behavioralObservation: f.behavioralObservation,
+				suggestion: f.suggestion
 			})),
 		coachNotes: cycle.coachNotes.map((n) => n.content)
 	};

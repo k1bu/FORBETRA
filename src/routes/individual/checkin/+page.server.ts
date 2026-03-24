@@ -621,22 +621,36 @@ export const actions: Actions = {
 			const milestoneThresholds = [3, 7, 14, 21, 30, 50];
 			const milestone = milestoneThresholds.includes(streak) ? streak : null;
 
-			// Send milestone celebration email (non-blocking)
+			// Send milestone celebration email (non-blocking, deduped)
 			if (milestone) {
-				const objective = await prisma.objective.findFirst({
-					where: { userId: dbUser.id, active: true },
-					select: { title: true }
+				// Only send on first submission, not re-submissions (check if reflection was just created)
+				const ref = await prisma.reflection.findFirst({
+					where: {
+						cycleId: cycle.id,
+						weekNumber,
+						reflectionType: checkInInfo.type,
+						userId: dbUser.id
+					},
+					select: { submittedAt: true, updatedAt: true }
 				});
-				sendEmail({
-					to: dbUser.email,
-					...emailTemplates.milestoneCelebration({
-						individualName: dbUser.name ?? dbUser.email,
-						milestone,
-						objectiveTitle: objective?.title
-					})
-				}).catch((err) => {
-					console.warn('[email:warn] Failed to send milestone email', err);
-				});
+				const isFirstSubmission =
+					ref && Math.abs(ref.updatedAt.getTime() - ref.submittedAt.getTime()) < 5000;
+				if (isFirstSubmission) {
+					const objective = await prisma.objective.findFirst({
+						where: { userId: dbUser.id, active: true },
+						select: { title: true }
+					});
+					sendEmail({
+						to: dbUser.email,
+						...emailTemplates.milestoneCelebration({
+							individualName: dbUser.name ?? dbUser.email,
+							milestone,
+							objectiveTitle: objective?.title
+						})
+					}).catch((err) => {
+						console.warn('[email:warn] Failed to send milestone email', err);
+					});
+				}
 			}
 
 			return {

@@ -1,10 +1,15 @@
 import { json } from '@sveltejs/kit';
 import prisma from '$lib/server/prisma';
 import { requireRole } from '$lib/server/auth';
+import { rateLimit } from '$lib/server/rateLimit';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async (event) => {
 	const { dbUser } = requireRole(event, 'INDIVIDUAL');
+
+	if (!(await rateLimit(`cycle-extend:${dbUser.id}`, 5, 60_000))) {
+		return json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+	}
 
 	const body = await event.request.json();
 	const cycleId = typeof body.cycleId === 'string' ? body.cycleId.trim() : '';
