@@ -10,7 +10,11 @@
 		Send,
 		Copy,
 		Check,
-		Smartphone
+		Smartphone,
+		ChevronDown,
+		Target,
+		Plus,
+		X
 	} from 'lucide-svelte';
 	import type { PageData, ActionData } from './$types';
 
@@ -108,6 +112,9 @@
 	let submittingCancel = $state<string | null>(null);
 	let submittingResend = $state<string | null>(null);
 	let smsEnabled = $state(false);
+	let showPrefill = $state(false);
+	let prefillSubgoals = $state([{ label: '', description: '' }]);
+	let prefillStakeholders = $state([{ name: '', email: '' }]);
 
 	// --- Toast on form success ---
 	let toastShownForForm: typeof form = null;
@@ -368,6 +375,140 @@
 					: (form?.values?.message ?? defaultInviteMessage)}</textarea
 			>
 		</label>
+		<!-- Pre-fill section -->
+		<div class="border-t border-border-default pt-4">
+			<button
+				type="button"
+				onclick={() => (showPrefill = !showPrefill)}
+				class="flex w-full items-center gap-2 text-sm font-semibold text-text-secondary transition-colors hover:text-text-primary"
+			>
+				<Target class="h-4 w-4 text-accent" />
+				Pre-fill their setup
+				<span class="text-xs font-normal text-text-muted">(optional)</span>
+				<ChevronDown
+					class="ml-auto h-4 w-4 transition-transform {showPrefill ? 'rotate-180' : ''}"
+				/>
+			</button>
+			<p class="mt-1 text-xs text-text-muted">
+				Set their goal, focus areas, and reviewers. They'll review and confirm during onboarding.
+			</p>
+
+			{#if showPrefill}
+				<div class="mt-4 space-y-4">
+					<!-- Objective -->
+					<label class="space-y-1 text-sm">
+						<span class="font-semibold text-text-secondary">Goal Title</span>
+						<input
+							type="text"
+							name="objectiveTitle"
+							class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary transition-all focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
+							placeholder="e.g. Develop executive presence"
+							maxlength="200"
+						/>
+					</label>
+					<label class="space-y-1 text-sm">
+						<span class="font-semibold text-text-secondary"
+							>Goal Description <span class="font-normal text-text-muted">(optional)</span></span
+						>
+						<textarea
+							name="objectiveDescription"
+							rows="2"
+							class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary transition-all focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
+							placeholder="What does success look like?"
+							maxlength="1000"
+						></textarea>
+					</label>
+
+					<!-- Subgoals -->
+					<div class="space-y-2">
+						<span class="text-sm font-semibold text-text-secondary"
+							>Focus Areas <span class="font-normal text-text-muted">(optional)</span></span
+						>
+						{#each prefillSubgoals as subgoal, i (i)}
+							<div class="flex gap-2">
+								<input
+									type="text"
+									name="subgoalLabel{i + 1}"
+									bind:value={subgoal.label}
+									class="flex-1 rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary transition-all focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
+									placeholder="e.g. Active listening"
+									maxlength="200"
+								/>
+								{#if prefillSubgoals.length > 1}
+									<button
+										type="button"
+										onclick={() =>
+											(prefillSubgoals = prefillSubgoals.filter((_, idx) => idx !== i))}
+										class="shrink-0 rounded-lg border border-border-default p-2 text-text-muted transition-colors hover:border-error/30 hover:text-error"
+										aria-label="Remove focus area"
+									>
+										<X class="h-4 w-4" />
+									</button>
+								{/if}
+							</div>
+						{/each}
+						{#if prefillSubgoals.length < 5}
+							<button
+								type="button"
+								onclick={() =>
+									(prefillSubgoals = [...prefillSubgoals, { label: '', description: '' }])}
+								class="flex items-center gap-1 text-xs font-semibold text-accent transition-colors hover:text-accent-hover"
+							>
+								<Plus class="h-3.5 w-3.5" /> Add focus area
+							</button>
+						{/if}
+					</div>
+
+					<!-- Stakeholders -->
+					<div class="space-y-2">
+						<span class="text-sm font-semibold text-text-secondary"
+							>Suggested Reviewers <span class="font-normal text-text-muted">(optional)</span></span
+						>
+						{#each prefillStakeholders as stakeholder, i (i)}
+							<div class="flex gap-2">
+								<input
+									type="text"
+									name="stakeholderName{i + 1}"
+									bind:value={stakeholder.name}
+									class="flex-1 rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary transition-all focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
+									placeholder="Name"
+									maxlength="120"
+								/>
+								<input
+									type="email"
+									name="stakeholderEmail{i + 1}"
+									bind:value={stakeholder.email}
+									class="flex-1 rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary transition-all focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
+									placeholder="Email"
+								/>
+								{#if prefillStakeholders.length > 1}
+									<button
+										type="button"
+										onclick={() =>
+											(prefillStakeholders = prefillStakeholders.filter((_, idx) => idx !== i))}
+										class="shrink-0 rounded-lg border border-border-default p-2 text-text-muted transition-colors hover:border-error/30 hover:text-error"
+										aria-label="Remove reviewer"
+									>
+										<X class="h-4 w-4" />
+									</button>
+								{/if}
+							</div>
+						{/each}
+						{#if prefillStakeholders.length < 5}
+							<button
+								type="button"
+								onclick={() =>
+									(prefillStakeholders = [...prefillStakeholders, { name: '', email: '' }])}
+								class="flex items-center gap-1 text-xs font-semibold text-accent transition-colors hover:text-accent-hover"
+							>
+								<Plus class="h-3.5 w-3.5" /> Add reviewer
+							</button>
+						{/if}
+					</div>
+				</div>
+			{/if}
+		</div>
+
 		<button
 			type="submit"
 			disabled={submittingCreate}

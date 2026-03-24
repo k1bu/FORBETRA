@@ -85,6 +85,40 @@ export const actions: Actions = {
 		const phone = String(formData.get('phone') ?? '').trim();
 		const message = String(formData.get('message') ?? '').trim();
 
+		// Build optional pre-fill payload
+		const objectiveTitle = String(formData.get('objectiveTitle') ?? '').trim();
+		const objectiveDescription = String(formData.get('objectiveDescription') ?? '').trim();
+
+		const subgoals: { label: string; description?: string }[] = [];
+		for (let i = 1; i <= 5; i++) {
+			const label = String(formData.get(`subgoalLabel${i}`) ?? '').trim();
+			if (label) {
+				const desc = String(formData.get(`subgoalDescription${i}`) ?? '').trim();
+				subgoals.push({ label, ...(desc ? { description: desc } : {}) });
+			}
+		}
+
+		const stakeholders: { name: string; email: string }[] = [];
+		for (let i = 1; i <= 5; i++) {
+			const sName = String(formData.get(`stakeholderName${i}`) ?? '').trim();
+			const sEmail = String(formData.get(`stakeholderEmail${i}`) ?? '').trim();
+			if (sName && sEmail) {
+				stakeholders.push({ name: sName, email: sEmail });
+			}
+		}
+
+		const payload =
+			objectiveTitle || subgoals.length > 0 || stakeholders.length > 0
+				? {
+						...(objectiveTitle ? { objectiveTitle } : {}),
+						...(objectiveDescription ? { objectiveDescription } : {}),
+						...(subgoals.length > 0 ? { subgoals } : {}),
+						...(stakeholders.length > 0
+							? { stakeholders: stakeholders.map((s) => ({ ...s, relationship: '' })) }
+							: {})
+					}
+				: undefined;
+
 		if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
 			return fail(400, {
 				action: 'createInvite' as const,
@@ -147,7 +181,7 @@ export const actions: Actions = {
 							name: name.length > 0 ? name : existingInvite.name,
 							phone: normalizedPhone ?? existingInvite.phone,
 							message: message.length > 0 ? message : existingInvite.message,
-							payload: undefined,
+							payload: payload ?? Prisma.DbNull,
 							tokenHash,
 							expiresAt,
 							acceptedAt: null,
@@ -175,7 +209,7 @@ export const actions: Actions = {
 						name: name.length > 0 ? name : null,
 						phone: normalizedPhone,
 						message: message.length > 0 ? message : null,
-						payload: undefined,
+						...(payload ? { payload } : {}),
 						tokenHash,
 						expiresAt
 					}
