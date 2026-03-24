@@ -12,6 +12,7 @@
 
 	const navItems = [
 		{ href: '/admin', label: 'Dashboard', icon: 'grid' },
+		{ href: '/admin/demo', label: 'Demo', icon: 'play' },
 		{ href: '/admin/preview', label: 'Preview Flows', icon: 'eye' },
 		{ href: '/admin/users', label: 'Users', icon: 'users' },
 		{ href: '/admin/objectives', label: 'Objectives & Cycles', icon: 'target' },
