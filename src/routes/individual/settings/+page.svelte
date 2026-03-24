@@ -2,12 +2,14 @@
 	import type { PageData } from './$types';
 	import { enhance } from '$app/forms';
 	import { addToast } from '$lib/stores/toasts.svelte';
-	import { Settings2, User, Bell, Mail, Smartphone, Clock } from 'lucide-svelte';
+	import { Settings2, User, Bell, Mail, Smartphone, Clock, Eye, EyeOff } from 'lucide-svelte';
 
 	const { data }: { data: PageData } = $props();
 
 	// --- Profile state ---
 	let isSavingProfile = $state(false);
+	let revealScores = $state(data.activeCycle?.revealScores ?? true);
+	let isSavingReveal = $state(false);
 	let profileName = $state(data.user.name);
 	let profilePhone = $state(data.user.phone);
 	let profileTimezone = $state(data.user.timezone);
@@ -260,4 +262,84 @@
 			</button>
 		</div>
 	</form>
+
+	<!-- Score Visibility -->
+	{#if data.activeCycle}
+		<form
+			method="POST"
+			action="?/toggleReveal"
+			use:enhance={() => {
+				isSavingReveal = true;
+				return async ({
+					result,
+					update
+				}: {
+					result: { type: string; data?: Record<string, unknown> };
+					update: () => Promise<void>;
+				}) => {
+					isSavingReveal = false;
+					if (result.type === 'failure' && result.data?.error) {
+						addToast(result.data.error as string, 'error');
+						return;
+					}
+					if (result.type === 'success' && result.data?.success) {
+						addToast(result.data.message as string, 'success');
+					}
+					await update();
+				};
+			}}
+			class="space-y-4 rounded-xl border border-border-default bg-surface-raised p-5"
+		>
+			<input type="hidden" name="cycleId" value={data.activeCycle.id} />
+			<input type="hidden" name="revealScores" value={revealScores ? 'true' : 'false'} />
+
+			<div class="flex items-center gap-2">
+				{#if revealScores}
+					<Eye class="h-4 w-4 text-accent" />
+				{:else}
+					<EyeOff class="h-4 w-4 text-text-muted" />
+				{/if}
+				<h2 class="text-sm font-semibold tracking-wide text-text-tertiary uppercase">
+					Score Visibility
+				</h2>
+			</div>
+
+			<div class="flex items-start gap-3">
+				<button
+					type="button"
+					role="switch"
+					aria-checked={revealScores}
+					onclick={() => (revealScores = !revealScores)}
+					class="relative mt-0.5 inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors {revealScores
+						? 'bg-accent'
+						: 'bg-border-strong'}"
+				>
+					<span
+						class="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-sm transition-transform {revealScores
+							? 'translate-x-5'
+							: 'translate-x-0'}"
+					></span>
+				</button>
+				<div>
+					<p class="text-sm font-medium text-text-primary">Allow reviewers to see my self-scores</p>
+					<p class="mt-0.5 text-xs text-text-muted">
+						When enabled, reviewers see how you rated yourself after they submit feedback so they
+						can compare perspectives.
+					</p>
+				</div>
+			</div>
+
+			{#if revealScores !== (data.activeCycle.revealScores ?? true)}
+				<div class="flex justify-end">
+					<button
+						type="submit"
+						disabled={isSavingReveal}
+						class="rounded-lg bg-accent px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
+					>
+						{isSavingReveal ? 'Saving...' : 'Save'}
+					</button>
+				</div>
+			{/if}
+		</form>
+	{/if}
 </section>

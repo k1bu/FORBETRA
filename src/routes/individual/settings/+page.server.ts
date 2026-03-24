@@ -8,6 +8,14 @@ import { validatePhone, normalizePhone } from '$lib/utils/phone';
 export const load: PageServerLoad = async (event) => {
 	const { dbUser } = requireRole(event, 'INDIVIDUAL');
 
+	const activeCycle = await prisma.cycle.findFirst({
+		where: {
+			objective: { userId: dbUser.id, active: true },
+			status: 'ACTIVE'
+		},
+		select: { id: true, revealScores: true }
+	});
+
 	return {
 		user: {
 			name: dbUser.name ?? '',
@@ -17,7 +25,8 @@ export const load: PageServerLoad = async (event) => {
 			notificationTime: dbUser.notificationTime ?? '09:00',
 			deliveryMethod: dbUser.deliveryMethod ?? 'email',
 			role: dbUser.role
-		}
+		},
+		activeCycle: activeCycle ? { id: activeCycle.id, revealScores: activeCycle.revealScores } : null
 	};
 };
 
@@ -76,5 +85,41 @@ export const actions: Actions = {
 			console.error('Failed to update profile', error);
 			return fail(500, { error: 'Unable to save profile. Please try again.', section: 'profile' });
 		}
+	},
+
+	toggleReveal: async (event) => {
+		const { dbUser } = requireRole(event, 'INDIVIDUAL');
+		const formData = await event.request.formData();
+		const revealScores = formData.get('revealScores') === 'true';
+		const cycleId = formData.get('cycleId')?.toString();
+
+		if (!cycleId) {
+			return fail(400, { error: 'No active cycle found.', section: 'reveal' });
+		}
+
+		// Verify ownership
+		const cycle = await prisma.cycle.findFirst({
+			where: {
+				id: cycleId,
+				objective: { userId: dbUser.id }
+			}
+		});
+
+		if (!cycle) {
+			return fail(404, { error: 'Cycle not found.', section: 'reveal' });
+		}
+
+		await prisma.cycle.update({
+			where: { id: cycleId },
+			data: { revealScores }
+		});
+
+		return {
+			success: true,
+			message: revealScores
+				? 'Reviewers can now see your self-scores.'
+				: 'Your self-scores are now hidden from reviewers.',
+			section: 'reveal'
+		};
 	}
 };
