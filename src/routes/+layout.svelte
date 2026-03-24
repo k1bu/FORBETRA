@@ -10,6 +10,7 @@
 	import { resolve } from '$app/paths';
 	import type { LayoutData } from './$types';
 	import ToastContainer from '$lib/components/ToastContainer.svelte';
+	import DemoTourOverlay from '$lib/components/DemoTourOverlay.svelte';
 
 	const { children, data }: { children: Snippet; data: LayoutData } = $props();
 
@@ -153,6 +154,7 @@
 		</footer>
 	{/if}
 	<ToastContainer />
+	<DemoTourOverlay />
 </ClerkProvider>
 
 <style>
