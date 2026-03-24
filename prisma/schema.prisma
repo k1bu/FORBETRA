@@ -244,6 +244,10 @@ model CoachNote {
   coach      User   @relation("CoachNotesAuthored", fields: [coachId], references: [id], onDelete: Cascade)
   individual User   @relation("CoachNotesReceived", fields: [individualId], references: [id], onDelete: Cascade)
   cycle      Cycle? @relation(fields: [cycleId], references: [id], onDelete: SetNull)
+
+  @@index([coachId])
+  @@index([individualId])
+  @@index([cycleId])
 }
 
 model Token {

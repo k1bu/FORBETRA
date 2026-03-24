@@ -27,6 +27,8 @@ export const load: PageServerLoad = async ({ parent }) => {
 					effortScore: true,
 					performanceScore: true,
 					comment: true,
+					behavioralObservation: true,
+					suggestion: true,
 					submittedAt: true,
 					stakeholder: {
 						select: { name: true }
@@ -52,6 +54,8 @@ export const load: PageServerLoad = async ({ parent }) => {
 					effortScore: number | null;
 					performanceScore: number | null;
 					comment: string | null;
+					behavioralObservation: string | null;
+					suggestion: string | null;
 				}>;
 			}>;
 		}
@@ -72,7 +76,9 @@ export const load: PageServerLoad = async ({ parent }) => {
 				stakeholderName: f.stakeholder.name,
 				effortScore: f.effortScore,
 				performanceScore: f.performanceScore,
-				comment: f.comment
+				comment: f.comment,
+				behavioralObservation: f.behavioralObservation,
+				suggestion: f.suggestion
 			}))
 		});
 	}

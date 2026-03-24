@@ -4,6 +4,7 @@ import { emailTemplates } from '$lib/notifications/emailTemplates';
 import { trySendSms } from '$lib/notifications/sms';
 import { smsTemplates } from '$lib/notifications/smsTemplates';
 import { computeWeekNumber } from '$lib/server/coachUtils';
+import { rateLimit } from '$lib/server/rateLimit';
 
 export const remindStakeholderFeedback = async () => {
 	const stakeholders = await prisma.stakeholder.findMany({
@@ -58,6 +59,10 @@ export const remindStakeholderFeedback = async () => {
 				continue; // Only send on odd-numbered weeks
 			}
 		}
+
+		// Limit to 2 reminders per stakeholder per week
+		const allowed = await rateLimit(`sh-remind:${stakeholder.id}`, 2, 7 * 24 * 60 * 60 * 1000);
+		if (!allowed) continue;
 
 		// Get the most recent pending token
 		const latestToken = pending[0];

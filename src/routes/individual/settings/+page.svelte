@@ -309,6 +309,7 @@
 					type="button"
 					role="switch"
 					aria-checked={revealScores}
+					aria-label="Toggle reviewer score visibility"
 					onclick={() => (revealScores = !revealScores)}
 					class="relative mt-0.5 inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors {revealScores
 						? 'bg-accent'

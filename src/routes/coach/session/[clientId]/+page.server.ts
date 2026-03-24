@@ -79,6 +79,9 @@ export const load: PageServerLoad = async (event) => {
 										submittedAt: true,
 										effortScore: true,
 										performanceScore: true,
+										comment: true,
+										behavioralObservation: true,
+										suggestion: true,
 										reflection: {
 											select: {
 												weekNumber: true,

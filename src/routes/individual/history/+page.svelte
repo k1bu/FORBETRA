@@ -54,6 +54,8 @@
 							effortScore: number | null;
 							performanceScore: number | null;
 							comment: string | null;
+							behavioralObservation: string | null;
+							suggestion: string | null;
 						}>;
 					}>;
 				}) => {
@@ -61,7 +63,10 @@
 						if (r.notes?.toLowerCase().includes(q)) return true;
 						return r.feedbacks.some(
 							(f) =>
-								f.comment?.toLowerCase().includes(q) || f.stakeholderName.toLowerCase().includes(q)
+								f.comment?.toLowerCase().includes(q) ||
+								f.behavioralObservation?.toLowerCase().includes(q) ||
+								f.suggestion?.toLowerCase().includes(q) ||
+								f.stakeholderName.toLowerCase().includes(q)
 						);
 					});
 					if (matchingReflections.length === 0) return null;
@@ -263,6 +268,19 @@
 																	{#if feedback.comment}
 																		<p class="mt-1 text-xs text-text-secondary">
 																			{feedback.comment}
+																		</p>
+																	{/if}
+																	{#if feedback.behavioralObservation}
+																		<p class="mt-1 text-xs text-text-secondary">
+																			<span class="font-medium text-text-tertiary">Observed:</span>
+																			{feedback.behavioralObservation}
+																		</p>
+																	{/if}
+																	{#if feedback.suggestion}
+																		<p class="mt-1 text-xs text-text-secondary">
+																			<span class="font-medium text-text-tertiary">Suggestion:</span
+																			>
+																			{feedback.suggestion}
 																		</p>
 																	{/if}
 																</div>
