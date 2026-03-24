@@ -437,6 +437,10 @@ export const emailTemplates = {
 							<p style="margin: 0; font-size: 14px; color: #64748b;">${trendIcon(data.performanceTrend)} Performance: ${trendLabel(data.performanceTrend)}</p>
 						</div>
 						<p style="font-size: 14px; color: #64748b;">Your continued feedback helps ${indName} stay accountable and see the full picture of their growth. Thank you!</p>
+						<div style="text-align: center; margin: 30px 0;">
+							<p style="font-size: 14px; color: #334155; font-weight: 600; margin-bottom: 12px;">Keep the momentum going — your next feedback makes a real difference.</p>
+							<a href="${baseUrl}" style="display: inline-block; background: #0891b2; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Continue Supporting ${indName}</a>
+						</div>
 					</div>
 				${emailFooter(baseUrl)}
 				</body>
