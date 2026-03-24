@@ -19,18 +19,20 @@ All 5 ship-blocking issues resolved and deployed (commit `3eab353`).
 
 ---
 
-## Tier 2: Competitive Differentiation (Next 4-6 Weeks)
+## Tier 2: Competitive Differentiation — COMPLETE
 
-| #   | Item                                                                                                                                                                      | Impact | Effort | Status  |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ------ | ------- |
-| 6   | **Coach-prefilled client onboarding** — Coach sets objective/subgoals/stakeholders during invite; client signs up and sees pre-populated onboarding to review and confirm | High   | Medium | Planned |
-| 7   | Restructure Individual Hub into Today / Progress / Scorecard views                                                                                                        | High   | High   | Planned |
-| 8   | Add streaming to AI insights                                                                                                                                              | High   | Low    | Planned |
-| 9   | Build Coach Session View (client deep-dive with prep + notes + data)                                                                                                      | High   | Medium | Planned |
-| 10  | On-demand Coach Prep generation (not just Monday morning)                                                                                                                 | High   | Low    | Planned |
-| 11  | Add in-app notifications (toast system for insights, feedback, coach notes)                                                                                               | High   | Medium | Planned |
-| 12  | Make Reveal opt-in for participants (don't auto-show self-scores to stakeholders)                                                                                         | Medium | Low    | Planned |
-| 13  | Add milestone celebrations and streak-based email nudges                                                                                                                  | Medium | Low    | Planned |
+All 8 items built and committed (March 2026).
+
+| #   | Item                                                                                                                                                                      | Impact | Effort | Status |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ------ | ------ |
+| 6   | **Coach-prefilled client onboarding** — Coach sets objective/subgoals/stakeholders during invite; client signs up and sees pre-populated onboarding to review and confirm | High   | Medium | Done   |
+| 7   | Restructure Individual Hub into Today / Progress / Scorecard views                                                                                                        | High   | High   | Done   |
+| 8   | Add streaming to AI insights                                                                                                                                              | High   | Low    | Done   |
+| 9   | Build Coach Session View (client deep-dive with prep + notes + data)                                                                                                      | High   | Medium | Done   |
+| 10  | On-demand Coach Prep generation (not just Monday morning)                                                                                                                 | High   | Low    | Done   |
+| 11  | Add in-app notifications (toast system for insights, feedback, coach notes)                                                                                               | High   | Medium | Done   |
+| 12  | Make Reveal opt-in for participants (don't auto-show self-scores to stakeholders)                                                                                         | Medium | Low    | Done   |
+| 13  | Add milestone celebrations and streak-based email nudges                                                                                                                  | Medium | Low    | Done   |
 
 ### Item 6 Detail: Coach-Prefilled Client Onboarding
 
