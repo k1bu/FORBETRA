@@ -42,25 +42,72 @@
 	async function generatePrep() {
 		generatingPrep = true;
 		prepError = null;
+		freshPrep = { id: '', content: '', createdAt: new Date().toISOString() };
 		try {
 			const res = await fetch('/api/insights/coach-prep', {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
+				headers: {
+					'Content-Type': 'application/json',
+					Accept: 'text/event-stream'
+				},
 				body: JSON.stringify({ individualId: data.client.id })
 			});
-			const result = await res.json();
-			if (res.ok && result.content) {
-				freshPrep = {
-					id: result.id,
-					content: result.content,
-					createdAt: result.createdAt
-				};
-				addToast('Session prep ready', 'success');
-			} else {
-				prepError = result.error || 'Could not generate insights. Try again in a moment.';
+
+			if (!res.ok) {
+				const err = await res.json();
+				prepError = err.error || 'Could not generate insights. Try again in a moment.';
+				freshPrep = null;
+				return;
 			}
+
+			const reader = res.body?.getReader();
+			if (!reader) {
+				// Fallback to non-streaming
+				const result = await res.json();
+				freshPrep = { id: result.id, content: result.content, createdAt: result.createdAt };
+				addToast('Session prep ready', 'success');
+				return;
+			}
+
+			const decoder = new TextDecoder();
+			let buffer = '';
+
+			while (true) {
+				const { done, value } = await reader.read();
+				if (done) break;
+				buffer += decoder.decode(value, { stream: true });
+				const lines = buffer.split('\n');
+				buffer = lines.pop() ?? '';
+
+				for (const line of lines) {
+					if (line.startsWith('data: ')) {
+						const payload = line.slice(6);
+						try {
+							const parsed = JSON.parse(payload);
+							if (typeof parsed === 'string') {
+								freshPrep = {
+									id: freshPrep?.id ?? '',
+									content: (freshPrep?.content ?? '') + parsed,
+									createdAt: freshPrep?.createdAt ?? new Date().toISOString()
+								};
+							} else if (parsed.id && typeof parsed.id === 'string') {
+								freshPrep = {
+									id: parsed.id,
+									content: freshPrep?.content ?? '',
+									createdAt: freshPrep?.createdAt ?? new Date().toISOString()
+								};
+							}
+						} catch {
+							// Ignore malformed JSON
+						}
+					}
+				}
+			}
+
+			addToast('Session prep ready', 'success');
 		} catch {
 			prepError = 'Connection issue — check your network and try again.';
+			if (!freshPrep?.content) freshPrep = null;
 		} finally {
 			generatingPrep = false;
 		}

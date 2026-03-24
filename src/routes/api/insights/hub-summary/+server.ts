@@ -2,7 +2,10 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import prisma from '$lib/server/prisma';
 import { requireRole } from '$lib/server/auth';
-import { generateWeeklySynthesis } from '$lib/server/ai/generateInsight';
+import {
+	generateWeeklySynthesis,
+	generateWeeklySynthesisStreaming
+} from '$lib/server/ai/generateInsight';
 import { computeWeekNumber } from '$lib/server/coachUtils';
 import { rateLimit } from '$lib/server/rateLimit';
 
@@ -32,13 +35,59 @@ export const POST: RequestHandler = async (event) => {
 	const cycle = objective.cycles[0];
 	const currentWeek = computeWeekNumber(cycle.startDate);
 
+	// Check if client wants streaming
+	const acceptHeader = event.request.headers.get('accept') ?? '';
+	if (acceptHeader.includes('text/event-stream')) {
+		const result = await generateWeeklySynthesisStreaming(dbUser.id, cycle.id, currentWeek);
+
+		if (!result) {
+			return json({ error: 'Failed to generate insight' }, { status: 500 });
+		}
+
+		const encoder = new TextEncoder();
+		const sseStream = new ReadableStream({
+			async start(controller) {
+				// Send insight ID as first event
+				controller.enqueue(
+					encoder.encode(`event: meta\ndata: ${JSON.stringify({ id: result.insightId })}\n\n`)
+				);
+
+				const reader = result.stream.getReader();
+				try {
+					while (true) {
+						const { done, value } = await reader.read();
+						if (done) break;
+						controller.enqueue(encoder.encode(`data: ${JSON.stringify(value)}\n\n`));
+					}
+					controller.enqueue(encoder.encode('event: done\ndata: {}\n\n'));
+					controller.close();
+				} catch (error) {
+					controller.enqueue(
+						encoder.encode(
+							`event: error\ndata: ${JSON.stringify({ error: error instanceof Error ? error.message : 'Stream error' })}\n\n`
+						)
+					);
+					controller.close();
+				}
+			}
+		});
+
+		return new Response(sseStream, {
+			headers: {
+				'Content-Type': 'text/event-stream',
+				'Cache-Control': 'no-cache',
+				Connection: 'keep-alive'
+			}
+		});
+	}
+
+	// Non-streaming fallback
 	const insightId = await generateWeeklySynthesis(dbUser.id, cycle.id, currentWeek);
 
 	if (!insightId) {
 		return json({ error: 'Failed to generate insight' }, { status: 500 });
 	}
 
-	// Fetch the generated insight content
 	const insight = await prisma.insight.findUnique({
 		where: { id: insightId },
 		select: { id: true, content: true, type: true, weekNumber: true, createdAt: true }

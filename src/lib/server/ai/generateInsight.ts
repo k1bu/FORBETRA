@@ -202,6 +202,83 @@ async function createAndGenerateInsight(
 	}
 }
 
+async function createAndGenerateInsightStreaming(
+	userId: string,
+	cycleId: string | null,
+	weekNumber: number | null,
+	type: InsightType,
+	promptBuilder: () => Promise<string>,
+	maxTokens: number = 1024
+): Promise<{ insightId: string; stream: ReadableStream<string> } | null> {
+	const insight = await prisma.insight.create({
+		data: {
+			userId,
+			cycleId,
+			weekNumber,
+			type,
+			status: 'PENDING',
+			modelId: MODEL_ID
+		}
+	});
+
+	try {
+		await prisma.insight.update({
+			where: { id: insight.id },
+			data: { status: 'GENERATING' }
+		});
+
+		const prompt = await promptBuilder();
+		const rawStream = callClaudeStreaming(prompt, maxTokens);
+		let accumulated = '';
+
+		const wrappedStream = new ReadableStream<string>({
+			async start(controller) {
+				const reader = rawStream.getReader();
+				try {
+					while (true) {
+						const { done, value } = await reader.read();
+						if (done) break;
+						accumulated += value;
+						controller.enqueue(value);
+					}
+
+					await prisma.insight.update({
+						where: { id: insight.id },
+						data: {
+							status: 'COMPLETED',
+							content: accumulated,
+							promptHash: simpleHash(prompt)
+						}
+					});
+					controller.close();
+				} catch (error) {
+					await prisma.insight.update({
+						where: { id: insight.id },
+						data: {
+							status: 'FAILED',
+							metadata: { error: error instanceof Error ? error.message : 'Unknown error' }
+						}
+					});
+					controller.error(error);
+				}
+			}
+		});
+
+		return { insightId: insight.id, stream: wrappedStream };
+	} catch (error: unknown) {
+		const errMsg = error instanceof Error ? error.message : 'Unknown error';
+		console.error(`[insight:error] Failed to start streaming ${type}`, {
+			insightId: insight.id,
+			error: errMsg
+		});
+		await prisma.insight.update({
+			where: { id: insight.id },
+			data: { status: 'FAILED', metadata: { error: errMsg } }
+		});
+		return null;
+	}
+}
+
 function simpleHash(str: string): string {
 	let hash = 0;
 	for (let i = 0; i < str.length; i++) {
@@ -334,258 +411,296 @@ export async function generateCheckInInsight(
 /**
  * Generate a WEEKLY_SYNTHESIS insight for end-of-week.
  */
+async function buildWeeklySynthesisContext(
+	userId: string,
+	cycleId: string,
+	weekNumber: number
+): Promise<string> {
+	const cycle = await prisma.cycle.findUnique({
+		where: { id: cycleId },
+		include: {
+			objective: {
+				include: { subgoals: { where: { active: true } } }
+			},
+			reflections: {
+				where: {
+					userId,
+					weekNumber: { lte: weekNumber, gte: Math.max(1, weekNumber - 3) }
+				},
+				select: {
+					weekNumber: true,
+					reflectionType: true,
+					effortScore: true,
+					performanceScore: true,
+					notes: true
+				}
+			},
+			coachNotes: {
+				where: { weekNumber },
+				select: { content: true }
+			}
+		}
+	});
+
+	if (!cycle) throw new Error('Cycle not found');
+
+	const [thisWeekReflectionsRaw, identityAnchor] = await Promise.all([
+		Promise.resolve(cycle.reflections.filter((r) => r.weekNumber === weekNumber)),
+		getIdentityAnchor(cycleId, userId)
+	]);
+
+	const thisWeekReflections = thisWeekReflectionsRaw.map((r) => ({
+		type: r.reflectionType,
+		effort: r.effortScore,
+		performance: r.performanceScore,
+		notes: r.notes
+	}));
+
+	const weeklyAverages = getWeeklyAverages(cycle.reflections);
+	const last3 = weeklyAverages.filter((w) => w.weekNumber < weekNumber).slice(-3);
+
+	const feedback = await prisma.feedback.findMany({
+		where: {
+			reflection: {
+				cycleId,
+				weekNumber: { lte: weekNumber, gte: Math.max(1, weekNumber - 3) }
+			}
+		},
+		include: {
+			stakeholder: { select: { name: true } },
+			reflection: { select: { weekNumber: true } }
+		}
+	});
+
+	const context: WeeklySynthesisContext = {
+		objectiveTitle: cycle.objective.title,
+		subgoals: cycle.objective.subgoals.map((s) => s.label),
+		currentWeek: weekNumber,
+		identityAnchor,
+		thisWeekReflections,
+		last3Weeks: last3,
+		stakeholderFeedback: feedback
+			.filter((f) => f.reflection.weekNumber === weekNumber)
+			.map((f) => ({
+				weekNumber: f.reflection.weekNumber,
+				stakeholderName: f.stakeholder.name,
+				effort: f.effortScore,
+				performance: f.performanceScore
+			})),
+		coachNotes: cycle.coachNotes.map((n) => n.content)
+	};
+
+	return buildWeeklySynthesisPrompt(context);
+}
+
 export async function generateWeeklySynthesis(
 	userId: string,
 	cycleId: string,
 	weekNumber: number
 ): Promise<string | null> {
-	return createAndGenerateInsight(userId, cycleId, weekNumber, 'WEEKLY_SYNTHESIS', async () => {
-		const cycle = await prisma.cycle.findUnique({
-			where: { id: cycleId },
-			include: {
-				objective: {
-					include: { subgoals: { where: { active: true } } }
-				},
-				reflections: {
-					where: {
-						userId,
-						weekNumber: { lte: weekNumber, gte: Math.max(1, weekNumber - 3) }
-					},
-					select: {
-						weekNumber: true,
-						reflectionType: true,
-						effortScore: true,
-						performanceScore: true,
-						notes: true
-					}
-				},
-				coachNotes: {
-					where: { weekNumber },
-					select: { content: true }
-				}
-			}
-		});
+	return createAndGenerateInsight(userId, cycleId, weekNumber, 'WEEKLY_SYNTHESIS', () =>
+		buildWeeklySynthesisContext(userId, cycleId, weekNumber)
+	);
+}
 
-		if (!cycle) throw new Error('Cycle not found');
-
-		const [thisWeekReflectionsRaw, identityAnchor] = await Promise.all([
-			Promise.resolve(cycle.reflections.filter((r) => r.weekNumber === weekNumber)),
-			getIdentityAnchor(cycleId, userId)
-		]);
-
-		const thisWeekReflections = thisWeekReflectionsRaw.map((r) => ({
-			type: r.reflectionType,
-			effort: r.effortScore,
-			performance: r.performanceScore,
-			notes: r.notes
-		}));
-
-		const weeklyAverages = getWeeklyAverages(cycle.reflections);
-		const last3 = weeklyAverages.filter((w) => w.weekNumber < weekNumber).slice(-3);
-
-		// Get all stakeholder feedback for this week + recent weeks
-		const feedback = await prisma.feedback.findMany({
-			where: {
-				reflection: {
-					cycleId,
-					weekNumber: { lte: weekNumber, gte: Math.max(1, weekNumber - 3) }
-				}
-			},
-			include: {
-				stakeholder: { select: { name: true } },
-				reflection: { select: { weekNumber: true } }
-			}
-		});
-
-		const context: WeeklySynthesisContext = {
-			objectiveTitle: cycle.objective.title,
-			subgoals: cycle.objective.subgoals.map((s) => s.label),
-			currentWeek: weekNumber,
-			identityAnchor,
-			thisWeekReflections,
-			last3Weeks: last3,
-			stakeholderFeedback: feedback
-				.filter((f) => f.reflection.weekNumber === weekNumber)
-				.map((f) => ({
-					weekNumber: f.reflection.weekNumber,
-					stakeholderName: f.stakeholder.name,
-					effort: f.effortScore,
-					performance: f.performanceScore
-				})),
-			coachNotes: cycle.coachNotes.map((n) => n.content)
-		};
-
-		return buildWeeklySynthesisPrompt(context);
-	});
+/**
+ * Streaming variant of weekly synthesis — returns SSE-compatible stream.
+ */
+export async function generateWeeklySynthesisStreaming(
+	userId: string,
+	cycleId: string,
+	weekNumber: number
+): Promise<{ insightId: string; stream: ReadableStream<string> } | null> {
+	return createAndGenerateInsightStreaming(userId, cycleId, weekNumber, 'WEEKLY_SYNTHESIS', () =>
+		buildWeeklySynthesisContext(userId, cycleId, weekNumber)
+	);
 }
 
 /**
  * Generate a COACH_PREP insight for a specific client.
  */
-export async function generateCoachPrep(
+async function buildCoachPrepContext(
 	coachId: string,
 	individualId: string,
 	cycleId: string
-): Promise<string | null> {
-	return createAndGenerateInsight(individualId, cycleId, null, 'COACH_PREP', async () => {
-		const individual = await prisma.user.findUnique({
-			where: { id: individualId },
-			select: { name: true, email: true }
-		});
+): Promise<string> {
+	const individual = await prisma.user.findUnique({
+		where: { id: individualId },
+		select: { name: true, email: true }
+	});
 
-		const cycle = await prisma.cycle.findUnique({
-			where: { id: cycleId },
-			include: {
-				objective: {
-					include: {
-						subgoals: { where: { active: true } },
-						stakeholders: {
-							include: {
-								feedbacks: {
-									orderBy: { submittedAt: 'desc' },
-									take: 20,
-									include: {
-										stakeholder: { select: { name: true } },
-										reflection: {
-											select: {
-												weekNumber: true,
-												effortScore: true,
-												performanceScore: true
-											}
+	const cycle = await prisma.cycle.findUnique({
+		where: { id: cycleId },
+		include: {
+			objective: {
+				include: {
+					subgoals: { where: { active: true } },
+					stakeholders: {
+						include: {
+							feedbacks: {
+								orderBy: { submittedAt: 'desc' },
+								take: 20,
+								include: {
+									stakeholder: { select: { name: true } },
+									reflection: {
+										select: {
+											weekNumber: true,
+											effortScore: true,
+											performanceScore: true
 										}
 									}
 								}
 							}
 						}
 					}
-				},
-				reflections: {
-					where: { userId: individualId },
-					orderBy: { weekNumber: 'desc' },
-					take: 30,
-					select: {
-						weekNumber: true,
-						effortScore: true,
-						performanceScore: true
-					}
-				},
-				coachNotes: {
-					where: { coachId },
-					orderBy: { createdAt: 'desc' },
-					take: 5,
-					select: { content: true }
 				}
-			}
-		});
-
-		if (!cycle || !individual) throw new Error('Data not found');
-
-		const currentWeek = computeWeekNumber(cycle.startDate);
-		const weeklyAverages = getWeeklyAverages(cycle.reflections);
-		const last4 = weeklyAverages.slice(-4);
-
-		// Calculate stability
-		const effortValues = last4.map((w) => w.effort).filter((v): v is number => v !== null);
-		const perfValues = last4.map((w) => w.performance).filter((v): v is number => v !== null);
-		const efStd = stdDev(effortValues);
-		const prStd = stdDev(perfValues);
-		const stds = [efStd, prStd].filter((v): v is number => v !== null);
-		const combinedStd = stds.length > 0 ? stds.reduce((a, b) => a + b, 0) / stds.length : null;
-		const stabilityScore =
-			combinedStd !== null ? Math.max(0, Math.round(100 - combinedStd * 10)) : null;
-
-		// Build stakeholder feedback and gap data
-		const allStakeholderFeedback: Array<{
-			weekNumber: number;
-			stakeholderName: string;
-			effort: number | null;
-			performance: number | null;
-		}> = [];
-
-		const gapByWeek = new Map<
-			number,
-			{ selfEffort: number[]; selfPerf: number[]; shEffort: number[]; shPerf: number[] }
-		>();
-
-		cycle.objective.stakeholders.forEach((sh) => {
-			sh.feedbacks.forEach((fb) => {
-				if (!fb.reflection) return;
-				const wk = fb.reflection.weekNumber;
-
-				allStakeholderFeedback.push({
-					weekNumber: wk,
-					stakeholderName: fb.stakeholder.name,
-					effort: fb.effortScore,
-					performance: fb.performanceScore
-				});
-
-				if (!gapByWeek.has(wk)) {
-					gapByWeek.set(wk, {
-						selfEffort: [],
-						selfPerf: [],
-						shEffort: [],
-						shPerf: []
-					});
+			},
+			reflections: {
+				where: { userId: individualId },
+				orderBy: { weekNumber: 'desc' },
+				take: 30,
+				select: {
+					weekNumber: true,
+					effortScore: true,
+					performanceScore: true
 				}
-				const g = gapByWeek.get(wk)!;
-				if (fb.effortScore !== null) g.shEffort.push(fb.effortScore);
-				if (fb.performanceScore !== null) g.shPerf.push(fb.performanceScore);
-				if (fb.reflection.effortScore !== null) g.selfEffort.push(fb.reflection.effortScore);
-				if (fb.reflection.performanceScore !== null)
-					g.selfPerf.push(fb.reflection.performanceScore);
-			});
-		});
-
-		const stakeholderGapTrend = Array.from(gapByWeek.entries())
-			.filter(([wk]) => wk >= currentWeek - 4)
-			.map(([weekNumber, g]) => {
-				const selfE =
-					g.selfEffort.length > 0
-						? g.selfEffort.reduce((a, b) => a + b, 0) / g.selfEffort.length
-						: 0;
-				const shE =
-					g.shEffort.length > 0 ? g.shEffort.reduce((a, b) => a + b, 0) / g.shEffort.length : 0;
-				const selfP =
-					g.selfPerf.length > 0 ? g.selfPerf.reduce((a, b) => a + b, 0) / g.selfPerf.length : 0;
-				const shP = g.shPerf.length > 0 ? g.shPerf.reduce((a, b) => a + b, 0) / g.shPerf.length : 0;
-				return {
-					weekNumber,
-					effortGap: Number((selfE - shE).toFixed(1)),
-					performanceGap: Number((selfP - shP).toFixed(1))
-				};
-			})
-			.sort((a, b) => a.weekNumber - b.weekNumber);
-
-		// Build alerts
-		const alerts: string[] = [];
-		if (stabilityScore !== null && stabilityScore < 50) {
-			alerts.push(`Low stability score: ${stabilityScore}/100`);
-		}
-		const lastWeekAvg = last4[last4.length - 1];
-		if (lastWeekAvg && lastWeekAvg.effort !== null && lastWeekAvg.performance !== null) {
-			const gap = lastWeekAvg.effort - lastWeekAvg.performance;
-			if (gap > 2) {
-				alerts.push(
-					`Significant effort-performance gap: ${gap.toFixed(1)} points (effort ${lastWeekAvg.effort}, performance ${lastWeekAvg.performance})`
-				);
+			},
+			coachNotes: {
+				where: { coachId },
+				orderBy: { createdAt: 'desc' },
+				take: 5,
+				select: { content: true }
 			}
 		}
-
-		const context: CoachPrepContext = {
-			individualName: individual.name ?? individual.email,
-			objectiveTitle: cycle.objective.title,
-			last4Weeks: last4,
-			stakeholderFeedback: allStakeholderFeedback
-				.filter((f) => f.weekNumber >= currentWeek - 4)
-				.slice(0, 20),
-			stakeholderGapTrend,
-			stabilityScore,
-			coachNotes: cycle.coachNotes.map((n) => n.content),
-			alerts
-		};
-
-		return buildCoachPrepPrompt(context);
 	});
+
+	if (!cycle || !individual) throw new Error('Data not found');
+
+	const currentWeek = computeWeekNumber(cycle.startDate);
+	const weeklyAverages = getWeeklyAverages(cycle.reflections);
+	const last4 = weeklyAverages.slice(-4);
+
+	// Calculate stability
+	const effortValues = last4.map((w) => w.effort).filter((v): v is number => v !== null);
+	const perfValues = last4.map((w) => w.performance).filter((v): v is number => v !== null);
+	const efStd = stdDev(effortValues);
+	const prStd = stdDev(perfValues);
+	const stds = [efStd, prStd].filter((v): v is number => v !== null);
+	const combinedStd = stds.length > 0 ? stds.reduce((a, b) => a + b, 0) / stds.length : null;
+	const stabilityScore =
+		combinedStd !== null ? Math.max(0, Math.round(100 - combinedStd * 10)) : null;
+
+	// Build stakeholder feedback and gap data
+	const allStakeholderFeedback: Array<{
+		weekNumber: number;
+		stakeholderName: string;
+		effort: number | null;
+		performance: number | null;
+	}> = [];
+
+	const gapByWeek = new Map<
+		number,
+		{ selfEffort: number[]; selfPerf: number[]; shEffort: number[]; shPerf: number[] }
+	>();
+
+	cycle.objective.stakeholders.forEach((sh) => {
+		sh.feedbacks.forEach((fb) => {
+			if (!fb.reflection) return;
+			const wk = fb.reflection.weekNumber;
+
+			allStakeholderFeedback.push({
+				weekNumber: wk,
+				stakeholderName: fb.stakeholder.name,
+				effort: fb.effortScore,
+				performance: fb.performanceScore
+			});
+
+			if (!gapByWeek.has(wk)) {
+				gapByWeek.set(wk, {
+					selfEffort: [],
+					selfPerf: [],
+					shEffort: [],
+					shPerf: []
+				});
+			}
+			const g = gapByWeek.get(wk)!;
+			if (fb.effortScore !== null) g.shEffort.push(fb.effortScore);
+			if (fb.performanceScore !== null) g.shPerf.push(fb.performanceScore);
+			if (fb.reflection.effortScore !== null) g.selfEffort.push(fb.reflection.effortScore);
+			if (fb.reflection.performanceScore !== null) g.selfPerf.push(fb.reflection.performanceScore);
+		});
+	});
+
+	const stakeholderGapTrend = Array.from(gapByWeek.entries())
+		.filter(([wk]) => wk >= currentWeek - 4)
+		.map(([weekNumber, g]) => {
+			const selfE =
+				g.selfEffort.length > 0 ? g.selfEffort.reduce((a, b) => a + b, 0) / g.selfEffort.length : 0;
+			const shE =
+				g.shEffort.length > 0 ? g.shEffort.reduce((a, b) => a + b, 0) / g.shEffort.length : 0;
+			const selfP =
+				g.selfPerf.length > 0 ? g.selfPerf.reduce((a, b) => a + b, 0) / g.selfPerf.length : 0;
+			const shP = g.shPerf.length > 0 ? g.shPerf.reduce((a, b) => a + b, 0) / g.shPerf.length : 0;
+			return {
+				weekNumber,
+				effortGap: Number((selfE - shE).toFixed(1)),
+				performanceGap: Number((selfP - shP).toFixed(1))
+			};
+		})
+		.sort((a, b) => a.weekNumber - b.weekNumber);
+
+	// Build alerts
+	const alerts: string[] = [];
+	if (stabilityScore !== null && stabilityScore < 50) {
+		alerts.push(`Low stability score: ${stabilityScore}/100`);
+	}
+	const lastWeekAvg = last4[last4.length - 1];
+	if (lastWeekAvg && lastWeekAvg.effort !== null && lastWeekAvg.performance !== null) {
+		const gap = lastWeekAvg.effort - lastWeekAvg.performance;
+		if (gap > 2) {
+			alerts.push(
+				`Significant effort-performance gap: ${gap.toFixed(1)} points (effort ${lastWeekAvg.effort}, performance ${lastWeekAvg.performance})`
+			);
+		}
+	}
+
+	const context: CoachPrepContext = {
+		individualName: individual.name ?? individual.email,
+		objectiveTitle: cycle.objective.title,
+		last4Weeks: last4,
+		stakeholderFeedback: allStakeholderFeedback
+			.filter((f) => f.weekNumber >= currentWeek - 4)
+			.slice(0, 20),
+		stakeholderGapTrend,
+		stabilityScore,
+		coachNotes: cycle.coachNotes.map((n) => n.content),
+		alerts
+	};
+
+	return buildCoachPrepPrompt(context);
+}
+
+export async function generateCoachPrep(
+	coachId: string,
+	individualId: string,
+	cycleId: string
+): Promise<string | null> {
+	return createAndGenerateInsight(individualId, cycleId, null, 'COACH_PREP', () =>
+		buildCoachPrepContext(coachId, individualId, cycleId)
+	);
+}
+
+/**
+ * Streaming variant of coach prep — returns SSE-compatible stream.
+ */
+export async function generateCoachPrepStreaming(
+	coachId: string,
+	individualId: string,
+	cycleId: string
+): Promise<{ insightId: string; stream: ReadableStream<string> } | null> {
+	return createAndGenerateInsightStreaming(individualId, cycleId, null, 'COACH_PREP', () =>
+		buildCoachPrepContext(coachId, individualId, cycleId)
+	);
 }
 
 /**
