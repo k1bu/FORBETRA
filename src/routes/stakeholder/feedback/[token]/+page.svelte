@@ -23,7 +23,8 @@
 		CircleCheck,
 		Target,
 		Send,
-		Shield
+		Shield,
+		Lightbulb
 	} from 'lucide-svelte';
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
@@ -37,7 +38,10 @@
 	let effortScore = $state<number | null>(data.previousRatings?.effortScore ?? null);
 	let performanceScore = $state<number | null>(data.previousRatings?.performanceScore ?? null);
 	let notes = $state('');
+	let behavioralObservation = $state('');
+	let suggestion = $state('');
 	let showComment = $state(false);
+	let showStructured = $state(false);
 	let showPrivacyDetails = $state(false);
 	let isSubmitting = $state(false);
 	let showReveal = $state(false);
@@ -154,7 +158,11 @@
 					if (typeof draft.effortScore === 'number') effortScore = draft.effortScore;
 					if (typeof draft.performanceScore === 'number') performanceScore = draft.performanceScore;
 					if (typeof draft.notes === 'string') notes = draft.notes;
+					if (typeof draft.behavioralObservation === 'string')
+						behavioralObservation = draft.behavioralObservation;
+					if (typeof draft.suggestion === 'string') suggestion = draft.suggestion;
 					if (notes) showComment = true;
+					if (behavioralObservation || suggestion) showStructured = true;
 					draftRestored = true;
 					setTimeout(() => {
 						draftRestored = false;
@@ -174,6 +182,8 @@
 		const e = effortScore;
 		const p = performanceScore;
 		const n = notes;
+		const bo = behavioralObservation;
+		const su = suggestion;
 
 		if (data.isPreview) return;
 		const timeout = setTimeout(() => {
@@ -184,6 +194,8 @@
 						effortScore: e,
 						performanceScore: p,
 						notes: n,
+						behavioralObservation: bo,
+						suggestion: su,
 						savedAt: Date.now()
 					})
 				);
@@ -1108,6 +1120,68 @@
 						>
 							<PenLine class="h-4 w-4" />
 							Add a comment <span class="text-xs text-text-muted">(optional)</span>
+						</button>
+					{/if}
+
+					<!-- Structured prompts (behavioral observation + suggestion) -->
+					{#if showStructured}
+						<div class="space-y-4">
+							<div
+								class="rounded-2xl border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30"
+							>
+								<label
+									for="behavioralObservation"
+									class="mb-1 block text-sm font-medium text-text-secondary"
+									>Specific behavior you've observed</label
+								>
+								<p class="mb-2 text-xs text-text-muted">
+									What has {data.reflection.participantName} done well or struggled with recently?
+								</p>
+								<textarea
+									name="behavioralObservation"
+									id="behavioralObservation"
+									rows="2"
+									maxlength="500"
+									bind:value={behavioralObservation}
+									class="w-full rounded-xl border border-border-default bg-surface-subtle px-4 py-3 text-sm text-text-secondary placeholder:text-text-muted focus:border-accent focus:bg-surface-raised focus:ring-2 focus:ring-accent/30 focus:outline-none"
+									placeholder="e.g. Showed great active listening during the team meeting last Tuesday"
+								></textarea>
+								<span class="mt-1 block text-right text-xs text-text-muted"
+									>{behavioralObservation.length} / 500</span
+								>
+							</div>
+							<div
+								class="rounded-2xl border border-border-default bg-surface-raised p-6 transition-all hover:border-accent/30"
+							>
+								<label for="suggestion" class="mb-1 block text-sm font-medium text-text-secondary"
+									>Suggestion for improvement</label
+								>
+								<p class="mb-2 text-xs text-text-muted">
+									What's one thing {data.reflection.participantName} could try differently?
+								</p>
+								<textarea
+									name="suggestion"
+									id="suggestion"
+									rows="2"
+									maxlength="500"
+									bind:value={suggestion}
+									class="w-full rounded-xl border border-border-default bg-surface-subtle px-4 py-3 text-sm text-text-secondary placeholder:text-text-muted focus:border-accent focus:bg-surface-raised focus:ring-2 focus:ring-accent/30 focus:outline-none"
+									placeholder="e.g. Could delegate more to build trust with the team"
+								></textarea>
+								<span class="mt-1 block text-right text-xs text-text-muted"
+									>{suggestion.length} / 500</span
+								>
+							</div>
+						</div>
+					{:else}
+						<button
+							type="button"
+							onclick={() => (showStructured = true)}
+							class="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border border-border-default bg-surface-raised py-3 text-sm font-medium text-text-secondary transition-colors hover:border-accent/30 hover:bg-accent-muted/30 hover:text-accent"
+						>
+							<Lightbulb class="h-4 w-4" />
+							Share a specific observation or suggestion
+							<span class="text-xs text-text-muted">(optional)</span>
 						</button>
 					{/if}
 

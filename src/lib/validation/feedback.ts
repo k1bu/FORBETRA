@@ -15,7 +15,13 @@ export const stakeholderFeedbackSchema = z
 			.min(0, 'Minimum score is 0')
 			.max(10, 'Maximum score is 10')
 			.optional(),
-		comment: z.string().trim().max(500, 'Keep comments under 500 characters').optional()
+		comment: z.string().trim().max(500, 'Keep comments under 500 characters').optional(),
+		behavioralObservation: z
+			.string()
+			.trim()
+			.max(500, 'Keep observations under 500 characters')
+			.optional(),
+		suggestion: z.string().trim().max(500, 'Keep suggestions under 500 characters').optional()
 	})
 	.refine(
 		(data) =>

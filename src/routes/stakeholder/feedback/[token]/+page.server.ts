@@ -321,6 +321,8 @@ export const actions: Actions = {
 					effortScore: data.effortScore ?? null,
 					performanceScore: data.performanceScore ?? null,
 					comment: data.comment ?? null,
+					behavioralObservation: data.behavioralObservation ?? null,
+					suggestion: data.suggestion ?? null,
 					submittedAt: new Date()
 				},
 				create: {
@@ -329,6 +331,8 @@ export const actions: Actions = {
 					effortScore: data.effortScore ?? null,
 					performanceScore: data.performanceScore ?? null,
 					comment: data.comment ?? null,
+					behavioralObservation: data.behavioralObservation ?? null,
+					suggestion: data.suggestion ?? null,
 					submittedAt: new Date()
 				}
 			});
