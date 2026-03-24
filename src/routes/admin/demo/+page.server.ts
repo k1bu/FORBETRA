@@ -6,9 +6,13 @@ export const load: PageServerLoad = async (event) => {
 	requireRole(event, 'ADMIN');
 
 	const [bestIndividual, bestCoach] = await Promise.all([
+		// Prefer an individual with an ACTIVE cycle for demo
 		prisma.user
 			.findFirst({
-				where: { role: 'INDIVIDUAL', email: { contains: 'improving' } },
+				where: {
+					role: 'INDIVIDUAL',
+					objectives: { some: { active: true, cycles: { some: { status: 'ACTIVE' } } } }
+				},
 				select: { id: true }
 			})
 			.then(
