@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { addToast } from '$lib/stores/toasts.svelte';
-	import { Play, ChevronRight } from 'lucide-svelte';
+	import { Play, ChevronRight, ChevronLeft, X, Mic } from 'lucide-svelte';
 
 	const { data }: { data: PageData } = $props();
 
@@ -23,10 +23,18 @@
 		window.open(path, `demo-${windowCounter}`);
 	};
 
+	const openNew = (path: string) => {
+		windowCounter++;
+		window.open(path, `demo-${windowCounter}`);
+	};
+
 	type DemoStep = {
 		label: string;
 		description: string;
 		action: () => void;
+		say: string;
+		pointOut: string[];
+		tip?: string;
 	};
 
 	type DemoPath = {
@@ -53,22 +61,51 @@
 				{
 					label: 'Coach Dashboard',
 					description: 'Client alerts, quick actions, and portfolio overview',
-					action: () => impersonateAndOpen(selectedCoachId, '/coach')
+					action: () => impersonateAndOpen(selectedCoachId, '/coach'),
+					say: "This is your command center. At a glance you see which clients need attention, who's overdue, and where the coaching opportunities are.",
+					pointOut: [
+						'Alert badges on clients',
+						'Quick action buttons',
+						'Completion rates per client'
+					],
+					tip: 'Hover over a client card to show the drill-down'
 				},
 				{
 					label: 'Client Roster',
 					description: 'Full client list — click into any client for session prep',
-					action: () => impersonateAndOpen(selectedCoachId, '/coach/roster')
+					action: () => impersonateAndOpen(selectedCoachId, '/coach/roster'),
+					say: 'Your full client roster with status at a glance. Click any client to open their session prep view.',
+					pointOut: [
+						'Client status indicators',
+						'Objective and cycle info',
+						'Click into Alex Rivera to show session prep'
+					],
+					tip: 'After clicking a client, show the "Generate Prep" button and let it stream live'
 				},
 				{
 					label: 'Portfolio Analytics',
 					description: 'Cross-client comparison, trends, and CSV export',
-					action: () => impersonateAndOpen(selectedCoachId, '/coach/analytics')
+					action: () => impersonateAndOpen(selectedCoachId, '/coach/analytics'),
+					say: "Across your entire portfolio — who's consistent, who's improving, who needs intervention. You can sort by any column and export to CSV.",
+					pointOut: [
+						'Consistency scores',
+						'Trajectory arrows',
+						'Alert count column',
+						'Portfolio trend chart at bottom'
+					]
 				},
 				{
 					label: 'Invite with Pre-fill',
 					description: 'Set up goal and reviewers before client signs up',
-					action: () => impersonateAndOpen(selectedCoachId, '/coach/invitations')
+					action: () => impersonateAndOpen(selectedCoachId, '/coach/invitations'),
+					say: "When you onboard a new client, you don't just send a link. You pre-fill their goal, focus areas, and suggested reviewers. They sign up and everything is already set up.",
+					pointOut: [
+						'Expand "Pre-fill their setup"',
+						'Goal title field',
+						'Focus areas',
+						'Suggested reviewers'
+					],
+					tip: 'Fill in a sample goal to show how it works'
 				}
 			]
 		},
@@ -84,27 +121,57 @@
 				{
 					label: 'Today Hub',
 					description: '"What should I focus on this week?" — single-focus home',
-					action: () => impersonateAndOpen(selectedIndividualId, '/individual')
+					action: () => impersonateAndOpen(selectedIndividualId, '/individual'),
+					say: 'This is what you see every day. One question: what should you focus on this week? No clutter — just the next action and your latest AI insight.',
+					pointOut: [
+						'The single-focus question header',
+						'Primary action card',
+						'AI insight teaser',
+						'Streak badge (top right)'
+					]
 				},
 				{
 					label: 'Quick Check-in',
 					description: '60-second effort + performance rating',
-					action: () => impersonateAndOpen(selectedIndividualId, '/individual/checkin')
+					action: () => impersonateAndOpen(selectedIndividualId, '/individual/checkin'),
+					say: "This takes 60 seconds. Two scores — effort and performance — on a 0 to 10 scale. Optional notes. That's it.",
+					pointOut: ['Effort scale (0-10)', 'Performance scale (0-10)', 'Optional notes section'],
+					tip: 'Rate effort 7, performance 5 to show an effort-performance gap'
 				},
 				{
 					label: 'AI Insights (streaming)',
 					description: 'Generate a cycle report — watch sections appear live',
-					action: () => impersonateAndOpen(selectedIndividualId, '/individual/insights')
+					action: () => impersonateAndOpen(selectedIndividualId, '/individual/insights'),
+					say: 'Now watch this. Click Generate Report and sections appear in real time as the AI analyzes weeks of data.',
+					pointOut: [
+						'Click "Generate Report"',
+						'Watch sections stream in',
+						'Each section is grounded in real data, not generic advice'
+					],
+					tip: 'Pause and let the streaming happen — the visual effect sells itself'
 				},
 				{
 					label: 'Ask Your Data',
 					description: '"Where have I improved?" — chat grounded in real data',
-					action: () => impersonateAndOpen(selectedIndividualId, '/individual/ask')
+					action: () => impersonateAndOpen(selectedIndividualId, '/individual/ask'),
+					say: 'This is a conversation with your own data. Ask "Where have I improved the most?" or "What do my reviewers see that I don\'t?" — it\'s grounded in your actual check-ins and feedback.',
+					pointOut: [
+						'Type a question',
+						'Response streams in real time',
+						'Suggested questions below the input'
+					],
+					tip: 'Try: "Where have I improved the most?"'
 				},
 				{
 					label: 'Progress & Scorecard',
 					description: 'Trends, perception gaps, self vs reviewer comparison',
-					action: () => impersonateAndOpen(selectedIndividualId, '/individual?tab=progress')
+					action: () => impersonateAndOpen(selectedIndividualId, '/individual?tab=progress'),
+					say: 'The Progress tab shows your trend over time. Switch to Scorecard to see how your self-ratings compare to what your reviewers see — that gap is where the real growth happens.',
+					pointOut: [
+						'Score cards (4 metrics)',
+						'Trend chart',
+						'Switch to Scorecard tab for self vs reviewer'
+					]
 				}
 			]
 		},
@@ -119,28 +186,61 @@
 			steps: [
 				{
 					label: 'Athlete Hub',
-					description: 'Weekly effort vs performance — spot the gap between work and results',
-					action: () => impersonateAndOpen(selectedIndividualId, '/individual')
+					description: 'Weekly effort vs performance — spot the gap',
+					action: () => impersonateAndOpen(selectedIndividualId, '/individual'),
+					say: "This is the athlete's daily view. The key insight: are you working hard AND getting results? The effort-performance gap tells the whole story.",
+					pointOut: [
+						'Effort vs performance in the action card',
+						'Streak badge — consistency matters in sport',
+						'AI insight teaser'
+					]
 				},
 				{
-					label: 'Daily Check-in',
+					label: 'Training Check-in',
 					description: 'Rate effort and performance after training or competition',
-					action: () => impersonateAndOpen(selectedIndividualId, '/individual/checkin')
+					action: () => impersonateAndOpen(selectedIndividualId, '/individual/checkin'),
+					say: 'After every training session or competition, the athlete rates effort and performance. Takes 60 seconds. Over time, patterns emerge that neither the athlete nor coach can see in the moment.',
+					pointOut: [
+						'Effort: "How hard did I work?"',
+						'Performance: "How well did I execute?"',
+						'Notes for context (what happened today)'
+					],
+					tip: 'Frame it as a training journal that turns into data'
 				},
 				{
 					label: 'Trend Analysis',
 					description: 'See effort-performance patterns over weeks',
-					action: () => impersonateAndOpen(selectedIndividualId, '/individual?tab=progress')
+					action: () => impersonateAndOpen(selectedIndividualId, '/individual?tab=progress'),
+					say: 'This is where the magic happens. Weeks of data reveal patterns: overtraining shows as high effort, declining performance. Peaking shows the opposite. The coach can use this to adjust training load.',
+					pointOut: [
+						'Trend chart — look for effort/performance divergence',
+						'Score cards for averages',
+						'Heat map (if enough weeks)'
+					]
 				},
 				{
 					label: 'Coach Prep View',
 					description: 'What the sport coach sees before your session',
-					action: () => impersonateAndOpen(selectedCoachId, '/coach/roster')
+					action: () => impersonateAndOpen(selectedCoachId, '/coach/roster'),
+					say: "Now let's flip to the coach side. Before every session, the coach sees AI-generated prep: trends, risks, and conversation starters — all based on the athlete's actual data.",
+					pointOut: [
+						'Click into a client',
+						'Generate Prep button',
+						'Trend chart and stakeholder feedback'
+					],
+					tip: 'Click into a client and hit "Generate Prep" to show the streaming AI'
 				},
 				{
 					label: 'AI Performance Report',
-					description: 'AI analyzes your training data and spots blind spots',
-					action: () => impersonateAndOpen(selectedIndividualId, '/individual/insights')
+					description: 'AI analyzes training data and spots blind spots',
+					action: () => impersonateAndOpen(selectedIndividualId, '/individual/insights'),
+					say: 'The AI analyzes weeks of training data and writes a performance report. It spots patterns humans miss — like when effort is high but results are flat, which often signals a need to recover, not push harder.',
+					pointOut: [
+						'Click "Generate Report"',
+						'Watch for effort-performance gap analysis',
+						'Behavioral experiment suggestion at the end'
+					],
+					tip: 'Let it stream — the live generation is impressive'
 				}
 			]
 		},
@@ -156,47 +256,75 @@
 				{
 					label: 'Platform Overview',
 					description: 'Admin dashboard — users, cycles, and system health',
-					action: () => {
-						windowCounter++;
-						window.open('/admin', `demo-${windowCounter}`);
-					}
+					action: () => openNew('/admin'),
+					say: 'This is the admin view of the entire platform. You see all users, active coaching cycles, and system health at a glance.',
+					pointOut: ['Total users and roles', 'Active cycles', 'System status']
 				},
 				{
 					label: 'Organization Management',
 					description: 'Create orgs, manage members, domain-based assignment',
-					action: () => {
-						windowCounter++;
-						window.open('/admin/organizations', `demo-${windowCounter}`);
-					}
+					action: () => openNew('/admin/organizations'),
+					say: "Organizations can manage all their coaches and participants under one umbrella. Domain-based auto-assignment means when someone with an @company.com email signs up, they're automatically linked.",
+					pointOut: [
+						'Create Organization form',
+						'Add Member by email',
+						'Role assignment (Member vs Org Admin)'
+					]
 				},
 				{
 					label: 'Coach Portfolio Analytics',
 					description: 'Cross-client trends, consistency scores, and alerts',
-					action: () => impersonateAndOpen(selectedCoachId, '/coach/analytics')
+					action: () => impersonateAndOpen(selectedCoachId, '/coach/analytics'),
+					say: 'This is what a coaching program manager cares about: are participants engaging? Are they improving? Which coaches are getting the best outcomes? All sortable, all exportable.',
+					pointOut: [
+						'Consistency scores across clients',
+						'Trajectory indicators',
+						'Alert counts',
+						'CSV export button'
+					]
 				},
 				{
 					label: 'Individual Experience',
 					description: 'What participants actually see day-to-day',
-					action: () => impersonateAndOpen(selectedIndividualId, '/individual')
+					action: () => impersonateAndOpen(selectedIndividualId, '/individual'),
+					say: 'This is what your participants see. Simple, focused, and designed for busy leaders who have 60 seconds between meetings.',
+					pointOut: ['Single-focus design', 'No training needed — intuitive', 'Mobile-friendly']
 				},
 				{
 					label: 'Stakeholder Feedback',
 					description: '60-second feedback form — see how easy it is for reviewers',
-					action: () => {
-						windowCounter++;
-						window.open('/stakeholder/feedback/preview?preview=true', `demo-${windowCounter}`);
-					}
+					action: () => openNew('/stakeholder/feedback/preview?preview=true'),
+					say: 'This is the 360 feedback experience. A stakeholder gets a link, rates effort and performance, and optionally shares a specific observation. Takes 60 seconds. No login required.',
+					pointOut: [
+						'No account needed — token-based access',
+						'Two simple scores',
+						'Behavioral observation field (qualitative data)',
+						'Score reveal after submission'
+					],
+					tip: 'Show this on a phone to emphasize how simple it is'
 				},
 				{
 					label: 'AI Insights Engine',
 					description: 'Watch real-time AI analysis of coaching data',
-					action: () => impersonateAndOpen(selectedIndividualId, '/individual/insights')
+					action: () => impersonateAndOpen(selectedIndividualId, '/individual/insights'),
+					say: 'Every week, the AI synthesizes check-in data and stakeholder feedback into actionable insights. Coaches get session prep. Individuals get a performance report. All automated.',
+					pointOut: [
+						'Click "Generate Report"',
+						'Streaming AI output',
+						'Grounded in actual data, not templates'
+					]
 				}
 			]
 		}
 	]);
 
+	// --- Overlay state ---
 	let expandedPath = $state<string | null>(null);
+	let activePathId = $state<string | null>(null);
+	let activeStepIdx = $state(0);
+
+	const activePath = $derived(demoPaths.find((p) => p.id === activePathId));
+	const activeStep = $derived(activePath?.steps[activeStepIdx]);
 	let stepIndex = $state<Record<string, number>>({});
 
 	function togglePath(id: string) {
@@ -205,7 +333,30 @@
 
 	function runStep(pathId: string, step: DemoStep, idx: number) {
 		stepIndex = { ...stepIndex, [pathId]: idx };
+		activePathId = pathId;
+		activeStepIdx = idx;
 		step.action();
+	}
+
+	function nextStep() {
+		if (!activePath) return;
+		const next = activeStepIdx + 1;
+		if (next < activePath.steps.length) {
+			runStep(activePath.id, activePath.steps[next], next);
+		}
+	}
+
+	function prevStep() {
+		if (!activePath) return;
+		const prev = activeStepIdx - 1;
+		if (prev >= 0) {
+			activeStepIdx = prev;
+			stepIndex = { ...stepIndex, [activePath.id]: prev };
+		}
+	}
+
+	function closeOverlay() {
+		activePathId = null;
 	}
 </script>
 
@@ -213,12 +364,12 @@
 	<title>Demo | Forbetra Admin</title>
 </svelte:head>
 
-<section class="mx-auto flex max-w-4xl flex-col gap-6 p-6">
+<section class="mx-auto flex max-w-4xl flex-col gap-6 p-6 pb-48">
 	<header>
 		<h1 class="text-2xl font-bold text-text-primary">Demo Center</h1>
 		<p class="mt-1 text-sm text-text-secondary">
-			Guided walkthroughs for different audiences. Each path opens screens in new tabs with the
-			right user impersonated.
+			Guided walkthroughs for different audiences. Each step opens a screen and shows you what to
+			say.
 		</p>
 	</header>
 
@@ -263,7 +414,6 @@
 			<div
 				class="overflow-hidden rounded-xl border border-border-default bg-surface-raised transition-all"
 			>
-				<!-- Header -->
 				<button
 					onclick={() => togglePath(path.id)}
 					class="flex w-full items-center gap-4 p-5 text-left transition-colors hover:bg-surface-subtle"
@@ -290,13 +440,12 @@
 					</div>
 				</button>
 
-				<!-- Steps -->
 				{#if isExpanded}
 					<div class="border-t border-border-default px-5 pt-3 pb-5">
 						<div class="flex flex-col gap-2">
 							{#each path.steps as step, idx (step.label)}
 								{@const isDone = currentStep >= idx}
-								{@const isCurrent = currentStep === idx}
+								{@const isCurrent = currentStep === idx && activePathId === path.id}
 								<button
 									onclick={() => runStep(path.id, step, idx)}
 									class="group flex items-center gap-3 rounded-lg border px-4 py-3 text-left transition-all {isCurrent
@@ -335,11 +484,106 @@
 			</div>
 		{/each}
 	</div>
-
-	<div
-		class="rounded-lg border border-border-default bg-surface-raised px-4 py-3 text-xs text-text-tertiary"
-	>
-		Each step opens in a new tab with the selected user impersonated. Your admin session stays
-		active here. Come back to this page between steps to advance the walkthrough.
-	</div>
 </section>
+
+<!-- ═══ Talking Points Overlay ═══ -->
+{#if activeStep && activePath}
+	<div
+		class="fixed right-0 bottom-0 left-0 z-50 border-t border-border-default bg-surface-raised shadow-2xl"
+	>
+		<div class="mx-auto flex max-w-4xl flex-col gap-3 px-6 py-4">
+			<!-- Header row -->
+			<div class="flex items-center justify-between">
+				<div class="flex items-center gap-3">
+					<div
+						class="flex h-8 w-8 items-center justify-center rounded-lg border {activePath.bgColor}"
+					>
+						<Mic class="h-4 w-4 {activePath.color}" />
+					</div>
+					<div>
+						<p class="text-xs font-semibold text-text-tertiary">
+							{activePath.title} — Step {activeStepIdx + 1} of {activePath.steps.length}
+						</p>
+						<p class="text-sm font-bold {activePath.color}">{activeStep.label}</p>
+					</div>
+				</div>
+				<button
+					onclick={closeOverlay}
+					class="rounded-lg p-1.5 text-text-muted transition-colors hover:bg-surface-subtle hover:text-text-primary"
+					aria-label="Close talking points"
+				>
+					<X class="h-5 w-5" />
+				</button>
+			</div>
+
+			<!-- Content -->
+			<div class="flex gap-4">
+				<!-- Say this -->
+				<div class="flex-1 rounded-lg bg-surface-subtle px-4 py-3">
+					<p class="mb-1 text-xs font-bold tracking-wide text-text-tertiary uppercase">Say</p>
+					<p class="text-sm leading-relaxed text-text-primary">"{activeStep.say}"</p>
+				</div>
+
+				<!-- Point out -->
+				<div class="w-64 shrink-0 rounded-lg bg-surface-subtle px-4 py-3">
+					<p class="mb-1 text-xs font-bold tracking-wide text-text-tertiary uppercase">Point out</p>
+					<ul class="space-y-1">
+						{#each activeStep.pointOut as point (point)}
+							<li class="flex items-start gap-1.5 text-xs text-text-secondary">
+								<span class="mt-0.5 text-accent">&#9654;</span>
+								{point}
+							</li>
+						{/each}
+					</ul>
+					{#if activeStep.tip}
+						<p class="mt-2 rounded bg-warning-muted px-2 py-1 text-xs font-medium text-warning">
+							{activeStep.tip}
+						</p>
+					{/if}
+				</div>
+			</div>
+
+			<!-- Navigation -->
+			<div class="flex items-center justify-between">
+				<button
+					onclick={prevStep}
+					disabled={activeStepIdx === 0}
+					class="flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-semibold text-text-secondary transition-colors hover:bg-surface-subtle disabled:opacity-30"
+				>
+					<ChevronLeft class="h-4 w-4" /> Previous
+				</button>
+
+				<!-- Step dots -->
+				<div class="flex gap-1.5">
+					{#each Array.from({ length: activePath.steps.length }, (__, i) => i) as idx (idx)}
+						<button
+							onclick={() => runStep(activePath.id, activePath.steps[idx], idx)}
+							class="h-2 w-2 rounded-full transition-all {idx === activeStepIdx
+								? 'scale-125 bg-accent'
+								: idx <= (stepIndex[activePath.id] ?? -1)
+									? 'bg-success/40'
+									: 'bg-border-strong'}"
+							aria-label="Go to step {idx + 1}"
+						></button>
+					{/each}
+				</div>
+
+				{#if activeStepIdx < activePath.steps.length - 1}
+					<button
+						onclick={nextStep}
+						class="flex items-center gap-1 rounded-lg bg-accent px-4 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-accent-hover"
+					>
+						Next <ChevronRight class="h-4 w-4" />
+					</button>
+				{:else}
+					<button
+						onclick={closeOverlay}
+						class="flex items-center gap-1 rounded-lg bg-success px-4 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-success/80"
+					>
+						Done &#10003;
+					</button>
+				{/if}
+			</div>
+		</div>
+	</div>
+{/if}
