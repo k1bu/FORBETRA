@@ -21,11 +21,24 @@
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
 
+	const milestoneMessages: Record<number, string> = {
+		3: 'First streak! 3 in a row',
+		7: 'One week strong! 7 straight',
+		14: 'Two weeks of consistency!',
+		21: 'Three-week powerhouse!',
+		30: 'A full month of dedication!',
+		50: 'Elite commitment — 50 check-ins!'
+	};
+
 	let toastShownForForm: ActionData | null = null;
 	$effect(() => {
 		if (form?.success && form !== toastShownForForm) {
-			addToast('Check-in submitted!', 'success');
 			toastShownForForm = form;
+			if (form.milestone && milestoneMessages[form.milestone]) {
+				addToast(`🔥 ${milestoneMessages[form.milestone]}`, 'success', 6000);
+			} else {
+				addToast('Check-in submitted!', 'success');
+			}
 		}
 	});
 

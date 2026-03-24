@@ -10,6 +10,13 @@ export type EmailTemplateData = {
 	currentStreak?: number;
 };
 
+export type MilestoneCelebrationData = {
+	individualName: string;
+	milestone: number;
+	objectiveTitle?: string;
+	appUrl?: string;
+};
+
 export type CoachInvitationData = {
 	coachName: string;
 	recipientName?: string;
@@ -549,6 +556,81 @@ export const emailTemplates = {
 			</html>
 		`,
 			text: `Reviewer feedback received for ${data.individualName}${week}\n\nHi ${data.coachName},\n\n${data.stakeholderName || 'A reviewer'} just submitted feedback for your client ${data.individualName}${week}.\n\nCheck your coaching dashboard to review updated insights and identify coaching opportunities.\n\nView dashboard: ${data.appUrl || baseUrl}/coach/roster${textFooter()}`
+		};
+	},
+
+	milestoneCelebration: (data: MilestoneCelebrationData) => {
+		const name = escapeHtml(data.individualName || 'there');
+		const milestoneMessages: Record<number, { emoji: string; headline: string; body: string }> = {
+			3: {
+				emoji: '🔥',
+				headline: 'First Streak!',
+				body: "You've checked in 3 times in a row. Consistency is the first step to real growth."
+			},
+			7: {
+				emoji: '⚡',
+				headline: 'One Week Strong!',
+				body: "7 consecutive check-ins. You're building a habit that compounds over time."
+			},
+			14: {
+				emoji: '🏆',
+				headline: 'Two-Week Powerhouse!',
+				body: '14 straight check-ins — your commitment to growth is showing up in the data.'
+			},
+			21: {
+				emoji: '🌟',
+				headline: 'Three Weeks of Momentum!',
+				body: '21 check-ins without missing a beat. Research says habits form around this mark.'
+			},
+			30: {
+				emoji: '💎',
+				headline: 'A Full Month!',
+				body: '30 consecutive check-ins. Your dedication to self-improvement is exceptional.'
+			},
+			50: {
+				emoji: '👑',
+				headline: 'Elite Commitment!',
+				body: '50 straight check-ins — you are in rare company. Keep leading by example.'
+			}
+		};
+		const m = milestoneMessages[data.milestone] ?? {
+			emoji: '🎉',
+			headline: `${data.milestone} Check-in Streak!`,
+			body: `You've hit ${data.milestone} consecutive check-ins. Keep the momentum going!`
+		};
+		const objLine = data.objectiveTitle
+			? `<p style="font-size: 14px; color: #64748b; background: #f1f5f9; padding: 12px; border-radius: 6px; margin: 20px 0;"><strong>Goal:</strong> ${escapeHtml(data.objectiveTitle)}</p>`
+			: '';
+
+		return {
+			subject: `${m.emoji} ${m.headline} — ${data.milestone} check-ins in a row!`,
+			html: `
+				<!DOCTYPE html>
+				<html>
+				<head>
+					<meta charset="utf-8">
+					<meta name="viewport" content="width=device-width, initial-scale=1.0">
+				</head>
+				<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #334155; max-width: 600px; margin: 0 auto; padding: 20px;">
+					<div style="display: none; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #ffffff;">${m.headline} — ${data.milestone} consecutive check-ins</div>
+					<div style="background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); padding: 40px 30px; text-align: center; border-radius: 12px 12px 0 0;">
+						<p style="font-size: 48px; margin: 0 0 10px 0;">${m.emoji}</p>
+						<h1 style="color: white; margin: 0; font-size: 28px; font-weight: 700;">${m.headline}</h1>
+						<p style="color: rgba(255,255,255,0.9); margin: 8px 0 0; font-size: 16px;">${data.milestone} consecutive check-ins</p>
+					</div>
+					<div style="background: white; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+						<p style="font-size: 16px; margin-top: 0;">Hi ${name},</p>
+						<p style="font-size: 16px;">${m.body}</p>
+						${objLine}
+						<div style="text-align: center; margin: 30px 0;">
+							<a href="${data.appUrl || baseUrl}/individual" style="display: inline-block; background: #f59e0b; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">View Your Progress</a>
+						</div>
+					</div>
+				${emailFooter()}
+				</body>
+				</html>
+			`,
+			text: `${m.emoji} ${m.headline}\n\nHi ${data.individualName},\n\n${m.body}\n\n${data.objectiveTitle ? `Goal: ${data.objectiveTitle}\n\n` : ''}View your progress: ${data.appUrl || baseUrl}/individual${textFooter()}`
 		};
 	}
 };

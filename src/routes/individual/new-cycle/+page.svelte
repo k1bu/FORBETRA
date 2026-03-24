@@ -1,8 +1,17 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
 	import { enhance } from '$app/forms';
+	import { addToast } from '$lib/stores/toasts.svelte';
 
 	const { data, form }: { data: PageData; form: ActionData | null } = $props();
+
+	let toastShownForForm: ActionData | null = null;
+	$effect(() => {
+		if (form && 'error' in form && form !== toastShownForForm) {
+			toastShownForForm = form;
+			addToast(String(form.error), 'error');
+		}
+	});
 
 	const formValues = (form as { values?: Record<string, string> } | null)?.values;
 	let cycleLabel = $state(formValues?.cycleLabel ?? data.defaults.cycleLabel);

@@ -6,6 +6,8 @@ import type { Actions, PageServerLoad } from './$types';
 import type { ReflectionType } from '@prisma/client';
 import { computeWeekNumber, getDateForWeekday } from '$lib/server/coachUtils';
 import { parseCheckInDays } from '$lib/utils/checkInDays';
+import { sendEmail } from '$lib/notifications/email';
+import { emailTemplates } from '$lib/notifications/emailTemplates';
 
 // Unified check-in: every check-in is RATING_A (effort + performance + notes)
 const getCheckInType = (
@@ -615,10 +617,33 @@ export const actions: Actions = {
 				// Micro-moment is non-critical — skip on error
 			}
 
+			// Detect milestone streaks
+			const milestoneThresholds = [3, 7, 14, 21, 30, 50];
+			const milestone = milestoneThresholds.includes(streak) ? streak : null;
+
+			// Send milestone celebration email (non-blocking)
+			if (milestone) {
+				const objective = await prisma.objective.findFirst({
+					where: { userId: dbUser.id, active: true },
+					select: { title: true }
+				});
+				sendEmail({
+					to: dbUser.email,
+					...emailTemplates.milestoneCelebration({
+						individualName: dbUser.name ?? dbUser.email,
+						milestone,
+						objectiveTitle: objective?.title
+					})
+				}).catch((err) => {
+					console.warn('[email:warn] Failed to send milestone email', err);
+				});
+			}
+
 			return {
 				success: true,
 				type: checkInInfo.type,
 				streak,
+				milestone,
 				microMoment
 			};
 		} catch (error) {
