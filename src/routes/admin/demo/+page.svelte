@@ -8,6 +8,7 @@
 	let selectedIndividualId = $state(data.defaults.individualId);
 	let selectedCoachId = $state(data.defaults.coachId);
 
+	let windowCounter = 0;
 	const impersonateAndOpen = async (userId: string, path: string) => {
 		const res = await fetch('/api/admin/impersonate', {
 			method: 'POST',
@@ -18,7 +19,8 @@
 			addToast('Failed to start impersonation. Please try again.', 'error');
 			return;
 		}
-		window.open(path, '_blank');
+		windowCounter++;
+		window.open(path, `demo-${windowCounter}`);
 	};
 
 	type DemoStep = {
@@ -54,12 +56,9 @@
 					action: () => impersonateAndOpen(selectedCoachId, '/coach')
 				},
 				{
-					label: 'Session Prep (live AI)',
-					description: 'Generate real-time prep with streaming AI insights',
-					action: () => {
-						const firstClientPath = '/coach/roster';
-						impersonateAndOpen(selectedCoachId, firstClientPath);
-					}
+					label: 'Client Roster',
+					description: 'Full client list — click into any client for session prep',
+					action: () => impersonateAndOpen(selectedCoachId, '/coach/roster')
 				},
 				{
 					label: 'Portfolio Analytics',
@@ -157,12 +156,18 @@
 				{
 					label: 'Platform Overview',
 					description: 'Admin dashboard — users, cycles, and system health',
-					action: () => window.open('/admin', '_blank')
+					action: () => {
+						windowCounter++;
+						window.open('/admin', `demo-${windowCounter}`);
+					}
 				},
 				{
 					label: 'Organization Management',
 					description: 'Create orgs, manage members, domain-based assignment',
-					action: () => window.open('/admin/organizations', '_blank')
+					action: () => {
+						windowCounter++;
+						window.open('/admin/organizations', `demo-${windowCounter}`);
+					}
 				},
 				{
 					label: 'Coach Portfolio Analytics',
@@ -177,7 +182,10 @@
 				{
 					label: 'Stakeholder Feedback',
 					description: '60-second feedback form — see how easy it is for reviewers',
-					action: () => window.open('/stakeholder/feedback/preview?preview=true', '_blank')
+					action: () => {
+						windowCounter++;
+						window.open('/stakeholder/feedback/preview?preview=true', `demo-${windowCounter}`);
+					}
 				},
 				{
 					label: 'AI Insights Engine',
