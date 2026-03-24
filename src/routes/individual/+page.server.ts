@@ -3,21 +3,34 @@ import { requireRole } from '$lib/server/auth';
 import {
 	computeCompletionMetrics,
 	computeNextAction,
-	computeMyLastRatings,
-	computeStakeholdersLastRatings,
-	computeHeatMap,
-	computeVisualizationData,
-	computePerceptionGaps,
 	computeNextCheckInDay
 } from '$lib/server/hubMetrics';
 import type { PageServerLoad } from './$types';
+
+export type MaturityStage = 'new' | 'growing' | 'established';
+
+function getMaturityStage(reflectionCount: number): MaturityStage {
+	if (reflectionCount >= 12) return 'established';
+	if (reflectionCount >= 4) return 'growing';
+	return 'new';
+}
+
+function computeTotalWeeks(startDate: Date, endDate: Date | null, currentWeek: number): number {
+	if (endDate) {
+		return Math.max(
+			1,
+			Math.ceil((endDate.getTime() - startDate.getTime()) / (7 * 24 * 60 * 60 * 1000))
+		);
+	}
+	return currentWeek;
+}
 
 export const load: PageServerLoad = async (event) => {
 	const { dbUser } = requireRole(event, 'INDIVIDUAL');
 
 	const { objective, cycle, currentWeek } = await event.parent();
 
-	const [hasAnyObjective, coachClient] = await Promise.all([
+	const [hasAnyObjective, coachClient, latestInsight] = await Promise.all([
 		prisma.objective.findFirst({
 			where: { userId: dbUser.id },
 			select: { id: true }
@@ -25,7 +38,19 @@ export const load: PageServerLoad = async (event) => {
 		prisma.coachClient.findFirst({
 			where: { individualId: dbUser.id },
 			select: { coach: { select: { name: true } } }
-		})
+		}),
+		cycle
+			? prisma.insight.findFirst({
+					where: {
+						userId: dbUser.id,
+						cycleId: cycle.id,
+						status: 'COMPLETED',
+						type: { in: ['CHECK_IN', 'WEEKLY_SYNTHESIS'] }
+					},
+					orderBy: { createdAt: 'desc' },
+					select: { id: true, content: true, type: true, weekNumber: true, createdAt: true }
+				})
+			: null
 	]);
 
 	const isFirstVisit = !hasAnyObjective;
@@ -38,6 +63,7 @@ export const load: PageServerLoad = async (event) => {
 		return {
 			isFirstVisit,
 			isOnboardingComplete: false,
+			maturityStage: 'new' as MaturityStage,
 			nextCheckInDay: computeNextCheckInDay(checkInFrequency),
 			coachName: coachClient?.coach?.name ?? null,
 			objective: objective
@@ -52,63 +78,19 @@ export const load: PageServerLoad = async (event) => {
 			currentWeek: null,
 			totalWeeks: null,
 			nextAction: null,
-			myLastRatings: null,
-			stakeholdersLastRatings: null,
-			perceptionGaps: null,
-			latestInsight: null,
-			visualizationData: null
+			latestInsight: null
 		};
 	}
 
-	// Fetch feedbacks + latest insight in parallel
-	const [allFeedbacks, latestInsight] = await Promise.all([
-		prisma.feedback.findMany({
-			where: { reflection: { cycleId: cycle.id } },
-			select: {
-				stakeholderId: true,
-				effortScore: true,
-				performanceScore: true,
-				submittedAt: true,
-				reflection: { select: { weekNumber: true } }
-			},
-			orderBy: { submittedAt: 'desc' }
-		}),
-		prisma.insight.findFirst({
-			where: {
-				userId: dbUser.id,
-				cycleId: cycle.id,
-				status: 'COMPLETED',
-				type: { in: ['CHECK_IN', 'WEEKLY_SYNTHESIS'] }
-			},
-			orderBy: { createdAt: 'desc' },
-			select: { id: true, content: true, type: true, weekNumber: true, createdAt: true }
-		})
-	]);
-
-	// Pure computations
+	const totalWeeks = computeTotalWeeks(cycle.startDate, cycle.endDate ?? null, currentWeek);
 	const summary = computeCompletionMetrics(reflections, currentWeek, checkInFrequency);
 	const nextAction = computeNextAction(reflections, currentWeek, checkInFrequency);
-	const myLastRatings = computeMyLastRatings(reflections);
-	const stakeholdersLastRatings = computeStakeholdersLastRatings(allFeedbacks);
-	const { weeks: heatMapWeeks, totalWeeks } = computeHeatMap(
-		reflections,
-		currentWeek,
-		cycle.startDate,
-		cycle.endDate ?? null
-	);
-	const stakeholderRefs = objective.stakeholders.map((s) => ({ id: s.id, name: s.name }));
-	const visualizationData =
-		heatMapWeeks.length > 0
-			? computeVisualizationData(heatMapWeeks, allFeedbacks, stakeholderRefs)
-			: null;
-	const perceptionGaps =
-		allFeedbacks.length > 0
-			? computePerceptionGaps(allFeedbacks, reflections, stakeholderRefs)
-			: null;
+	const maturityStage = getMaturityStage(reflections.length);
 
 	return {
 		isFirstVisit,
 		isOnboardingComplete,
+		maturityStage,
 		nextCheckInDay: computeNextCheckInDay(checkInFrequency),
 		coachName: coachClient?.coach?.name ?? null,
 		objective: {
@@ -130,9 +112,6 @@ export const load: PageServerLoad = async (event) => {
 		currentWeek,
 		totalWeeks,
 		nextAction,
-		myLastRatings,
-		stakeholdersLastRatings,
-		perceptionGaps,
 		latestInsight: latestInsight
 			? {
 					id: latestInsight.id,
@@ -141,7 +120,6 @@ export const load: PageServerLoad = async (event) => {
 					weekNumber: latestInsight.weekNumber,
 					createdAt: latestInsight.createdAt.toISOString()
 				}
-			: null,
-		visualizationData
+			: null
 	};
 };
