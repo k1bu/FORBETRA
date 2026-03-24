@@ -201,6 +201,22 @@ async function main() {
 			// Use first subgoal for reflections
 			const subgoal = objective.subgoals[0];
 
+			// Create initial rating (week 0) — required by onboarding flow
+			await prisma.reflection.create({
+				data: {
+					cycleId: cycle.id,
+					userId: individual.id,
+					subgoalId: subgoal.id,
+					reflectionType: ReflectionType.RATING_A,
+					weekNumber: 0,
+					checkInDate: cycleStartDate,
+					submittedAt: cycleStartDate,
+					effortScore: 5,
+					performanceScore: 5
+				}
+			});
+			totalReflections++;
+
 			// Generate reflections and feedback for each active week
 			for (let week = 1; week <= activeWeeks; week++) {
 				const weekStartDate = new Date(cycleStartDate);
