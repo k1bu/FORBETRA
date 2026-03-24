@@ -30,7 +30,7 @@ export const load: PageServerLoad = async (event) => {
 
 	const { objective, cycle, currentWeek } = await event.parent();
 
-	const [hasAnyObjective, coachClient, latestInsight] = await Promise.all([
+	const [hasAnyObjective, coachClient, latestInsight, feedbacks] = await Promise.all([
 		prisma.objective.findFirst({
 			where: { userId: dbUser.id },
 			select: { id: true }
@@ -50,7 +50,17 @@ export const load: PageServerLoad = async (event) => {
 					orderBy: { createdAt: 'desc' },
 					select: { id: true, content: true, type: true, weekNumber: true, createdAt: true }
 				})
-			: null
+			: null,
+		cycle
+			? prisma.feedback.findMany({
+					where: { reflection: { cycleId: cycle.id } },
+					select: {
+						effortScore: true,
+						performanceScore: true,
+						reflection: { select: { weekNumber: true } }
+					}
+				})
+			: []
 	]);
 
 	const isFirstVisit = !hasAnyObjective;
@@ -87,6 +97,50 @@ export const load: PageServerLoad = async (event) => {
 	const nextAction = computeNextAction(reflections, currentWeek, checkInFrequency);
 	const maturityStage = getMaturityStage(reflections.length);
 
+	// Compute the three signals: effort trend, performance trend, perception gap
+	const effortScores = reflections
+		.filter((r) => r.effortScore != null)
+		.sort((a, b) => a.weekNumber - b.weekNumber)
+		.map((r) => ({ week: r.weekNumber, score: r.effortScore! }));
+	const perfScores = reflections
+		.filter((r) => r.performanceScore != null)
+		.sort((a, b) => a.weekNumber - b.weekNumber)
+		.map((r) => ({ week: r.weekNumber, score: r.performanceScore! }));
+
+	const avg = (arr: number[]) =>
+		arr.length > 0 ? +(arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1) : null;
+	const trend = (scores: Array<{ week: number; score: number }>) => {
+		if (scores.length < 2) return { direction: 'flat' as const, delta: 0 };
+		const recent = scores.slice(-3).map((s) => s.score);
+		const earlier = scores.slice(0, Math.max(1, scores.length - 3)).map((s) => s.score);
+		const recentAvg = avg(recent)!;
+		const earlierAvg = avg(earlier)!;
+		const d = +(recentAvg - earlierAvg).toFixed(1);
+		return {
+			direction: d > 0.3 ? ('up' as const) : d < -0.3 ? ('down' as const) : ('flat' as const),
+			delta: d
+		};
+	};
+
+	const selfEffortAvg = avg(effortScores.map((s) => s.score));
+	const selfPerfAvg = avg(perfScores.map((s) => s.score));
+	const effortTrend = trend(effortScores);
+	const perfTrend = trend(perfScores);
+
+	// Perception gap
+	const revEffortScores = feedbacks.filter((f) => f.effortScore != null).map((f) => f.effortScore!);
+	const revPerfScores = feedbacks
+		.filter((f) => f.performanceScore != null)
+		.map((f) => f.performanceScore!);
+	const revEffortAvg = avg(revEffortScores);
+	const revPerfAvg = avg(revPerfScores);
+	const effortGap =
+		selfEffortAvg != null && revEffortAvg != null
+			? +(selfEffortAvg - revEffortAvg).toFixed(1)
+			: null;
+	const perfGap =
+		selfPerfAvg != null && revPerfAvg != null ? +(selfPerfAvg - revPerfAvg).toFixed(1) : null;
+
 	return {
 		isFirstVisit,
 		isOnboardingComplete,
@@ -120,6 +174,15 @@ export const load: PageServerLoad = async (event) => {
 					weekNumber: latestInsight.weekNumber,
 					createdAt: latestInsight.createdAt.toISOString()
 				}
-			: null
+			: null,
+		signals: {
+			effort: { avg: selfEffortAvg, trend: effortTrend },
+			performance: { avg: selfPerfAvg, trend: perfTrend },
+			reviewerEffort: { avg: revEffortAvg },
+			reviewerPerformance: { avg: revPerfAvg },
+			effortGap,
+			perfGap,
+			hasFeedback: feedbacks.length > 0
+		}
 	};
 };
