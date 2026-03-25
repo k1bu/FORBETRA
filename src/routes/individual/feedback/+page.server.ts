@@ -23,14 +23,13 @@ export const load: PageServerLoad = async (event) => {
 				)
 			: (currentWeek ?? 1);
 
-	// Need stakeholder feedbacks + tokens — fetch separately since layout doesn't include these
+	// Stakeholders with feedbacks + tokens
 	const stakeholdersWithFeedbacks = await prisma.stakeholder.findMany({
 		where: { objectiveId: objective.id },
 		orderBy: { createdAt: 'asc' },
 		include: {
 			feedbacks: {
 				orderBy: { submittedAt: 'desc' },
-				take: 1,
 				include: {
 					reflection: { select: { weekNumber: true } }
 				}
@@ -44,74 +43,10 @@ export const load: PageServerLoad = async (event) => {
 	});
 
 	const currentTime = new Date();
-
-	// Reviewer list
-	const reviewers = stakeholdersWithFeedbacks.map((stakeholder) => {
-		const pendingToken = stakeholder.tokens.find(
-			(token) => !token.usedAt && token.expiresAt > currentTime
-		);
-		const latestFeedback = stakeholder.feedbacks[0] ?? null;
-
-		return {
-			id: stakeholder.id,
-			name: stakeholder.name,
-			email: stakeholder.email,
-			phone: stakeholder.phone,
-			lastFeedbackDate: latestFeedback?.submittedAt?.toISOString() ?? null,
-			pendingFeedbackLink: pendingToken
-				? `${baseUrl}/stakeholder/feedback/${pendingToken.tokenHash}`
-				: null
-		};
-	});
-
-	// Perception gaps (current week)
 	const avg = (arr: number[]) =>
 		arr.length > 0 ? Number((arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1)) : null;
 
-	// Load all feedbacks for this cycle
-	const allFeedbacks = cycle
-		? await prisma.feedback.findMany({
-				where: {
-					stakeholder: { objectiveId: objective.id },
-					reflection: { cycleId: cycle.id }
-				},
-				select: {
-					stakeholderId: true,
-					effortScore: true,
-					performanceScore: true,
-					reflection: { select: { weekNumber: true } }
-				}
-			})
-		: [];
-
-	// Self scores for current week
-	const selfReflections = cycle
-		? cycle.reflections.filter((r) => r.weekNumber === currentWeek)
-		: [];
-	const selfEfforts = selfReflections
-		.map((r) => r.effortScore)
-		.filter((v): v is number => v !== null);
-	const selfPerfs = selfReflections
-		.map((r) => r.performanceScore)
-		.filter((v): v is number => v !== null);
-	const myEffort = avg(selfEfforts);
-	const myPerformance = avg(selfPerfs);
-
-	// Group feedbacks by stakeholder and week
-	const shWeekMap = new Map<string, Map<number, { efforts: number[]; performances: number[] }>>();
-	for (const fb of allFeedbacks) {
-		if (!fb.reflection) continue;
-		const wk = fb.reflection.weekNumber;
-		const shId = fb.stakeholderId;
-		if (!shWeekMap.has(shId)) shWeekMap.set(shId, new Map());
-		const shWeeks = shWeekMap.get(shId)!;
-		if (!shWeeks.has(wk)) shWeeks.set(wk, { efforts: [], performances: [] });
-		const w = shWeeks.get(wk)!;
-		if (fb.effortScore !== null) w.efforts.push(fb.effortScore);
-		if (fb.performanceScore !== null) w.performances.push(fb.performanceScore);
-	}
-
-	// Self scores per week for trend computation
+	// Self scores per week
 	const selfWeekMap = new Map<number, { effort: number | null; performance: number | null }>();
 	if (cycle) {
 		for (let wk = 1; wk <= totalWeeks; wk++) {
@@ -119,6 +54,29 @@ export const load: PageServerLoad = async (event) => {
 			const effs = refs.map((r) => r.effortScore).filter((v): v is number => v !== null);
 			const prfs = refs.map((r) => r.performanceScore).filter((v): v is number => v !== null);
 			selfWeekMap.set(wk, { effort: avg(effs), performance: avg(prfs) });
+		}
+	}
+
+	const selfScores = selfWeekMap.get(currentWeek ?? 0);
+	const myEffort = selfScores?.effort ?? null;
+	const myPerformance = selfScores?.performance ?? null;
+
+	// Group all feedbacks by stakeholder and week
+	const shWeekMap = new Map<
+		string,
+		Map<number, { efforts: number[]; performances: number[]; comments: string[] }>
+	>();
+	for (const sh of stakeholdersWithFeedbacks) {
+		for (const fb of sh.feedbacks) {
+			if (!fb.reflection) continue;
+			const wk = fb.reflection.weekNumber;
+			if (!shWeekMap.has(sh.id)) shWeekMap.set(sh.id, new Map());
+			const shWeeks = shWeekMap.get(sh.id)!;
+			if (!shWeeks.has(wk)) shWeeks.set(wk, { efforts: [], performances: [], comments: [] });
+			const w = shWeeks.get(wk)!;
+			if (fb.effortScore !== null) w.efforts.push(fb.effortScore);
+			if (fb.performanceScore !== null) w.performances.push(fb.performanceScore);
+			if (fb.comment && fb.comment.trim().length > 0) w.comments.push(fb.comment.trim());
 		}
 	}
 
@@ -144,12 +102,22 @@ export const load: PageServerLoad = async (event) => {
 		return 'stable';
 	}
 
-	const perceptionGaps = objective.stakeholders.map((sh) => {
+	// Aggregate reviewer averages for summary
+	const allReviewerEfforts: number[] = [];
+	const allReviewerPerfs: number[] = [];
+
+	// Build reviewer cards
+	const reviewers = stakeholdersWithFeedbacks.map((sh) => {
+		const pendingToken = sh.tokens.find((token) => !token.usedAt && token.expiresAt > currentTime);
+		const latestFeedback = sh.feedbacks[0] ?? null;
+
 		const shWeeks = shWeekMap.get(sh.id);
 		const viewData = shWeeks?.get(currentWeek ?? 0);
 
 		const stkEffort = viewData ? avg(viewData.efforts) : null;
 		const stkPerf = viewData ? avg(viewData.performances) : null;
+		if (stkEffort !== null) allReviewerEfforts.push(stkEffort);
+		if (stkPerf !== null) allReviewerPerfs.push(stkPerf);
 
 		const effortGap =
 			myEffort !== null && stkEffort !== null ? Number((myEffort - stkEffort).toFixed(1)) : null;
@@ -173,23 +141,55 @@ export const load: PageServerLoad = async (event) => {
 				)
 			: null;
 
+		// Build feedback history (all weeks)
+		const history: {
+			week: number;
+			effort: number | null;
+			performance: number | null;
+			comment: string | null;
+		}[] = [];
+		if (shWeeks) {
+			const weeks = Array.from(shWeeks.keys()).sort((a, b) => a - b);
+			for (const wk of weeks) {
+				const d = shWeeks.get(wk)!;
+				history.push({
+					week: wk,
+					effort: avg(d.efforts),
+					performance: avg(d.performances),
+					comment: d.comments[d.comments.length - 1] ?? null
+				});
+			}
+		}
+
 		return {
-			stakeholderId: sh.id,
-			stakeholderName: sh.name,
+			id: sh.id,
+			name: sh.name,
+			email: sh.email,
+			phone: sh.phone,
+			lastFeedbackDate: latestFeedback?.submittedAt?.toISOString() ?? null,
+			pendingFeedbackLink: pendingToken
+				? `${baseUrl}/stakeholder/feedback/${pendingToken.tokenHash}`
+				: null,
+			stkEffort,
+			stkPerf,
 			effortGap,
-			performanceGap: perfGap,
+			perfGap,
 			effortGapTrend,
 			performanceGapTrend,
-			maxAbsGap: Math.max(Math.abs(effortGap ?? 0), Math.abs(perfGap ?? 0))
+			history
 		};
 	});
+
+	const reviewerAvgEffort = avg(allReviewerEfforts);
+	const reviewerAvgPerf = avg(allReviewerPerfs);
 
 	return {
 		objective: { id: objective.id, title: objective.title },
 		reviewers,
 		myEffort,
 		myPerformance,
-		perceptionGaps,
+		reviewerAvgEffort,
+		reviewerAvgPerf,
 		currentWeek
 	};
 };

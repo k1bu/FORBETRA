@@ -1,82 +1,70 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
 	import { enhance } from '$app/forms';
+	import {
+		TrendingUp,
+		TrendingDown,
+		Minus,
+		ChevronDown,
+		ChevronUp,
+		UserPlus,
+		MessageSquare
+	} from 'lucide-svelte';
+	import Badge from '$lib/components/Badge.svelte';
 
 	let { data, form }: { data: PageData; form: ActionData | null } = $props();
 
+	let expandedReviewer = $state<string | null>(null);
 	let showAddForm = $state(false);
 	let addName = $state('');
 	let addEmail = $state('');
-	let addEmailError = $state('');
-	let copiedLink = $state<string | null>(null);
 	let addingReviewer = $state(false);
 	let requestingFeedbackId = $state<string | null>(null);
-
-	function validateAddEmail(email: string) {
-		if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-			addEmailError = 'Please enter a valid email address';
-		} else {
-			addEmailError = '';
-		}
-	}
-
-	const copyFeedbackLink = async (url: string) => {
-		try {
-			await navigator.clipboard.writeText(url);
-			copiedLink = url;
-			setTimeout(() => {
-				copiedLink = null;
-			}, 2000);
-		} catch {
-			// Clipboard API not available
-		}
-	};
+	let copiedLink = $state<string | null>(null);
 
 	const formResult = form as Record<string, unknown> | null;
 	const isStakeholderAction = formResult?.action === 'stakeholder';
 	const isFeedbackAction = formResult?.action === 'feedback';
 
-	function getRelativeDate(isoDate: string | null): string {
-		if (!isoDate) return 'Awaiting first response';
-		const date = new Date(isoDate);
-		const now = new Date();
-		const diffMs = now.getTime() - date.getTime();
-		const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-		if (diffDays === 0) return 'Today';
-		if (diffDays === 1) return 'Yesterday';
-		if (diffDays < 7) return `${diffDays} days ago`;
-		if (diffDays < 14) return '1 week ago';
-		return `${Math.floor(diffDays / 7)} weeks ago`;
-	}
-
 	function gapColor(gap: number | null): string {
 		if (gap === null) return 'text-text-muted';
 		const abs = Math.abs(gap);
-		if (abs <= 0.5) return 'text-success';
-		if (abs <= 1.5) return 'text-warning';
+		if (abs <= 1) return 'text-success';
+		if (abs <= 2) return 'text-warning';
 		return 'text-error';
 	}
 
-	function trendLabel(trend: string | null): string {
-		if (trend === 'closing') return 'Closing';
-		if (trend === 'widening') return 'Widening';
-		if (trend === 'stable') return 'Stable';
-		return '';
+	function formatGap(gap: number | null): string {
+		if (gap === null) return '--';
+		return (gap > 0 ? '+' : '') + gap;
 	}
 
-	function trendColor(trend: string | null): string {
-		if (trend === 'closing') return 'text-success';
-		if (trend === 'widening') return 'text-error';
-		if (trend === 'stable') return 'text-text-muted';
-		return 'text-text-muted';
+	function getRelativeDate(isoDate: string | null): string {
+		if (!isoDate) return 'Awaiting first response';
+		const diffDays = Math.floor((Date.now() - new Date(isoDate).getTime()) / 86400000);
+		if (diffDays === 0) return 'Today';
+		if (diffDays === 1) return 'Yesterday';
+		if (diffDays < 7) return `${diffDays}d ago`;
+		return `${Math.floor(diffDays / 7)}w ago`;
 	}
+
+	const copyLink = async (url: string) => {
+		try {
+			await navigator.clipboard.writeText(url);
+			copiedLink = url;
+			setTimeout(() => (copiedLink = null), 2000);
+		} catch {
+			/* noop */
+		}
+	};
 </script>
 
 <svelte:head>
 	<title>Feedback | Forbetra</title>
 </svelte:head>
 
-<div class="mx-auto max-w-4xl space-y-8 px-4 py-8 sm:px-6">
+<div class="mx-auto max-w-4xl space-y-6 px-4 py-8 sm:px-6">
+	<!-- Breadcrumb + Header -->
 	<div>
 		<!-- eslint-disable svelte/no-navigation-without-resolve -->
 		<nav aria-label="Breadcrumb" class="mb-2">
@@ -95,14 +83,16 @@
 		<!-- eslint-enable svelte/no-navigation-without-resolve -->
 		<h1 class="text-2xl font-bold text-text-primary">Feedback</h1>
 		<p class="mt-1 text-sm text-text-secondary">
-			Manage your reviewers and see how your self-assessment compares to their ratings.
+			Your self-assessment vs. reviewer ratings{data.currentWeek
+				? ` — Week ${data.currentWeek}`
+				: ''}.
 		</p>
 	</div>
 
-	<!-- Success/Error Messages -->
+	<!-- Toast messages -->
 	{#if isStakeholderAction && formResult?.success}
 		<div class="rounded-xl border border-success/30 bg-success-muted p-4 text-sm text-success">
-			Reviewer added successfully. They'll receive a welcome email.
+			Reviewer added. They'll receive a welcome email.
 		</div>
 	{/if}
 	{#if isFeedbackAction && formResult?.success}
@@ -116,21 +106,246 @@
 		</div>
 	{/if}
 
-	<!-- Section 1: Your Reviewers -->
-	<section class="space-y-4">
+	<!-- Section 1: Perception Gap Summary -->
+	{#if data.myEffort !== null || data.myPerformance !== null}
+		<section class="grid grid-cols-2 gap-3">
+			<div class="rounded-xl border border-border-default bg-surface-raised p-4">
+				<p class="text-2xs font-semibold tracking-wider text-text-muted uppercase">Effort</p>
+				<div class="mt-2 flex items-end justify-between">
+					<div>
+						<p class="text-xs text-text-tertiary">You</p>
+						<p class="text-2xl font-bold text-text-primary">{data.myEffort ?? '--'}</p>
+					</div>
+					<div class="text-right">
+						<p class="text-xs text-text-tertiary">Reviewers</p>
+						<p class="text-2xl font-bold text-text-primary">{data.reviewerAvgEffort ?? '--'}</p>
+					</div>
+				</div>
+				{#if data.myEffort !== null && data.reviewerAvgEffort !== null}
+					{@const gap = Number((data.myEffort - data.reviewerAvgEffort).toFixed(1))}
+					<div
+						class="mt-2 flex items-center justify-center gap-1 rounded-lg bg-surface-subtle px-2 py-1"
+					>
+						<span class="text-xs font-semibold {gapColor(gap)}">Gap: {formatGap(gap)}</span>
+					</div>
+				{/if}
+			</div>
+			<div class="rounded-xl border border-border-default bg-surface-raised p-4">
+				<p class="text-2xs font-semibold tracking-wider text-text-muted uppercase">Performance</p>
+				<div class="mt-2 flex items-end justify-between">
+					<div>
+						<p class="text-xs text-text-tertiary">You</p>
+						<p class="text-2xl font-bold text-text-primary">{data.myPerformance ?? '--'}</p>
+					</div>
+					<div class="text-right">
+						<p class="text-xs text-text-tertiary">Reviewers</p>
+						<p class="text-2xl font-bold text-text-primary">{data.reviewerAvgPerf ?? '--'}</p>
+					</div>
+				</div>
+				{#if data.myPerformance !== null && data.reviewerAvgPerf !== null}
+					{@const gap = Number((data.myPerformance - data.reviewerAvgPerf).toFixed(1))}
+					<div
+						class="mt-2 flex items-center justify-center gap-1 rounded-lg bg-surface-subtle px-2 py-1"
+					>
+						<span class="text-xs font-semibold {gapColor(gap)}">Gap: {formatGap(gap)}</span>
+					</div>
+				{/if}
+			</div>
+		</section>
+	{/if}
+
+	<!-- Section 2: Reviewer Cards -->
+	<section class="space-y-3">
 		<div class="flex items-center justify-between">
-			<h2 class="text-lg font-semibold text-text-primary">Your Reviewers</h2>
+			<h2 class="text-lg font-semibold text-text-primary">Reviewers</h2>
 			<button
 				type="button"
 				onclick={() => (showAddForm = !showAddForm)}
-				class="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-hover"
+				class="inline-flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-accent-hover"
 			>
-				{showAddForm ? 'Cancel' : 'Add Reviewer'}
+				<UserPlus class="h-3.5 w-3.5" />
+				{showAddForm ? 'Cancel' : 'Add'}
 			</button>
 		</div>
 
-		<!-- Add reviewer form -->
-		{#if showAddForm}
+		{#if data.reviewers.length === 0}
+			<div
+				class="rounded-xl border border-dashed border-border-strong bg-surface-raised p-8 text-center"
+			>
+				<p class="text-sm text-text-secondary">
+					No reviewers yet. Add someone to start getting feedback.
+				</p>
+			</div>
+		{:else}
+			{#each data.reviewers as reviewer (reviewer.id)}
+				{@const maxGap = Math.max(
+					Math.abs(reviewer.effortGap ?? 0),
+					Math.abs(reviewer.perfGap ?? 0)
+				)}
+				<div
+					class="rounded-xl border {maxGap > 2
+						? 'border-error/30'
+						: maxGap > 1
+							? 'border-warning/30'
+							: 'border-border-default'} bg-surface-raised transition-all"
+				>
+					<!-- Card header — clickable -->
+					<button
+						type="button"
+						class="flex w-full items-center gap-4 p-4 text-left"
+						onclick={() =>
+							(expandedReviewer = expandedReviewer === reviewer.id ? null : reviewer.id)}
+					>
+						<div class="min-w-0 flex-1">
+							<p class="font-medium text-text-primary">{reviewer.name}</p>
+							<p class="text-xs text-text-muted">{getRelativeDate(reviewer.lastFeedbackDate)}</p>
+						</div>
+						<!-- Scores + gap -->
+						<div class="flex items-center gap-3 text-center">
+							{#if reviewer.stkEffort !== null}
+								<div>
+									<p class="text-2xs text-text-tertiary">Eff</p>
+									<p class="text-sm font-bold text-text-primary">{reviewer.stkEffort}</p>
+									{#if reviewer.effortGap !== null}
+										<p class="text-2xs font-semibold {gapColor(reviewer.effortGap)}">
+											{formatGap(reviewer.effortGap)}
+										</p>
+									{/if}
+								</div>
+							{/if}
+							{#if reviewer.stkPerf !== null}
+								<div>
+									<p class="text-2xs text-text-tertiary">Perf</p>
+									<p class="text-sm font-bold text-text-primary">{reviewer.stkPerf}</p>
+									{#if reviewer.perfGap !== null}
+										<p class="text-2xs font-semibold {gapColor(reviewer.perfGap)}">
+											{formatGap(reviewer.perfGap)}
+										</p>
+									{/if}
+								</div>
+							{/if}
+							{#if reviewer.effortGapTrend || reviewer.performanceGapTrend}
+								{@const trend = reviewer.effortGapTrend ?? reviewer.performanceGapTrend}
+								{#if trend === 'closing'}
+									<TrendingDown class="h-4 w-4 text-success" />
+								{:else if trend === 'widening'}
+									<TrendingUp class="h-4 w-4 text-error" />
+								{:else}
+									<Minus class="h-4 w-4 text-text-muted" />
+								{/if}
+							{/if}
+						</div>
+						{#if expandedReviewer === reviewer.id}
+							<ChevronUp class="h-4 w-4 shrink-0 text-text-muted" />
+						{:else}
+							<ChevronDown class="h-4 w-4 shrink-0 text-text-muted" />
+						{/if}
+					</button>
+
+					<!-- Expanded detail -->
+					{#if expandedReviewer === reviewer.id}
+						<div class="space-y-3 border-t border-border-default px-4 pt-3 pb-4">
+							<p class="text-xs text-text-muted">{reviewer.email}</p>
+
+							<!-- Trend badge -->
+							{#if reviewer.effortGapTrend || reviewer.performanceGapTrend}
+								{@const trend = reviewer.effortGapTrend ?? reviewer.performanceGapTrend}
+								<Badge
+									variant={trend === 'closing'
+										? 'success'
+										: trend === 'widening'
+											? 'error'
+											: 'default'}
+								>
+									Gap {trend}
+								</Badge>
+							{/if}
+
+							<!-- Feedback history -->
+							{#if reviewer.history.length > 0}
+								<div>
+									<p class="text-2xs mb-2 font-semibold tracking-wider text-text-muted uppercase">
+										History
+									</p>
+									<div class="space-y-1.5">
+										{#each reviewer.history as entry (entry.week)}
+											<div
+												class="flex items-center gap-3 rounded-lg bg-surface-subtle px-3 py-2 text-xs"
+											>
+												<span class="w-12 shrink-0 font-medium text-text-secondary"
+													>Wk {entry.week}</span
+												>
+												<span class="text-text-tertiary"
+													>E: <strong class="text-text-primary">{entry.effort ?? '--'}</strong
+													></span
+												>
+												<span class="text-text-tertiary"
+													>P: <strong class="text-text-primary">{entry.performance ?? '--'}</strong
+													></span
+												>
+												{#if entry.comment}
+													<span title={entry.comment}
+														><MessageSquare
+															class="ml-auto h-3 w-3 shrink-0 text-text-muted"
+														/></span
+													>
+												{/if}
+											</div>
+										{/each}
+									</div>
+								</div>
+							{:else}
+								<p class="text-xs text-text-muted">No feedback submitted yet.</p>
+							{/if}
+
+							<!-- Actions -->
+							<div class="flex items-center gap-2 pt-1">
+								{#if reviewer.pendingFeedbackLink}
+									<button
+										type="button"
+										onclick={() => {
+											if (reviewer.pendingFeedbackLink) copyLink(reviewer.pendingFeedbackLink);
+										}}
+										class="rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors {copiedLink ===
+										reviewer.pendingFeedbackLink
+											? 'border-success text-success'
+											: 'border-border-default text-text-secondary hover:border-accent hover:text-accent'}"
+									>
+										{copiedLink === reviewer.pendingFeedbackLink ? 'Copied!' : 'Copy Link'}
+									</button>
+								{/if}
+								<form
+									method="post"
+									action="?/generateFeedback"
+									use:enhance={() => {
+										requestingFeedbackId = reviewer.id;
+										return async ({ update }) => {
+											requestingFeedbackId = null;
+											await update();
+										};
+									}}
+								>
+									<input type="hidden" name="stakeholderId" value={reviewer.id} />
+									<button
+										type="submit"
+										disabled={requestingFeedbackId === reviewer.id}
+										class="rounded-lg border border-accent bg-accent-muted px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-accent hover:text-white disabled:opacity-50"
+									>
+										{requestingFeedbackId === reviewer.id ? 'Sending...' : 'Request Feedback'}
+									</button>
+								</form>
+							</div>
+						</div>
+					{/if}
+				</div>
+			{/each}
+		{/if}
+	</section>
+
+	<!-- Section 3: Add Reviewer -->
+	{#if showAddForm}
+		<section class="rounded-xl border border-border-default bg-surface-raised p-5">
+			<h2 class="mb-3 text-sm font-semibold text-text-primary">Add a Reviewer</h2>
 			<form
 				method="post"
 				action="?/addStakeholder"
@@ -141,23 +356,23 @@
 						await update();
 					};
 				}}
-				class="rounded-xl border border-border-default bg-surface-raised p-5"
+				class="space-y-3"
 			>
-				<div class="grid gap-4 sm:grid-cols-2">
+				<div class="grid gap-3 sm:grid-cols-2">
 					<div class="space-y-1">
-						<label class="block text-sm font-medium text-text-secondary" for="add-name">Name</label>
+						<label class="block text-xs font-medium text-text-secondary" for="add-name">Name</label>
 						<input
 							id="add-name"
 							name="name"
 							type="text"
 							required
 							placeholder="John Smith"
-							class="w-full rounded-lg border border-border-default bg-surface-raised px-4 py-2.5 text-text-primary transition-all focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
+							class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary transition-all focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
 							bind:value={addName}
 						/>
 					</div>
 					<div class="space-y-1">
-						<label class="block text-sm font-medium text-text-secondary" for="add-email"
+						<label class="block text-xs font-medium text-text-secondary" for="add-email"
 							>Email</label
 						>
 						<input
@@ -166,170 +381,29 @@
 							type="email"
 							required
 							placeholder="john@example.com"
-							class="w-full rounded-lg border {addEmailError
-								? 'border-error'
-								: 'border-border-default'} bg-surface-raised px-4 py-2.5 text-text-primary transition-all focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
+							class="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary transition-all focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
 							bind:value={addEmail}
-							onblur={() => validateAddEmail(addEmail)}
-							oninput={() => {
-								if (addEmailError) validateAddEmail(addEmail);
-							}}
 						/>
-						{#if addEmailError}
-							<p class="text-xs text-error" aria-live="polite">{addEmailError}</p>
-						{/if}
 					</div>
 				</div>
-				<div class="mt-4 flex justify-end">
+				<div class="flex justify-end">
 					<button
 						type="submit"
 						disabled={addingReviewer}
-						class="rounded-lg bg-accent px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-hover disabled:opacity-50"
+						class="rounded-lg bg-accent px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-hover disabled:opacity-50"
 					>
 						{addingReviewer ? 'Adding...' : 'Add Reviewer'}
 					</button>
 				</div>
 			</form>
-		{/if}
+		</section>
+	{/if}
 
-		<!-- Reviewer list -->
-		{#if data.reviewers.length === 0}
-			<div class="rounded-xl border border-border-default bg-surface-raised p-8 text-center">
-				<p class="text-text-secondary">No reviewers yet. Add someone to start getting feedback.</p>
-			</div>
-		{:else}
-			<div class="space-y-3">
-				{#each data.reviewers as reviewer (reviewer.id)}
-					<div
-						class="flex items-center justify-between rounded-xl border border-border-default bg-surface-raised p-4 transition-all hover:border-accent/30"
-					>
-						<div class="min-w-0 flex-1">
-							<p class="font-medium text-text-primary">{reviewer.name}</p>
-							<p class="text-sm text-text-muted">{reviewer.email}</p>
-							<p class="mt-1 text-xs text-text-tertiary">
-								Last feedback: {getRelativeDate(reviewer.lastFeedbackDate)}
-							</p>
-						</div>
-						<div class="flex shrink-0 items-center gap-2">
-							{#if reviewer.pendingFeedbackLink}
-								<button
-									type="button"
-									onclick={() => {
-										if (reviewer.pendingFeedbackLink)
-											copyFeedbackLink(reviewer.pendingFeedbackLink);
-									}}
-									class="rounded-lg border px-3 py-2 text-sm font-medium transition-colors {copiedLink ===
-									reviewer.pendingFeedbackLink
-										? 'border-success text-success'
-										: 'border-border-default text-text-secondary hover:border-accent hover:text-accent'}"
-								>
-									{copiedLink === reviewer.pendingFeedbackLink ? 'Copied!' : 'Copy Link'}
-								</button>
-							{/if}
-							<form
-								method="post"
-								action="?/generateFeedback"
-								use:enhance={() => {
-									requestingFeedbackId = reviewer.id;
-									return async ({ update }) => {
-										requestingFeedbackId = null;
-										await update();
-									};
-								}}
-							>
-								<input type="hidden" name="stakeholderId" value={reviewer.id} />
-								<button
-									type="submit"
-									disabled={requestingFeedbackId === reviewer.id}
-									class="shrink-0 rounded-lg border border-accent bg-accent-muted px-4 py-2 text-sm font-medium text-accent transition-colors hover:bg-accent hover:text-white disabled:opacity-50"
-								>
-									{requestingFeedbackId === reviewer.id ? 'Sending...' : 'Request Feedback'}
-								</button>
-							</form>
-						</div>
-					</div>
-				{/each}
-			</div>
-		{/if}
-	</section>
-
-	<!-- Section 2: Perception Gaps -->
-	<section class="space-y-4">
-		<div>
-			<h2 class="text-lg font-semibold text-text-primary">Perception Gaps</h2>
-			<p class="mt-1 text-sm text-text-secondary">
-				How your self-scores compare to your reviewers' ratings{data.currentWeek
-					? ` (Week ${data.currentWeek})`
-					: ''}.
-			</p>
-		</div>
-
-		{#if data.perceptionGaps.length === 0}
-			<div class="rounded-xl border border-border-default bg-surface-raised p-8 text-center">
-				<p class="text-text-secondary">
-					Add reviewers and complete check-ins to see perception gaps.
-				</p>
-			</div>
-		{:else if data.myEffort === null && data.myPerformance === null}
-			<div class="rounded-xl border border-border-default bg-surface-raised p-8 text-center">
-				<p class="text-text-secondary">Complete a check-in this week to see perception gaps.</p>
-			</div>
-		{:else}
-			<div
-				class="rounded-xl border border-accent/20 bg-accent-muted/50 p-4 text-sm text-text-secondary"
-			>
-				<p>
-					<strong class="text-accent">Reading gaps:</strong> Positive means you rate yourself higher
-					than your reviewer. Negative means they rate you higher. Gaps closer to 0 show alignment.
-				</p>
-			</div>
-
-			<div class="overflow-x-auto rounded-xl border border-border-default">
-				<table class="w-full text-left text-sm">
-					<thead class="bg-surface-subtle text-text-secondary">
-						<tr>
-							<th class="px-4 py-3 font-medium">Reviewer</th>
-							<th class="px-4 py-3 font-medium">Effort Gap</th>
-							<th class="px-4 py-3 font-medium">Performance Gap</th>
-							<th class="px-4 py-3 font-medium">Trend</th>
-						</tr>
-					</thead>
-					<tbody class="divide-y divide-border-default bg-surface-raised">
-						{#each data.perceptionGaps.sort((a, b) => b.maxAbsGap - a.maxAbsGap) as gap (gap.stakeholderId)}
-							<tr>
-								<td class="px-4 py-3 font-medium text-text-primary">{gap.stakeholderName}</td>
-								<td class="px-4 py-3">
-									{#if gap.effortGap !== null}
-										<span class={gapColor(gap.effortGap)}>
-											{gap.effortGap > 0 ? '+' : ''}{gap.effortGap}
-										</span>
-									{:else}
-										<span class="text-text-muted">—</span>
-									{/if}
-								</td>
-								<td class="px-4 py-3">
-									{#if gap.performanceGap !== null}
-										<span class={gapColor(gap.performanceGap)}>
-											{gap.performanceGap > 0 ? '+' : ''}{gap.performanceGap}
-										</span>
-									{:else}
-										<span class="text-text-muted">—</span>
-									{/if}
-								</td>
-								<td class="px-4 py-3">
-									{#if gap.effortGapTrend || gap.performanceGapTrend}
-										<span class={trendColor(gap.effortGapTrend ?? gap.performanceGapTrend)}>
-											{trendLabel(gap.effortGapTrend ?? gap.performanceGapTrend)}
-										</span>
-									{:else}
-										<span class="text-text-muted">—</span>
-									{/if}
-								</td>
-							</tr>
-						{/each}
-					</tbody>
-				</table>
-			</div>
-		{/if}
-	</section>
+	<!-- Legend -->
+	<div class="text-2xs flex flex-wrap items-center gap-x-4 gap-y-1 px-1 text-text-muted">
+		<span>Gap = Your score minus reviewer score</span>
+		<span class="text-success">Green (&le;1)</span>
+		<span class="text-warning">Amber (1-2)</span>
+		<span class="text-error">Red (&gt;2)</span>
+	</div>
 </div>
