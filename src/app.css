@@ -13,43 +13,48 @@
 	--font-size-2xs: 11px;
 	--font-size-2xs--line-height: 15px;
 
-	/* Surface palette (dark-first) */
-	--color-surface-base: #09090b;
-	--color-surface-raised: #131316;
-	--color-surface-overlay: #1c1c20;
-	--color-surface-subtle: #232329;
+	/* Surface palette — warm darks with clear contrast steps */
+	--color-surface-base: #0c0b0f;
+	--color-surface-raised: #16151b;
+	--color-surface-overlay: #1e1d24;
+	--color-surface-subtle: #26252d;
 
-	/* Border palette */
-	--color-border-default: rgba(255, 255, 255, 0.08);
-	--color-border-strong: rgba(255, 255, 255, 0.15);
-	--color-border-accent: rgba(255, 255, 255, 0.25);
+	/* Border palette — slightly more visible */
+	--color-border-default: rgba(255, 255, 255, 0.1);
+	--color-border-strong: rgba(255, 255, 255, 0.18);
+	--color-border-accent: rgba(255, 255, 255, 0.28);
 
 	/* Text palette */
 	--color-text-primary: #f4f5f8;
-	--color-text-secondary: #a1a1aa;
+	--color-text-secondary: #a8a8b3;
 	--color-text-tertiary: #71717a;
 	--color-text-muted: #52525b;
 
-	/* Brand accent */
+	/* Brand accent — CTAs and interactive elements */
 	--color-accent: #6366f1;
 	--color-accent-hover: #818cf8;
-	--color-accent-muted: rgba(99, 102, 241, 0.15);
+	--color-accent-muted: rgba(99, 102, 241, 0.12);
+
+	/* AI accent — warm amber for AI-generated content */
+	--color-ai: #e5a54b;
+	--color-ai-hover: #f0b963;
+	--color-ai-muted: rgba(229, 165, 75, 0.12);
 
 	/* Data colors */
 	--color-data-effort: #06b6d4;
-	--color-data-effort-muted: rgba(6, 182, 212, 0.15);
+	--color-data-effort-muted: rgba(6, 182, 212, 0.12);
 	--color-data-performance: #f59e0b;
-	--color-data-performance-muted: rgba(245, 158, 11, 0.15);
+	--color-data-performance-muted: rgba(245, 158, 11, 0.12);
 
 	/* Semantic colors */
 	--color-success: #10b981;
-	--color-success-muted: rgba(16, 185, 129, 0.15);
+	--color-success-muted: rgba(16, 185, 129, 0.12);
 	--color-warning: #f59e0b;
-	--color-warning-muted: rgba(245, 158, 11, 0.15);
+	--color-warning-muted: rgba(245, 158, 11, 0.12);
 	--color-error: #ef4444;
-	--color-error-muted: rgba(239, 68, 68, 0.15);
+	--color-error-muted: rgba(239, 68, 68, 0.12);
 	--color-info: #6366f1;
-	--color-info-muted: rgba(99, 102, 241, 0.15);
+	--color-info-muted: rgba(99, 102, 241, 0.12);
 }
 
 /* --- Glass utilities --- */
