@@ -1,5 +1,6 @@
 <script lang="ts">
 	import '../app.css';
+	import '@fontsource/plus-jakarta-sans/latin.css';
 	import '@fontsource/geist-sans/latin.css';
 	import '@fontsource/geist-mono/latin.css';
 	import favicon from '$lib/assets/favicon.svg';

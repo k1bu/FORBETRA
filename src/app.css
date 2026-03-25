@@ -2,84 +2,104 @@
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
 
-/* --- Dark mode (class-based) --- */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* --- Design Tokens --- */
+/* --- Design Tokens — Premium Warm Dark --- */
 @theme {
-	/* Typography */
-	--font-sans: 'Geist Sans', ui-sans-serif, system-ui, sans-serif;
+	/* Typography — Plus Jakarta Sans (warm geometric) */
+	--font-sans: 'Plus Jakarta Sans', 'Geist Sans', ui-sans-serif, system-ui, sans-serif;
 	--font-mono: 'Geist Mono', ui-monospace, monospace;
 	--font-size-2xs: 11px;
 	--font-size-2xs--line-height: 15px;
 
-	/* Surface palette — warm darks with clear contrast steps */
-	--color-surface-base: #0c0b0f;
-	--color-surface-raised: #16151b;
-	--color-surface-overlay: #1e1d24;
-	--color-surface-subtle: #26252d;
+	/* Surface palette — warm stone blacks */
+	--color-surface-base: #0c0a09;
+	--color-surface-raised: #141210;
+	--color-surface-overlay: #1c1917;
+	--color-surface-subtle: #231f1c;
 
-	/* Border palette — slightly more visible */
-	--color-border-default: rgba(255, 255, 255, 0.1);
-	--color-border-strong: rgba(255, 255, 255, 0.18);
-	--color-border-accent: rgba(255, 255, 255, 0.28);
+	/* Border — warm white at varying opacity */
+	--color-border-default: rgba(250, 244, 237, 0.06);
+	--color-border-strong: rgba(250, 244, 237, 0.12);
+	--color-border-accent: rgba(250, 244, 237, 0.2);
 
-	/* Text palette */
-	--color-text-primary: #f4f5f8;
-	--color-text-secondary: #a8a8b3;
-	--color-text-tertiary: #71717a;
-	--color-text-muted: #52525b;
+	/* Text — single warm white at varying opacity */
+	--color-text-primary: rgba(250, 244, 237, 0.93);
+	--color-text-secondary: rgba(250, 244, 237, 0.55);
+	--color-text-tertiary: rgba(250, 244, 237, 0.35);
+	--color-text-muted: rgba(250, 244, 237, 0.2);
 
-	/* Brand accent — CTAs and interactive elements */
-	--color-accent: #6366f1;
-	--color-accent-hover: #818cf8;
-	--color-accent-muted: rgba(99, 102, 241, 0.12);
+	/* Accent — warm amber/gold */
+	--color-accent: #e8a04a;
+	--color-accent-hover: #f0b265;
+	--color-accent-muted: rgba(232, 160, 74, 0.1);
 
-	/* AI accent — warm amber for AI-generated content */
-	--color-ai: #e5a54b;
-	--color-ai-hover: #f0b963;
-	--color-ai-muted: rgba(229, 165, 75, 0.12);
+	/* AI accent */
+	--color-ai: #e8a04a;
+	--color-ai-hover: #f0b265;
+	--color-ai-muted: rgba(232, 160, 74, 0.08);
 
 	/* Data colors */
-	--color-data-effort: #06b6d4;
-	--color-data-effort-muted: rgba(6, 182, 212, 0.12);
-	--color-data-performance: #f59e0b;
-	--color-data-performance-muted: rgba(245, 158, 11, 0.12);
+	--color-data-effort: #7dd3fc;
+	--color-data-effort-muted: rgba(125, 211, 252, 0.1);
+	--color-data-performance: #fbbf24;
+	--color-data-performance-muted: rgba(251, 191, 36, 0.1);
 
-	/* Semantic colors */
-	--color-success: #10b981;
-	--color-success-muted: rgba(16, 185, 129, 0.12);
-	--color-warning: #f59e0b;
-	--color-warning-muted: rgba(245, 158, 11, 0.12);
-	--color-error: #ef4444;
-	--color-error-muted: rgba(239, 68, 68, 0.12);
-	--color-info: #6366f1;
-	--color-info-muted: rgba(99, 102, 241, 0.12);
+	/* Semantic */
+	--color-success: #4ade80;
+	--color-success-muted: rgba(74, 222, 128, 0.1);
+	--color-warning: #fbbf24;
+	--color-warning-muted: rgba(251, 191, 36, 0.1);
+	--color-error: #f87171;
+	--color-error-muted: rgba(248, 113, 113, 0.1);
+	--color-info: #7dd3fc;
+	--color-info-muted: rgba(125, 211, 252, 0.1);
 }
 
-/* --- Glass utilities --- */
+/* --- Premium surface utilities --- */
 @layer components {
+	.card {
+		background: var(--color-surface-raised);
+		border: 1px solid var(--color-border-default);
+		border-radius: 16px;
+		box-shadow: inset 0 1px 0 rgba(250, 244, 237, 0.04);
+	}
+	.card-hover {
+		transition: all 350ms cubic-bezier(0.16, 1, 0.3, 1);
+	}
+	.card-hover:hover {
+		background: var(--color-surface-overlay);
+		border-color: var(--color-border-strong);
+		box-shadow:
+			inset 0 1px 0 rgba(250, 244, 237, 0.06),
+			0 2px 8px rgba(0, 0, 0, 0.3),
+			0 8px 24px rgba(0, 0, 0, 0.2);
+	}
 	.glass {
-		background: rgba(255, 255, 255, 0.04);
+		background: rgba(20, 18, 16, 0.7);
 		backdrop-filter: blur(16px);
 		-webkit-backdrop-filter: blur(16px);
-		border: 1px solid rgba(255, 255, 255, 0.08);
+		border: 1px solid var(--color-border-default);
 	}
 	.glass-raised {
-		background: rgba(255, 255, 255, 0.07);
+		background: rgba(20, 18, 16, 0.85);
 		backdrop-filter: blur(24px);
 		-webkit-backdrop-filter: blur(24px);
-		border: 1px solid rgba(255, 255, 255, 0.12);
+		border: 1px solid var(--color-border-strong);
 	}
-	.glass-strong {
-		background: rgba(255, 255, 255, 0.12);
-		backdrop-filter: blur(32px);
-		-webkit-backdrop-filter: blur(32px);
-		border: 1px solid rgba(255, 255, 255, 0.18);
+	.glow-amber {
+		background-image: radial-gradient(ellipse at 50% 0%, rgba(232, 160, 74, 0.1), transparent 70%);
+	}
+	.glow-soft {
+		background-image: radial-gradient(
+			ellipse at 50% 50%,
+			rgba(232, 160, 74, 0.06),
+			transparent 70%
+		);
 	}
 }
 
-/* --- Focus ring utility --- */
+/* --- Focus ring --- */
 @layer utilities {
 	.focus-ring {
 		@apply focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface-base focus-visible:outline-none;
@@ -89,40 +109,38 @@
 	}
 }
 
-/* --- Animation utilities --- */
+/* --- Animations (slower, softer) --- */
 @layer utilities {
 	.anim-lift {
 		transition:
-			transform 0.2s ease,
-			box-shadow 0.2s ease;
+			transform 350ms cubic-bezier(0.16, 1, 0.3, 1),
+			box-shadow 350ms cubic-bezier(0.16, 1, 0.3, 1);
 	}
 	.anim-lift:hover {
 		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+		box-shadow:
+			0 4px 12px rgba(0, 0, 0, 0.3),
+			0 0 24px rgba(232, 160, 74, 0.06);
 	}
-
 	.anim-slide-up {
-		animation: slideUp 0.3s ease-out both;
+		animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
 	}
-
 	.anim-fade-in {
-		animation: fadeIn 0.3s ease-out both;
+		animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
 	}
-
 	.anim-stagger {
-		animation: slideUp 0.3s ease-out both;
-		animation-delay: calc(var(--stagger, 0) * 60ms);
+		animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+		animation-delay: calc(var(--stagger, 0) * 80ms);
 	}
-
 	.anim-pop {
-		animation: pop 0.15s ease-out;
+		animation: pop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 	}
 }
 
 @keyframes slideUp {
 	from {
 		opacity: 0;
-		transform: translateY(8px);
+		transform: translateY(12px);
 	}
 	to {
 		opacity: 1;
@@ -144,7 +162,7 @@
 		transform: scale(1);
 	}
 	50% {
-		transform: scale(1.15);
+		transform: scale(1.12);
 	}
 	100% {
 		transform: scale(1);
@@ -163,7 +181,7 @@
 	}
 }
 
-/* --- Base styles --- */
+/* --- Base --- */
 @layer base {
 	html {
 		background-color: var(--color-surface-base);
@@ -171,5 +189,6 @@
 		font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
+		letter-spacing: -0.01em;
 	}
 }
