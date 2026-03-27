@@ -1,3 +1,4 @@
+import { fail } from '@sveltejs/kit';
 import prisma from '$lib/server/prisma';
 import { requireRole } from '$lib/server/auth';
 import {
@@ -5,7 +6,13 @@ import {
 	computeNextAction,
 	computeNextCheckInDay
 } from '$lib/server/hubMetrics';
-import type { PageServerLoad } from './$types';
+import { checkInEntrySchema } from '$lib/validation/reflection';
+import { computeWeekNumber, getDateForWeekday } from '$lib/server/coachUtils';
+import { parseCheckInDays } from '$lib/utils/checkInDays';
+import { sendEmail } from '$lib/notifications/email';
+import { emailTemplates } from '$lib/notifications/emailTemplates';
+import type { Actions, PageServerLoad } from './$types';
+import type { ReflectionType } from '@prisma/client';
 
 export type MaturityStage = 'new' | 'growing' | 'established';
 
@@ -23,6 +30,31 @@ function computeTotalWeeks(startDate: Date, endDate: Date | null, currentWeek: n
 		);
 	}
 	return currentWeek;
+}
+
+function dayNameToNumber(day: string): number {
+	const map: Record<string, number> = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
+	return map[day] ?? 3;
+}
+
+function getCheckInAvailability(
+	startDate: Date,
+	weekNumber: number,
+	checkInFrequency: string
+): { type: ReflectionType; isAvailable: boolean } {
+	const today = new Date();
+	today.setHours(0, 0, 0, 0);
+	const days = parseCheckInDays(checkInFrequency);
+	const dayNumbers = days.map(dayNameToNumber);
+	const sortedDays = [...dayNumbers].sort((a, b) => a - b);
+
+	for (const day of sortedDays) {
+		const dayDate = getDateForWeekday(day, startDate, weekNumber);
+		if (today >= dayDate) {
+			return { type: 'RATING_A', isAvailable: true };
+		}
+	}
+	return { type: 'RATING_A', isAvailable: false };
 }
 
 export const load: PageServerLoad = async (event) => {
@@ -88,7 +120,15 @@ export const load: PageServerLoad = async (event) => {
 			currentWeek: null,
 			totalWeeks: null,
 			nextAction: null,
-			latestInsight: null
+			latestInsight: null,
+			// Check-in fields (null for incomplete onboarding)
+			identityAnchor: null,
+			isCheckInDue: false,
+			lastEffortScore: null,
+			lastPerformanceScore: null,
+			hasNewFeedback: false,
+			newFeedbackRaterName: null,
+			coachNudge: null
 		};
 	}
 
@@ -141,6 +181,103 @@ export const load: PageServerLoad = async (event) => {
 	const perfGap =
 		selfPerfAvg != null && revPerfAvg != null ? +(selfPerfAvg - revPerfAvg).toFixed(1) : null;
 
+	// ═══ Check-in data for inline Today screen ═══
+
+	// Identity anchor: the user's Week 1 notes or objective identity text
+	let identityAnchor: string | null = null;
+	const firstSubgoal = objective.subgoals[0] ?? null;
+	if (firstSubgoal) {
+		const week1 = await prisma.reflection.findFirst({
+			where: {
+				cycleId: cycle.id,
+				userId: dbUser.id,
+				weekNumber: 1,
+				notes: { not: null }
+			},
+			select: { notes: true },
+			orderBy: { submittedAt: 'asc' }
+		});
+		identityAnchor = week1?.notes?.trim() || null;
+	}
+
+	// Determine if check-in is due
+	const checkInAvailability = getCheckInAvailability(
+		cycle.startDate,
+		currentWeek,
+		checkInFrequency
+	);
+	const isCheckInDue = nextAction.state === 'open' && checkInAvailability.isAvailable;
+
+	// Last scores for RatingBar lastValue prop
+	let lastEffortScore: number | null = null;
+	let lastPerformanceScore: number | null = null;
+	if (firstSubgoal) {
+		const lastReflection = await prisma.reflection.findFirst({
+			where: {
+				userId: dbUser.id,
+				cycleId: cycle.id,
+				subgoalId: firstSubgoal.id,
+				weekNumber: { lt: currentWeek },
+				OR: [{ effortScore: { not: null } }, { performanceScore: { not: null } }]
+			},
+			orderBy: { weekNumber: 'desc' },
+			select: { effortScore: true, performanceScore: true }
+		});
+		lastEffortScore = lastReflection?.effortScore ?? null;
+		lastPerformanceScore = lastReflection?.performanceScore ?? null;
+	}
+
+	// Check for recent feedback (submitted in the last 7 days)
+	let hasNewFeedback = false;
+	let newFeedbackRaterName: string | null = null;
+	try {
+		const sevenDaysAgo = new Date();
+		sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+		const recentFeedback = await prisma.feedback.findFirst({
+			where: {
+				reflection: { cycleId: cycle.id },
+				submittedAt: { gte: sevenDaysAgo }
+			},
+			orderBy: { submittedAt: 'desc' },
+			select: {
+				stakeholder: { select: { name: true } }
+			}
+		});
+		if (recentFeedback) {
+			hasNewFeedback = true;
+			const name = recentFeedback.stakeholder?.name;
+			if (name) {
+				const parts = name.split(' ');
+				newFeedbackRaterName =
+					parts.length > 1 ? `${parts[0]} ${parts[1][0]}.` : parts[0];
+			}
+		}
+	} catch {
+		// Non-critical — skip on error
+	}
+
+	// Coach nudge (latest coach note for this individual)
+	let coachNudge: { text: string; coachName: string } | null = null;
+	if (coachClient?.coach?.name) {
+		try {
+			const recentNote = await prisma.coachNote.findFirst({
+				where: {
+					individualId: dbUser.id
+				},
+				orderBy: { createdAt: 'desc' },
+				select: { content: true }
+			});
+			if (recentNote?.content) {
+				coachNudge = {
+					text: recentNote.content,
+					coachName: coachClient.coach.name
+				};
+			}
+		} catch {
+			// Non-critical — skip on error
+		}
+	}
+
 	return {
 		isFirstVisit,
 		isOnboardingComplete,
@@ -183,6 +320,179 @@ export const load: PageServerLoad = async (event) => {
 			effortGap,
 			perfGap,
 			hasFeedback: feedbacks.length > 0
-		}
+		},
+		// Inline check-in data
+		identityAnchor,
+		isCheckInDue,
+		lastEffortScore,
+		lastPerformanceScore,
+		hasNewFeedback,
+		newFeedbackRaterName,
+		coachNudge
 	};
+};
+
+// ═══ Check-in form action (mirrors checkin/+page.server.ts) ═══
+
+export const actions: Actions = {
+	checkin: async (event) => {
+		const { dbUser } = requireRole(event, 'INDIVIDUAL');
+
+		const objective = await prisma.objective.findFirst({
+			where: { userId: dbUser.id, active: true },
+			orderBy: { createdAt: 'desc' },
+			include: {
+				cycles: {
+					orderBy: { startDate: 'desc' },
+					take: 1
+				},
+				subgoals: {
+					orderBy: { createdAt: 'asc' },
+					take: 1
+				}
+			}
+		});
+
+		const cycle = objective?.cycles[0];
+		if (!cycle) {
+			return fail(400, { error: 'No active cycle found. Complete onboarding first.' });
+		}
+
+		const firstSubgoal = objective?.subgoals[0];
+		if (!firstSubgoal) {
+			return fail(400, { error: 'No sub-objectives found. Complete onboarding first.' });
+		}
+
+		const weekNumber = computeWeekNumber(cycle.startDate);
+		const checkInFrequency = cycle.checkInFrequency ?? '3x';
+		const checkInAvailability = getCheckInAvailability(
+			cycle.startDate,
+			weekNumber,
+			checkInFrequency
+		);
+
+		if (!checkInAvailability.isAvailable) {
+			return fail(400, { error: 'This check-in is not available yet.' });
+		}
+
+		const formData = await event.request.formData();
+		const submission = Object.fromEntries(formData) as Record<string, string>;
+		const parsed = checkInEntrySchema.safeParse(submission);
+
+		if (!parsed.success) {
+			const errors = parsed.error.flatten();
+			return fail(400, {
+				error:
+					errors.fieldErrors.effortScore?.[0] ??
+					errors.fieldErrors.performanceScore?.[0] ??
+					'Invalid input'
+			});
+		}
+
+		const data = parsed.data;
+		const notes = data.notes ?? null;
+
+		try {
+			await prisma.reflection.upsert({
+				where: {
+					cycleId_weekNumber_reflectionType_subgoalId: {
+						cycleId: cycle.id,
+						weekNumber,
+						reflectionType: 'RATING_A',
+						subgoalId: firstSubgoal.id
+					}
+				},
+				update: {
+					notes,
+					effortScore: data.effortScore,
+					performanceScore: data.performanceScore,
+					submittedAt: new Date(),
+					checkInDate: new Date()
+				},
+				create: {
+					cycleId: cycle.id,
+					userId: dbUser.id,
+					subgoalId: firstSubgoal.id,
+					reflectionType: 'RATING_A',
+					weekNumber,
+					effortScore: data.effortScore,
+					performanceScore: data.performanceScore,
+					notes,
+					checkInDate: new Date()
+				}
+			});
+
+			// Compute streak
+			let streak = 0;
+			try {
+				const allReflections = await prisma.reflection.findMany({
+					where: { cycleId: cycle.id },
+					select: { weekNumber: true, reflectionType: true }
+				});
+
+				const completedSet = new Set(
+					allReflections.map((r) => `${r.weekNumber}-${r.reflectionType}`)
+				);
+
+				const streakCheckInDays = parseCheckInDays(checkInFrequency);
+				const currentWeek = computeWeekNumber(cycle.startDate);
+				const expectedSequence: Array<{ week: number; type: string }> = [];
+				for (let w = 1; w <= currentWeek; w++) {
+					for (let d = 0; d < streakCheckInDays.length; d++) {
+						expectedSequence.push({ week: w, type: 'RATING_A' });
+					}
+				}
+
+				for (let i = expectedSequence.length - 1; i >= 0; i--) {
+					const expected = expectedSequence[i];
+					if (completedSet.has(`${expected.week}-${expected.type}`)) {
+						streak++;
+					} else {
+						break;
+					}
+				}
+			} catch {
+				// Streak computation is non-critical
+			}
+
+			// Send milestone email if applicable
+			const milestoneThresholds = [3, 7, 14, 21, 30, 50];
+			const milestone = milestoneThresholds.includes(streak) ? streak : null;
+
+			if (milestone) {
+				const ref = await prisma.reflection.findFirst({
+					where: {
+						cycleId: cycle.id,
+						weekNumber,
+						reflectionType: 'RATING_A',
+						userId: dbUser.id
+					},
+					select: { submittedAt: true, updatedAt: true }
+				});
+				const isFirstSubmission =
+					ref && Math.abs(ref.updatedAt.getTime() - ref.submittedAt.getTime()) < 5000;
+				if (isFirstSubmission) {
+					const obj = await prisma.objective.findFirst({
+						where: { userId: dbUser.id, active: true },
+						select: { title: true }
+					});
+					sendEmail({
+						to: dbUser.email,
+						...emailTemplates.milestoneCelebration({
+							individualName: dbUser.name ?? dbUser.email,
+							milestone,
+							objectiveTitle: obj?.title
+						})
+					}).catch((err) => {
+						console.warn('[email:warn] Failed to send milestone email', err);
+					});
+				}
+			}
+
+			return { success: true, streak };
+		} catch (error) {
+			console.error('Failed to record check-in', error);
+			return fail(500, { error: 'Could not save your check-in. Please try again.' });
+		}
+	}
 };

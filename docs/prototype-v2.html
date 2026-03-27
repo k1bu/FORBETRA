@@ -1,0 +1,1900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Forbetra — The Quiet Room</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   DESIGN TOKENS
+   ============================================================ */
+:root {
+  --surface-base: #0c0a09;
+  --surface-raised: #141210;
+  --surface-overlay: #1c1917;
+  --surface-subtle: #231f1c;
+
+  --text-primary: rgba(250,244,237, 0.93);
+  --text-secondary: rgba(250,244,237, 0.55);
+  --text-tertiary: rgba(250,244,237, 0.35);
+  --text-muted: rgba(250,244,237, 0.20);
+
+  --accent: #e0b580;
+  --accent-hover: #edc99a;
+  --accent-muted: rgba(224,181,128, 0.10);
+
+  --data-effort: #94a3b8;
+  --data-effort-vivid: #cbd5e1;
+  --data-performance: #d4a06a;
+  --data-performance-vivid: #e0b580;
+
+  --border-default: rgba(250,244,237, 0.04);
+  --border-strong: rgba(250,244,237, 0.08);
+
+  --signal-aligned: #4ade80;
+  --signal-different: #f59e0b;
+  --signal-attention: #ef4444;
+
+  --rater-sarah: #f472b6;
+  --rater-david: #60a5fa;
+  --rater-priya: #a78bfa;
+
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-hover: 150ms;
+  --dur-transition: 300ms;
+  --dur-ceremony: 600ms;
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  background: var(--surface-base);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.01em;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================================
+   TYPOGRAPHY
+   ============================================================ */
+.mono { font-family: 'Geist Mono', 'SF Mono', ui-monospace, monospace; }
+.label-upper {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.heading { font-size: 20px; font-weight: 600; line-height: 1.3; letter-spacing: -0.015em; }
+.body-text { font-size: 15px; line-height: 1.7; }
+.body-small { font-size: 13px; line-height: 1.5; }
+.display-num { font-family: 'Geist Mono', 'SF Mono', ui-monospace, monospace; font-size: 44px; font-weight: 700; line-height: 1; }
+.hero-num { font-family: 'Geist Mono', 'SF Mono', ui-monospace, monospace; font-size: 32px; font-weight: 700; line-height: 1; }
+
+/* ============================================================
+   GLOBAL HEADER
+   ============================================================ */
+.global-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border-default);
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  background: var(--surface-base);
+  z-index: 100;
+}
+.wordmark {
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+.header-right { display: flex; align-items: center; gap: 16px; }
+.avatar {
+  width: 28px; height: 28px; border-radius: 14px;
+  background: var(--surface-subtle);
+  border: 1px solid var(--border-strong);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 600; color: var(--text-tertiary);
+}
+
+/* ============================================================
+   BOTTOM TAB BAR
+   ============================================================ */
+.tab-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--surface-raised);
+  border-top: 1px solid var(--border-default);
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+  z-index: 100;
+}
+.tab-btn {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 4px;
+  padding: 6px 28px;
+  background: none; border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: color var(--dur-hover) var(--ease);
+  min-width: 72px;
+}
+.tab-btn:hover { color: var(--text-secondary); }
+.tab-btn.active { color: var(--accent); }
+.tab-icon { font-size: 20px; line-height: 1; height: 24px; display: flex; align-items: center; }
+.tab-label { font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+
+/* ============================================================
+   SCREEN CONTAINERS
+   ============================================================ */
+.screen {
+  display: none;
+  padding-top: 61px; /* header height */
+  padding-bottom: 80px; /* tab bar height */
+  min-height: 100vh;
+}
+.screen.active { display: block; }
+.screen-inner {
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+.screen-inner.reading-width { max-width: 640px; }
+
+/* ============================================================
+   IDENTITY ANCHOR + WEEK
+   ============================================================ */
+.ceremony-space { padding-top: 40px; }
+.identity-anchor {
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-bottom: 8px;
+}
+.week-indicator {
+  font-family: 'Geist Mono', 'SF Mono', ui-monospace, monospace;
+  font-size: 11px; color: var(--text-muted);
+  letter-spacing: 0.06em;
+  margin-bottom: 32px;
+}
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+.card {
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  padding: 20px 24px;
+}
+.card-interactive {
+  cursor: pointer;
+  transition: all var(--dur-hover) var(--ease);
+}
+.card-interactive:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-overlay);
+}
+
+/* ============================================================
+   SCREEN 1: TODAY
+   ============================================================ */
+.notification-hint {
+  padding: 12px 16px;
+  border-left: 2px solid rgba(224,181,128, 0.25);
+  margin-bottom: 24px;
+  cursor: pointer;
+  transition: border-color var(--dur-hover) var(--ease);
+}
+.notification-hint:hover { border-color: var(--accent); }
+.notification-hint span {
+  font-size: 13px; color: var(--text-secondary);
+}
+.coach-nudge {
+  border-left: 2px solid rgba(224,181,128, 0.20);
+  padding: 16px 20px;
+  margin-bottom: 24px;
+}
+.coach-nudge p {
+  font-size: 14px; color: var(--text-secondary);
+  line-height: 1.6; font-style: italic;
+}
+
+/* ============================================================
+   SCREEN 2: CHECK-IN
+   ============================================================ */
+.checkin-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 8px;
+}
+.checkin-instruction {
+  font-size: 13px; color: var(--text-tertiary);
+  margin-bottom: 32px;
+}
+.bars-container {
+  display: flex;
+  justify-content: center;
+  gap: 48px;
+  margin-bottom: 20px;
+}
+.bar-group { display: flex; flex-direction: column; align-items: center; }
+.bar-track-wrapper {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+}
+.bar-scale {
+  display: flex; flex-direction: column;
+  justify-content: space-between;
+  height: 280px;
+  padding: 0;
+  margin-right: 6px;
+}
+.bar-tick {
+  display: flex; align-items: center; gap: 3px;
+  flex-direction: row-reverse;
+}
+.bar-tick-line {
+  width: 8px; height: 1px;
+  background: rgba(250,244,237, 0.12);
+}
+.bar-tick.major .bar-tick-line {
+  width: 12px;
+  background: rgba(250,244,237, 0.25);
+}
+.bar-tick-num {
+  font-family: 'Geist Mono', 'SF Mono', monospace;
+  font-size: 11px; color: var(--text-tertiary);
+  width: 16px; text-align: right;
+  font-weight: 500;
+}
+.bar-tick.minor .bar-tick-num {
+  font-size: 9px;
+  color: var(--text-muted);
+}
+.bar-tick.highlight .bar-tick-num {
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 13px;
+}
+.bar-tick.highlight .bar-tick-line {
+  width: 16px;
+  background: rgba(250,244,237, 0.5);
+  height: 2px;
+}
+.bar-track {
+  width: 72px; height: 280px;
+  border-radius: 36px;
+  background: var(--surface-raised);
+  border: 2px solid rgba(250,244,237, 0.06);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: border-color 200ms var(--ease), box-shadow 200ms var(--ease);
+}
+.bar-track:hover, .bar-track.active {
+  border-color: rgba(250,244,237, 0.12);
+}
+.bar-track.active.effort {
+  box-shadow: 0 0 24px rgba(148,163,184, 0.15), inset 0 0 24px rgba(148,163,184, 0.05);
+}
+.bar-track.active.performance {
+  box-shadow: 0 0 24px rgba(212,160,106, 0.15), inset 0 0 24px rgba(212,160,106, 0.05);
+}
+.bar-fill {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  border-radius: 0 0 35px 35px;
+  transition: height 80ms var(--ease);
+}
+.bar-fill.effort {
+  background: linear-gradient(to top, #475569, #94a3b8, #cbd5e1);
+}
+.bar-fill.performance {
+  background: linear-gradient(to top, #92700a, #d4a06a, #e0b580);
+}
+.bar-thumb {
+  position: absolute;
+  top: -2px; left: 50%;
+  transform: translateX(-50%);
+  width: 32px; height: 4px;
+  border-radius: 2px;
+  background: rgba(250,244,237, 0.8);
+  box-shadow: 0 0 8px rgba(250,244,237, 0.3);
+}
+/* Floating num removed — score now lives in bar-label-group below */
+.bar-last-marker {
+  position: absolute;
+  left: 6px; right: 6px;
+  height: 2px;
+  background: rgba(250,244,237, 0.25);
+  pointer-events: none;
+  border-radius: 1px;
+}
+.bar-label-group { text-align: center; margin-top: 16px; }
+.bar-dim-label {
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.bar-dim-label.effort { color: var(--data-effort); }
+.bar-dim-label.performance { color: var(--data-performance); }
+.bar-score-readout {
+  font-family: 'Geist Mono', 'SF Mono', monospace;
+  font-size: 40px; font-weight: 700;
+  line-height: 1;
+  margin: 4px 0;
+  transition: transform 120ms var(--ease);
+}
+.bar-score-readout.effort { color: var(--data-effort-vivid); }
+.bar-score-readout.performance { color: var(--data-performance-vivid); }
+.bar-score-readout.inactive { color: var(--text-muted); }
+.bar-score-readout.pulse {
+  transform: scale(1.08);
+}
+.bar-last-label {
+  font-family: 'Geist Mono', 'SF Mono', monospace;
+  font-size: 11px; color: var(--text-muted);
+}
+.note-prompt {
+  margin-bottom: 16px;
+}
+.note-prompt-label {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+.note-prompt-label em {
+  font-style: normal;
+  color: var(--text-tertiary);
+}
+.note-area {
+  margin-bottom: 16px;
+}
+.note-area textarea {
+  width: 100%; min-height: 88px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-family: 'Plus Jakarta Sans', system-ui;
+  font-size: 14px; line-height: 1.6;
+  color: var(--text-primary);
+  resize: vertical;
+  outline: none;
+  transition: border-color 200ms var(--ease);
+}
+.note-area textarea:focus { border-color: rgba(250,244,237, 0.14); }
+.note-area textarea::placeholder { color: var(--text-muted); }
+
+/* Stakeholder note prompts */
+.note-prompt-structured {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.note-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.note-field-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+.note-field-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.note-field textarea {
+  width: 100%; min-height: 72px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-family: 'Plus Jakarta Sans', system-ui;
+  font-size: 14px; line-height: 1.6;
+  color: var(--text-primary);
+  resize: vertical;
+  outline: none;
+  transition: border-color 200ms var(--ease);
+}
+.note-field textarea:focus { border-color: rgba(250,244,237, 0.14); }
+.note-field textarea::placeholder { color: var(--text-muted); }
+.note-field-optional {
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.btn-primary {
+  display: block; width: 100%;
+  padding: 14px; border: none; border-radius: 8px;
+  background: var(--accent);
+  color: #0c0a09;
+  font-family: 'Plus Jakarta Sans', system-ui;
+  font-size: 15px; font-weight: 600;
+  cursor: pointer;
+  transition: all var(--dur-hover) var(--ease);
+}
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-primary:disabled {
+  opacity: 0.4; cursor: not-allowed;
+}
+.btn-primary:disabled:hover { background: var(--accent); }
+.btn-secondary {
+  display: inline-block;
+  padding: 14px 32px; border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: 'Plus Jakarta Sans', system-ui;
+  font-size: 15px; font-weight: 500;
+  cursor: pointer;
+  transition: all var(--dur-hover) var(--ease);
+}
+.btn-secondary:hover { border-color: var(--text-tertiary); color: var(--text-primary); }
+.back-link {
+  font-size: 13px; color: var(--text-tertiary);
+  cursor: pointer; margin-bottom: 24px;
+  display: inline-block;
+}
+.back-link:hover { color: var(--text-secondary); }
+
+/* ============================================================
+   SCREEN 3: PROGRESS
+   ============================================================ */
+.progress-numbers {
+  display: flex;
+  justify-content: center;
+  gap: 48px;
+  margin-bottom: 8px;
+}
+.progress-col { text-align: center; }
+.progress-you-label {
+  font-size: 11px; color: var(--text-tertiary);
+  margin-top: 4px;
+}
+.progress-trend {
+  font-family: 'Geist Mono', 'SF Mono', monospace;
+  font-size: 12px; color: var(--text-muted);
+  margin-top: 4px;
+}
+.chart-card {
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  padding: 16px 12px 8px;
+  position: relative;
+  cursor: crosshair;
+  margin-bottom: 8px;
+}
+.chart-label-row {
+  font-size: 9px; font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px; padding-left: 4px;
+}
+.chart-canvas { width: 100%; display: block; }
+
+/* Tooltip */
+.chart-tooltip {
+  display: none;
+  position: absolute;
+  background: var(--surface-overlay);
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 12px;
+  z-index: 10;
+  min-width: 160px;
+  pointer-events: none;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+.chart-tooltip.visible { display: block; }
+
+/* ============================================================
+   SCREEN 4: FEEDBACK (PERCEPTION FIELD)
+   ============================================================ */
+.feedback-section-title {
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-muted); margin-bottom: 32px;
+}
+.big-numbers {
+  display: flex;
+  justify-content: center;
+  gap: 48px;
+  margin-bottom: 32px;
+}
+.score-col { text-align: center; }
+.score-dim-label {
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-muted); margin-bottom: 8px;
+}
+.score-you {
+  font-family: 'Geist Mono', 'SF Mono', monospace;
+  font-size: 44px; font-weight: 700; line-height: 1;
+}
+.score-you.effort { color: var(--data-effort-vivid); }
+.score-you.performance { color: var(--data-performance-vivid); }
+.score-you-sub {
+  font-size: 11px; color: var(--text-tertiary); margin-top: 4px;
+}
+.score-avg {
+  font-family: 'Geist Mono', 'SF Mono', monospace;
+  font-size: 22px; font-weight: 500;
+  margin-top: 12px; line-height: 1;
+}
+.score-avg.effort { color: var(--data-effort); opacity: 0.6; }
+.score-avg.performance { color: var(--data-performance); opacity: 0.6; }
+.score-avg-label {
+  font-size: 10px; color: var(--text-muted); margin-top: 3px;
+}
+.gap-text {
+  font-size: 12px; font-weight: 500; margin-top: 8px;
+}
+
+/* Perspectives */
+.persp-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 12px;
+}
+.persp-reset {
+  font-size: 11px; color: var(--text-tertiary);
+  cursor: pointer; text-decoration: none;
+  display: none;
+}
+.persp-reset:hover { color: var(--text-secondary); }
+.persp-reset.visible { display: inline; }
+
+.rater-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 200ms var(--ease);
+  margin-bottom: 2px;
+}
+.rater-row:hover {
+  background: var(--surface-raised);
+  border-color: var(--border-default);
+}
+
+/* Toggle */
+.rater-toggle {
+  width: 36px; height: 20px;
+  border-radius: 10px;
+  background: var(--surface-subtle);
+  border: 1.5px solid var(--border-strong);
+  position: relative;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 200ms var(--ease);
+}
+.rater-toggle .knob {
+  width: 14px; height: 14px;
+  border-radius: 7px;
+  background: rgba(250,244,237, 0.15);
+  position: absolute;
+  top: 2px; left: 2px;
+  transition: all 200ms var(--ease);
+}
+.rater-toggle.on .knob {
+  left: 18px;
+}
+
+.rater-swatch {
+  width: 20px; height: 3px;
+  border-radius: 2px; flex-shrink: 0;
+  opacity: 0.4;
+  transition: opacity 200ms var(--ease);
+}
+.rater-row.active .rater-swatch { opacity: 1; }
+
+.rater-info { flex: 1; min-width: 0; }
+.rater-name {
+  font-size: 14px; font-weight: 500;
+  margin-bottom: 2px;
+  transition: opacity 200ms var(--ease);
+}
+.rater-row.active .rater-name { font-weight: 600; }
+.rater-row:not(.active) .rater-name { opacity: 0.45; }
+.rater-gap-text {
+  font-size: 11px; color: var(--text-tertiary);
+  transition: opacity 200ms var(--ease);
+}
+.rater-row:not(.active) .rater-gap-text { opacity: 0.35; }
+
+.rater-scores {
+  display: flex; gap: 12px; flex-shrink: 0;
+  transition: opacity 200ms var(--ease);
+}
+.rater-row:not(.active) .rater-scores { opacity: 0.35; }
+.rater-score-item { text-align: center; }
+.rater-score-val {
+  font-family: 'Geist Mono', 'SF Mono', monospace;
+  font-size: 15px; font-weight: 500;
+}
+.rater-score-dim {
+  font-size: 9px; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--text-muted); margin-top: 1px;
+}
+
+.rater-badge {
+  font-size: 10px; font-weight: 500;
+  padding: 3px 8px; border-radius: 4px;
+  flex-shrink: 0;
+  transition: opacity 200ms var(--ease);
+}
+.rater-row:not(.active) .rater-badge { opacity: 0.35; }
+.badge-aligned { color: #4ade80; background: rgba(74,222,128, 0.12); }
+.badge-different { color: #fbbf24; background: rgba(245,158,11, 0.12); }
+.badge-biggap { color: #f87171; background: rgba(239,68,68, 0.12); }
+
+/* Insight card */
+.insight-card {
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-top: 32px; margin-bottom: 32px;
+}
+.insight-text {
+  font-size: 15px; line-height: 1.7;
+  color: var(--text-secondary);
+}
+.insight-text strong { color: var(--text-primary); font-weight: 500; }
+
+/* Rater "New" state */
+.rater-row.rater-new {
+  background: rgba(224,181,128, 0.06);
+  border-color: rgba(224,181,128, 0.15);
+}
+.rater-row.rater-new .rater-name::after {
+  content: 'New';
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: rgba(224,181,128, 0.10);
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+/* ============================================================
+   SCREEN 6: COACH VIEW
+   ============================================================ */
+.coach-greeting { margin-bottom: 4px; }
+.coach-meta {
+  font-size: 13px; color: var(--text-muted); margin-bottom: 32px;
+}
+.client-row {
+  display: flex; align-items: center; gap: 16px;
+  padding: 16px 20px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all var(--dur-hover) var(--ease);
+}
+.client-row:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-overlay);
+}
+.client-avatar {
+  width: 32px; height: 32px;
+  border-radius: 16px;
+  background: var(--surface-subtle);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600; color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+.client-info { flex: 1; }
+.client-name { font-size: 15px; font-weight: 500; color: var(--text-primary); }
+.client-signal { font-size: 12px; margin-top: 2px; }
+
+/* ============================================================
+   SCREEN 7: GROWTH STORY
+   ============================================================ */
+.growth-headline {
+  font-size: 20px; font-weight: 600;
+  line-height: 1.4; color: var(--text-primary);
+  margin-bottom: 32px;
+  max-width: 520px;
+}
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 32px;
+}
+.comparison-table th {
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 8px 12px;
+  text-align: right;
+  border-bottom: 1px solid var(--border-default);
+}
+.comparison-table th:first-child { text-align: left; }
+.comparison-table td {
+  font-family: 'Geist Mono', 'SF Mono', monospace;
+  font-size: 14px; font-weight: 500;
+  padding: 10px 12px;
+  text-align: right;
+  border-bottom: 1px solid var(--border-default);
+}
+.comparison-table td:first-child {
+  font-family: 'Plus Jakarta Sans', system-ui;
+  font-size: 13px; color: var(--text-secondary);
+  text-align: left;
+}
+.comparison-table .change-positive { color: var(--signal-aligned); }
+.comparison-table .change-closing { color: var(--signal-aligned); }
+
+.growth-quotes {
+  margin-bottom: 32px;
+}
+.growth-quote {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border-default);
+}
+.growth-quote p {
+  font-size: 15px; line-height: 1.7;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin-bottom: 4px;
+}
+.growth-quote .attribution {
+  font-size: 11px; color: var(--text-muted);
+  font-style: normal;
+}
+.growth-narrative {
+  font-size: 15px; line-height: 1.7;
+  color: var(--text-secondary);
+  margin-bottom: 32px;
+}
+.growth-narrative strong { color: var(--text-primary); font-weight: 500; }
+.next-section { margin-bottom: 32px; }
+.next-item {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-default);
+  font-size: 14px; color: var(--text-secondary);
+}
+.growth-actions {
+  display: flex; gap: 12px;
+  justify-content: center;
+  padding-bottom: 32px;
+}
+
+/* ============================================================
+   UTILITY
+   ============================================================ */
+.fade-in {
+  animation: fadeIn var(--dur-ceremony) var(--ease) both;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.mt-8 { margin-top: 8px; }
+.mt-16 { margin-top: 16px; }
+.mt-24 { margin-top: 24px; }
+.mt-32 { margin-top: 32px; }
+.mb-8 { margin-bottom: 8px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-24 { margin-bottom: 24px; }
+.mb-32 { margin-bottom: 32px; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 420px) {
+  .bars-container { gap: 24px; }
+  .big-numbers, .progress-numbers { gap: 32px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     GLOBAL HEADER
+     ============================================================ -->
+<div class="global-header">
+  <div class="wordmark">FORBETRA</div>
+  <div class="header-right">
+    <div class="avatar">MS</div>
+  </div>
+</div>
+
+<!-- Demo Panel -->
+<div id="demo-panel" style="display:none;position:fixed;bottom:100px;right:20px;background:var(--surface-overlay);border:1px solid var(--border-strong);border-radius:12px;padding:12px 16px;z-index:200;min-width:160px;">
+  <div style="font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;">All Views</div>
+  <a style="display:block;font-size:13px;color:var(--text-secondary);padding:6px 0;cursor:pointer;text-decoration:none;" onclick="showScreen('today');toggleDemoPanel()">Today</a>
+  <a style="display:block;font-size:13px;color:var(--text-secondary);padding:6px 0;cursor:pointer;text-decoration:none;" onclick="showScreen('progress');toggleDemoPanel()">Progress</a>
+  <a style="display:block;font-size:13px;color:var(--text-secondary);padding:6px 0;cursor:pointer;text-decoration:none;" onclick="showScreen('feedback');toggleDemoPanel()">Feedback</a>
+  <a style="display:block;font-size:13px;color:var(--text-secondary);padding:6px 0;cursor:pointer;text-decoration:none;" onclick="showScreen('coach');toggleDemoPanel()">Coach</a>
+  <a style="display:block;font-size:13px;color:var(--text-secondary);padding:6px 0;cursor:pointer;text-decoration:none;" onclick="showScreen('stakeholder');toggleDemoPanel()">Stakeholder</a>
+  <a style="display:block;font-size:13px;color:var(--text-secondary);padding:6px 0;cursor:pointer;text-decoration:none;" onclick="showScreen('growth');toggleDemoPanel()">Growth Story</a>
+</div>
+<button id="demo-fab" onclick="toggleDemoPanel()" style="position:fixed;bottom:68px;right:20px;z-index:200;background:var(--surface-overlay);border:1px solid var(--border-strong);border-radius:24px;padding:10px 16px;font-size:13px;font-weight:500;color:var(--text-secondary);cursor:pointer;font-family:'Plus Jakarta Sans',system-ui;">Demo &#9776;</button>
+
+<!-- ============================================================
+     SCREEN 1: TODAY (with inline check-in)
+     ============================================================ -->
+<div class="screen active" id="screen-today">
+  <div class="screen-inner">
+    <div class="ceremony-space">
+      <div class="identity-anchor">I am becoming a leader who listens before deciding</div>
+      <div class="week-indicator">Week 7 of 12</div>
+    </div>
+
+    <!-- Check-in (shown when due) -->
+    <div id="today-checkin" class="fade-in" style="animation-delay:160ms">
+      <div class="checkin-instruction">How did you show up this week?</div>
+
+      <div class="bars-container">
+        <!-- EFFORT BAR -->
+        <div class="bar-group">
+          <div class="bar-track-wrapper">
+            <div class="bar-scale" id="effort-scale"></div>
+            <div class="bar-track" id="effort-track" data-dim="effort" data-last="6">
+              <div class="bar-fill effort" id="effort-fill" style="height:0%"></div>
+              <div class="bar-thumb" id="effort-thumb" style="display:none"></div>
+              <div class="bar-last-marker" id="effort-last" style="bottom:60%"></div>
+            </div>
+          </div>
+          <div class="bar-label-group">
+            <div class="bar-dim-label effort">Effort</div>
+            <div class="bar-score-readout effort inactive" id="effort-readout">--</div>
+            <div class="bar-last-label">Last: 6</div>
+          </div>
+        </div>
+
+        <!-- PERFORMANCE BAR -->
+        <div class="bar-group">
+          <div class="bar-track-wrapper">
+            <div class="bar-scale" id="perf-scale"></div>
+            <div class="bar-track" id="perf-track" data-dim="performance" data-last="7">
+              <div class="bar-fill performance" id="perf-fill" style="height:0%"></div>
+              <div class="bar-thumb" id="perf-thumb" style="display:none"></div>
+              <div class="bar-last-marker" id="perf-last" style="bottom:70%"></div>
+            </div>
+          </div>
+          <div class="bar-label-group">
+            <div class="bar-dim-label performance">Performance</div>
+            <div class="bar-score-readout performance inactive" id="perf-readout">--</div>
+            <div class="bar-last-label">Last: 7</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="note-prompt">
+        <div class="note-prompt-label">What shaped your week? <em>— even one sentence helps your coach</em></div>
+        <div class="note-area">
+          <textarea placeholder="A specific moment, a challenge, something you noticed..."></textarea>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="checkin-submit" disabled>Save check-in</button>
+    </div>
+
+    <!-- Caught-up state (shown when no check-in due) -->
+    <div id="today-done" style="display:none; text-align:center; padding: 48px 0;">
+      <div style="font-size: 15px; color: var(--text-secondary); line-height: 1.6;">You're on track.<br>Your next check-in opens Wednesday.</div>
+      <div style="margin-top:24px"><a style="font-size:12px;color:var(--text-tertiary);cursor:pointer" onclick="document.getElementById('today-done').style.display='none';document.getElementById('today-checkin').style.display='block'">Reset check-in (demo)</a></div>
+    </div>
+
+    <!-- New feedback notification -->
+    <div class="notification-hint fade-in" style="animation-delay:240ms" onclick="showFeedbackWithHighlight('sarah')">
+      <span>Sarah M. shared her perspective. <span style="color:var(--accent)">View scores &rarr;</span></span>
+    </div>
+
+    <!-- Coach nudge -->
+    <div class="coach-nudge fade-in" style="animation-delay:320ms">
+      <p>"Consider what your team sees that you might be discounting this week."</p>
+      <div style="font-size:11px;color:var(--text-muted);font-style:normal;margin-top:8px">— Your coach, Sarah</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     STAKEHOLDER FEEDBACK (accessed via token link)
+     ============================================================ -->
+<div class="screen" id="screen-stakeholder">
+  <div class="screen-inner">
+    <div class="ceremony-space">
+      <div class="heading">Share your perspective</div>
+      <div style="font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin-top: 8px;">
+        You're giving feedback on <strong style="color: var(--text-primary);">James Mitchell</strong>'s effort and performance this week. Your responses are confidential.
+      </div>
+      <div style="font-size:12px;color:var(--text-muted);line-height:1.5;margin-top:12px">
+        <strong style="color:var(--text-tertiary)">Effort</strong> = how much energy and commitment they showed.
+        <strong style="color:var(--text-tertiary)">Performance</strong> = the quality and impact of their work.
+      </div>
+    </div>
+
+    <div class="bars-container">
+      <!-- EFFORT BAR -->
+      <div class="bar-group">
+        <div class="bar-track-wrapper">
+          <div class="bar-scale" id="sh-effort-scale"></div>
+          <div class="bar-track" id="sh-effort-track" data-dim="sh-effort">
+            <div class="bar-fill effort" id="sh-effort-fill" style="height:0%"></div>
+            <div class="bar-thumb" id="sh-effort-thumb" style="display:none"></div>
+          </div>
+        </div>
+        <div class="bar-label-group">
+          <div class="bar-dim-label effort">Effort</div>
+          <div class="bar-score-readout effort inactive" id="sh-effort-readout">--</div>
+        </div>
+      </div>
+      <!-- PERFORMANCE BAR -->
+      <div class="bar-group">
+        <div class="bar-track-wrapper">
+          <div class="bar-scale" id="sh-perf-scale"></div>
+          <div class="bar-track" id="sh-perf-track" data-dim="sh-performance">
+            <div class="bar-fill performance" id="sh-perf-fill" style="height:0%"></div>
+            <div class="bar-thumb" id="sh-perf-thumb" style="display:none"></div>
+          </div>
+        </div>
+        <div class="bar-label-group">
+          <div class="bar-dim-label performance">Performance</div>
+          <div class="bar-score-readout performance inactive" id="sh-perf-readout">--</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note-prompt-structured">
+      <div class="note-field">
+        <div class="note-field-label">What specific behavior did you observe this week?</div>
+        <div class="note-field-hint">Think of a concrete moment — what did they do or say?</div>
+        <textarea placeholder="e.g., In Tuesday's meeting, they asked the team for input before making the decision..."></textarea>
+      </div>
+      <div class="note-field">
+        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+          <div class="note-field-label">What would you suggest they focus on?</div>
+          <div class="note-field-optional">Optional</div>
+        </div>
+        <textarea placeholder="One thing that could make a difference..."></textarea>
+      </div>
+    </div>
+
+    <button class="btn-primary" id="sh-submit" disabled>Submit feedback</button>
+    <div style="text-align: center; margin-top: 16px; font-size: 12px; color: var(--text-muted);">
+      Your feedback is confidential and helps shape their growth.
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SCREEN 3: PROGRESS
+     ============================================================ -->
+<div class="screen" id="screen-progress">
+  <div class="screen-inner reading-width">
+    <div class="ceremony-space">
+      <div class="identity-anchor">I am becoming a leader who listens before deciding</div>
+      <div class="week-indicator">Week 7 of 12</div>
+    </div>
+
+    <div class="progress-numbers mb-24">
+      <div class="progress-col">
+        <div class="score-you effort">7</div>
+        <div class="progress-you-label">(you)</div>
+        <div class="progress-trend">&#8593; from 6</div>
+      </div>
+      <div class="progress-col">
+        <div class="score-you performance">5</div>
+        <div class="progress-you-label">(you)</div>
+        <div class="progress-trend">&#8595; from 7</div>
+      </div>
+    </div>
+
+    <!-- Effort chart -->
+    <div class="chart-card" id="progress-effort-container">
+      <div class="chart-label-row">EFFORT OVER TIME</div>
+      <canvas class="chart-canvas" id="progress-effort-chart" height="160"></canvas>
+      <div class="chart-tooltip" id="progress-effort-tooltip"></div>
+    </div>
+
+    <!-- Performance chart -->
+    <div class="chart-card" id="progress-perf-container">
+      <div class="chart-label-row">PERFORMANCE OVER TIME</div>
+      <canvas class="chart-canvas" id="progress-perf-chart" height="160"></canvas>
+      <div class="chart-tooltip" id="progress-perf-tooltip"></div>
+    </div>
+
+    <!-- AI Insight -->
+    <div class="insight-card mt-24">
+      <div class="insight-text">
+        Your effort has been <strong>steadily climbing since week 4</strong>, while your performance perception dipped this week. This pattern sometimes indicates you're <strong>investing in new approaches</strong> that haven't yet translated to visible results. The gap between effort and performance narrowed significantly in weeks 4 and 6 — worth exploring what was different.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SCREEN 4: FEEDBACK (PERCEPTION FIELD)
+     ============================================================ -->
+<div class="screen" id="screen-feedback">
+  <div class="screen-inner reading-width">
+    <div class="ceremony-space">
+      <div class="feedback-section-title">FEEDBACK — HOW OTHERS SEE YOU</div>
+    </div>
+
+    <!-- Big Numbers -->
+    <div class="big-numbers" id="fb-big-numbers">
+      <div class="score-col">
+        <div class="score-dim-label">Effort</div>
+        <div class="score-you effort">7</div>
+        <div class="score-you-sub">(you)</div>
+        <div class="score-avg effort" id="fb-avg-e">8.0</div>
+        <div class="score-avg-label" id="fb-avg-label-e">avg of 3 raters</div>
+        <div class="gap-text" id="fb-gap-e">They see +1.0 higher</div>
+      </div>
+      <div class="score-col">
+        <div class="score-dim-label">Performance</div>
+        <div class="score-you performance">5</div>
+        <div class="score-you-sub">(you)</div>
+        <div class="score-avg performance" id="fb-avg-p">7.0</div>
+        <div class="score-avg-label" id="fb-avg-label-p">avg of 3 raters</div>
+        <div class="gap-text" id="fb-gap-p">They see +2.0 higher</div>
+      </div>
+    </div>
+
+    <!-- Perspectives (above charts so toggles are near the result) -->
+    <div class="persp-header">
+      <div class="label-upper" style="color:var(--text-muted)">PERSPECTIVES</div>
+      <a class="persp-reset" id="persp-reset" onclick="resetRaters()">Reset</a>
+    </div>
+    <div id="perspectives-list"></div>
+
+    <!-- Effort chart -->
+    <div class="chart-card" id="fb-effort-container" style="margin-top: 24px;">
+      <div class="chart-label-row">EFFORT OVER TIME</div>
+      <canvas class="chart-canvas" id="fb-effort-chart" height="160"></canvas>
+      <div class="chart-tooltip" id="fb-effort-tooltip"></div>
+    </div>
+
+    <!-- Performance chart -->
+    <div class="chart-card mb-32" id="fb-perf-container">
+      <div class="chart-label-row">PERFORMANCE OVER TIME</div>
+      <canvas class="chart-canvas" id="fb-perf-chart" height="160"></canvas>
+      <div class="chart-tooltip" id="fb-perf-tooltip"></div>
+    </div>
+
+    <!-- AI Insight -->
+    <div class="insight-card">
+      <div class="insight-text" id="fb-insight-text">
+        <strong>Sarah</strong> consistently rates your effort 2 points higher than you rate yourself — she sees work you may be discounting. <strong>David</strong> tracks closest to your self-assessment, especially on effort. The performance gap with all three raters suggests they see <strong>stronger results than you give yourself credit for</strong>.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SCREEN 6: COACH VIEW
+     ============================================================ -->
+<div class="screen" id="screen-coach">
+  <div class="screen-inner reading-width">
+    <div class="ceremony-space">
+      <a class="back-link" onclick="showScreen('today')">&#8592; Back</a>
+      <div class="heading coach-greeting">Good afternoon, Sarah</div>
+      <div class="coach-meta">4 active clients</div>
+    </div>
+
+    <div id="coach-clients">
+      <div class="client-row" style="animation:fadeIn 300ms var(--ease) 0ms both">
+        <div class="client-avatar">JT</div>
+        <div class="client-info">
+          <div class="client-name">Jordan Torres</div>
+          <div class="client-signal" style="color:var(--signal-attention)">Missed 2 check-ins, 5 days ago</div>
+        </div>
+      </div>
+      <div class="client-row" style="animation:fadeIn 300ms var(--ease) 80ms both">
+        <div class="client-avatar">MS</div>
+        <div class="client-info">
+          <div class="client-name">Marc Sagal</div>
+          <div class="client-signal" style="color:var(--signal-different)">Perception gap emerging, 2 days ago</div>
+        </div>
+      </div>
+      <div class="client-row" style="animation:fadeIn 300ms var(--ease) 160ms both">
+        <div class="client-avatar">AL</div>
+        <div class="client-info">
+          <div class="client-name">Aisha Lin</div>
+          <div class="client-signal" style="color:var(--text-secondary)">Checked in today</div>
+        </div>
+      </div>
+      <div class="client-row" style="animation:fadeIn 300ms var(--ease) 240ms both">
+        <div class="client-avatar">RP</div>
+        <div class="client-info">
+          <div class="client-name">Robert Park</div>
+          <div class="client-signal" style="color:var(--text-muted)">Awaiting check-in</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SCREEN 7: GROWTH STORY
+     ============================================================ -->
+<div class="screen" id="screen-growth">
+  <div class="screen-inner reading-width fade-in">
+    <div class="ceremony-space">
+      <a class="back-link" onclick="showScreen('today')">&#8592; Back</a>
+      <div class="label-upper" style="color:var(--text-muted);margin-bottom:16px">YOUR GROWTH STORY — CYCLE 1</div>
+    </div>
+
+    <div class="growth-headline">
+      You started uncertain about delegation and ended with your team noticing the change.
+    </div>
+
+    <!-- Comparison Table -->
+    <table class="comparison-table mb-32">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Start (W1)</th>
+          <th>End (W12)</th>
+          <th>Change</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Effort (you)</td>
+          <td style="color:var(--data-effort-vivid)">5</td>
+          <td style="color:var(--data-effort-vivid)">8</td>
+          <td class="change-positive">+3</td>
+        </tr>
+        <tr>
+          <td>Performance (you)</td>
+          <td style="color:var(--data-performance-vivid)">4</td>
+          <td style="color:var(--data-performance-vivid)">7</td>
+          <td class="change-positive">+3</td>
+        </tr>
+        <tr>
+          <td>Effort (raters)</td>
+          <td style="color:var(--data-effort)">7.0</td>
+          <td style="color:var(--data-effort)">8.2</td>
+          <td class="change-positive">+1.2</td>
+        </tr>
+        <tr>
+          <td>Performance (raters)</td>
+          <td style="color:var(--data-performance)">6.0</td>
+          <td style="color:var(--data-performance)">7.1</td>
+          <td class="change-positive">+1.1</td>
+        </tr>
+        <tr>
+          <td>Perception gap</td>
+          <td style="color:var(--text-secondary)">2.0</td>
+          <td style="color:var(--text-secondary)">0.75</td>
+          <td class="change-closing">&#8595; closing</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Growth Chart -->
+    <div class="chart-card mb-8">
+      <div class="chart-label-row">EFFORT — 12-WEEK JOURNEY</div>
+      <canvas class="chart-canvas" id="growth-effort-chart" height="160"></canvas>
+    </div>
+    <div class="chart-card mb-32">
+      <div class="chart-label-row">PERFORMANCE — 12-WEEK JOURNEY</div>
+      <canvas class="chart-canvas" id="growth-perf-chart" height="160"></canvas>
+    </div>
+
+    <!-- Top 3 Rater Quotes -->
+    <div class="label-upper mb-16" style="color:var(--text-muted)">WHAT THEY SAID</div>
+    <div class="growth-quotes">
+      <div class="growth-quote">
+        <p>"The way you started asking for input before making calls — everyone noticed."</p>
+        <span class="attribution">— Sarah</span>
+      </div>
+      <div class="growth-quote">
+        <p>"Weeks 8 through 10 felt like a different team. You gave us room."</p>
+        <span class="attribution">— David</span>
+      </div>
+      <div class="growth-quote">
+        <p>"I noticed the biggest change in how you handle disagreement. Much more curious."</p>
+        <span class="attribution">— Priya</span>
+      </div>
+    </div>
+
+    <!-- AI Narrative -->
+    <div class="growth-narrative">
+      <strong>Your cycle tells a clear story of convergence.</strong> In the first four weeks, you rated your effort significantly lower than your raters did — a pattern that often indicates high self-criticism or unfamiliarity with a new leadership approach. By week 8, your self-perception began catching up to how others experienced you.
+      <br><br>
+      The most notable shift was in <strong>performance perception</strong>: your raters saw steady improvement throughout, while your own assessment fluctuated. This gap between internal experience and external observation is common when leaders are stretching into new behaviors — the discomfort you feel internally isn't visible to those around you.
+    </div>
+
+    <!-- What's Next -->
+    <div class="label-upper mb-16" style="color:var(--text-muted)">WHAT'S NEXT</div>
+    <div class="next-section">
+      <div class="next-item">Continue the listening practice — your raters specifically noted the shift in how you handle disagreement.</div>
+      <div class="next-item">Watch for the mid-cycle dip: your effort dropped in weeks 3 and 5. Build in recovery rituals.</div>
+      <div class="next-item">Consider sharing your Growth Story with your team to close the feedback loop.</div>
+    </div>
+
+    <div class="growth-actions">
+      <button class="btn-secondary">Share</button>
+      <button class="btn-primary" style="width:auto;padding:14px 32px">Start a new cycle</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     BOTTOM TAB BAR
+     ============================================================ -->
+<div class="tab-bar" id="tab-bar">
+  <button class="tab-btn active" data-tab="today" onclick="showScreen('today')">
+    <span class="tab-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><circle cx="10" cy="10" r="2"/></svg></span>
+    <span class="tab-label">Today</span>
+  </button>
+  <button class="tab-btn" data-tab="progress" onclick="showScreen('progress')">
+    <span class="tab-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="3,14 8,9 12,12 17,5"/></svg></span>
+    <span class="tab-label">Progress</span>
+  </button>
+  <button class="tab-btn" data-tab="feedback" onclick="showScreen('feedback')">
+    <span class="tab-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="3"/><circle cx="14" cy="8" r="2.5"/><path d="M1,17 C1,13 4,11 7,11 C10,11 13,13 13,17"/><path d="M12,16 C12,13 13.5,11.5 14,11.5 C16,11.5 18,13 18,16"/></svg></span>
+    <span class="tab-label">Feedback</span>
+  </button>
+</div>
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const selfData = [
+  { e: 5, p: 4 }, { e: 6, p: 5 }, { e: 5, p: 6 },
+  { e: 7, p: 7 }, { e: 6, p: 5 }, { e: 6, p: 7 }, { e: 7, p: 5 }
+];
+
+const raters = [
+  { id: 'sarah', name: 'Sarah M.', color: '#f472b6',
+    data: [{e:8,p:7},{e:8,p:7},{e:7,p:8},{e:8,p:7},{e:7,p:8},{e:7,p:8},{e:9,p:8}] },
+  { id: 'david', name: 'David K.', color: '#60a5fa',
+    data: [{e:6,p:5},{e:6,p:5},{e:5,p:6},{e:6,p:5},{e:7,p:6},{e:6,p:6},{e:7,p:6}] },
+  { id: 'priya', name: 'Priya R.', color: '#a78bfa',
+    data: [{e:7,p:6},{e:7,p:6},{e:6,p:7},{e:7,p:6},{e:7,p:7},{e:8,p:7},{e:8,p:7}] }
+];
+
+// 12-week data for Growth Story
+const selfData12 = [
+  ...selfData,
+  { e: 7, p: 6 }, { e: 8, p: 7 }, { e: 7, p: 7 }, { e: 8, p: 7 }, { e: 8, p: 7 }
+];
+const raters12 = [
+  { id: 'sarah', name: 'Sarah M.', color: '#f472b6',
+    data: [...raters[0].data, {e:8,p:8},{e:9,p:8},{e:8,p:8},{e:9,p:9},{e:9,p:8}] },
+  { id: 'david', name: 'David K.', color: '#60a5fa',
+    data: [...raters[1].data, {e:7,p:6},{e:7,p:7},{e:7,p:7},{e:7,p:7},{e:7,p:7}] },
+  { id: 'priya', name: 'Priya R.', color: '#a78bfa',
+    data: [...raters[2].data, {e:8,p:7},{e:8,p:7},{e:8,p:8},{e:8,p:7},{e:9,p:7}] }
+];
+
+let activeRaters = new Set(raters.map(r => r.id));
+let newRaters = new Set(['sarah']); // in production, populated from backend
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+let currentScreen = 'today';
+const tabScreens = ['today', 'progress', 'feedback'];
+
+function toggleDemoPanel() {
+  const panel = document.getElementById('demo-panel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  currentScreen = name;
+
+  // Update tab active state
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === name);
+  });
+
+  // Reset / draw when needed
+  if (name === 'progress') drawProgressCharts();
+  if (name === 'feedback') updateFeedbackAll();
+  if (name === 'growth') drawGrowthCharts();
+
+  window.scrollTo(0, 0);
+}
+
+// ============================================================
+// CHECK-IN BARS
+// ============================================================
+const barValues = { effort: null, performance: null };
+const shBarValues = { 'sh-effort': null, 'sh-performance': null };
+
+function initBars() {
+  // Build scale marks — every number 0-10, majors at 0,5,10
+  ['effort-scale', 'perf-scale', 'sh-effort-scale', 'sh-perf-scale'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    let html = '';
+    for (let i = 10; i >= 0; i--) {
+      const isMajor = (i === 0 || i === 5 || i === 10);
+      html += `<div class="bar-tick ${isMajor ? 'major' : 'minor'}"><div class="bar-tick-num">${i}</div><div class="bar-tick-line"></div></div>`;
+    }
+    el.innerHTML = html;
+  });
+
+  // Add drag handlers (individual + stakeholder bars)
+  ['effort', 'perf', 'sh-effort', 'sh-perf'].forEach(prefix => {
+    const track = document.getElementById(prefix + '-track');
+    if (!track) return;
+    const fill = document.getElementById(prefix + '-fill');
+    const thumb = document.getElementById(prefix + '-thumb');
+    const readout = document.getElementById(prefix + '-readout');
+    const dim = track.dataset.dim || prefix;
+    let dragging = false;
+    let lastVal = -1;
+
+    function update(e) {
+      const rect = track.getBoundingClientRect();
+      let clientY;
+      if (e.touches) clientY = e.touches[0].clientY;
+      else clientY = e.clientY;
+
+      let ratio = 1 - (clientY - rect.top) / rect.height;
+      ratio = Math.max(0, Math.min(1, ratio));
+      let val = Math.round(ratio * 10);
+      let pct = (val / 10) * 100;
+
+      fill.style.height = pct + '%';
+      thumb.style.display = 'block';
+
+      // Update readout below the bar
+      readout.classList.remove('inactive');
+      if (val !== lastVal) {
+        readout.textContent = val;
+        // Pulse animation on value change
+        readout.classList.add('pulse');
+        setTimeout(() => readout.classList.remove('pulse'), 120);
+        lastVal = val;
+      }
+
+      // Highlight matching scale tick
+      const scaleId = prefix + '-scale';
+      const altScaleId = prefix === 'effort' ? 'effort-scale' : prefix === 'perf' ? 'perf-scale' : scaleId;
+      const scale = document.getElementById(scaleId) || document.getElementById(altScaleId);
+      if (scale) {
+        scale.querySelectorAll('.bar-tick').forEach(t => t.classList.remove('highlight'));
+        const ticks = scale.querySelectorAll('.bar-tick');
+        if (ticks[10 - val]) ticks[10 - val].classList.add('highlight');
+      }
+
+      // Update check-in state for individual or stakeholder bars
+      if (prefix.startsWith('sh-')) {
+        shBarValues[dim] = val;
+        checkShSubmit();
+      } else {
+        barValues[dim] = val;
+        checkSubmit();
+      }
+    }
+
+    function onDown(e) {
+      e.preventDefault();
+      dragging = true;
+      const isDimEffort = dim === 'effort' || dim === 'sh-effort';
+      track.classList.add('active', isDimEffort ? 'effort' : 'performance');
+      update(e);
+    }
+    function onMove(e) {
+      if (!dragging) return;
+      e.preventDefault();
+      update(e);
+    }
+    function onUp() {
+      dragging = false;
+      track.classList.remove('active', 'effort', 'performance');
+    }
+
+    track.addEventListener('mousedown', onDown);
+    track.addEventListener('touchstart', onDown, { passive: false });
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('touchmove', onMove, { passive: false });
+    window.addEventListener('mouseup', onUp);
+    window.addEventListener('touchend', onUp);
+  });
+}
+
+function checkSubmit() {
+  const btn = document.getElementById('checkin-submit');
+  btn.disabled = !(barValues.effort !== null && barValues.performance !== null);
+}
+
+function checkShSubmit() {
+  const btn = document.getElementById('sh-submit');
+  btn.disabled = !(shBarValues['sh-effort'] !== null && shBarValues['sh-performance'] !== null);
+}
+
+// toggleNote removed — note area is always visible now
+
+// ============================================================
+// CHART DRAWING UTILITY
+// ============================================================
+function drawLineChart(canvas, container, tooltipEl, data, raterData, dim, options = {}) {
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = container.getBoundingClientRect();
+  const w = rect.width - 24;
+  const h = options.height || 160;
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, w, h);
+
+  const weeks = data.length;
+  const pad = { l: 28, r: 80, t: 12, b: 28 };
+  const cw = w - pad.l - pad.r;
+  const ch = h - pad.t - pad.b;
+  const xStep = cw / (weeks - 1);
+  const yScale = v => pad.t + ch - (v / 10) * ch;
+  const xPos = i => pad.l + i * xStep;
+  const dimKey = dim === 'effort' ? 'e' : 'p';
+
+  // Grid
+  ctx.strokeStyle = 'rgba(250,244,237,0.04)';
+  ctx.lineWidth = 1;
+  [0, 5, 10].forEach(v => {
+    ctx.beginPath();
+    ctx.moveTo(pad.l, yScale(v));
+    ctx.lineTo(w - pad.r, yScale(v));
+    ctx.stroke();
+  });
+
+  // Y labels
+  ctx.fillStyle = 'rgba(250,244,237,0.2)';
+  ctx.font = '9px "Geist Mono", "SF Mono", monospace';
+  ctx.textAlign = 'right';
+  [0, 5, 10].forEach(v => { ctx.fillText(v, pad.l - 6, yScale(v) + 3); });
+
+  // X labels
+  ctx.textAlign = 'center';
+  for (let i = 0; i < weeks; i++) {
+    ctx.fillStyle = i === weeks - 1 ? 'rgba(250,244,237,0.55)' : 'rgba(250,244,237,0.2)';
+    ctx.font = i === weeks - 1 ? 'bold 10px "Geist Mono", "SF Mono", monospace' : '10px "Geist Mono", "SF Mono", monospace';
+    ctx.fillText('W' + (i + 1), xPos(i), h - 6);
+  }
+
+  // Draw bezier curve helper
+  function drawLine(pts, color, lineWidth, alpha, showDots, dotSize) {
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineWidth;
+    ctx.beginPath();
+    ctx.moveTo(xPos(0), yScale(pts[0]));
+    for (let i = 1; i < pts.length; i++) {
+      const cx = (xPos(i - 1) + xPos(i)) / 2;
+      ctx.bezierCurveTo(cx, yScale(pts[i - 1]), cx, yScale(pts[i]), xPos(i), yScale(pts[i]));
+    }
+    ctx.stroke();
+
+    if (showDots) {
+      for (let i = 0; i < pts.length; i++) {
+        ctx.beginPath();
+        ctx.arc(xPos(i), yScale(pts[i]), dotSize || 3, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // Rater lines
+  if (raterData && raterData.length > 0) {
+    raterData.forEach(r => {
+      const isOn = options.showAll || activeRaters.has(r.id);
+      if (!isOn && !options.showAll) return;
+      const pts = r.data.slice(0, weeks).map(d => d[dimKey]);
+      const alpha = options.raterDashed ? 0.3 : (isOn ? 0.4 : 0.05);
+      const lw = options.raterDashed ? 1.5 : 1.5;
+
+      if (options.raterDashed) {
+        // Dashed for avg rater line in growth
+        ctx.globalAlpha = alpha;
+        ctx.strokeStyle = r.color;
+        ctx.lineWidth = lw;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(xPos(0), yScale(pts[0]));
+        for (let i = 1; i < pts.length; i++) {
+          const cx = (xPos(i - 1) + xPos(i)) / 2;
+          ctx.bezierCurveTo(cx, yScale(pts[i - 1]), cx, yScale(pts[i]), xPos(i), yScale(pts[i]));
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.globalAlpha = 1;
+      } else {
+        drawLine(pts, r.color, lw, alpha, isOn, 3);
+      }
+
+      // Right-edge label
+      if (isOn || options.showAll) {
+        const lastVal = pts[pts.length - 1];
+        const labelY = yScale(lastVal);
+        const firstName = r.name.split(' ')[0];
+        const labelText = firstName + ' ' + lastVal;
+        ctx.font = 'bold 10px "Geist Mono", "SF Mono", monospace';
+        const textW = ctx.measureText(labelText).width;
+        ctx.globalAlpha = 0.85;
+        const rx = xPos(weeks - 1) + 6;
+        const ry = labelY - 8;
+        const rw = textW + 10;
+        const rh = 17;
+        const rr = 4;
+        ctx.fillStyle = 'rgba(12,10,9,0.75)';
+        ctx.beginPath();
+        ctx.moveTo(rx + rr, ry);
+        ctx.lineTo(rx + rw - rr, ry);
+        ctx.quadraticCurveTo(rx + rw, ry, rx + rw, ry + rr);
+        ctx.lineTo(rx + rw, ry + rh - rr);
+        ctx.quadraticCurveTo(rx + rw, ry + rh, rx + rw - rr, ry + rh);
+        ctx.lineTo(rx + rr, ry + rh);
+        ctx.quadraticCurveTo(rx, ry + rh, rx, ry + rh - rr);
+        ctx.lineTo(rx, ry + rr);
+        ctx.quadraticCurveTo(rx, ry, rx + rr, ry);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = r.color;
+        ctx.textAlign = 'left';
+        ctx.fillText(labelText, rx + 5, labelY + 4);
+        ctx.globalAlpha = 1;
+      }
+    });
+  }
+
+  // Self line
+  const selfPts = data.map(d => d[dimKey]);
+  drawLine(selfPts, 'rgba(250,244,237,0.93)', 2.5, 1, true, 4);
+
+  // "You" label
+  ctx.fillStyle = 'rgba(250,244,237,0.7)';
+  ctx.font = 'bold 10px "Geist Mono", "SF Mono", monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText('You', xPos(weeks - 1) + 8, yScale(selfPts[selfPts.length - 1]) + 3);
+
+  // Store layout
+  canvas._layout = { pad, xStep, weeks, w, h, yScale, xPos, dimKey };
+
+  // Tooltip handler
+  if (tooltipEl) {
+    canvas.onmousemove = function(e) {
+      const L = canvas._layout;
+      if (!L) return;
+      const r = canvas.getBoundingClientRect();
+      const mx = (e.clientX - r.left) * (canvas.width / dpr / r.width);
+      const weekIdx = Math.round((mx - L.pad.l) / L.xStep);
+      if (weekIdx < 0 || weekIdx >= L.weeks) { tooltipEl.classList.remove('visible'); return; }
+
+      let rows = [{ name: 'You', color: 'rgba(250,244,237,0.93)', score: data[weekIdx][L.dimKey], isSelf: true }];
+      if (raterData) {
+        raterData.forEach(rt => {
+          if (activeRaters.has(rt.id) || options.showAll) {
+            rows.push({ name: rt.name, color: rt.color, score: rt.data[weekIdx][L.dimKey] });
+          }
+        });
+      }
+      rows.sort((a, b) => b.score - a.score);
+
+      let html = `<div style="font-family:'Geist Mono','SF Mono',monospace;font-size:10px;color:rgba(250,244,237,0.2);letter-spacing:0.06em;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(250,244,237,0.04)">WEEK ${weekIdx + 1}</div>`;
+      rows.forEach(row => {
+        html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0">
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="width:6px;height:6px;border-radius:3px;background:${row.color}"></div>
+            <span style="font-size:12px;color:${row.isSelf ? 'rgba(250,244,237,0.93)' : 'rgba(250,244,237,0.55)'};${row.isSelf ? 'font-weight:600' : ''}">${row.name}</span>
+          </div>
+          <span style="font-family:'Geist Mono','SF Mono',monospace;font-weight:500;font-size:12px;color:${row.color}">${row.score}</span>
+        </div>`;
+      });
+
+      tooltipEl.innerHTML = html;
+      tooltipEl.classList.add('visible');
+      const tx = L.xPos(weekIdx);
+      tooltipEl.style.left = (tx + 20 > L.w - 180 ? tx - 180 : tx + 20) + 'px';
+      tooltipEl.style.top = '40px';
+    };
+    canvas.onmouseleave = function() { tooltipEl.classList.remove('visible'); };
+  }
+}
+
+// ============================================================
+// PROGRESS CHARTS
+// ============================================================
+function drawProgressCharts() {
+  drawLineChart(
+    document.getElementById('progress-effort-chart'),
+    document.getElementById('progress-effort-container'),
+    document.getElementById('progress-effort-tooltip'),
+    selfData, null, 'effort'
+  );
+  drawLineChart(
+    document.getElementById('progress-perf-chart'),
+    document.getElementById('progress-perf-container'),
+    document.getElementById('progress-perf-tooltip'),
+    selfData, null, 'performance'
+  );
+}
+
+// ============================================================
+// FEEDBACK (PERCEPTION FIELD)
+// ============================================================
+function updateFeedbackAll() {
+  updateFeedbackNumbers();
+  drawFeedbackCharts();
+  updatePerspectives();
+  updateResetLink();
+}
+
+function updateFeedbackNumbers() {
+  const last = selfData.length - 1;
+  const active = raters.filter(r => activeRaters.has(r.id));
+  if (active.length === 0) {
+    document.getElementById('fb-avg-e').textContent = '—';
+    document.getElementById('fb-avg-p').textContent = '—';
+    document.getElementById('fb-avg-label-e').textContent = 'no raters selected';
+    document.getElementById('fb-avg-label-p').textContent = 'no raters selected';
+    document.getElementById('fb-gap-e').textContent = '';
+    document.getElementById('fb-gap-p').textContent = '';
+    return;
+  }
+
+  const avgE = active.reduce((s, r) => s + r.data[last].e, 0) / active.length;
+  const avgP = active.reduce((s, r) => s + r.data[last].p, 0) / active.length;
+  const gapE = avgE - selfData[last].e;
+  const gapP = avgP - selfData[last].p;
+
+  document.getElementById('fb-avg-e').textContent = avgE.toFixed(1);
+  document.getElementById('fb-avg-p').textContent = avgP.toFixed(1);
+
+  const label = active.length === 1 ? active[0].name : `avg of ${active.length} raters`;
+  document.getElementById('fb-avg-label-e').textContent = label;
+  document.getElementById('fb-avg-label-p').textContent = label;
+
+  const gapTextE = document.getElementById('fb-gap-e');
+  const gapTextP = document.getElementById('fb-gap-p');
+
+  function gapString(gap) {
+    const abs = Math.abs(gap).toFixed(1);
+    if (Math.abs(gap) < 0.5) return 'Close to your view';
+    return gap > 0 ? `They see +${abs} higher` : `They see ${abs} lower`;
+  }
+  function gapColor(gap) {
+    const abs = Math.abs(gap);
+    if (abs <= 1) return 'var(--signal-aligned)';
+    if (abs <= 2) return 'var(--signal-different)';
+    return 'var(--signal-attention)';
+  }
+
+  gapTextE.textContent = gapString(gapE);
+  gapTextE.style.color = gapColor(gapE);
+  gapTextP.textContent = gapString(gapP);
+  gapTextP.style.color = gapColor(gapP);
+}
+
+function drawFeedbackCharts() {
+  drawLineChart(
+    document.getElementById('fb-effort-chart'),
+    document.getElementById('fb-effort-container'),
+    document.getElementById('fb-effort-tooltip'),
+    selfData, raters, 'effort'
+  );
+  drawLineChart(
+    document.getElementById('fb-perf-chart'),
+    document.getElementById('fb-perf-container'),
+    document.getElementById('fb-perf-tooltip'),
+    selfData, raters, 'performance'
+  );
+}
+
+function updatePerspectives() {
+  const last = selfData.length - 1;
+  const selfE = selfData[last].e;
+  const selfP = selfData[last].p;
+
+  const sorted = raters.map(r => {
+    const gapE = r.data[last].e - selfE;
+    const gapP = r.data[last].p - selfP;
+    const mag = (Math.abs(gapE) + Math.abs(gapP)) / 2;
+    return { ...r, gapE, gapP, mag, latestE: r.data[last].e, latestP: r.data[last].p };
+  }).sort((a, b) => b.mag - a.mag);
+
+  const list = document.getElementById('perspectives-list');
+  list.innerHTML = sorted.map(r => {
+    const isOn = activeRaters.has(r.id);
+    const badge = r.mag <= 1 ? { cls: 'badge-aligned', text: 'Aligned' } :
+                  r.mag <= 2 ? { cls: 'badge-different', text: 'Different view' } :
+                  { cls: 'badge-biggap', text: 'Big gap' };
+
+    // Plain language gap text
+    let gapText;
+    if (r.mag <= 0.5) {
+      gapText = 'Close to your view';
+    } else {
+      const biggerDim = Math.abs(r.gapE) >= Math.abs(r.gapP) ? 'effort' : 'performance';
+      const biggerGap = Math.abs(r.gapE) >= Math.abs(r.gapP) ? Math.abs(r.gapE) : Math.abs(r.gapP);
+      const dir = (Math.abs(r.gapE) >= Math.abs(r.gapP) ? r.gapE : r.gapP) > 0 ? 'higher' : 'lower';
+      gapText = `Sees your ${biggerDim} ${biggerGap} ${dir}`;
+    }
+
+    const toggleBg = isOn ? r.color + '33' : '';
+    const toggleBorder = isOn ? r.color + '66' : '';
+    const knobBg = isOn ? r.color : 'rgba(250,244,237,0.15)';
+
+    return `<div class="rater-row ${isOn ? 'active' : ''} ${newRaters.has(r.id) ? 'rater-new' : ''}">
+      <div class="rater-toggle ${isOn ? 'on' : ''}" onclick="toggleRater('${r.id}',event)" style="${isOn ? 'background:' + toggleBg + ';border-color:' + toggleBorder : ''}">
+        <div class="knob" style="background:${knobBg}"></div>
+      </div>
+      <div class="rater-swatch" style="background:${r.color}"></div>
+      <div class="rater-info" onclick="soloRater('${r.id}')">
+        <div class="rater-name" style="color:${r.color}">${r.name}</div>
+        <div class="rater-gap-text">${gapText}</div>
+      </div>
+      <div class="rater-scores">
+        <div class="rater-score-item">
+          <div class="rater-score-val" style="color:var(--data-effort-vivid)">${r.latestE}</div>
+          <div class="rater-score-dim">E</div>
+        </div>
+        <div class="rater-score-item">
+          <div class="rater-score-val" style="color:var(--data-performance-vivid)">${r.latestP}</div>
+          <div class="rater-score-dim">P</div>
+        </div>
+      </div>
+      <div class="rater-badge ${badge.cls}">${badge.text}</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleRater(id, evt) {
+  if (evt) evt.stopPropagation();
+  if (activeRaters.has(id)) activeRaters.delete(id);
+  else activeRaters.add(id);
+  newRaters.delete(id);
+  updateFeedbackAll();
+}
+
+function soloRater(id) {
+  if (activeRaters.size === 1 && activeRaters.has(id)) {
+    activeRaters = new Set(raters.map(r => r.id));
+  } else {
+    activeRaters = new Set([id]);
+  }
+  newRaters.delete(id);
+  updateFeedbackAll();
+}
+
+function resetRaters() {
+  activeRaters = new Set(raters.map(r => r.id));
+  updateFeedbackAll();
+}
+
+function updateResetLink() {
+  const el = document.getElementById('persp-reset');
+  const allOn = activeRaters.size === raters.length;
+  el.classList.toggle('visible', !allOn);
+}
+
+function showFeedbackWithHighlight(raterId) {
+  showScreen('feedback');
+  setTimeout(() => {
+    document.querySelectorAll('.rater-row').forEach(row => {
+      row.classList.remove('rater-new');
+    });
+    // Find the row for this rater and highlight it
+    const rows = document.querySelectorAll('.rater-row');
+    rows.forEach(row => {
+      if (row.querySelector('.rater-name') && row.querySelector('.rater-name').textContent.toLowerCase().includes(raterId)) {
+        row.classList.add('rater-new');
+        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    });
+  }, 150);
+}
+
+// ============================================================
+// GROWTH CHARTS
+// ============================================================
+function drawGrowthCharts() {
+  drawLineChart(
+    document.getElementById('growth-effort-chart'),
+    document.getElementById('growth-effort-chart').parentElement,
+    null,
+    selfData12, raters12, 'effort',
+    { showAll: true, raterDashed: true }
+  );
+  drawLineChart(
+    document.getElementById('growth-perf-chart'),
+    document.getElementById('growth-perf-chart').parentElement,
+    null,
+    selfData12, raters12, 'performance',
+    { showAll: true, raterDashed: true }
+  );
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  initBars();
+
+  // Check-in submit handler
+  document.getElementById('checkin-submit').addEventListener('click', function() {
+    if (!this.disabled) {
+      document.getElementById('today-checkin').style.display = 'none';
+      const doneEl = document.getElementById('today-done');
+      doneEl.style.display = 'block';
+      // Update the done message to include confirmation
+      doneEl.querySelector('div').innerHTML = 'Check-in saved.<br>Your next check-in opens Wednesday.';
+      barValues.effort = null;
+      barValues.performance = null;
+    }
+  });
+
+  // Stakeholder submit handler
+  document.getElementById('sh-submit').addEventListener('click', function() {
+    if (!this.disabled) {
+      const container = document.getElementById('screen-stakeholder').querySelector('.screen-inner');
+      container.innerHTML = '<div class="ceremony-space" style="text-align:center;padding-top:120px;padding-bottom:120px;"><div style="font-size:18px;font-weight:500;color:var(--text-primary);line-height:1.6;">Thank you</div><div style="font-size:15px;color:var(--text-secondary);line-height:1.6;margin-top:12px;">Your perspective has been shared.<br>It makes a real difference.</div></div>';
+    }
+  });
+
+  // Resize handler
+  window.addEventListener('resize', () => {
+    if (currentScreen === 'progress') drawProgressCharts();
+    if (currentScreen === 'feedback') { drawFeedbackCharts(); }
+    if (currentScreen === 'growth') drawGrowthCharts();
+  });
+}
+
+init();
+</script>
+</body>
+</html>

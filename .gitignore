@@ -26,3 +26,4 @@ vite.config.ts.timestamp-*
 
 # Legacy files
 _old/
+_session.md

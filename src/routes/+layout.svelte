@@ -79,43 +79,30 @@
 			>Skip to main content</a
 		>
 		<header
-			class="flex flex-wrap items-center justify-between gap-3 border-b border-border-default bg-surface-base p-4"
+			class="flex items-center justify-between border-b border-border-default bg-surface-base px-4 py-3"
 			aria-label="Site header"
 		>
-			<h1 class="text-lg font-semibold tracking-[0.12em] text-text-primary">Forbetra</h1>
-			<nav class="flex items-center gap-3" aria-label="Main navigation">
+			<h1 class="text-sm font-bold tracking-[0.18em] text-text-tertiary uppercase">Forbetra</h1>
+			<nav class="flex items-center gap-2" aria-label="Main navigation">
 				{#if data.dbUser}
-					<div class="flex items-center gap-3">
-						{#if data.dbUser.role === 'INDIVIDUAL' && !isRoleSelection}
-							<!-- Individual Hub link hidden — sidebar in /individual layout handles navigation -->
-						{/if}
-						{#if data.dbUser.role === 'COACH' && !isRoleSelection}
-							<!-- Coach nav links hidden — sidebar in /coach layout handles navigation -->
-						{/if}
-						{#if data.dbUser.role === 'ADMIN'}
-							<a
-								href={resolve('/admin/users')}
-								class={navClass(isActive('/admin'))}
-								aria-current={isActive('/admin') ? 'page' : undefined}
-							>
-								Admin Console
-							</a>
-						{/if}
-						{#if !isRoleSelection}
-							<a
-								href={resolve('/settings')}
-								class={navClass(isActive('/settings'))}
-								aria-current={isActive('/settings') ? 'page' : undefined}
-							>
-								Settings
-							</a>
-						{/if}
-						{#if displayRole}
-							<span class="text-sm text-text-muted"
-								>Role: {displayRole.charAt(0) + displayRole.slice(1).toLowerCase()}</span
-							>
-						{/if}
-					</div>
+					{#if data.dbUser.role === 'ADMIN'}
+						<a
+							href={resolve('/admin/users')}
+							class="{navClass(isActive('/admin'))} px-2 py-1 text-xs"
+							aria-current={isActive('/admin') ? 'page' : undefined}
+						>
+							Admin
+						</a>
+					{/if}
+					{#if !isRoleSelection}
+						<a
+							href={resolve('/settings')}
+							class="{navClass(isActive('/settings'))} px-2 py-1 text-xs"
+							aria-current={isActive('/settings') ? 'page' : undefined}
+						>
+							Settings
+						</a>
+					{/if}
 				{/if}
 				<UserButton />
 			</nav>

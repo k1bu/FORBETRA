@@ -19,9 +19,9 @@
 
 	const variantClasses: Record<Variant, string> = {
 		default: 'bg-surface-subtle text-text-secondary border border-border-default',
-		success: 'bg-success-muted text-success',
-		warning: 'bg-warning-muted text-warning',
-		error: 'bg-error-muted text-error',
+		success: 'bg-signal-aligned-muted text-signal-aligned',
+		warning: 'bg-signal-different-muted text-signal-different',
+		error: 'bg-signal-attention-muted text-signal-attention',
 		accent: 'bg-accent-muted text-accent',
 		effort: 'bg-data-effort-muted text-data-effort',
 		performance: 'bg-data-performance-muted text-data-performance'

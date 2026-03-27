@@ -18,10 +18,10 @@
 	--color-surface-overlay: #1c1917;
 	--color-surface-subtle: #231f1c;
 
-	/* Border — warm white at varying opacity */
-	--color-border-default: rgba(250, 244, 237, 0.06);
-	--color-border-strong: rgba(250, 244, 237, 0.12);
-	--color-border-accent: rgba(250, 244, 237, 0.2);
+	/* Border — warm white at varying opacity (reduced for subtlety) */
+	--color-border-default: rgba(250, 244, 237, 0.04);
+	--color-border-strong: rgba(250, 244, 237, 0.08);
+	--color-border-accent: rgba(250, 244, 237, 0.14);
 
 	/* Text — single warm white at varying opacity */
 	--color-text-primary: rgba(250, 244, 237, 0.93);
@@ -29,31 +29,48 @@
 	--color-text-tertiary: rgba(250, 244, 237, 0.35);
 	--color-text-muted: rgba(250, 244, 237, 0.2);
 
-	/* Accent — warm amber/gold */
-	--color-accent: #e8a04a;
-	--color-accent-hover: #f0b265;
-	--color-accent-muted: rgba(232, 160, 74, 0.1);
+	/* Accent — lighter brass, distinct from data-performance */
+	--color-accent: #e0b580;
+	--color-accent-hover: #edc99a;
+	--color-accent-muted: rgba(224, 181, 128, 0.1);
 
 	/* AI accent */
-	--color-ai: #e8a04a;
-	--color-ai-hover: #f0b265;
-	--color-ai-muted: rgba(232, 160, 74, 0.08);
+	--color-ai: #e0b580;
+	--color-ai-hover: #edc99a;
+	--color-ai-muted: rgba(224, 181, 128, 0.08);
 
 	/* Data colors */
-	--color-data-effort: #7dd3fc;
-	--color-data-effort-muted: rgba(125, 211, 252, 0.1);
-	--color-data-performance: #fbbf24;
-	--color-data-performance-muted: rgba(251, 191, 36, 0.1);
+	--color-data-effort: #94a3b8;
+	--color-data-effort-muted: rgba(148, 163, 184, 0.1);
+	--color-data-effort-vivid: #cbd5e1;
+	--color-data-performance: #d4a06a;
+	--color-data-performance-muted: rgba(212, 160, 106, 0.1);
+	--color-data-performance-vivid: #e0b580;
 
-	/* Semantic */
+	/* Signal colors */
+	--color-signal-aligned: #4ade80;
+	--color-signal-aligned-muted: rgba(74, 222, 128, 0.1);
+	--color-signal-different: #f59e0b;
+	--color-signal-different-muted: rgba(245, 158, 11, 0.1);
+	--color-signal-attention: #ef4444;
+	--color-signal-attention-muted: rgba(239, 68, 68, 0.1);
+
+	/* Semantic — DEPRECATED: use signal-* tokens above. Kept for backward compatibility. */
 	--color-success: #4ade80;
 	--color-success-muted: rgba(74, 222, 128, 0.1);
-	--color-warning: #fbbf24;
-	--color-warning-muted: rgba(251, 191, 36, 0.1);
-	--color-error: #f87171;
-	--color-error-muted: rgba(248, 113, 113, 0.1);
-	--color-info: #7dd3fc;
-	--color-info-muted: rgba(125, 211, 252, 0.1);
+	--color-warning: #f59e0b;
+	--color-warning-muted: rgba(245, 158, 11, 0.1);
+	--color-error: #ef4444;
+	--color-error-muted: rgba(239, 68, 68, 0.1);
+	--color-info: #94a3b8;
+	--color-info-muted: rgba(148, 163, 184, 0.1);
+
+	/* Rater palette — per-rater identification */
+	--color-rater-1: #f472b6;
+	--color-rater-2: #60a5fa;
+	--color-rater-3: #a78bfa;
+	--color-rater-4: #2dd4bf;
+	--color-rater-5: #fbbf24;
 }
 
 /* --- Premium surface utilities --- */
@@ -61,7 +78,7 @@
 	.card {
 		background: var(--color-surface-raised);
 		border: 1px solid var(--color-border-default);
-		border-radius: 16px;
+		border-radius: 12px;
 		box-shadow: inset 0 1px 0 rgba(250, 244, 237, 0.04);
 	}
 	.card-hover {
@@ -75,27 +92,21 @@
 			0 2px 8px rgba(0, 0, 0, 0.3),
 			0 8px 24px rgba(0, 0, 0, 0.2);
 	}
+	/* DEPRECATED: glass/glow utilities removed in design system update.
+	   Kept as no-ops so existing class references don't break. Remove after Phase 2. */
 	.glass {
-		background: rgba(20, 18, 16, 0.7);
-		backdrop-filter: blur(16px);
-		-webkit-backdrop-filter: blur(16px);
+		background: var(--color-surface-raised);
 		border: 1px solid var(--color-border-default);
 	}
 	.glass-raised {
-		background: rgba(20, 18, 16, 0.85);
-		backdrop-filter: blur(24px);
-		-webkit-backdrop-filter: blur(24px);
+		background: var(--color-surface-overlay);
 		border: 1px solid var(--color-border-strong);
 	}
 	.glow-amber {
-		background-image: radial-gradient(ellipse at 50% 0%, rgba(232, 160, 74, 0.1), transparent 70%);
+		/* removed — no-op */
 	}
 	.glow-soft {
-		background-image: radial-gradient(
-			ellipse at 50% 50%,
-			rgba(232, 160, 74, 0.06),
-			transparent 70%
-		);
+		/* removed — no-op */
 	}
 }
 
@@ -120,7 +131,7 @@
 		transform: translateY(-2px);
 		box-shadow:
 			0 4px 12px rgba(0, 0, 0, 0.3),
-			0 0 24px rgba(232, 160, 74, 0.06);
+			0 0 24px rgba(224, 181, 128, 0.06);
 	}
 	.anim-slide-up {
 		animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;

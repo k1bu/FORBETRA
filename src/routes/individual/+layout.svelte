@@ -1,13 +1,12 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { page } from '$app/stores';
-	import { Home, PenLine, TrendingUp, Users, Settings } from 'lucide-svelte';
+	import { Home, TrendingUp, Users, Settings } from 'lucide-svelte';
 
 	const { children }: { children: Snippet } = $props();
 
 	const navItems = [
-		{ href: '/individual', label: 'Home', icon: Home },
-		{ href: '/individual/checkin', label: 'Check-in', icon: PenLine },
+		{ href: '/individual', label: 'Today', icon: Home },
 		{ href: '/individual/progress', label: 'Progress', icon: TrendingUp },
 		{ href: '/individual/feedback', label: 'Feedback', icon: Users }
 	];
@@ -26,37 +25,36 @@
 >
 <div class="flex min-h-screen bg-surface-base">
 	<!-- Desktop Sidebar -->
-	<aside class="hidden w-48 shrink-0 border-r border-border-default bg-surface-raised lg:block">
-		<div class="sticky top-0 flex flex-col gap-1 p-4">
-			<div class="mb-4 flex items-center justify-between px-3">
-				<p class="text-xs font-bold tracking-widest text-text-tertiary uppercase">Forbetra</p>
-				<!-- eslint-disable svelte/no-navigation-without-resolve -->
-				<a
-					href="/individual/settings"
-					class="rounded-lg p-1 text-text-muted transition-colors hover:bg-surface-subtle hover:text-text-primary"
-					aria-label="Settings"
-				>
-					<Settings class="h-4 w-4" />
-				</a>
-				<!-- eslint-enable svelte/no-navigation-without-resolve -->
-			</div>
-			<nav class="flex flex-col gap-0.5" aria-label="Navigation">
+	<aside class="hidden w-12 shrink-0 border-r border-border-default bg-surface-raised lg:block">
+		<div class="sticky top-0 flex flex-col items-center gap-1 py-4">
+			<nav class="flex flex-col items-center gap-1" aria-label="Navigation">
 				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				{#each navItems as item (item.href)}
 					<a
 						href={item.href}
-						class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+						class="flex items-center justify-center rounded-lg p-2.5 transition-colors
 							{isActive(item.href)
 							? 'bg-accent-muted text-accent'
 							: 'text-text-secondary hover:bg-surface-subtle hover:text-text-primary'}"
 						aria-current={isActive(item.href) ? 'page' : undefined}
+						aria-label={item.label}
+						title={item.label}
 					>
 						<item.icon class="h-4 w-4 shrink-0" />
-						{item.label}
 					</a>
 				{/each}
 				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 			</nav>
+			<!-- eslint-disable svelte/no-navigation-without-resolve -->
+			<a
+				href="/individual/settings"
+				class="mt-auto rounded-lg p-2.5 text-text-muted transition-colors hover:bg-surface-subtle hover:text-text-primary"
+				aria-label="Settings"
+				title="Settings"
+			>
+				<Settings class="h-4 w-4" />
+			</a>
+			<!-- eslint-enable svelte/no-navigation-without-resolve -->
 		</div>
 	</aside>
 
@@ -76,7 +74,7 @@
 			{#each navItems as item (item.href)}
 				<a
 					href={item.href}
-					class="text-2xs flex flex-1 flex-col items-center gap-0.5 rounded-lg py-1.5 font-medium transition-colors
+					class="flex flex-1 flex-col items-center gap-0.5 rounded-lg py-1.5 text-[10px] font-semibold transition-colors
 						{isActive(item.href) ? 'text-accent' : 'text-text-muted'}"
 					aria-current={isActive(item.href) ? 'page' : undefined}
 				>

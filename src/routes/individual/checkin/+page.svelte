@@ -35,7 +35,7 @@
 		if (form?.success && form !== toastShownForForm) {
 			toastShownForForm = form;
 			if (form.milestone && milestoneMessages[form.milestone]) {
-				addToast(`🔥 ${milestoneMessages[form.milestone]}`, 'success', 6000);
+				addToast(milestoneMessages[form.milestone], 'success', 6000);
 			} else {
 				addToast('Check-in submitted!', 'success');
 			}
@@ -159,7 +159,7 @@
 		</p>
 		{#if !data.isPreview && !data.isAvailable}
 			<div
-				class="mx-auto max-w-md rounded-xl border border-warning/30 bg-warning-muted p-4 text-sm text-warning"
+				class="mx-auto max-w-md rounded-xl border border-warning/30 bg-signal-different-muted p-4 text-sm text-signal-different"
 			>
 				<p class="font-medium">Check-in not yet available</p>
 				<p class="mt-1">
@@ -173,7 +173,7 @@
 	<div aria-live="polite">
 		{#if form?.error}
 			<div
-				class="mx-auto max-w-2xl rounded-xl border border-error/30 bg-error-muted p-4 text-sm text-error"
+				class="mx-auto max-w-2xl rounded-xl border border-error/30 bg-signal-attention-muted p-4 text-sm text-signal-attention"
 			>
 				<p class="font-medium">{form.error}</p>
 			</div>
@@ -181,10 +181,10 @@
 
 		{#if form?.success}
 			<div
-				class="animate-in fade-in slide-in-from-top-2 mx-auto max-w-2xl rounded-xl border border-success/30 bg-success-muted p-6 text-center"
+				class="animate-in fade-in slide-in-from-top-2 mx-auto max-w-2xl rounded-xl border border-success/30 bg-signal-aligned-muted p-6 text-center"
 			>
-				<CircleCheck class="mx-auto mb-2 h-10 w-10 text-success" />
-				<p class="text-lg font-semibold text-success">Week {data.currentWeek} check-in saved</p>
+				<CircleCheck class="mx-auto mb-2 h-10 w-10 text-signal-aligned" />
+				<p class="text-lg font-semibold text-signal-aligned">Week {data.currentWeek} check-in saved</p>
 				{#if data.previousRatings}
 					{@const eDiff =
 						(effortScore ?? 0) - (data.previousRatings.effortScore ?? effortScore ?? 0)}
@@ -193,11 +193,11 @@
 						(data.previousRatings.performanceScore ?? performanceScore ?? 0)}
 					<p class="mt-1 text-sm text-text-secondary">
 						Effort {effortScore}{#if eDiff > 0}
-							<span class="text-success">(↑{eDiff})</span>{:else if eDiff < 0}
-							<span class="text-error">(↓{Math.abs(eDiff)})</span>{/if}
+							<span class="text-signal-aligned">(↑{eDiff})</span>{:else if eDiff < 0}
+							<span class="text-signal-attention">(↓{Math.abs(eDiff)})</span>{/if}
 						· Performance {performanceScore}{#if pDiff > 0}
-							<span class="text-success">(↑{pDiff})</span>{:else if pDiff < 0}
-							<span class="text-error">(↓{Math.abs(pDiff)})</span>{/if}
+							<span class="text-signal-aligned">(↑{pDiff})</span>{:else if pDiff < 0}
+							<span class="text-signal-attention">(↓{Math.abs(pDiff)})</span>{/if}
 					</p>
 				{/if}
 				{#if !form.streak || form.streak < 3}
@@ -208,22 +208,22 @@
 				{#if form.streak && form.streak >= 3}
 					{#if form.streak >= 20}
 						<div class="mt-2 rounded-lg bg-warning/10 px-3 py-2">
-							<p class="text-sm font-semibold text-warning">
+							<p class="text-sm font-semibold text-signal-different">
 								{form.streak}-check-in streak — this kind of consistency changes how you lead.
 							</p>
 						</div>
 					{:else if form.streak >= 10}
 						<div class="mt-2 rounded-lg bg-warning/10 px-3 py-2">
-							<p class="text-sm font-semibold text-warning">
+							<p class="text-sm font-semibold text-signal-different">
 								{form.streak} in a row. You've built a real practice. The data shows it.
 							</p>
 						</div>
 					{:else if form.streak >= 5}
-						<p class="mt-1 text-sm font-semibold text-warning">
+						<p class="mt-1 text-sm font-semibold text-signal-different">
 							{form.streak}-check-in streak — real patterns are forming.
 						</p>
 					{:else}
-						<p class="mt-1 text-sm font-semibold text-warning">
+						<p class="mt-1 text-sm font-semibold text-signal-different">
 							{form.streak} check-ins in a row — keep building.
 						</p>
 					{/if}

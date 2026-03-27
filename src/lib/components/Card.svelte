@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 
-	type Variant = 'default' | 'glass' | 'interactive';
+	type Variant = 'default' | 'interactive';
 	type Padding = 'sm' | 'md' | 'lg' | 'none';
 
 	let {
@@ -20,7 +20,6 @@
 
 	const variantClasses: Record<Variant, string> = {
 		default: 'bg-surface-raised rounded-xl border border-border-default',
-		glass: 'glass rounded-xl',
 		interactive:
 			'bg-surface-raised rounded-xl border border-border-default hover:border-border-strong hover:bg-surface-subtle transition-all cursor-pointer'
 	};
