@@ -5,7 +5,7 @@
 
 	let { data, form }: { data: PageData; form: ActionData | null } = $props();
 
-	type ReviewerFormValue = { name: string; email: string };
+	type ReviewerFormValue = { name: string; email: string; phone?: string };
 
 	const DRAFT_KEY = 'forbetra-onboarding-draft';
 	const DRAFT_MAX_AGE_MS = 24 * 60 * 60 * 1000;
@@ -32,12 +32,16 @@
 	const existingReviewers = existingData?.stakeholders ?? [];
 	let reviewerForms: ReviewerFormValue[] = $state(
 		existingReviewers.length > 0
-			? existingReviewers.map((s: { name: string; email: string }) => ({
+			? existingReviewers.map((s: { name: string; email: string; phone?: string }) => ({
 					name: s.name,
-					email: s.email
+					email: s.email,
+					phone: s.phone ?? ''
 				}))
-			: [{ name: '', email: '' }]
+			: [{ name: '', email: '', phone: '' }]
 	);
+
+	// Measure state (up to 3 ways to define/measure the objective)
+	let measureForms: string[] = $state(['']);
 
 	// Template state
 	let selectedContextId: string | null = $state(null);
@@ -140,8 +144,8 @@
 	}
 
 	function addReviewer() {
-		if (reviewerForms.length >= 5) return;
-		reviewerForms = [...reviewerForms, { name: '', email: '' }];
+		if (reviewerForms.length >= 10) return;
+		reviewerForms = [...reviewerForms, { name: '', email: '', phone: '' }];
 	}
 
 	function removeReviewer(index: number) {
@@ -332,6 +336,49 @@
 									{/if}
 								</div>
 
+								<div class="space-y-2">
+									<label class="flex items-center gap-2 text-sm font-semibold text-text-secondary">
+										<span>How will you measure progress?</span>
+										<span class="font-normal text-text-muted">(optional, up to 3)</span>
+									</label>
+									<p class="text-xs text-text-muted">
+										Define observable behaviors or outcomes that would signal you're on track.
+									</p>
+									{#each measureForms as measure, mIndex (mIndex)}
+										<div class="flex items-center gap-2">
+											<span class="text-xs text-text-muted font-mono w-5 text-right">{mIndex + 1}.</span>
+											<input
+												name={`measure${mIndex + 1}`}
+												type="text"
+												placeholder={mIndex === 0 ? 'e.g., Team members volunteer ideas in meetings' : mIndex === 1 ? 'e.g., Decisions communicated within 24 hours' : 'e.g., Direct reports rate trust 7+ on surveys'}
+												class="flex-1 rounded-lg border border-border-default bg-surface-raised px-4 py-2.5 text-sm text-text-primary transition-all focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
+												value={measure}
+												oninput={(event) => {
+													measureForms[mIndex] = event.currentTarget.value;
+												}}
+											/>
+											{#if mIndex > 0 && measure === ''}
+												<button
+													type="button"
+													onclick={() => { measureForms = measureForms.filter((_, i) => i !== mIndex); }}
+													class="text-xs text-text-muted hover:text-signal-attention transition-colors px-1"
+												>
+													&times;
+												</button>
+											{/if}
+										</div>
+									{/each}
+									{#if measureForms.length < 3}
+										<button
+											type="button"
+											onclick={() => { measureForms = [...measureForms, '']; }}
+											class="text-xs text-accent hover:text-accent-hover transition-colors"
+										>
+											+ Add another measure
+										</button>
+									{/if}
+								</div>
+
 								<div
 									class="rounded-xl border border-accent/30 bg-accent-muted p-4 text-sm text-text-secondary"
 								>
@@ -394,8 +441,8 @@
 							<div class="mb-6 space-y-2">
 								<h2 class="text-3xl font-bold text-text-primary">Add your reviewers</h2>
 								<p class="text-text-secondary">
-									Add 1–3 people who regularly see you in action. They'll provide feedback on your
-									progress. You can always add more later.
+									Add people who regularly see you in action. We recommend 3–10 reviewers for
+									meaningful feedback. You can always add more later.
 								</p>
 								<p class="text-xs text-text-muted">
 									Each reviewer receives a simple email with a link to rate your effort and
@@ -490,11 +537,31 @@
 													</p>
 												{/if}
 											</div>
+
+											<div class="space-y-1 sm:col-span-2">
+												<label
+													class="block text-sm font-medium text-text-secondary"
+													for={`stakeholderPhone${index + 1}`}
+												>
+													Mobile <span class="text-text-muted font-normal">(optional, for SMS reminders)</span>
+												</label>
+												<input
+													id={`stakeholderPhone${index + 1}`}
+													name={`stakeholderPhone${index + 1}`}
+													type="tel"
+													placeholder="+1 (555) 123-4567"
+													class="w-full rounded-lg border border-border-default bg-surface-raised px-4 py-2.5 text-text-primary transition-all focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
+													value={reviewer.phone ?? ''}
+													oninput={(event) => {
+														reviewerForms[index].phone = event.currentTarget.value;
+													}}
+												/>
+											</div>
 										</div>
 									</div>
 								{/each}
 
-								{#if reviewerForms.length < 5}
+								{#if reviewerForms.length < 10}
 									<button
 										type="button"
 										onclick={addReviewer}
