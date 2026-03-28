@@ -386,6 +386,18 @@
 						/>
 					</div>
 				</div>
+				<div class="space-y-1">
+					<label class="block text-sm font-medium text-text-secondary" for="phone">
+						Mobile <span class="text-text-muted font-normal">(optional)</span>
+					</label>
+					<input
+						id="phone"
+						name="phone"
+						type="tel"
+						placeholder="+1 (555) 123-4567"
+						class="w-full rounded-lg border border-border-default bg-surface-raised px-4 py-2.5 text-text-primary transition-all focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
+					/>
+				</div>
 				<div class="flex justify-end">
 					<button
 						type="submit"

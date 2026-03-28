@@ -77,7 +77,7 @@
 					View Report <ArrowRight class="h-4 w-4" />
 				</a>
 				<a
-					href="/individual/new-cycle"
+					href="/onboarding"
 					class="rounded-full border border-border-strong px-7 py-3.5 text-sm font-semibold text-text-primary transition-all duration-350 hover:bg-surface-raised active:scale-[0.98]"
 				>
 					Start New

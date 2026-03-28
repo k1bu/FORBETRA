@@ -45,7 +45,7 @@ export const onboardingSchema = z.object({
 		.default([]),
 	stakeholders: z
 		.array(stakeholderSchema)
-		.max(5, 'Add up to five stakeholders')
+		.max(10, 'Add up to ten stakeholders')
 		.optional()
 		.default([]),
 	cycleLabel: z.string().trim().max(80, 'Cycle label is too long').optional(),

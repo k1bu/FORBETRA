@@ -5,7 +5,7 @@
 	import { addToast } from '$lib/stores/toasts.svelte';
 	import { SvelteSet } from 'svelte/reactivity';
 	import { getScoreColor, getScoreBgColor } from '$lib/utils/scoreColors';
-	import { Sparkles, ChevronDown, MessageCircle, ArrowRight } from 'lucide-svelte';
+	import { Sparkles, ChevronDown } from 'lucide-svelte';
 
 	const { data }: { data: PageData } = $props();
 
@@ -124,21 +124,11 @@
 				<li><span class="font-medium text-text-primary">Progress</span></li>
 			</ol>
 		</nav>
-		<div class="flex items-center justify-between">
-			<div>
-				<h1 class="text-2xl font-bold text-text-primary">Progress</h1>
-				<p class="mt-1 text-sm text-text-secondary">
-					AI report, charts, and check-in history in one place.
-				</p>
-			</div>
-			<a
-				href="/individual/ask"
-				class="inline-flex items-center gap-1.5 rounded-lg border border-accent/30 bg-surface-raised px-3 py-1.5 text-xs font-semibold text-accent transition-all hover:bg-accent-muted"
-			>
-				<MessageCircle class="h-3.5 w-3.5" />
-				Ask Your Data
-				<ArrowRight class="h-3 w-3" />
-			</a>
+		<div>
+			<h1 class="text-2xl font-bold text-text-primary">Progress</h1>
+			<p class="mt-1 text-sm text-text-secondary">
+				AI report, charts, and check-in history in one place.
+			</p>
 		</div>
 		<!-- eslint-enable svelte/no-navigation-without-resolve -->
 	</header>

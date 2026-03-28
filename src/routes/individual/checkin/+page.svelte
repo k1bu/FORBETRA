@@ -71,7 +71,7 @@
 	const formatDate = (value: string) =>
 		new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(new Date(value));
 
-	const notePrompt = $derived(() => {
+	const notePrompt = $derived.by(() => {
 		// No prompt until scores are selected
 		if (effortScore === null || performanceScore === null) {
 			return "What went well? What's challenging? What stood out this week?";
@@ -593,7 +593,7 @@
 							bind:value={notes}
 							disabled={!data.isAvailable || data.isLocked}
 							class="w-full rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:bg-surface-raised focus:ring-2 focus:ring-accent/30 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
-							placeholder={notePrompt()}
+							placeholder={notePrompt}
 						></textarea>
 						<div class="mt-2 flex items-center justify-between">
 							<p class="text-xs text-text-tertiary">Only you and your coach can see this.</p>

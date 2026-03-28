@@ -350,6 +350,7 @@
 											<input
 												name={`measure${mIndex + 1}`}
 												type="text"
+												aria-label={`Progress measure ${mIndex + 1}`}
 												placeholder={mIndex === 0 ? 'e.g., Team members volunteer ideas in meetings' : mIndex === 1 ? 'e.g., Decisions communicated within 24 hours' : 'e.g., Direct reports rate trust 7+ on surveys'}
 												class="flex-1 rounded-lg border border-border-default bg-surface-raised px-4 py-2.5 text-sm text-text-primary transition-all focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
 												value={measure}

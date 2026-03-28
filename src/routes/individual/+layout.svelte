@@ -1,7 +1,16 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { page } from '$app/stores';
+	import { afterNavigate } from '$app/navigation';
 	import { Home, TrendingUp, Users, Settings } from 'lucide-svelte';
+
+	afterNavigate(() => {
+		const main = document.getElementById('main-content');
+		if (main) {
+			main.setAttribute('tabindex', '-1');
+			main.focus({ preventScroll: true });
+		}
+	});
 
 	const { children }: { children: Snippet } = $props();
 
@@ -47,7 +56,7 @@
 			</nav>
 			<!-- eslint-disable svelte/no-navigation-without-resolve -->
 			<a
-				href="/individual/settings"
+				href="/settings"
 				class="mt-auto rounded-lg p-2.5 text-text-muted transition-colors hover:bg-surface-subtle hover:text-text-primary"
 				aria-label="Settings"
 				title="Settings"

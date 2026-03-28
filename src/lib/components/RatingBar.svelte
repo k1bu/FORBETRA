@@ -159,6 +159,14 @@
 			hasTouched = true;
 			const newVal = Math.max(0, (value ?? 0) - 1);
 			if (newVal !== value) setValue(newVal);
+		} else if (e.key === 'Home') {
+			e.preventDefault();
+			hasTouched = true;
+			if (value !== 0) setValue(0);
+		} else if (e.key === 'End') {
+			e.preventDefault();
+			hasTouched = true;
+			if (value !== 10) setValue(10);
 		}
 	}
 
