@@ -597,7 +597,12 @@ export const actions: Actions = {
 					}
 				}
 
-				throw redirect(303, '/onboarding/initial-ratings');
+				// Skip initial-ratings if no subgoals were created (nothing to rate)
+				if (data.subgoals.length > 0) {
+					throw redirect(303, '/onboarding/initial-ratings');
+				} else {
+					throw redirect(303, '/onboarding/complete');
+				}
 			}
 		} catch (error) {
 			// Re-throw redirects

@@ -12,7 +12,7 @@
 	const DRAFT_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
 	const contexts = data.contexts;
-	const errors: Record<string, string[]> = (form?.errors as Record<string, string[]>) ?? {};
+	let errors: Record<string, string[]> = $derived((form?.errors as Record<string, string[]>) ?? {});
 	const isEditing = data.isEditing;
 
 	// Reset isSubmitting when form response arrives (success or error)
