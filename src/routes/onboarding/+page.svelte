@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { enhance } from '$app/forms';
 	import type { ActionData, PageData } from './$types';
 	import type { ObjectiveTemplate, OnboardingContext } from '$lib/content/onboardingTemplates';
 
@@ -244,7 +245,20 @@
 		</div>
 
 		<div class="grid gap-6 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
-			<form method="post" class="space-y-8">
+			<form
+				method="post"
+				class="space-y-8"
+				use:enhance={() => {
+					isSubmitting = true;
+					return async ({ result, update }) => {
+						isSubmitting = false;
+						if (result.type === 'redirect') {
+							try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
+						}
+						await update();
+					};
+				}}
+			>
 				<!-- General form errors -->
 				{#if getError('_general')}
 					<div class="rounded-xl border border-error/30 bg-error-muted p-4 text-sm text-error">
@@ -622,9 +636,6 @@
 						<button
 							type="submit"
 							disabled={isSubmitting}
-							onclick={() => {
-								isSubmitting = true;
-							}}
 							class="group inline-flex items-center gap-2 rounded-xl bg-accent px-8 py-3 font-semibold text-[#0c0a09] transition-all hover:bg-accent-hover focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
 						>
 							{#if isSubmitting}
