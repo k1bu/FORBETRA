@@ -13,6 +13,13 @@
 	const contexts = data.contexts;
 	const errors: Record<string, string[]> = (form?.errors as Record<string, string[]>) ?? {};
 	const isEditing = data.isEditing;
+
+	// Reset isSubmitting when form response arrives (success or error)
+	$effect(() => {
+		if (form) {
+			isSubmitting = false;
+		}
+	});
 	const isPrePopulated = (data as unknown as Record<string, unknown>).isPrePopulated ?? false;
 	const existingData = data.existingData;
 
@@ -618,11 +625,11 @@
 							onclick={() => {
 								isSubmitting = true;
 							}}
-							class="group inline-flex items-center gap-2 rounded-xl bg-accent px-8 py-3 font-semibold text-white transition-all hover:bg-accent-hover focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+							class="group inline-flex items-center gap-2 rounded-xl bg-accent px-8 py-3 font-semibold text-[#0c0a09] transition-all hover:bg-accent-hover focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
 						>
 							{#if isSubmitting}
 								<span
-									class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
+									class="h-4 w-4 animate-spin rounded-full border-2 border-[#0c0a09] border-t-transparent"
 								></span>
 								Launching your journey...
 							{:else}
@@ -648,7 +655,7 @@
 							type="button"
 							onclick={() => goToStep('reviewers')}
 							disabled={!canAdvance}
-							class="group inline-flex items-center gap-2 rounded-xl bg-accent px-8 py-3 font-semibold text-white transition-all hover:bg-accent-hover focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+							class="group inline-flex items-center gap-2 rounded-xl bg-accent px-8 py-3 font-semibold text-[#0c0a09] transition-all hover:bg-accent-hover focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
 						>
 							Continue
 							<svg
