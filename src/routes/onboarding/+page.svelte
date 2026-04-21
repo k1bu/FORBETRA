@@ -253,7 +253,11 @@
 					return async ({ result, update }) => {
 						isSubmitting = false;
 						if (result.type === 'redirect') {
-							try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
+							try {
+								localStorage.removeItem(DRAFT_KEY);
+							} catch {
+								/* ignore */
+							}
 						}
 						await update();
 					};
@@ -367,12 +371,18 @@
 									</p>
 									{#each measureForms as measure, mIndex (mIndex)}
 										<div class="flex items-center gap-2">
-											<span class="text-xs text-text-muted font-mono w-5 text-right">{mIndex + 1}.</span>
+											<span class="w-5 text-right font-mono text-xs text-text-muted"
+												>{mIndex + 1}.</span
+											>
 											<input
 												name={`measure${mIndex + 1}`}
 												type="text"
 												aria-label={`Progress measure ${mIndex + 1}`}
-												placeholder={mIndex === 0 ? 'e.g., Team members volunteer ideas in meetings' : mIndex === 1 ? 'e.g., Decisions communicated within 24 hours' : 'e.g., Direct reports rate trust 7+ on surveys'}
+												placeholder={mIndex === 0
+													? 'e.g., Team members volunteer ideas in meetings'
+													: mIndex === 1
+														? 'e.g., Decisions communicated within 24 hours'
+														: 'e.g., Direct reports rate trust 7+ on surveys'}
 												class="flex-1 rounded-lg border border-border-default bg-surface-raised px-4 py-2.5 text-sm text-text-primary transition-all focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
 												value={measure}
 												oninput={(event) => {
@@ -382,8 +392,10 @@
 											{#if mIndex > 0 && measure === ''}
 												<button
 													type="button"
-													onclick={() => { measureForms = measureForms.filter((_, i) => i !== mIndex); }}
-													class="text-xs text-text-muted hover:text-signal-attention transition-colors px-1"
+													onclick={() => {
+														measureForms = measureForms.filter((_, i) => i !== mIndex);
+													}}
+													class="px-1 text-xs text-text-muted transition-colors hover:text-signal-attention"
 												>
 													&times;
 												</button>
@@ -393,8 +405,10 @@
 									{#if measureForms.length < 3}
 										<button
 											type="button"
-											onclick={() => { measureForms = [...measureForms, '']; }}
-											class="text-xs text-accent hover:text-accent-hover transition-colors"
+											onclick={() => {
+												measureForms = [...measureForms, ''];
+											}}
+											class="text-xs text-accent transition-colors hover:text-accent-hover"
 										>
 											+ Add another measure
 										</button>
@@ -565,7 +579,9 @@
 													class="block text-sm font-medium text-text-secondary"
 													for={`stakeholderPhone${index + 1}`}
 												>
-													Mobile <span class="text-text-muted font-normal">(optional, for SMS reminders)</span>
+													Mobile <span class="font-normal text-text-muted"
+														>(optional, for SMS reminders)</span
+													>
 												</label>
 												<input
 													id={`stakeholderPhone${index + 1}`}

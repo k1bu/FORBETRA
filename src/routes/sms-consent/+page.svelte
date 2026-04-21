@@ -103,8 +103,8 @@
 		<div>
 			<h2 class="mb-2 text-lg font-semibold text-text-primary">Message and Data Rates</h2>
 			<p>
-				<strong>Message and data rates may apply.</strong> Consult your wireless carrier for details
-				about your messaging plan.
+				<strong>Message and data rates may apply.</strong> Consult your wireless carrier for details about
+				your messaging plan.
 			</p>
 		</div>
 
@@ -112,9 +112,9 @@
 		<div>
 			<h2 class="mb-2 text-lg font-semibold text-text-primary">How to Opt Out</h2>
 			<p>
-				You can opt out of SMS messages at any time by replying <strong>STOP</strong> to any message
-				from Forbetra. You will receive a single confirmation message and no further SMS messages will
-				be sent unless you re-subscribe.
+				You can opt out of SMS messages at any time by replying <strong>STOP</strong> to any message from
+				Forbetra. You will receive a single confirmation message and no further SMS messages will be sent
+				unless you re-subscribe.
 			</p>
 			<p class="mt-2">
 				You can also disable SMS notifications in your account settings by switching your delivery

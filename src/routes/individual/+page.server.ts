@@ -248,8 +248,7 @@ export const load: PageServerLoad = async (event) => {
 			const name = recentFeedback.stakeholder?.name;
 			if (name) {
 				const parts = name.split(' ');
-				newFeedbackRaterName =
-					parts.length > 1 ? `${parts[0]} ${parts[1][0]}.` : parts[0];
+				newFeedbackRaterName = parts.length > 1 ? `${parts[0]} ${parts[1][0]}.` : parts[0];
 			}
 		}
 	} catch {

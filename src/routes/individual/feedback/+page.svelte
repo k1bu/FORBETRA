@@ -388,7 +388,7 @@
 				</div>
 				<div class="space-y-1">
 					<label class="block text-sm font-medium text-text-secondary" for="phone">
-						Mobile <span class="text-text-muted font-normal">(optional)</span>
+						Mobile <span class="font-normal text-text-muted">(optional)</span>
 					</label>
 					<input
 						id="phone"

@@ -255,8 +255,7 @@
 							Your consistent feedback is building a detailed picture — that's exactly what drives
 							real growth.
 						{:else if data.historicRatings.length >= 2}
-							You've contributed {data.historicRatings.length} times — that consistency makes a real
-							difference.
+							You've contributed {data.historicRatings.length} times — that consistency makes a real difference.
 						{:else}
 							Your first contribution is in — every data point helps {data.reflection
 								?.participantName ?? 'them'} see what they can't see alone.
@@ -395,8 +394,8 @@
 							>
 						</div>
 						<p class="text-2xs text-center text-text-muted">
-							Powered by <strong class="text-text-secondary">Forbetra</strong> — a coaching platform
-							that turns 360 feedback into measurable growth.
+							Powered by <strong class="text-text-secondary">Forbetra</strong> — a coaching platform that
+							turns 360 feedback into measurable growth.
 						</p>
 					</div>
 
@@ -1191,8 +1190,8 @@
 						>
 							<Eye class="h-3.5 w-3.5 shrink-0" />
 							<span
-								>After submitting, you'll see how {data.reflection.participantName} rated themselves
-								for comparison.</span
+								>After submitting, you'll see how {data.reflection.participantName} rated themselves for
+								comparison.</span
 							>
 						</div>
 					{/if}
@@ -1205,8 +1204,8 @@
 								role="alert"
 							>
 								<p class="font-medium">
-									<AlertTriangle class="inline h-4 w-4" /> Please select at least one score or write
-									an observation before submitting.
+									<AlertTriangle class="inline h-4 w-4" /> Please select at least one score or write an
+									observation before submitting.
 								</p>
 							</div>
 						{/if}

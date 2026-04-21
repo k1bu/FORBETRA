@@ -47,7 +47,9 @@
 	let isDragging = $state(false);
 	let trackEl = $state<HTMLDivElement | undefined>(undefined);
 	let hasTouched = $state(value !== null);
-	let displayLabel = $state(value !== null ? (dimension === 'effort' ? effortAnchors : performanceAnchors)[value] : '');
+	let displayLabel = $state(
+		value !== null ? (dimension === 'effort' ? effortAnchors : performanceAnchors)[value] : ''
+	);
 	let isPulsing = $state(false);
 	let isCrossfading = $state(false);
 
@@ -212,10 +214,7 @@
 		<div class="rating-bar__scale">
 			{#each scaleMarkers as marker (marker.value)}
 				{@const isActive = value === marker.value}
-				<div
-					class="rating-bar__tick"
-					style="bottom: {(marker.value / 10) * 100}%"
-				>
+				<div class="rating-bar__tick" style="bottom: {(marker.value / 10) * 100}%">
 					<span
 						class="rating-bar__tick-label"
 						class:rating-bar__tick-label--major={marker.isMajor}
@@ -233,7 +232,6 @@
 		</div>
 
 		<!-- Track -->
-		<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 		<div
 			bind:this={trackEl}
 			class="rating-bar__track"
@@ -266,10 +264,7 @@
 
 			<!-- Last-score marker -->
 			{#if lastPercent !== null}
-				<div
-					class="rating-bar__last-marker"
-					style="bottom: {lastPercent}%"
-				></div>
+				<div class="rating-bar__last-marker" style="bottom: {lastPercent}%"></div>
 			{/if}
 		</div>
 	</div>
@@ -284,18 +279,12 @@
 			{value !== null ? value : '--'}
 		</span>
 
-		<span
-			class="rating-bar__dimension-label"
-			style="color: {dimensionColor}"
-		>
+		<span class="rating-bar__dimension-label" style="color: {dimensionColor}">
 			{dimension === 'effort' ? 'EFFORT' : 'PERFORMANCE'}
 		</span>
 
 		{#if hasTouched}
-			<span
-				class="rating-bar__value-label"
-				class:rating-bar__value-label--fading={isCrossfading}
-			>
+			<span class="rating-bar__value-label" class:rating-bar__value-label--fading={isCrossfading}>
 				{displayLabel}
 			</span>
 		{/if}

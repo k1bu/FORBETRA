@@ -2,7 +2,7 @@
 
 ## Revision Log for "The Quiet Room"
 
-*Revisions based on iterative prototyping sessions -- March 2026*
+_Revisions based on iterative prototyping sessions -- March 2026_
 
 ---
 
@@ -26,10 +26,10 @@ The Feedback lens is now a single scrolling view with four stacked sections:
 
 Two large score pairs at the top of the screen, side by side:
 
-| Column | Content |
-|--------|---------|
-| Left (Effort) | Your self-score in `data-effort-vivid` at 44px Geist Mono. Below it: the average of active raters at 22px, 0.6 opacity. Below that: gap indicator in Geist Mono 12px, colored by signal semantics. |
-| Right (Performance) | Same layout in `data-performance-vivid`. |
+| Column              | Content                                                                                                                                                                                            |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Left (Effort)       | Your self-score in `data-effort-vivid` at 44px Geist Mono. Below it: the average of active raters at 22px, 0.6 opacity. Below that: gap indicator in Geist Mono 12px, colored by signal semantics. |
+| Right (Performance) | Same layout in `data-performance-vivid`.                                                                                                                                                           |
 
 The average and gap update dynamically as raters are toggled on/off. When only one rater is active, the label shifts from "avg of N raters" to that rater's name.
 
@@ -55,15 +55,15 @@ The chart container has `cursor: crosshair` and a vertical guide line that follo
 
 Below the chart, a list of all raters. Each rater is a row with:
 
-| Element | Spec |
-|---------|------|
-| Color dot | 10px circle in the rater's assigned color |
-| Line swatch | 20x3px rounded bar in the rater's color. Full opacity when active, 0.4 when inactive. |
-| Name | 14px, weight 500. Weight 600 and full opacity when active; 0.45 opacity when inactive. |
-| Gap text | 11px, `text-tertiary`. Shows alignment status in words: "Closely aligned" / "Slight gap" / "Significant gap." Dimmed to 0.35 opacity when inactive. |
-| Scores | Two small score values (effort and performance for current week) in Geist Mono 15px, colored by dimension. Dimmed when inactive. |
-| Alignment badge | Pill-shaped. "Aligned" (green), "Gap" (amber), or "Attention" (red). Dimmed when inactive. |
-| Toggle switch | 36x20px pill toggle. OFF: `surface-subtle` background with `border-strong`, knob at left in `text-muted`. ON: background tinted to the rater's color at 20% opacity, border in the rater's color, knob at right in the rater's color. |
+| Element         | Spec                                                                                                                                                                                                                                  |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Color dot       | 10px circle in the rater's assigned color                                                                                                                                                                                             |
+| Line swatch     | 20x3px rounded bar in the rater's color. Full opacity when active, 0.4 when inactive.                                                                                                                                                 |
+| Name            | 14px, weight 500. Weight 600 and full opacity when active; 0.45 opacity when inactive.                                                                                                                                                |
+| Gap text        | 11px, `text-tertiary`. Shows alignment status in words: "Closely aligned" / "Slight gap" / "Significant gap." Dimmed to 0.35 opacity when inactive.                                                                                   |
+| Scores          | Two small score values (effort and performance for current week) in Geist Mono 15px, colored by dimension. Dimmed when inactive.                                                                                                      |
+| Alignment badge | Pill-shaped. "Aligned" (green), "Gap" (amber), or "Attention" (red). Dimmed when inactive.                                                                                                                                            |
+| Toggle switch   | 36x20px pill toggle. OFF: `surface-subtle` background with `border-strong`, knob at left in `text-muted`. ON: background tinted to the rater's color at 20% opacity, border in the rater's color, knob at right in the rater's color. |
 
 Row tap behavior: tapping the row itself activates "solo mode" -- isolates that single rater (all others off). Tapping the same row again when it is the only active rater restores all raters. The toggle switch is an independent control for adding/removing individual raters without affecting others.
 
@@ -133,12 +133,12 @@ A landscape-oriented line chart showing the full cycle. Your effort and performa
 
 A grid of four key metrics, each rendered as a large Geist Mono number with a label:
 
-| Metric | Example |
-|--------|---------|
-| Average effort | 7.2 |
-| Average performance | 6.4 |
+| Metric               | Example                            |
+| -------------------- | ---------------------------------- |
+| Average effort       | 7.2                                |
+| Average performance  | 6.4                                |
 | Perception gap trend | Narrowing (with directional arrow) |
-| Completion rate | 92% |
+| Completion rate      | 92%                                |
 
 **Section 4: Key insight**
 
@@ -213,20 +213,20 @@ Coaches see rater names on the Perception Field. The individual may see anonymiz
 
 The Perception Field requires a palette of 12+ distinct, visually separable colors that all pass AA contrast on `surface-base`. These are assigned to raters in order and remain stable throughout a cycle.
 
-| Token | Value | Contrast on base |
-|-------|-------|-------------------|
-| `rater-1` | #f472b6 | 4.5:1 |
-| `rater-2` | #60a5fa | 5.1:1 |
-| `rater-3` | #a78bfa | 4.6:1 |
-| `rater-4` | #2dd4bf | 6.8:1 |
-| `rater-5` | #fbbf24 | 8.4:1 |
-| `rater-6` | #fb923c | 5.7:1 |
-| `rater-7` | #a3e635 | 8.9:1 |
-| `rater-8` | #22d3ee | 7.2:1 |
-| `rater-9` | #e879f9 | 4.8:1 |
-| `rater-10` | #f87171 | 4.6:1 |
-| `rater-11` | #34d399 | 6.4:1 |
-| `rater-12` | #818cf8 | 4.5:1 |
+| Token      | Value   | Contrast on base |
+| ---------- | ------- | ---------------- |
+| `rater-1`  | #f472b6 | 4.5:1            |
+| `rater-2`  | #60a5fa | 5.1:1            |
+| `rater-3`  | #a78bfa | 4.6:1            |
+| `rater-4`  | #2dd4bf | 6.8:1            |
+| `rater-5`  | #fbbf24 | 8.4:1            |
+| `rater-6`  | #fb923c | 5.7:1            |
+| `rater-7`  | #a3e635 | 8.9:1            |
+| `rater-8`  | #22d3ee | 7.2:1            |
+| `rater-9`  | #e879f9 | 4.8:1            |
+| `rater-10` | #f87171 | 4.6:1            |
+| `rater-11` | #34d399 | 6.4:1            |
+| `rater-12` | #818cf8 | 4.5:1            |
 
 These colors are deliberately high-chroma and diverse in hue. On the dark stone background, they read as distinct "voices" -- each perspective has its own visual identity. The palette was tested in the prototype-field.html prototype and confirmed to be legible even when 12 lines overlap on the chart.
 
@@ -234,9 +234,9 @@ Assignment rule: colors are assigned by stakeholder creation order and remain fi
 
 ### Revised token: accent color
 
-| Token | v1 Value | v2 Value | Change |
-|-------|----------|----------|--------|
-| `accent` | #d4a06a | #d4a06a | No change to the hex value |
+| Token    | v1 Value | v2 Value | Change                     |
+| -------- | -------- | -------- | -------------------------- |
+| `accent` | #d4a06a  | #d4a06a  | No change to the hex value |
 
 The accent color was already shifted from `#e8a04a` to `#d4a06a` in v1. Prototyping confirmed this was correct -- the lower-saturation brass reads as premium without competing with the rater palette. No further revision needed.
 
@@ -254,8 +254,8 @@ The two-variant card system (surface / interactive) confirmed. No revisions.
 
 ### Animation: one addition
 
-| Token | Value | Usage |
-|-------|-------|-------|
+| Token           | Value | Usage                                                               |
+| --------------- | ----- | ------------------------------------------------------------------- |
 | `duration-snap` | 100ms | Haptic-synchronized snap feedback during drag input (check-in bars) |
 
 This is faster than `duration-fast` (150ms) because it must feel instantaneous to match the haptic tick. Used exclusively for the score-snap micro-interaction on check-in gradient bars.
@@ -266,12 +266,12 @@ This is faster than `duration-fast` (150ms) because it must feel instantaneous t
 
 ### Newly excluded
 
-| Excluded Element | Reason |
-|------------------|--------|
+| Excluded Element                                | Reason                                                                                                                                                                                |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **The River (dual-band flowing visualization)** | Visually impressive but harder to read than a standard line chart. Replaced by plain multi-line charts on both Progress and Feedback lenses. Consistency and legibility over novelty. |
-| **The Mirror (mirrored-bar gap visualization)** | Aggregated stakeholder data is less useful than individual rater data. Replaced by the Perception Field's per-rater line chart with toggles. |
-| **The radial Behavioral Portrait** | Abstract encoding was not intuitive. Replaced by a structured Cycle Report with immediately legible charts and numbers. |
-| **Hover-to-spotlight interaction** | Too implicit. Users could not tell what state they were in. Replaced by explicit toggle switches with clear on/off visual state. |
+| **The Mirror (mirrored-bar gap visualization)** | Aggregated stakeholder data is less useful than individual rater data. Replaced by the Perception Field's per-rater line chart with toggles.                                          |
+| **The radial Behavioral Portrait**              | Abstract encoding was not intuitive. Replaced by a structured Cycle Report with immediately legible charts and numbers.                                                               |
+| **Hover-to-spotlight interaction**              | Too implicit. Users could not tell what state they were in. Replaced by explicit toggle switches with clear on/off visual state.                                                      |
 
 ### Newly included (reversals from v1 exclusions)
 
@@ -286,23 +286,27 @@ The implementation sequence changes to reflect the Perception Field as the signa
 **Phase 1: Foundation** -- unchanged from v1
 
 **Phase 2: The Three Lenses**
+
 - Build Today lens -- unchanged
 - Build Progress lens -- big numbers + standard line chart + AI insight (simpler than v1 River)
 - Build Feedback lens -- **The Perception Field** (toggle-based per-rater line chart, perspectives list, big numbers, AI insight). This is the most complex new component and the product's signature interaction.
 
 **Phase 3: Signature Moments**
+
 - The revised gradient-bar check-in (with scale markers, floating number, snap haptics)
 - The Pulse -- unchanged
 - The Reveal -- unchanged
 - Streak counter -- unchanged
 
 **Phase 4: Coach Console**
+
 - Signal-sorted client list -- unchanged
 - Session view with **Perception Field** (reuse the Feedback lens component with coach-specific additions: real names, per-rater notes)
 - On-demand prep -- unchanged
 - Portfolio view -- unchanged
 
 **Phase 5: The Cycle Report** (replaces The Portrait)
+
 - Headline summary + journey line chart + big numbers + AI insight + share export
 - Simpler to implement than the D3 radial -- uses the same chart renderer as Progress and Feedback
 
@@ -326,4 +330,4 @@ These are not new principles. They are the ones that prototyping proved most loa
 
 ---
 
-*The Quiet Room still feels like a private coaching room with warm timber and indirect light. The difference in v2 is that the instruments on the wall are clearer: real numbers, real names, real controls. The room is warm. The data is honest. The user is in command.*
+_The Quiet Room still feels like a private coaching room with warm timber and indirect light. The difference in v2 is that the instruments on the wall are clearer: real numbers, real names, real controls. The room is warm. The data is honest. The user is in command._

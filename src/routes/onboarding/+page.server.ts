@@ -167,13 +167,14 @@ export const actions: Actions = {
 		const measures = [
 			formData.get('measure1')?.toString().trim(),
 			formData.get('measure2')?.toString().trim(),
-			formData.get('measure3')?.toString().trim(),
+			formData.get('measure3')?.toString().trim()
 		].filter(Boolean) as string[];
 
 		// If measures were provided, append them to the description
-		const fullDescription = measures.length > 0
-			? `${objectiveDescription}\n\nSuccess measures:\n${measures.map((m, i) => `${i + 1}. ${m}`).join('\n')}`
-			: objectiveDescription;
+		const fullDescription =
+			measures.length > 0
+				? `${objectiveDescription}\n\nSuccess measures:\n${measures.map((m, i) => `${i + 1}. ${m}`).join('\n')}`
+				: objectiveDescription;
 		const cycleLabel = (formData.get('cycleLabel') ?? '').toString().trim();
 		const cycleStartDate = (formData.get('cycleStartDate') ?? '').toString();
 		const cycleDurationWeeksRaw = (formData.get('cycleDurationWeeks') ?? '').toString();

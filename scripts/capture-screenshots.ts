@@ -11,7 +11,6 @@ import { chromium } from 'playwright';
 const BASE = 'http://localhost:5173';
 const INDIVIDUAL_ID = 'cmn4zskut00szoxrewao1bsbn'; // Jamie Torres (active cycle)
 const COACH_ID = 'cmn4zrjwb0001oxre7wtoupgz'; // Marcus Thompson
-const ADMIN_ID = 'cmhtlercl0000jp044fsnv26a'; // Marc Sagal
 
 const VIEWPORT = { width: 1280, height: 800 };
 const MOBILE = { width: 390, height: 844 };
@@ -28,7 +27,12 @@ type Shot = {
 const shots: Shot[] = [
 	// Individual views
 	{ name: '01-individual-hub', path: '/individual', impersonateAs: INDIVIDUAL_ID },
-	{ name: '02-individual-hub-mobile', path: '/individual', impersonateAs: INDIVIDUAL_ID, viewport: MOBILE },
+	{
+		name: '02-individual-hub-mobile',
+		path: '/individual',
+		impersonateAs: INDIVIDUAL_ID,
+		viewport: MOBILE
+	},
 	{ name: '03-checkin', path: '/individual/checkin', impersonateAs: INDIVIDUAL_ID },
 	{ name: '04-insights', path: '/individual/insights', impersonateAs: INDIVIDUAL_ID },
 	{ name: '05-ask', path: '/individual/ask', impersonateAs: INDIVIDUAL_ID },
@@ -48,7 +52,7 @@ const shots: Shot[] = [
 	// Admin
 	{ name: '30-admin-dashboard', path: '/admin' },
 	{ name: '31-admin-organizations', path: '/admin/organizations' },
-	{ name: '32-admin-demo', path: '/admin/demo' },
+	{ name: '32-admin-demo', path: '/admin/demo' }
 ];
 
 async function main() {

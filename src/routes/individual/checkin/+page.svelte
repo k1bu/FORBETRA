@@ -184,7 +184,9 @@
 				class="animate-in fade-in slide-in-from-top-2 mx-auto max-w-2xl rounded-xl border border-success/30 bg-signal-aligned-muted p-6 text-center"
 			>
 				<CircleCheck class="mx-auto mb-2 h-10 w-10 text-signal-aligned" />
-				<p class="text-lg font-semibold text-signal-aligned">Week {data.currentWeek} check-in saved</p>
+				<p class="text-lg font-semibold text-signal-aligned">
+					Week {data.currentWeek} check-in saved
+				</p>
 				{#if data.previousRatings}
 					{@const eDiff =
 						(effortScore ?? 0) - (data.previousRatings.effortScore ?? effortScore ?? 0)}

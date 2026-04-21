@@ -579,8 +579,8 @@
 				<p class="text-xs text-text-secondary">
 					<strong>What this means:</strong> Gap shows the difference between your self-assessment and
 					stakeholder observations. Positive values mean you rate yourself higher than stakeholders see
-					you. Negative values mean stakeholders see you higher than you see yourself. Values closer
-					to zero indicate better alignment. Large gaps reveal potential blind spots in self-awareness.
+					you. Negative values mean stakeholders see you higher than you see yourself. Values closer to
+					zero indicate better alignment. Large gaps reveal potential blind spots in self-awareness.
 				</p>
 			</div>
 		</div>

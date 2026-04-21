@@ -237,8 +237,7 @@
 				<div>
 					<p class="text-sm font-bold text-success">Journey complete — well coached</p>
 					<p class="text-xs text-text-secondary">
-						{data.client.name} has completed their cycle. Review their progress, insights, and notes
-						below.
+						{data.client.name} has completed their cycle. Review their progress, insights, and notes below.
 					</p>
 				</div>
 			</div>

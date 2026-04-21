@@ -41,7 +41,9 @@
 	{#if screenState === 'welcome'}
 		<!-- ═══ Welcome — no cycle yet ═══ -->
 		<div class="anim-fade-in py-20 text-center">
-			<div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-border-strong">
+			<div
+				class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-border-strong"
+			>
 				<span class="text-3xl font-extralight text-accent">/</span>
 			</div>
 			<h1 class="text-3xl font-bold tracking-tight text-text-primary">Start your growth journey</h1>
@@ -57,11 +59,12 @@
 			</a>
 			<!-- eslint-enable svelte/no-navigation-without-resolve -->
 		</div>
-
 	{:else if screenState === 'complete'}
 		<!-- ═══ Cycle complete ═══ -->
 		<div class="anim-fade-in py-20 text-center">
-			<div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-border-strong">
+			<div
+				class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-border-strong"
+			>
 				<span class="text-3xl font-extralight text-accent">&#10003;</span>
 			</div>
 			<h1 class="text-3xl font-bold tracking-tight text-text-primary">Journey complete</h1>
@@ -85,16 +88,15 @@
 				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 			</div>
 		</div>
-
 	{:else}
 		<!-- ═══ Active journey — Today screen ═══ -->
 		<div class="pt-10">
 			<!-- Identity anchor -->
 			{#if data.identityAnchor}
-				<p
-					class="mb-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-text-tertiary"
-				>
-					I am becoming {data.identityAnchor.length > 80 ? data.identityAnchor.slice(0, 80) + '...' : data.identityAnchor}
+				<p class="mb-2 text-[11px] font-semibold tracking-[0.08em] text-text-tertiary uppercase">
+					I am becoming {data.identityAnchor.length > 80
+						? data.identityAnchor.slice(0, 80) + '...'
+						: data.identityAnchor}
 				</p>
 			{/if}
 
@@ -109,9 +111,7 @@
 				<!-- ═══ Check-in due — inline form ═══ -->
 				<div class="pt-8">
 					<!-- Prompt -->
-					<p class="mb-8 text-[13px] text-text-tertiary">
-						How would you describe your week?
-					</p>
+					<p class="mb-8 text-[13px] text-text-tertiary">How would you describe your week?</p>
 
 					<!-- Rating bars -->
 					<form
@@ -119,7 +119,11 @@
 						action="?/checkin"
 						use:enhance={() => {
 							isSubmitting = true;
-							return async ({ update }: { update: (opts?: { reset?: boolean }) => Promise<void> }) => {
+							return async ({
+								update
+							}: {
+								update: (opts?: { reset?: boolean }) => Promise<void>;
+							}) => {
 								await update({ reset: false });
 								isSubmitting = false;
 							};
@@ -144,7 +148,9 @@
 						<!-- Note prompt (always visible) -->
 						<div class="mt-8">
 							<p class="mb-3 text-sm text-text-secondary">
-								What shaped your week? <span class="text-text-tertiary">-- even one sentence helps your coach</span>
+								What shaped your week? <span class="text-text-tertiary"
+									>-- even one sentence helps your coach</span
+								>
 							</p>
 							<textarea
 								name="notes"
@@ -158,7 +164,9 @@
 
 						<!-- Error display -->
 						{#if form?.error}
-							<div class="mt-4 rounded-lg border border-signal-attention/30 bg-signal-attention-muted px-4 py-3 text-sm text-signal-attention">
+							<div
+								class="mt-4 rounded-lg border border-signal-attention/30 bg-signal-attention-muted px-4 py-3 text-sm text-signal-attention"
+							>
 								{form.error}
 							</div>
 						{/if}
@@ -177,7 +185,6 @@
 						</button>
 					</form>
 				</div>
-
 			{:else}
 				<!-- ═══ Caught up ═══ -->
 				<div class="py-12 text-center">
@@ -196,11 +203,13 @@
 				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<a
 					href="/individual/feedback"
-					class="group mt-8 block border-l-2 border-accent/25 py-3 pl-4 pr-4 transition-colors hover:border-accent"
+					class="group mt-8 block border-l-2 border-accent/25 py-3 pr-4 pl-4 transition-colors hover:border-accent"
 				>
 					<p class="text-[13px] text-text-secondary">
 						{data.newFeedbackRaterName ?? 'A reviewer'} shared their perspective.
-						<span class="font-semibold text-accent transition-colors group-hover:text-accent-hover">View scores</span>
+						<span class="font-semibold text-accent transition-colors group-hover:text-accent-hover"
+							>View scores</span
+						>
 					</p>
 				</a>
 				<!-- eslint-enable svelte/no-navigation-without-resolve -->
@@ -208,8 +217,8 @@
 
 			<!-- Coach nudge -->
 			{#if data.coachNudge}
-				<div class="mt-8 border-l-2 border-accent/20 py-4 pl-5 pr-4">
-					<p class="text-sm italic leading-relaxed text-text-secondary">
+				<div class="mt-8 border-l-2 border-accent/20 py-4 pr-4 pl-5">
+					<p class="text-sm leading-relaxed text-text-secondary italic">
 						"{data.coachNudge.text}"
 					</p>
 					<p class="mt-2 text-[11px] text-text-muted">

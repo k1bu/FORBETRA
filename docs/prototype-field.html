@@ -1,959 +1,1318 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Forbetra — The Perception Field</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --surface-base: #0c0a09;
-    --surface-raised: #141210;
-    --surface-overlay: #1c1917;
-    --surface-subtle: #231f1c;
-    --text-primary: rgba(250,244,237, 0.93);
-    --text-secondary: rgba(250,244,237, 0.55);
-    --text-tertiary: rgba(250,244,237, 0.35);
-    --text-muted: rgba(250,244,237, 0.20);
-    --accent: #d4a06a;
-    --accent-muted: rgba(212,160,106, 0.10);
-    --data-effort: #94a3b8;
-    --data-effort-vivid: #cbd5e1;
-    --data-performance: #d4a06a;
-    --data-performance-vivid: #e0b580;
-    --border-default: rgba(250,244,237, 0.04);
-    --border-strong: rgba(250,244,237, 0.08);
-    --signal-aligned: #4ade80;
-    --signal-divergent: #f59e0b;
-    --signal-attention: #ef4444;
-    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-    --rater-sarah: #f472b6;
-    --rater-david: #60a5fa;
-    --rater-priya: #a78bfa;
-    --rater-james: #2dd4bf;
-    --rater-marcus: #fbbf24;
-    --rater-elena: #fb923c;
-    --rater-chen: #a3e635;
-    --rater-lisa: #22d3ee;
-    --rater-tom: #e879f9;
-    --rater-rachel: #f87171;
-    --rater-omar: #34d399;
-    --rater-yuki: #818cf8;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    background: var(--surface-base);
-    color: var(--text-primary);
-    -webkit-font-smoothing: antialiased;
-    letter-spacing: -0.01em;
-    min-height: 100vh;
-  }
-
-  /* ===== PAGE HEADER ===== */
-  .global-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 24px;
-    border-bottom: 1px solid var(--border-default);
-  }
-  .wordmark { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-tertiary); }
-  .avatar { width: 28px; height: 28px; border-radius: 14px; background: var(--surface-subtle); border: 1px solid var(--border-strong); }
-
-  /* ===== MODE SWITCH ===== */
-  .mode-switch {
-    display: flex;
-    justify-content: center;
-    gap: 4px;
-    padding: 16px 24px 0;
-    max-width: 720px;
-    margin: 0 auto;
-  }
-  .mode-btn {
-    padding: 8px 16px;
-    background: var(--surface-raised);
-    border: 1px solid var(--border-default);
-    border-radius: 8px;
-    font-family: 'Plus Jakarta Sans', system-ui;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text-muted);
-    cursor: pointer;
-    transition: all 200ms var(--ease-out);
-  }
-  .mode-btn:hover { color: var(--text-secondary); border-color: var(--border-strong); }
-  .mode-btn.active { color: var(--accent); border-color: var(--accent); background: var(--accent-muted); }
-
-  /* ===== CONTAINER ===== */
-  .container { max-width: 720px; margin: 0 auto; padding: 0 24px; }
-
-  /* ===== BIG NUMBERS ===== */
-  .big-numbers {
-    padding-top: 48px;
-    display: flex;
-    justify-content: center;
-    gap: 48px;
-    margin-bottom: 8px;
-  }
-  .score-col { text-align: center; }
-  .score-label {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: 8px;
-  }
-  .score-you {
-    font-family: 'Geist Mono', 'SF Mono', monospace;
-    font-size: 44px;
-    font-weight: 700;
-    line-height: 1;
-  }
-  .score-you.effort { color: var(--data-effort-vivid); }
-  .score-you.performance { color: var(--data-performance-vivid); }
-  .score-you-label {
-    font-size: 11px;
-    color: var(--text-tertiary);
-    margin-top: 4px;
-  }
-  .score-avg {
-    font-family: 'Geist Mono', 'SF Mono', monospace;
-    font-size: 22px;
-    font-weight: 500;
-    margin-top: 12px;
-    line-height: 1;
-  }
-  .score-avg.effort { color: var(--data-effort); opacity: 0.6; }
-  .score-avg.performance { color: var(--data-performance); opacity: 0.6; }
-  .score-avg-label {
-    font-size: 10px;
-    color: var(--text-muted);
-    margin-top: 3px;
-  }
-  .gap-indicator {
-    font-family: 'Geist Mono', 'SF Mono', monospace;
-    font-size: 12px;
-    margin-top: 8px;
-    font-weight: 500;
-  }
-
-  /* ===== DIM TOGGLE ===== */
-  .dim-toggle {
-    display: flex;
-    justify-content: center;
-    gap: 2px;
-    background: var(--surface-raised);
-    border-radius: 8px;
-    padding: 3px;
-    width: fit-content;
-    margin: 24px auto;
-  }
-  .dim-toggle button {
-    padding: 6px 18px;
-    background: transparent;
-    border: none;
-    border-radius: 6px;
-    font-family: 'Plus Jakarta Sans', system-ui;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text-tertiary);
-    cursor: pointer;
-    transition: all 200ms var(--ease-out);
-  }
-  .dim-toggle button.act-e { background: rgba(148,163,184,0.12); color: var(--data-effort-vivid); }
-  .dim-toggle button.act-p { background: rgba(212,160,106,0.12); color: var(--data-performance-vivid); }
-
-  /* ===== CHART ===== */
-  .chart-section { margin-bottom: 32px; }
-  .chart-container {
-    background: var(--surface-raised);
-    border: 1px solid var(--border-default);
-    border-radius: 12px;
-    padding: 16px 12px 8px;
-    position: relative;
-    cursor: crosshair;
-  }
-  .chart-canvas { width: 100%; display: block; }
-
-  .chart-label {
-    font-size: 9px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: 8px;
-    padding-left: 4px;
-  }
-
-  /* Tooltip */
-  .tooltip {
-    display: none;
-    position: absolute;
-    background: var(--surface-overlay);
-    border: 1px solid var(--border-strong);
-    border-radius: 10px;
-    padding: 12px 16px;
-    font-size: 12px;
-    z-index: 10;
-    min-width: 180px;
-    pointer-events: none;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-  }
-  .tooltip.visible { display: block; }
-  .tooltip-week {
-    font-family: 'Geist Mono', 'SF Mono', monospace;
-    font-size: 10px;
-    color: var(--text-muted);
-    letter-spacing: 0.06em;
-    margin-bottom: 8px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid var(--border-default);
-  }
-  .tooltip-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 3px 0;
-  }
-  .tooltip-name {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .tooltip-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 3px;
-    flex-shrink: 0;
-  }
-  .tooltip-score {
-    font-family: 'Geist Mono', 'SF Mono', monospace;
-    font-weight: 500;
-  }
-
-  /* ===== PERSPECTIVES ===== */
-  .perspectives-section { margin-bottom: 32px; }
-  .section-label {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: 6px;
-  }
-  .perspectives-summary {
-    font-size: 12px;
-    color: var(--text-tertiary);
-    margin-bottom: 16px;
-    line-height: 1.5;
-  }
-
-  .rater-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 200ms var(--ease-out);
-    margin-bottom: 2px;
-  }
-  .rater-row:hover {
-    background: var(--surface-raised);
-    border-color: var(--border-default);
-  }
-  .rater-row.hover-highlight {
-    background: var(--surface-raised);
-    border-color: var(--border-strong);
-  }
-  .rater-row.spotlight {
-    background: var(--surface-raised);
-    border-color: var(--border-strong);
-  }
-
-  .rater-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 5px;
-    flex-shrink: 0;
-  }
-
-  .rater-info { flex: 1; min-width: 0; }
-  .rater-name {
-    font-size: 14px;
-    font-weight: 500;
-    margin-bottom: 2px;
-  }
-  .rater-gap-text {
-    font-size: 11px;
-    color: var(--text-tertiary);
-  }
-
-  .rater-scores {
-    display: flex;
-    gap: 12px;
-    flex-shrink: 0;
-  }
-  .rater-score-item {
-    text-align: center;
-  }
-  .rater-score-val {
-    font-family: 'Geist Mono', 'SF Mono', monospace;
-    font-size: 15px;
-    font-weight: 500;
-  }
-  .rater-score-dim {
-    font-size: 9px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-top: 1px;
-  }
-
-  .rater-badge {
-    font-size: 10px;
-    font-weight: 500;
-    padding: 3px 8px;
-    border-radius: 4px;
-    flex-shrink: 0;
-  }
-
-  /* Toggle switch */
-  .rater-toggle {
-    width: 36px;
-    height: 20px;
-    border-radius: 10px;
-    background: var(--surface-subtle);
-    border: 1px solid var(--border-strong);
-    position: relative;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: all 200ms var(--ease-out);
-  }
-  .rater-toggle .toggle-knob {
-    width: 14px;
-    height: 14px;
-    border-radius: 7px;
-    background: var(--text-muted);
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    transition: all 200ms var(--ease-out);
-  }
-  .rater-toggle.on {
-    border-color: transparent;
-  }
-  .rater-toggle.on .toggle-knob {
-    left: 18px;
-  }
-
-  /* Line swatch next to name */
-  .rater-line-swatch {
-    width: 20px;
-    height: 3px;
-    border-radius: 2px;
-    flex-shrink: 0;
-    opacity: 0.4;
-    transition: opacity 200ms var(--ease-out);
-  }
-  .rater-row.active .rater-line-swatch {
-    opacity: 1;
-  }
-  .rater-row.active .rater-name {
-    font-weight: 600;
-  }
-  .rater-row:not(.active) .rater-name {
-    opacity: 0.45;
-  }
-  .rater-row:not(.active) .rater-scores {
-    opacity: 0.35;
-  }
-  .rater-row:not(.active) .rater-gap-text {
-    opacity: 0.35;
-  }
-  .rater-row:not(.active) .rater-badge {
-    opacity: 0.35;
-  }
-  .badge-aligned { color: #4ade80; background: rgba(74,222,128, 0.12); }
-  .badge-divergent { color: #fbbf24; background: rgba(245,158,11, 0.12); }
-  .badge-attention { color: #f87171; background: rgba(239,68,68, 0.12); }
-
-  .show-all-btn {
-    display: block;
-    width: 100%;
-    padding: 12px;
-    background: transparent;
-    border: 1px dashed var(--border-strong);
-    border-radius: 10px;
-    font-family: 'Plus Jakarta Sans', system-ui;
-    font-size: 13px;
-    color: var(--text-tertiary);
-    cursor: pointer;
-    transition: all 200ms var(--ease-out);
-    margin-top: 4px;
-  }
-  .show-all-btn:hover {
-    border-color: var(--accent);
-    color: var(--text-secondary);
-  }
-
-  .hidden-raters { display: none; }
-  .hidden-raters.expanded { display: block; }
-
-  /* ===== AI INSIGHT ===== */
-  .insight-card {
-    background: var(--surface-raised);
-    border: 1px solid var(--border-default);
-    border-radius: 12px;
-    padding: 20px 24px;
-    margin-bottom: 48px;
-  }
-  .insight-text {
-    font-size: 15px;
-    line-height: 1.7;
-    color: var(--text-secondary);
-  }
-  .insight-text strong { color: var(--text-primary); font-weight: 500; }
-  .insight-link {
-    display: inline-block;
-    margin-top: 12px;
-    font-size: 13px;
-    color: var(--accent);
-    text-decoration: none;
-    cursor: pointer;
-  }
-
-  @keyframes slideUp {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-</style>
-</head>
-<body>
-
-<div class="global-header">
-  <div class="wordmark">FORBETRA</div>
-  <div class="avatar"></div>
-</div>
-
-<!-- Mode switch: small group vs team -->
-<div class="mode-switch">
-  <button class="mode-btn active" onclick="setMode('small')">3 Raters (Coaching)</button>
-  <button class="mode-btn" onclick="setMode('large')">12 Raters (Team 360)</button>
-</div>
-
-<div class="container">
-
-  <!-- BIG NUMBERS -->
-  <div class="big-numbers">
-    <div class="score-col">
-      <div class="score-label">Effort</div>
-      <div class="score-you effort">7</div>
-      <div class="score-you-label">(you)</div>
-      <div class="score-avg effort" id="avg-effort">8.2</div>
-      <div class="score-avg-label" id="avg-label-e">avg of 3 raters</div>
-      <div class="gap-indicator" id="gap-e" style="color: var(--signal-divergent)">&#9650; 1.2 gap</div>
-    </div>
-    <div class="score-col">
-      <div class="score-label">Performance</div>
-      <div class="score-you performance">5</div>
-      <div class="score-you-label">(you)</div>
-      <div class="score-avg performance" id="avg-perf">7.0</div>
-      <div class="score-avg-label" id="avg-label-p">avg of 3 raters</div>
-      <div class="gap-indicator" id="gap-p" style="color: var(--signal-attention)">&#9650; 2.0 gap</div>
-    </div>
-  </div>
-
-  <!-- DIM TOGGLE -->
-  <div class="dim-toggle">
-    <button class="act-e" id="dim-e" onclick="setDim('effort')">Effort</button>
-    <button id="dim-p" onclick="setDim('performance')">Performance</button>
-  </div>
-
-  <!-- CHART -->
-  <div class="chart-section">
-    <div class="chart-container" id="chart-container">
-      <div class="chart-label" id="chart-dim-label">EFFORT OVER TIME</div>
-      <canvas class="chart-canvas" id="chart" height="200"></canvas>
-      <div class="tooltip" id="tooltip"></div>
-    </div>
-  </div>
-
-  <!-- PERSPECTIVES -->
-  <div class="perspectives-section">
-    <div style="display:flex; justify-content:space-between; align-items:baseline;">
-      <div class="section-label">PERSPECTIVES</div>
-      <div style="display:flex; gap:12px;">
-        <a onclick="showAllRaters()" style="font-size:11px; color:var(--text-tertiary); cursor:pointer; text-decoration:none;">Show all</a>
-        <a onclick="hideAllRaters()" style="font-size:11px; color:var(--text-tertiary); cursor:pointer; text-decoration:none;">Hide all</a>
-      </div>
-    </div>
-    <div class="perspectives-summary" id="persp-summary"></div>
-    <div id="perspectives-list"></div>
-    <div class="hidden-raters" id="hidden-raters"></div>
-    <button class="show-all-btn" id="show-all-btn" style="display:none;" onclick="toggleShowAll()">Show all perspectives</button>
-  </div>
-
-  <!-- AI INSIGHT -->
-  <div class="insight-card">
-    <div class="insight-text" id="insight-text"></div>
-    <a class="insight-link">Read full insight &rarr;</a>
-  </div>
-
-</div>
-
-<script>
-// ===== DATA =====
-const selfData = [
-  { e: 5, p: 4 }, { e: 6, p: 5 }, { e: 5, p: 6 },
-  { e: 7, p: 7 }, { e: 6, p: 5 }, { e: 6, p: 7 }, { e: 7, p: 5 }
-];
-
-const smallRaters = [
-  { id: 'sarah', name: 'Sarah M.', color: '#f472b6',
-    data: [{ e:8,p:7 },{ e:8,p:7 },{ e:7,p:8 },{ e:8,p:7 },{ e:7,p:8 },{ e:7,p:8 },{ e:9,p:8 }] },
-  { id: 'david', name: 'David K.', color: '#60a5fa',
-    data: [{ e:6,p:5 },{ e:6,p:5 },{ e:5,p:6 },{ e:6,p:5 },{ e:7,p:6 },{ e:6,p:6 },{ e:7,p:6 }] },
-  { id: 'priya', name: 'Priya R.', color: '#a78bfa',
-    data: [{ e:7,p:6 },{ e:7,p:6 },{ e:6,p:7 },{ e:7,p:6 },{ e:7,p:7 },{ e:8,p:7 },{ e:8,p:7 }] },
-];
-
-const largeRaters = [
-  ...smallRaters,
-  { id: 'james', name: 'James W.', color: '#2dd4bf',
-    data: [{ e:6,p:5 },{ e:7,p:6 },{ e:6,p:6 },{ e:7,p:7 },{ e:7,p:6 },{ e:7,p:7 },{ e:7,p:6 }] },
-  { id: 'marcus', name: 'Marcus T.', color: '#fbbf24',
-    data: [{ e:4,p:3 },{ e:4,p:4 },{ e:4,p:4 },{ e:5,p:4 },{ e:4,p:3 },{ e:5,p:4 },{ e:4,p:3 }] },
-  { id: 'elena', name: 'Elena V.', color: '#fb923c',
-    data: [{ e:7,p:6 },{ e:7,p:7 },{ e:6,p:6 },{ e:7,p:7 },{ e:7,p:6 },{ e:7,p:7 },{ e:8,p:7 }] },
-  { id: 'chen', name: 'Chen L.', color: '#a3e635',
-    data: [{ e:6,p:6 },{ e:6,p:6 },{ e:5,p:5 },{ e:7,p:6 },{ e:6,p:6 },{ e:6,p:6 },{ e:7,p:6 }] },
-  { id: 'lisa', name: 'Lisa P.', color: '#22d3ee',
-    data: [{ e:7,p:7 },{ e:8,p:7 },{ e:7,p:7 },{ e:8,p:8 },{ e:7,p:7 },{ e:8,p:8 },{ e:8,p:7 }] },
-  { id: 'tom', name: 'Tom H.', color: '#e879f9',
-    data: [{ e:6,p:5 },{ e:6,p:6 },{ e:6,p:5 },{ e:6,p:6 },{ e:6,p:5 },{ e:6,p:6 },{ e:6,p:5 }] },
-  { id: 'rachel', name: 'Rachel F.', color: '#f87171',
-    data: [{ e:5,p:5 },{ e:5,p:5 },{ e:5,p:5 },{ e:6,p:6 },{ e:5,p:5 },{ e:6,p:6 },{ e:6,p:5 }] },
-  { id: 'omar', name: 'Omar S.', color: '#34d399',
-    data: [{ e:7,p:6 },{ e:7,p:6 },{ e:6,p:7 },{ e:7,p:7 },{ e:7,p:6 },{ e:7,p:7 },{ e:7,p:6 }] },
-  { id: 'yuki', name: 'Yuki N.', color: '#818cf8',
-    data: [{ e:8,p:7 },{ e:7,p:7 },{ e:7,p:6 },{ e:8,p:7 },{ e:7,p:7 },{ e:7,p:7 },{ e:8,p:7 }] },
-];
-
-let currentMode = 'small';
-let currentDim = 'effort';
-let activeRaters = new Set();
-
-function getRaters() { return currentMode === 'small' ? smallRaters : largeRaters; }
-function isLargeMode() { return getRaters().length > 5; }
-
-function initActiveRaters() {
-  activeRaters = new Set(getRaters().map(r => r.id));
-}
-
-// ===== MODE / DIM =====
-function setMode(m) {
-  currentMode = m;
-  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
-  initActiveRaters();
-  updateAll();
-}
-
-function setDim(d) {
-  currentDim = d;
-  document.getElementById('dim-e').className = d === 'effort' ? 'act-e' : '';
-  document.getElementById('dim-p').className = d === 'performance' ? 'act-p' : '';
-  updateAll();
-}
-
-function toggleRater(id, evt) {
-  if (evt) evt.stopPropagation();
-  if (activeRaters.has(id)) {
-    activeRaters.delete(id);
-  } else {
-    activeRaters.add(id);
-  }
-  updateAll();
-}
-
-function showOnlyRater(id) {
-  if (activeRaters.size === 1 && activeRaters.has(id)) {
-    // If only this one is on, turn all back on
-    initActiveRaters();
-  } else {
-    activeRaters = new Set([id]);
-  }
-  updateAll();
-}
-
-function showAllRaters() {
-  initActiveRaters();
-  updateAll();
-}
-
-function hideAllRaters() {
-  activeRaters = new Set();
-  updateAll();
-}
-
-// ===== UPDATE =====
-function updateAll() {
-  updateNumbers();
-  drawChart();
-  updatePerspectives();
-  updateInsight();
-}
-
-function updateNumbers() {
-  const raters = getRaters();
-  const lastWeek = selfData.length - 1;
-  const avgE = raters.reduce((s, r) => s + r.data[lastWeek].e, 0) / raters.length;
-  const avgP = raters.reduce((s, r) => s + r.data[lastWeek].p, 0) / raters.length;
-  const gapE = avgE - selfData[lastWeek].e;
-  const gapP = avgP - selfData[lastWeek].p;
-
-  document.getElementById('avg-effort').textContent = avgE.toFixed(1);
-  document.getElementById('avg-perf').textContent = avgP.toFixed(1);
-  document.getElementById('avg-label-e').textContent = `avg of ${raters.length} raters`;
-  document.getElementById('avg-label-p').textContent = `avg of ${raters.length} raters`;
-
-  const ge = document.getElementById('gap-e');
-  const gp = document.getElementById('gap-p');
-  ge.innerHTML = `${gapE > 0 ? '&#9650;' : gapE < 0 ? '&#9660;' : '&bull;'} ${Math.abs(gapE).toFixed(1)} gap`;
-  gp.innerHTML = `${gapP > 0 ? '&#9650;' : gapP < 0 ? '&#9660;' : '&bull;'} ${Math.abs(gapP).toFixed(1)} gap`;
-  ge.style.color = Math.abs(gapE) <= 1 ? 'var(--signal-aligned)' : Math.abs(gapE) <= 2 ? 'var(--signal-divergent)' : 'var(--signal-attention)';
-  gp.style.color = Math.abs(gapP) <= 1 ? 'var(--signal-aligned)' : Math.abs(gapP) <= 2 ? 'var(--signal-divergent)' : 'var(--signal-attention)';
-}
-
-// ===== CHART =====
-function drawChart() {
-  const canvas = document.getElementById('chart');
-  const ctx = canvas.getContext('2d');
-  const dpr = window.devicePixelRatio || 1;
-  const rect = canvas.parentElement.getBoundingClientRect();
-  const w = rect.width - 24;
-  const h = 200;
-  canvas.width = w * dpr;
-  canvas.height = h * dpr;
-  canvas.style.width = w + 'px';
-  canvas.style.height = h + 'px';
-  ctx.scale(dpr, dpr);
-  ctx.clearRect(0, 0, w, h);
-
-  const dim = currentDim === 'effort' ? 'e' : 'p';
-  const dimColor = currentDim === 'effort' ? '#94a3b8' : '#d4a06a';
-  const dimVivid = currentDim === 'effort' ? '#cbd5e1' : '#e0b580';
-  const raters = getRaters();
-  const weeks = selfData.length;
-  const pad = { l: 28, r: 90, t: 12, b: 28 };
-  const cw = w - pad.l - pad.r;
-  const ch = h - pad.t - pad.b;
-  const xStep = cw / (weeks - 1);
-  const yScale = v => pad.t + ch - (v / 10) * ch;
-  const xPos = i => pad.l + i * xStep;
-
-  document.getElementById('chart-dim-label').textContent =
-    (currentDim === 'effort' ? 'EFFORT' : 'PERFORMANCE') + ' OVER TIME';
-
-  // Grid lines
-  ctx.strokeStyle = 'rgba(250,244,237,0.04)';
-  ctx.lineWidth = 1;
-  [0, 5, 10].forEach(v => {
-    ctx.beginPath();
-    ctx.moveTo(pad.l, yScale(v));
-    ctx.lineTo(w - pad.r, yScale(v));
-    ctx.stroke();
-  });
-
-  // Y-axis labels
-  ctx.fillStyle = 'rgba(250,244,237,0.2)';
-  ctx.font = '9px monospace';
-  ctx.textAlign = 'right';
-  [0, 5, 10].forEach(v => {
-    ctx.fillText(v, pad.l - 6, yScale(v) + 3);
-  });
-
-  // X-axis
-  ctx.textAlign = 'center';
-  for (let i = 0; i < weeks; i++) {
-    const label = 'W' + (i + 1);
-    ctx.fillStyle = i === weeks - 1 ? 'rgba(250,244,237,0.55)' : 'rgba(250,244,237,0.2)';
-    ctx.font = i === weeks - 1 ? 'bold 10px monospace' : '10px monospace';
-    ctx.fillText(label, xPos(i), h - 6);
-  }
-
-  const large = isLargeMode();
-  const anyActive = activeRaters.size > 0;
-  const allActive = activeRaters.size === raters.length;
-
-  if (large && allActive) {
-    // BAND MODE: draw min/max range
-    const mins = [], maxs = [], avgs = [];
-    for (let i = 0; i < weeks; i++) {
-      const vals = raters.map(r => r.data[i][dim]);
-      mins.push(Math.min(...vals));
-      maxs.push(Math.max(...vals));
-      avgs.push(vals.reduce((a, b) => a + b, 0) / vals.length);
-    }
-
-    // Band fill
-    ctx.beginPath();
-    ctx.moveTo(xPos(0), yScale(maxs[0]));
-    for (let i = 1; i < weeks; i++) {
-      const px = xPos(i - 1), cx = (px + xPos(i)) / 2;
-      ctx.bezierCurveTo(cx, yScale(maxs[i - 1]), cx, yScale(maxs[i]), xPos(i), yScale(maxs[i]));
-    }
-    for (let i = weeks - 1; i >= 0; i--) {
-      if (i === weeks - 1) { ctx.lineTo(xPos(i), yScale(mins[i])); continue; }
-      const nx = xPos(i + 1), cx = (xPos(i) + nx) / 2;
-      ctx.bezierCurveTo(cx, yScale(mins[i + 1]), cx, yScale(mins[i]), xPos(i), yScale(mins[i]));
-    }
-    ctx.closePath();
-    ctx.fillStyle = currentDim === 'effort' ? 'rgba(148,163,184,0.08)' : 'rgba(212,160,106,0.08)';
-    ctx.fill();
-
-    // Band edges
-    ctx.strokeStyle = currentDim === 'effort' ? 'rgba(148,163,184,0.15)' : 'rgba(212,160,106,0.15)';
-    ctx.lineWidth = 1;
-    [maxs, mins].forEach(arr => {
-      ctx.beginPath();
-      ctx.moveTo(xPos(0), yScale(arr[0]));
-      for (let i = 1; i < weeks; i++) {
-        const px = xPos(i - 1), cx = (px + xPos(i)) / 2;
-        ctx.bezierCurveTo(cx, yScale(arr[i - 1]), cx, yScale(arr[i]), xPos(i), yScale(arr[i]));
-      }
-      ctx.stroke();
-    });
-
-    // Avg dashed line
-    ctx.strokeStyle = 'rgba(250,244,237,0.2)';
-    ctx.lineWidth = 1.5;
-    ctx.setLineDash([4, 6]);
-    ctx.beginPath();
-    ctx.moveTo(xPos(0), yScale(avgs[0]));
-    for (let i = 1; i < weeks; i++) {
-      const px = xPos(i - 1), cx = (px + xPos(i)) / 2;
-      ctx.bezierCurveTo(cx, yScale(avgs[i - 1]), cx, yScale(avgs[i]), xPos(i), yScale(avgs[i]));
-    }
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    // Outlier dots (deviation > 2 from median)
-    for (let i = 0; i < weeks; i++) {
-      const median = avgs[i]; // using avg as approx
-      raters.forEach(r => {
-        const v = r.data[i][dim];
-        if (Math.abs(v - median) >= 2) {
-          ctx.beginPath();
-          ctx.arc(xPos(i), yScale(v), 4, 0, Math.PI * 2);
-          ctx.fillStyle = r.color;
-          ctx.globalAlpha = 0.7;
-          ctx.fill();
-          ctx.globalAlpha = 1;
-        }
-      });
-    }
-  } else {
-    // INDIVIDUAL MODE: draw each rater line
-    raters.forEach(r => {
-      const isOn = activeRaters.has(r.id);
-      const someOff = !allActive;
-      const alpha = isOn ? (someOff ? 0.9 : (large ? 0.3 : 0.5)) : 0.04;
-      const lw = isOn && someOff ? 2.5 : 1.5;
-
-      ctx.strokeStyle = r.color;
-      ctx.lineWidth = lw;
-      ctx.globalAlpha = alpha;
-      ctx.beginPath();
-      ctx.moveTo(xPos(0), yScale(r.data[0][dim]));
-      for (let i = 1; i < weeks; i++) {
-        const px = xPos(i - 1), cx = (px + xPos(i)) / 2;
-        ctx.bezierCurveTo(cx, yScale(r.data[i - 1][dim]), cx, yScale(r.data[i][dim]), xPos(i), yScale(r.data[i][dim]));
-      }
-      ctx.stroke();
-
-      // Dots
-      for (let i = 0; i < weeks; i++) {
-        ctx.beginPath();
-        ctx.arc(xPos(i), yScale(r.data[i][dim]), (isOn && someOff) ? 4 : 3, 0, Math.PI * 2);
-        ctx.fillStyle = r.color;
-        ctx.fill();
-      }
-      ctx.globalAlpha = 1;
-
-      // Label at right edge
-      if (isOn && (!large || someOff)) {
-        const lastVal = r.data[weeks - 1][dim];
-        const labelY = yScale(lastVal);
-        const labelText = r.name.split(' ')[0] + ' ' + lastVal;
-        ctx.font = 'bold 11px monospace';
-        const textW = ctx.measureText(labelText).width;
-        ctx.globalAlpha = 0.85;
-        ctx.fillStyle = 'rgba(12,10,9, 0.75)';
-        ctx.beginPath();
-        const rx = xPos(weeks - 1) + 6, ry = labelY - 8, rw = textW + 10, rh = 17, rr = 4;
-        ctx.moveTo(rx + rr, ry);
-        ctx.lineTo(rx + rw - rr, ry);
-        ctx.quadraticCurveTo(rx + rw, ry, rx + rw, ry + rr);
-        ctx.lineTo(rx + rw, ry + rh - rr);
-        ctx.quadraticCurveTo(rx + rw, ry + rh, rx + rw - rr, ry + rh);
-        ctx.lineTo(rx + rr, ry + rh);
-        ctx.quadraticCurveTo(rx, ry + rh, rx, ry + rh - rr);
-        ctx.lineTo(rx, ry + rr);
-        ctx.quadraticCurveTo(rx, ry, rx + rr, ry);
-        ctx.closePath();
-        ctx.fill();
-        ctx.fillStyle = r.color;
-        ctx.textAlign = 'left';
-        ctx.fillText(labelText, xPos(weeks - 1) + 11, labelY + 4);
-        ctx.globalAlpha = 1;
-      }
-    });
-  }
-
-  // Self line (always on top, always brightest)
-  ctx.strokeStyle = 'rgba(250,244,237,0.93)';
-  ctx.lineWidth = 2.5;
-  ctx.beginPath();
-  ctx.moveTo(xPos(0), yScale(selfData[0][dim]));
-  for (let i = 1; i < weeks; i++) {
-    const px = xPos(i - 1), cx = (px + xPos(i)) / 2;
-    ctx.bezierCurveTo(cx, yScale(selfData[i - 1][dim]), cx, yScale(selfData[i][dim]), xPos(i), yScale(selfData[i][dim]));
-  }
-  ctx.stroke();
-
-  // Self dots
-  for (let i = 0; i < weeks; i++) {
-    ctx.beginPath();
-    ctx.arc(xPos(i), yScale(selfData[i][dim]), i === weeks - 1 ? 5 : 4, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(250,244,237,0.93)';
-    ctx.fill();
-  }
-
-  // "You" label
-  ctx.fillStyle = 'rgba(250,244,237,0.7)';
-  ctx.font = 'bold 10px monospace';
-  ctx.textAlign = 'left';
-  ctx.fillText('You', xPos(weeks - 1) + 8, yScale(selfData[weeks - 1][dim]) + 3);
-
-  // Store layout for tooltip
-  canvas._layout = { pad, xStep, weeks, w, h, yScale, xPos, dim };
-}
-
-// ===== TOOLTIP =====
-document.getElementById('chart').addEventListener('mousemove', function(e) {
-  const L = this._layout;
-  if (!L) return;
-  const rect = this.getBoundingClientRect();
-  const mx = e.clientX - rect.left;
-  const weekIdx = Math.round((mx - L.pad.l) / L.xStep);
-  if (weekIdx < 0 || weekIdx >= L.weeks) { document.getElementById('tooltip').classList.remove('visible'); return; }
-
-  const raters = getRaters();
-  const dim = L.dim;
-  let rows = [{ name: 'You', color: 'rgba(250,244,237,0.93)', score: selfData[weekIdx][dim], isSelf: true }];
-  raters.forEach(r => {
-    rows.push({ name: r.name, color: r.color, score: r.data[weekIdx][dim] });
-  });
-  rows.sort((a, b) => b.score - a.score);
-
-  const large = isLargeMode() && activeRaters.size === getRaters().length;
-  let displayRows = rows;
-  let collapsed = 0;
-  if (large && rows.length > 6) {
-    const top2 = rows.slice(0, 2);
-    const bot2 = rows.slice(-2);
-    const self = rows.find(r => r.isSelf);
-    const shown = new Set([...top2, ...bot2, self]);
-    displayRows = rows.filter(r => shown.has(r));
-    collapsed = rows.length - displayRows.length;
-  }
-
-  let html = `<div class="tooltip-week">WEEK ${weekIdx + 1}</div>`;
-  displayRows.forEach(r => {
-    html += `<div class="tooltip-row">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Forbetra — The Perception Field</title>
+		<link
+			href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+			rel="stylesheet"
+		/>
+		<style>
+			:root {
+				--surface-base: #0c0a09;
+				--surface-raised: #141210;
+				--surface-overlay: #1c1917;
+				--surface-subtle: #231f1c;
+				--text-primary: rgba(250, 244, 237, 0.93);
+				--text-secondary: rgba(250, 244, 237, 0.55);
+				--text-tertiary: rgba(250, 244, 237, 0.35);
+				--text-muted: rgba(250, 244, 237, 0.2);
+				--accent: #d4a06a;
+				--accent-muted: rgba(212, 160, 106, 0.1);
+				--data-effort: #94a3b8;
+				--data-effort-vivid: #cbd5e1;
+				--data-performance: #d4a06a;
+				--data-performance-vivid: #e0b580;
+				--border-default: rgba(250, 244, 237, 0.04);
+				--border-strong: rgba(250, 244, 237, 0.08);
+				--signal-aligned: #4ade80;
+				--signal-divergent: #f59e0b;
+				--signal-attention: #ef4444;
+				--ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+				--rater-sarah: #f472b6;
+				--rater-david: #60a5fa;
+				--rater-priya: #a78bfa;
+				--rater-james: #2dd4bf;
+				--rater-marcus: #fbbf24;
+				--rater-elena: #fb923c;
+				--rater-chen: #a3e635;
+				--rater-lisa: #22d3ee;
+				--rater-tom: #e879f9;
+				--rater-rachel: #f87171;
+				--rater-omar: #34d399;
+				--rater-yuki: #818cf8;
+			}
+
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+
+			body {
+				font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+				background: var(--surface-base);
+				color: var(--text-primary);
+				-webkit-font-smoothing: antialiased;
+				letter-spacing: -0.01em;
+				min-height: 100vh;
+			}
+
+			/* ===== PAGE HEADER ===== */
+			.global-header {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 16px 24px;
+				border-bottom: 1px solid var(--border-default);
+			}
+			.wordmark {
+				font-size: 11px;
+				font-weight: 700;
+				letter-spacing: 0.12em;
+				text-transform: uppercase;
+				color: var(--text-tertiary);
+			}
+			.avatar {
+				width: 28px;
+				height: 28px;
+				border-radius: 14px;
+				background: var(--surface-subtle);
+				border: 1px solid var(--border-strong);
+			}
+
+			/* ===== MODE SWITCH ===== */
+			.mode-switch {
+				display: flex;
+				justify-content: center;
+				gap: 4px;
+				padding: 16px 24px 0;
+				max-width: 720px;
+				margin: 0 auto;
+			}
+			.mode-btn {
+				padding: 8px 16px;
+				background: var(--surface-raised);
+				border: 1px solid var(--border-default);
+				border-radius: 8px;
+				font-family: 'Plus Jakarta Sans', system-ui;
+				font-size: 12px;
+				font-weight: 500;
+				color: var(--text-muted);
+				cursor: pointer;
+				transition: all 200ms var(--ease-out);
+			}
+			.mode-btn:hover {
+				color: var(--text-secondary);
+				border-color: var(--border-strong);
+			}
+			.mode-btn.active {
+				color: var(--accent);
+				border-color: var(--accent);
+				background: var(--accent-muted);
+			}
+
+			/* ===== CONTAINER ===== */
+			.container {
+				max-width: 720px;
+				margin: 0 auto;
+				padding: 0 24px;
+			}
+
+			/* ===== BIG NUMBERS ===== */
+			.big-numbers {
+				padding-top: 48px;
+				display: flex;
+				justify-content: center;
+				gap: 48px;
+				margin-bottom: 8px;
+			}
+			.score-col {
+				text-align: center;
+			}
+			.score-label {
+				font-size: 11px;
+				font-weight: 600;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				color: var(--text-muted);
+				margin-bottom: 8px;
+			}
+			.score-you {
+				font-family: 'Geist Mono', 'SF Mono', monospace;
+				font-size: 44px;
+				font-weight: 700;
+				line-height: 1;
+			}
+			.score-you.effort {
+				color: var(--data-effort-vivid);
+			}
+			.score-you.performance {
+				color: var(--data-performance-vivid);
+			}
+			.score-you-label {
+				font-size: 11px;
+				color: var(--text-tertiary);
+				margin-top: 4px;
+			}
+			.score-avg {
+				font-family: 'Geist Mono', 'SF Mono', monospace;
+				font-size: 22px;
+				font-weight: 500;
+				margin-top: 12px;
+				line-height: 1;
+			}
+			.score-avg.effort {
+				color: var(--data-effort);
+				opacity: 0.6;
+			}
+			.score-avg.performance {
+				color: var(--data-performance);
+				opacity: 0.6;
+			}
+			.score-avg-label {
+				font-size: 10px;
+				color: var(--text-muted);
+				margin-top: 3px;
+			}
+			.gap-indicator {
+				font-family: 'Geist Mono', 'SF Mono', monospace;
+				font-size: 12px;
+				margin-top: 8px;
+				font-weight: 500;
+			}
+
+			/* ===== DIM TOGGLE ===== */
+			.dim-toggle {
+				display: flex;
+				justify-content: center;
+				gap: 2px;
+				background: var(--surface-raised);
+				border-radius: 8px;
+				padding: 3px;
+				width: fit-content;
+				margin: 24px auto;
+			}
+			.dim-toggle button {
+				padding: 6px 18px;
+				background: transparent;
+				border: none;
+				border-radius: 6px;
+				font-family: 'Plus Jakarta Sans', system-ui;
+				font-size: 12px;
+				font-weight: 500;
+				color: var(--text-tertiary);
+				cursor: pointer;
+				transition: all 200ms var(--ease-out);
+			}
+			.dim-toggle button.act-e {
+				background: rgba(148, 163, 184, 0.12);
+				color: var(--data-effort-vivid);
+			}
+			.dim-toggle button.act-p {
+				background: rgba(212, 160, 106, 0.12);
+				color: var(--data-performance-vivid);
+			}
+
+			/* ===== CHART ===== */
+			.chart-section {
+				margin-bottom: 32px;
+			}
+			.chart-container {
+				background: var(--surface-raised);
+				border: 1px solid var(--border-default);
+				border-radius: 12px;
+				padding: 16px 12px 8px;
+				position: relative;
+				cursor: crosshair;
+			}
+			.chart-canvas {
+				width: 100%;
+				display: block;
+			}
+
+			.chart-label {
+				font-size: 9px;
+				font-weight: 600;
+				letter-spacing: 0.06em;
+				text-transform: uppercase;
+				color: var(--text-muted);
+				margin-bottom: 8px;
+				padding-left: 4px;
+			}
+
+			/* Tooltip */
+			.tooltip {
+				display: none;
+				position: absolute;
+				background: var(--surface-overlay);
+				border: 1px solid var(--border-strong);
+				border-radius: 10px;
+				padding: 12px 16px;
+				font-size: 12px;
+				z-index: 10;
+				min-width: 180px;
+				pointer-events: none;
+				box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+			}
+			.tooltip.visible {
+				display: block;
+			}
+			.tooltip-week {
+				font-family: 'Geist Mono', 'SF Mono', monospace;
+				font-size: 10px;
+				color: var(--text-muted);
+				letter-spacing: 0.06em;
+				margin-bottom: 8px;
+				padding-bottom: 6px;
+				border-bottom: 1px solid var(--border-default);
+			}
+			.tooltip-row {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 3px 0;
+			}
+			.tooltip-name {
+				display: flex;
+				align-items: center;
+				gap: 6px;
+			}
+			.tooltip-dot {
+				width: 6px;
+				height: 6px;
+				border-radius: 3px;
+				flex-shrink: 0;
+			}
+			.tooltip-score {
+				font-family: 'Geist Mono', 'SF Mono', monospace;
+				font-weight: 500;
+			}
+
+			/* ===== PERSPECTIVES ===== */
+			.perspectives-section {
+				margin-bottom: 32px;
+			}
+			.section-label {
+				font-size: 11px;
+				font-weight: 600;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				color: var(--text-muted);
+				margin-bottom: 6px;
+			}
+			.perspectives-summary {
+				font-size: 12px;
+				color: var(--text-tertiary);
+				margin-bottom: 16px;
+				line-height: 1.5;
+			}
+
+			.rater-row {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				padding: 12px 16px;
+				background: transparent;
+				border: 1px solid transparent;
+				border-radius: 10px;
+				cursor: pointer;
+				transition: all 200ms var(--ease-out);
+				margin-bottom: 2px;
+			}
+			.rater-row:hover {
+				background: var(--surface-raised);
+				border-color: var(--border-default);
+			}
+			.rater-row.hover-highlight {
+				background: var(--surface-raised);
+				border-color: var(--border-strong);
+			}
+			.rater-row.spotlight {
+				background: var(--surface-raised);
+				border-color: var(--border-strong);
+			}
+
+			.rater-dot {
+				width: 10px;
+				height: 10px;
+				border-radius: 5px;
+				flex-shrink: 0;
+			}
+
+			.rater-info {
+				flex: 1;
+				min-width: 0;
+			}
+			.rater-name {
+				font-size: 14px;
+				font-weight: 500;
+				margin-bottom: 2px;
+			}
+			.rater-gap-text {
+				font-size: 11px;
+				color: var(--text-tertiary);
+			}
+
+			.rater-scores {
+				display: flex;
+				gap: 12px;
+				flex-shrink: 0;
+			}
+			.rater-score-item {
+				text-align: center;
+			}
+			.rater-score-val {
+				font-family: 'Geist Mono', 'SF Mono', monospace;
+				font-size: 15px;
+				font-weight: 500;
+			}
+			.rater-score-dim {
+				font-size: 9px;
+				letter-spacing: 0.06em;
+				text-transform: uppercase;
+				color: var(--text-muted);
+				margin-top: 1px;
+			}
+
+			.rater-badge {
+				font-size: 10px;
+				font-weight: 500;
+				padding: 3px 8px;
+				border-radius: 4px;
+				flex-shrink: 0;
+			}
+
+			/* Toggle switch */
+			.rater-toggle {
+				width: 36px;
+				height: 20px;
+				border-radius: 10px;
+				background: var(--surface-subtle);
+				border: 1px solid var(--border-strong);
+				position: relative;
+				cursor: pointer;
+				flex-shrink: 0;
+				transition: all 200ms var(--ease-out);
+			}
+			.rater-toggle .toggle-knob {
+				width: 14px;
+				height: 14px;
+				border-radius: 7px;
+				background: var(--text-muted);
+				position: absolute;
+				top: 2px;
+				left: 2px;
+				transition: all 200ms var(--ease-out);
+			}
+			.rater-toggle.on {
+				border-color: transparent;
+			}
+			.rater-toggle.on .toggle-knob {
+				left: 18px;
+			}
+
+			/* Line swatch next to name */
+			.rater-line-swatch {
+				width: 20px;
+				height: 3px;
+				border-radius: 2px;
+				flex-shrink: 0;
+				opacity: 0.4;
+				transition: opacity 200ms var(--ease-out);
+			}
+			.rater-row.active .rater-line-swatch {
+				opacity: 1;
+			}
+			.rater-row.active .rater-name {
+				font-weight: 600;
+			}
+			.rater-row:not(.active) .rater-name {
+				opacity: 0.45;
+			}
+			.rater-row:not(.active) .rater-scores {
+				opacity: 0.35;
+			}
+			.rater-row:not(.active) .rater-gap-text {
+				opacity: 0.35;
+			}
+			.rater-row:not(.active) .rater-badge {
+				opacity: 0.35;
+			}
+			.badge-aligned {
+				color: #4ade80;
+				background: rgba(74, 222, 128, 0.12);
+			}
+			.badge-divergent {
+				color: #fbbf24;
+				background: rgba(245, 158, 11, 0.12);
+			}
+			.badge-attention {
+				color: #f87171;
+				background: rgba(239, 68, 68, 0.12);
+			}
+
+			.show-all-btn {
+				display: block;
+				width: 100%;
+				padding: 12px;
+				background: transparent;
+				border: 1px dashed var(--border-strong);
+				border-radius: 10px;
+				font-family: 'Plus Jakarta Sans', system-ui;
+				font-size: 13px;
+				color: var(--text-tertiary);
+				cursor: pointer;
+				transition: all 200ms var(--ease-out);
+				margin-top: 4px;
+			}
+			.show-all-btn:hover {
+				border-color: var(--accent);
+				color: var(--text-secondary);
+			}
+
+			.hidden-raters {
+				display: none;
+			}
+			.hidden-raters.expanded {
+				display: block;
+			}
+
+			/* ===== AI INSIGHT ===== */
+			.insight-card {
+				background: var(--surface-raised);
+				border: 1px solid var(--border-default);
+				border-radius: 12px;
+				padding: 20px 24px;
+				margin-bottom: 48px;
+			}
+			.insight-text {
+				font-size: 15px;
+				line-height: 1.7;
+				color: var(--text-secondary);
+			}
+			.insight-text strong {
+				color: var(--text-primary);
+				font-weight: 500;
+			}
+			.insight-link {
+				display: inline-block;
+				margin-top: 12px;
+				font-size: 13px;
+				color: var(--accent);
+				text-decoration: none;
+				cursor: pointer;
+			}
+
+			@keyframes slideUp {
+				from {
+					opacity: 0;
+					transform: translateY(6px);
+				}
+				to {
+					opacity: 1;
+					transform: translateY(0);
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div class="global-header">
+			<div class="wordmark">FORBETRA</div>
+			<div class="avatar"></div>
+		</div>
+
+		<!-- Mode switch: small group vs team -->
+		<div class="mode-switch">
+			<button class="mode-btn active" onclick="setMode('small')">3 Raters (Coaching)</button>
+			<button class="mode-btn" onclick="setMode('large')">12 Raters (Team 360)</button>
+		</div>
+
+		<div class="container">
+			<!-- BIG NUMBERS -->
+			<div class="big-numbers">
+				<div class="score-col">
+					<div class="score-label">Effort</div>
+					<div class="score-you effort">7</div>
+					<div class="score-you-label">(you)</div>
+					<div class="score-avg effort" id="avg-effort">8.2</div>
+					<div class="score-avg-label" id="avg-label-e">avg of 3 raters</div>
+					<div class="gap-indicator" id="gap-e" style="color: var(--signal-divergent)">
+						&#9650; 1.2 gap
+					</div>
+				</div>
+				<div class="score-col">
+					<div class="score-label">Performance</div>
+					<div class="score-you performance">5</div>
+					<div class="score-you-label">(you)</div>
+					<div class="score-avg performance" id="avg-perf">7.0</div>
+					<div class="score-avg-label" id="avg-label-p">avg of 3 raters</div>
+					<div class="gap-indicator" id="gap-p" style="color: var(--signal-attention)">
+						&#9650; 2.0 gap
+					</div>
+				</div>
+			</div>
+
+			<!-- DIM TOGGLE -->
+			<div class="dim-toggle">
+				<button class="act-e" id="dim-e" onclick="setDim('effort')">Effort</button>
+				<button id="dim-p" onclick="setDim('performance')">Performance</button>
+			</div>
+
+			<!-- CHART -->
+			<div class="chart-section">
+				<div class="chart-container" id="chart-container">
+					<div class="chart-label" id="chart-dim-label">EFFORT OVER TIME</div>
+					<canvas class="chart-canvas" id="chart" height="200"></canvas>
+					<div class="tooltip" id="tooltip"></div>
+				</div>
+			</div>
+
+			<!-- PERSPECTIVES -->
+			<div class="perspectives-section">
+				<div style="display: flex; justify-content: space-between; align-items: baseline">
+					<div class="section-label">PERSPECTIVES</div>
+					<div style="display: flex; gap: 12px">
+						<a
+							onclick="showAllRaters()"
+							style="
+								font-size: 11px;
+								color: var(--text-tertiary);
+								cursor: pointer;
+								text-decoration: none;
+							"
+							>Show all</a
+						>
+						<a
+							onclick="hideAllRaters()"
+							style="
+								font-size: 11px;
+								color: var(--text-tertiary);
+								cursor: pointer;
+								text-decoration: none;
+							"
+							>Hide all</a
+						>
+					</div>
+				</div>
+				<div class="perspectives-summary" id="persp-summary"></div>
+				<div id="perspectives-list"></div>
+				<div class="hidden-raters" id="hidden-raters"></div>
+				<button
+					class="show-all-btn"
+					id="show-all-btn"
+					style="display: none"
+					onclick="toggleShowAll()"
+				>
+					Show all perspectives
+				</button>
+			</div>
+
+			<!-- AI INSIGHT -->
+			<div class="insight-card">
+				<div class="insight-text" id="insight-text"></div>
+				<a class="insight-link">Read full insight &rarr;</a>
+			</div>
+		</div>
+
+		<script>
+			// ===== DATA =====
+			const selfData = [
+				{ e: 5, p: 4 },
+				{ e: 6, p: 5 },
+				{ e: 5, p: 6 },
+				{ e: 7, p: 7 },
+				{ e: 6, p: 5 },
+				{ e: 6, p: 7 },
+				{ e: 7, p: 5 }
+			];
+
+			const smallRaters = [
+				{
+					id: 'sarah',
+					name: 'Sarah M.',
+					color: '#f472b6',
+					data: [
+						{ e: 8, p: 7 },
+						{ e: 8, p: 7 },
+						{ e: 7, p: 8 },
+						{ e: 8, p: 7 },
+						{ e: 7, p: 8 },
+						{ e: 7, p: 8 },
+						{ e: 9, p: 8 }
+					]
+				},
+				{
+					id: 'david',
+					name: 'David K.',
+					color: '#60a5fa',
+					data: [
+						{ e: 6, p: 5 },
+						{ e: 6, p: 5 },
+						{ e: 5, p: 6 },
+						{ e: 6, p: 5 },
+						{ e: 7, p: 6 },
+						{ e: 6, p: 6 },
+						{ e: 7, p: 6 }
+					]
+				},
+				{
+					id: 'priya',
+					name: 'Priya R.',
+					color: '#a78bfa',
+					data: [
+						{ e: 7, p: 6 },
+						{ e: 7, p: 6 },
+						{ e: 6, p: 7 },
+						{ e: 7, p: 6 },
+						{ e: 7, p: 7 },
+						{ e: 8, p: 7 },
+						{ e: 8, p: 7 }
+					]
+				}
+			];
+
+			const largeRaters = [
+				...smallRaters,
+				{
+					id: 'james',
+					name: 'James W.',
+					color: '#2dd4bf',
+					data: [
+						{ e: 6, p: 5 },
+						{ e: 7, p: 6 },
+						{ e: 6, p: 6 },
+						{ e: 7, p: 7 },
+						{ e: 7, p: 6 },
+						{ e: 7, p: 7 },
+						{ e: 7, p: 6 }
+					]
+				},
+				{
+					id: 'marcus',
+					name: 'Marcus T.',
+					color: '#fbbf24',
+					data: [
+						{ e: 4, p: 3 },
+						{ e: 4, p: 4 },
+						{ e: 4, p: 4 },
+						{ e: 5, p: 4 },
+						{ e: 4, p: 3 },
+						{ e: 5, p: 4 },
+						{ e: 4, p: 3 }
+					]
+				},
+				{
+					id: 'elena',
+					name: 'Elena V.',
+					color: '#fb923c',
+					data: [
+						{ e: 7, p: 6 },
+						{ e: 7, p: 7 },
+						{ e: 6, p: 6 },
+						{ e: 7, p: 7 },
+						{ e: 7, p: 6 },
+						{ e: 7, p: 7 },
+						{ e: 8, p: 7 }
+					]
+				},
+				{
+					id: 'chen',
+					name: 'Chen L.',
+					color: '#a3e635',
+					data: [
+						{ e: 6, p: 6 },
+						{ e: 6, p: 6 },
+						{ e: 5, p: 5 },
+						{ e: 7, p: 6 },
+						{ e: 6, p: 6 },
+						{ e: 6, p: 6 },
+						{ e: 7, p: 6 }
+					]
+				},
+				{
+					id: 'lisa',
+					name: 'Lisa P.',
+					color: '#22d3ee',
+					data: [
+						{ e: 7, p: 7 },
+						{ e: 8, p: 7 },
+						{ e: 7, p: 7 },
+						{ e: 8, p: 8 },
+						{ e: 7, p: 7 },
+						{ e: 8, p: 8 },
+						{ e: 8, p: 7 }
+					]
+				},
+				{
+					id: 'tom',
+					name: 'Tom H.',
+					color: '#e879f9',
+					data: [
+						{ e: 6, p: 5 },
+						{ e: 6, p: 6 },
+						{ e: 6, p: 5 },
+						{ e: 6, p: 6 },
+						{ e: 6, p: 5 },
+						{ e: 6, p: 6 },
+						{ e: 6, p: 5 }
+					]
+				},
+				{
+					id: 'rachel',
+					name: 'Rachel F.',
+					color: '#f87171',
+					data: [
+						{ e: 5, p: 5 },
+						{ e: 5, p: 5 },
+						{ e: 5, p: 5 },
+						{ e: 6, p: 6 },
+						{ e: 5, p: 5 },
+						{ e: 6, p: 6 },
+						{ e: 6, p: 5 }
+					]
+				},
+				{
+					id: 'omar',
+					name: 'Omar S.',
+					color: '#34d399',
+					data: [
+						{ e: 7, p: 6 },
+						{ e: 7, p: 6 },
+						{ e: 6, p: 7 },
+						{ e: 7, p: 7 },
+						{ e: 7, p: 6 },
+						{ e: 7, p: 7 },
+						{ e: 7, p: 6 }
+					]
+				},
+				{
+					id: 'yuki',
+					name: 'Yuki N.',
+					color: '#818cf8',
+					data: [
+						{ e: 8, p: 7 },
+						{ e: 7, p: 7 },
+						{ e: 7, p: 6 },
+						{ e: 8, p: 7 },
+						{ e: 7, p: 7 },
+						{ e: 7, p: 7 },
+						{ e: 8, p: 7 }
+					]
+				}
+			];
+
+			let currentMode = 'small';
+			let currentDim = 'effort';
+			let activeRaters = new Set();
+
+			function getRaters() {
+				return currentMode === 'small' ? smallRaters : largeRaters;
+			}
+			function isLargeMode() {
+				return getRaters().length > 5;
+			}
+
+			function initActiveRaters() {
+				activeRaters = new Set(getRaters().map((r) => r.id));
+			}
+
+			// ===== MODE / DIM =====
+			function setMode(m) {
+				currentMode = m;
+				document.querySelectorAll('.mode-btn').forEach((b) => b.classList.remove('active'));
+				event.target.classList.add('active');
+				initActiveRaters();
+				updateAll();
+			}
+
+			function setDim(d) {
+				currentDim = d;
+				document.getElementById('dim-e').className = d === 'effort' ? 'act-e' : '';
+				document.getElementById('dim-p').className = d === 'performance' ? 'act-p' : '';
+				updateAll();
+			}
+
+			function toggleRater(id, evt) {
+				if (evt) evt.stopPropagation();
+				if (activeRaters.has(id)) {
+					activeRaters.delete(id);
+				} else {
+					activeRaters.add(id);
+				}
+				updateAll();
+			}
+
+			function showOnlyRater(id) {
+				if (activeRaters.size === 1 && activeRaters.has(id)) {
+					// If only this one is on, turn all back on
+					initActiveRaters();
+				} else {
+					activeRaters = new Set([id]);
+				}
+				updateAll();
+			}
+
+			function showAllRaters() {
+				initActiveRaters();
+				updateAll();
+			}
+
+			function hideAllRaters() {
+				activeRaters = new Set();
+				updateAll();
+			}
+
+			// ===== UPDATE =====
+			function updateAll() {
+				updateNumbers();
+				drawChart();
+				updatePerspectives();
+				updateInsight();
+			}
+
+			function updateNumbers() {
+				const raters = getRaters();
+				const lastWeek = selfData.length - 1;
+				const avgE = raters.reduce((s, r) => s + r.data[lastWeek].e, 0) / raters.length;
+				const avgP = raters.reduce((s, r) => s + r.data[lastWeek].p, 0) / raters.length;
+				const gapE = avgE - selfData[lastWeek].e;
+				const gapP = avgP - selfData[lastWeek].p;
+
+				document.getElementById('avg-effort').textContent = avgE.toFixed(1);
+				document.getElementById('avg-perf').textContent = avgP.toFixed(1);
+				document.getElementById('avg-label-e').textContent = `avg of ${raters.length} raters`;
+				document.getElementById('avg-label-p').textContent = `avg of ${raters.length} raters`;
+
+				const ge = document.getElementById('gap-e');
+				const gp = document.getElementById('gap-p');
+				ge.innerHTML = `${gapE > 0 ? '&#9650;' : gapE < 0 ? '&#9660;' : '&bull;'} ${Math.abs(gapE).toFixed(1)} gap`;
+				gp.innerHTML = `${gapP > 0 ? '&#9650;' : gapP < 0 ? '&#9660;' : '&bull;'} ${Math.abs(gapP).toFixed(1)} gap`;
+				ge.style.color =
+					Math.abs(gapE) <= 1
+						? 'var(--signal-aligned)'
+						: Math.abs(gapE) <= 2
+							? 'var(--signal-divergent)'
+							: 'var(--signal-attention)';
+				gp.style.color =
+					Math.abs(gapP) <= 1
+						? 'var(--signal-aligned)'
+						: Math.abs(gapP) <= 2
+							? 'var(--signal-divergent)'
+							: 'var(--signal-attention)';
+			}
+
+			// ===== CHART =====
+			function drawChart() {
+				const canvas = document.getElementById('chart');
+				const ctx = canvas.getContext('2d');
+				const dpr = window.devicePixelRatio || 1;
+				const rect = canvas.parentElement.getBoundingClientRect();
+				const w = rect.width - 24;
+				const h = 200;
+				canvas.width = w * dpr;
+				canvas.height = h * dpr;
+				canvas.style.width = w + 'px';
+				canvas.style.height = h + 'px';
+				ctx.scale(dpr, dpr);
+				ctx.clearRect(0, 0, w, h);
+
+				const dim = currentDim === 'effort' ? 'e' : 'p';
+				const dimColor = currentDim === 'effort' ? '#94a3b8' : '#d4a06a';
+				const dimVivid = currentDim === 'effort' ? '#cbd5e1' : '#e0b580';
+				const raters = getRaters();
+				const weeks = selfData.length;
+				const pad = { l: 28, r: 90, t: 12, b: 28 };
+				const cw = w - pad.l - pad.r;
+				const ch = h - pad.t - pad.b;
+				const xStep = cw / (weeks - 1);
+				const yScale = (v) => pad.t + ch - (v / 10) * ch;
+				const xPos = (i) => pad.l + i * xStep;
+
+				document.getElementById('chart-dim-label').textContent =
+					(currentDim === 'effort' ? 'EFFORT' : 'PERFORMANCE') + ' OVER TIME';
+
+				// Grid lines
+				ctx.strokeStyle = 'rgba(250,244,237,0.04)';
+				ctx.lineWidth = 1;
+				[0, 5, 10].forEach((v) => {
+					ctx.beginPath();
+					ctx.moveTo(pad.l, yScale(v));
+					ctx.lineTo(w - pad.r, yScale(v));
+					ctx.stroke();
+				});
+
+				// Y-axis labels
+				ctx.fillStyle = 'rgba(250,244,237,0.2)';
+				ctx.font = '9px monospace';
+				ctx.textAlign = 'right';
+				[0, 5, 10].forEach((v) => {
+					ctx.fillText(v, pad.l - 6, yScale(v) + 3);
+				});
+
+				// X-axis
+				ctx.textAlign = 'center';
+				for (let i = 0; i < weeks; i++) {
+					const label = 'W' + (i + 1);
+					ctx.fillStyle = i === weeks - 1 ? 'rgba(250,244,237,0.55)' : 'rgba(250,244,237,0.2)';
+					ctx.font = i === weeks - 1 ? 'bold 10px monospace' : '10px monospace';
+					ctx.fillText(label, xPos(i), h - 6);
+				}
+
+				const large = isLargeMode();
+				const anyActive = activeRaters.size > 0;
+				const allActive = activeRaters.size === raters.length;
+
+				if (large && allActive) {
+					// BAND MODE: draw min/max range
+					const mins = [],
+						maxs = [],
+						avgs = [];
+					for (let i = 0; i < weeks; i++) {
+						const vals = raters.map((r) => r.data[i][dim]);
+						mins.push(Math.min(...vals));
+						maxs.push(Math.max(...vals));
+						avgs.push(vals.reduce((a, b) => a + b, 0) / vals.length);
+					}
+
+					// Band fill
+					ctx.beginPath();
+					ctx.moveTo(xPos(0), yScale(maxs[0]));
+					for (let i = 1; i < weeks; i++) {
+						const px = xPos(i - 1),
+							cx = (px + xPos(i)) / 2;
+						ctx.bezierCurveTo(
+							cx,
+							yScale(maxs[i - 1]),
+							cx,
+							yScale(maxs[i]),
+							xPos(i),
+							yScale(maxs[i])
+						);
+					}
+					for (let i = weeks - 1; i >= 0; i--) {
+						if (i === weeks - 1) {
+							ctx.lineTo(xPos(i), yScale(mins[i]));
+							continue;
+						}
+						const nx = xPos(i + 1),
+							cx = (xPos(i) + nx) / 2;
+						ctx.bezierCurveTo(
+							cx,
+							yScale(mins[i + 1]),
+							cx,
+							yScale(mins[i]),
+							xPos(i),
+							yScale(mins[i])
+						);
+					}
+					ctx.closePath();
+					ctx.fillStyle =
+						currentDim === 'effort' ? 'rgba(148,163,184,0.08)' : 'rgba(212,160,106,0.08)';
+					ctx.fill();
+
+					// Band edges
+					ctx.strokeStyle =
+						currentDim === 'effort' ? 'rgba(148,163,184,0.15)' : 'rgba(212,160,106,0.15)';
+					ctx.lineWidth = 1;
+					[maxs, mins].forEach((arr) => {
+						ctx.beginPath();
+						ctx.moveTo(xPos(0), yScale(arr[0]));
+						for (let i = 1; i < weeks; i++) {
+							const px = xPos(i - 1),
+								cx = (px + xPos(i)) / 2;
+							ctx.bezierCurveTo(
+								cx,
+								yScale(arr[i - 1]),
+								cx,
+								yScale(arr[i]),
+								xPos(i),
+								yScale(arr[i])
+							);
+						}
+						ctx.stroke();
+					});
+
+					// Avg dashed line
+					ctx.strokeStyle = 'rgba(250,244,237,0.2)';
+					ctx.lineWidth = 1.5;
+					ctx.setLineDash([4, 6]);
+					ctx.beginPath();
+					ctx.moveTo(xPos(0), yScale(avgs[0]));
+					for (let i = 1; i < weeks; i++) {
+						const px = xPos(i - 1),
+							cx = (px + xPos(i)) / 2;
+						ctx.bezierCurveTo(
+							cx,
+							yScale(avgs[i - 1]),
+							cx,
+							yScale(avgs[i]),
+							xPos(i),
+							yScale(avgs[i])
+						);
+					}
+					ctx.stroke();
+					ctx.setLineDash([]);
+
+					// Outlier dots (deviation > 2 from median)
+					for (let i = 0; i < weeks; i++) {
+						const median = avgs[i]; // using avg as approx
+						raters.forEach((r) => {
+							const v = r.data[i][dim];
+							if (Math.abs(v - median) >= 2) {
+								ctx.beginPath();
+								ctx.arc(xPos(i), yScale(v), 4, 0, Math.PI * 2);
+								ctx.fillStyle = r.color;
+								ctx.globalAlpha = 0.7;
+								ctx.fill();
+								ctx.globalAlpha = 1;
+							}
+						});
+					}
+				} else {
+					// INDIVIDUAL MODE: draw each rater line
+					raters.forEach((r) => {
+						const isOn = activeRaters.has(r.id);
+						const someOff = !allActive;
+						const alpha = isOn ? (someOff ? 0.9 : large ? 0.3 : 0.5) : 0.04;
+						const lw = isOn && someOff ? 2.5 : 1.5;
+
+						ctx.strokeStyle = r.color;
+						ctx.lineWidth = lw;
+						ctx.globalAlpha = alpha;
+						ctx.beginPath();
+						ctx.moveTo(xPos(0), yScale(r.data[0][dim]));
+						for (let i = 1; i < weeks; i++) {
+							const px = xPos(i - 1),
+								cx = (px + xPos(i)) / 2;
+							ctx.bezierCurveTo(
+								cx,
+								yScale(r.data[i - 1][dim]),
+								cx,
+								yScale(r.data[i][dim]),
+								xPos(i),
+								yScale(r.data[i][dim])
+							);
+						}
+						ctx.stroke();
+
+						// Dots
+						for (let i = 0; i < weeks; i++) {
+							ctx.beginPath();
+							ctx.arc(xPos(i), yScale(r.data[i][dim]), isOn && someOff ? 4 : 3, 0, Math.PI * 2);
+							ctx.fillStyle = r.color;
+							ctx.fill();
+						}
+						ctx.globalAlpha = 1;
+
+						// Label at right edge
+						if (isOn && (!large || someOff)) {
+							const lastVal = r.data[weeks - 1][dim];
+							const labelY = yScale(lastVal);
+							const labelText = r.name.split(' ')[0] + ' ' + lastVal;
+							ctx.font = 'bold 11px monospace';
+							const textW = ctx.measureText(labelText).width;
+							ctx.globalAlpha = 0.85;
+							ctx.fillStyle = 'rgba(12,10,9, 0.75)';
+							ctx.beginPath();
+							const rx = xPos(weeks - 1) + 6,
+								ry = labelY - 8,
+								rw = textW + 10,
+								rh = 17,
+								rr = 4;
+							ctx.moveTo(rx + rr, ry);
+							ctx.lineTo(rx + rw - rr, ry);
+							ctx.quadraticCurveTo(rx + rw, ry, rx + rw, ry + rr);
+							ctx.lineTo(rx + rw, ry + rh - rr);
+							ctx.quadraticCurveTo(rx + rw, ry + rh, rx + rw - rr, ry + rh);
+							ctx.lineTo(rx + rr, ry + rh);
+							ctx.quadraticCurveTo(rx, ry + rh, rx, ry + rh - rr);
+							ctx.lineTo(rx, ry + rr);
+							ctx.quadraticCurveTo(rx, ry, rx + rr, ry);
+							ctx.closePath();
+							ctx.fill();
+							ctx.fillStyle = r.color;
+							ctx.textAlign = 'left';
+							ctx.fillText(labelText, xPos(weeks - 1) + 11, labelY + 4);
+							ctx.globalAlpha = 1;
+						}
+					});
+				}
+
+				// Self line (always on top, always brightest)
+				ctx.strokeStyle = 'rgba(250,244,237,0.93)';
+				ctx.lineWidth = 2.5;
+				ctx.beginPath();
+				ctx.moveTo(xPos(0), yScale(selfData[0][dim]));
+				for (let i = 1; i < weeks; i++) {
+					const px = xPos(i - 1),
+						cx = (px + xPos(i)) / 2;
+					ctx.bezierCurveTo(
+						cx,
+						yScale(selfData[i - 1][dim]),
+						cx,
+						yScale(selfData[i][dim]),
+						xPos(i),
+						yScale(selfData[i][dim])
+					);
+				}
+				ctx.stroke();
+
+				// Self dots
+				for (let i = 0; i < weeks; i++) {
+					ctx.beginPath();
+					ctx.arc(xPos(i), yScale(selfData[i][dim]), i === weeks - 1 ? 5 : 4, 0, Math.PI * 2);
+					ctx.fillStyle = 'rgba(250,244,237,0.93)';
+					ctx.fill();
+				}
+
+				// "You" label
+				ctx.fillStyle = 'rgba(250,244,237,0.7)';
+				ctx.font = 'bold 10px monospace';
+				ctx.textAlign = 'left';
+				ctx.fillText('You', xPos(weeks - 1) + 8, yScale(selfData[weeks - 1][dim]) + 3);
+
+				// Store layout for tooltip
+				canvas._layout = { pad, xStep, weeks, w, h, yScale, xPos, dim };
+			}
+
+			// ===== TOOLTIP =====
+			document.getElementById('chart').addEventListener('mousemove', function (e) {
+				const L = this._layout;
+				if (!L) return;
+				const rect = this.getBoundingClientRect();
+				const mx = e.clientX - rect.left;
+				const weekIdx = Math.round((mx - L.pad.l) / L.xStep);
+				if (weekIdx < 0 || weekIdx >= L.weeks) {
+					document.getElementById('tooltip').classList.remove('visible');
+					return;
+				}
+
+				const raters = getRaters();
+				const dim = L.dim;
+				let rows = [
+					{
+						name: 'You',
+						color: 'rgba(250,244,237,0.93)',
+						score: selfData[weekIdx][dim],
+						isSelf: true
+					}
+				];
+				raters.forEach((r) => {
+					rows.push({ name: r.name, color: r.color, score: r.data[weekIdx][dim] });
+				});
+				rows.sort((a, b) => b.score - a.score);
+
+				const large = isLargeMode() && activeRaters.size === getRaters().length;
+				let displayRows = rows;
+				let collapsed = 0;
+				if (large && rows.length > 6) {
+					const top2 = rows.slice(0, 2);
+					const bot2 = rows.slice(-2);
+					const self = rows.find((r) => r.isSelf);
+					const shown = new Set([...top2, ...bot2, self]);
+					displayRows = rows.filter((r) => shown.has(r));
+					collapsed = rows.length - displayRows.length;
+				}
+
+				let html = `<div class="tooltip-week">WEEK ${weekIdx + 1}</div>`;
+				displayRows.forEach((r) => {
+					html += `<div class="tooltip-row">
       <div class="tooltip-name"><div class="tooltip-dot" style="background:${r.color}"></div><span style="color:${r.isSelf ? 'var(--text-primary)' : 'var(--text-secondary)'};font-size:12px;${r.isSelf ? 'font-weight:600' : ''}">${r.name}</span></div>
       <div class="tooltip-score" style="color:${r.isSelf ? (currentDim === 'effort' ? 'var(--data-effort-vivid)' : 'var(--data-performance-vivid)') : r.color}">${r.score}</div>
     </div>`;
-  });
-  if (collapsed > 0) {
-    html += `<div style="font-size:11px;color:var(--text-muted);padding-top:4px;">+${collapsed} others (avg ${(rows.filter(r => !displayRows.includes(r)).reduce((s,r) => s + r.score, 0) / collapsed).toFixed(1)})</div>`;
-  }
+				});
+				if (collapsed > 0) {
+					html += `<div style="font-size:11px;color:var(--text-muted);padding-top:4px;">+${collapsed} others (avg ${(rows.filter((r) => !displayRows.includes(r)).reduce((s, r) => s + r.score, 0) / collapsed).toFixed(1)})</div>`;
+				}
 
-  const tooltip = document.getElementById('tooltip');
-  tooltip.innerHTML = html;
-  tooltip.classList.add('visible');
-  const tx = L.xPos(weekIdx);
-  tooltip.style.left = (tx + 20 > L.w - 200 ? tx - 200 : tx + 20) + 'px';
-  tooltip.style.top = '40px';
-});
+				const tooltip = document.getElementById('tooltip');
+				tooltip.innerHTML = html;
+				tooltip.classList.add('visible');
+				const tx = L.xPos(weekIdx);
+				tooltip.style.left = (tx + 20 > L.w - 200 ? tx - 200 : tx + 20) + 'px';
+				tooltip.style.top = '40px';
+			});
 
-document.getElementById('chart').addEventListener('mouseleave', function() {
-  document.getElementById('tooltip').classList.remove('visible');
-});
+			document.getElementById('chart').addEventListener('mouseleave', function () {
+				document.getElementById('tooltip').classList.remove('visible');
+			});
 
-// ===== PERSPECTIVES =====
-function updatePerspectives() {
-  const raters = getRaters();
-  const lastWeek = selfData.length - 1;
-  const selfE = selfData[lastWeek].e;
-  const selfP = selfData[lastWeek].p;
+			// ===== PERSPECTIVES =====
+			function updatePerspectives() {
+				const raters = getRaters();
+				const lastWeek = selfData.length - 1;
+				const selfE = selfData[lastWeek].e;
+				const selfP = selfData[lastWeek].p;
 
-  // Compute gap magnitude and sort
-  const sorted = raters.map(r => {
-    const gapE = r.data[lastWeek].e - selfE;
-    const gapP = r.data[lastWeek].p - selfP;
-    const mag = (Math.abs(gapE) + Math.abs(gapP)) / 2;
-    return { ...r, gapE, gapP, mag, latestE: r.data[lastWeek].e, latestP: r.data[lastWeek].p };
-  }).sort((a, b) => b.mag - a.mag);
+				// Compute gap magnitude and sort
+				const sorted = raters
+					.map((r) => {
+						const gapE = r.data[lastWeek].e - selfE;
+						const gapP = r.data[lastWeek].p - selfP;
+						const mag = (Math.abs(gapE) + Math.abs(gapP)) / 2;
+						return {
+							...r,
+							gapE,
+							gapP,
+							mag,
+							latestE: r.data[lastWeek].e,
+							latestP: r.data[lastWeek].p
+						};
+					})
+					.sort((a, b) => b.mag - a.mag);
 
-  // Summary
-  const divergent = sorted.filter(r => r.mag > 1.5).length;
-  const aligned = sorted.length - divergent;
-  const summaryEl = document.getElementById('persp-summary');
-  if (sorted.length > 5) {
-    summaryEl.textContent = `${sorted.length} raters this week · ${divergent} divergent · ${aligned} aligned`;
-    summaryEl.style.display = 'block';
-  } else {
-    summaryEl.style.display = 'none';
-  }
+				// Summary
+				const divergent = sorted.filter((r) => r.mag > 1.5).length;
+				const aligned = sorted.length - divergent;
+				const summaryEl = document.getElementById('persp-summary');
+				if (sorted.length > 5) {
+					summaryEl.textContent = `${sorted.length} raters this week · ${divergent} divergent · ${aligned} aligned`;
+					summaryEl.style.display = 'block';
+				} else {
+					summaryEl.style.display = 'none';
+				}
 
-  // Visible vs hidden
-  const visibleCount = sorted.length > 7 ? 4 : sorted.length;
-  const visible = sorted.slice(0, visibleCount);
-  const hidden = sorted.slice(visibleCount);
+				// Visible vs hidden
+				const visibleCount = sorted.length > 7 ? 4 : sorted.length;
+				const visible = sorted.slice(0, visibleCount);
+				const hidden = sorted.slice(visibleCount);
 
-  document.getElementById('perspectives-list').innerHTML = visible.map(r => raterRowHTML(r)).join('');
-  document.getElementById('hidden-raters').innerHTML = hidden.map(r => raterRowHTML(r)).join('');
-  document.getElementById('hidden-raters').classList.remove('expanded');
+				document.getElementById('perspectives-list').innerHTML = visible
+					.map((r) => raterRowHTML(r))
+					.join('');
+				document.getElementById('hidden-raters').innerHTML = hidden
+					.map((r) => raterRowHTML(r))
+					.join('');
+				document.getElementById('hidden-raters').classList.remove('expanded');
 
-  const showBtn = document.getElementById('show-all-btn');
-  if (hidden.length > 0) {
-    showBtn.style.display = 'block';
-    showBtn.textContent = `Show all ${sorted.length} perspectives`;
-  } else {
-    showBtn.style.display = 'none';
-  }
-}
+				const showBtn = document.getElementById('show-all-btn');
+				if (hidden.length > 0) {
+					showBtn.style.display = 'block';
+					showBtn.textContent = `Show all ${sorted.length} perspectives`;
+				} else {
+					showBtn.style.display = 'none';
+				}
+			}
 
-function raterRowHTML(r) {
-  const badge = r.mag <= 1 ? { cls: 'badge-aligned', text: 'Aligned' } :
-                r.mag <= 2.5 ? { cls: 'badge-divergent', text: 'Divergent' } :
-                { cls: 'badge-attention', text: 'Attention' };
-  const gapDir = r.gapE > 0 ? 'above' : r.gapE < 0 ? 'below' : 'aligned with';
-  const gapDim = Math.abs(r.gapE) >= Math.abs(r.gapP) ? 'effort' : 'performance';
-  const gapVal = Math.abs(r.gapE) >= Math.abs(r.gapP) ? Math.abs(r.gapE) : Math.abs(r.gapP);
-  const gapText = r.mag <= 0.5 ? 'Aligned with you' : `${gapVal > 0 ? '+' : ''}${gapVal.toFixed(1)} ${gapDir} you (${gapDim})`;
-  const isOn = activeRaters.has(r.id);
+			function raterRowHTML(r) {
+				const badge =
+					r.mag <= 1
+						? { cls: 'badge-aligned', text: 'Aligned' }
+						: r.mag <= 2.5
+							? { cls: 'badge-divergent', text: 'Divergent' }
+							: { cls: 'badge-attention', text: 'Attention' };
+				const gapDir = r.gapE > 0 ? 'above' : r.gapE < 0 ? 'below' : 'aligned with';
+				const gapDim = Math.abs(r.gapE) >= Math.abs(r.gapP) ? 'effort' : 'performance';
+				const gapVal = Math.abs(r.gapE) >= Math.abs(r.gapP) ? Math.abs(r.gapE) : Math.abs(r.gapP);
+				const gapText =
+					r.mag <= 0.5
+						? 'Aligned with you'
+						: `${gapVal > 0 ? '+' : ''}${gapVal.toFixed(1)} ${gapDir} you (${gapDim})`;
+				const isOn = activeRaters.has(r.id);
 
-  return `
+				return `
     <div class="rater-row ${isOn ? 'active' : ''}" style="animation: slideUp 300ms var(--ease-out) both;">
       <div class="rater-toggle ${isOn ? 'on' : ''}" onclick="toggleRater('${r.id}', event)" style="${isOn ? 'background:' + r.color + '20; border-color:' + r.color + '40' : ''}">
         <div class="toggle-knob" style="${isOn ? 'background:' + r.color : ''}"></div>
@@ -976,49 +1335,56 @@ function raterRowHTML(r) {
       <div class="rater-badge ${badge.cls}">${badge.text}</div>
     </div>
   `;
-}
+			}
 
-function toggleShowAll() {
-  const el = document.getElementById('hidden-raters');
-  const btn = document.getElementById('show-all-btn');
-  if (el.classList.contains('expanded')) {
-    el.classList.remove('expanded');
-    btn.textContent = `Show all ${getRaters().length} perspectives`;
-  } else {
-    el.classList.add('expanded');
-    btn.textContent = 'Show less';
-  }
-}
+			function toggleShowAll() {
+				const el = document.getElementById('hidden-raters');
+				const btn = document.getElementById('show-all-btn');
+				if (el.classList.contains('expanded')) {
+					el.classList.remove('expanded');
+					btn.textContent = `Show all ${getRaters().length} perspectives`;
+				} else {
+					el.classList.add('expanded');
+					btn.textContent = 'Show less';
+				}
+			}
 
-// ===== INSIGHT =====
-function updateInsight() {
-  const raters = getRaters();
-  const lastWeek = selfData.length - 1;
-  const selfE = selfData[lastWeek].e;
-  const selfP = selfData[lastWeek].p;
+			// ===== INSIGHT =====
+			function updateInsight() {
+				const raters = getRaters();
+				const lastWeek = selfData.length - 1;
+				const selfE = selfData[lastWeek].e;
+				const selfP = selfData[lastWeek].p;
 
-  if (raters.length <= 5) {
-    const sorted = raters.map(r => ({
-      name: r.name.split(' ')[0],
-      gapE: r.data[lastWeek].e - selfE,
-      gapP: r.data[lastWeek].p - selfP,
-    })).sort((a, b) => (Math.abs(b.gapE) + Math.abs(b.gapP)) - (Math.abs(a.gapE) + Math.abs(a.gapP)));
-    document.getElementById('insight-text').innerHTML =
-      `<strong>${sorted[0].name}</strong> consistently rates your effort ${Math.abs(sorted[0].gapE)} points higher than you rate yourself — she sees work you're discounting. <strong>${sorted[sorted.length - 1].name}</strong> tracks closest to your self-assessment, especially on performance.`;
-  } else {
-    const gaps = raters.map(r => ({ name: r.name, mag: (Math.abs(r.data[lastWeek].e - selfE) + Math.abs(r.data[lastWeek].p - selfP)) / 2 }));
-    const divergent = gaps.filter(g => g.mag > 1.5).length;
-    const aligned = gaps.length - divergent;
-    const most = gaps.sort((a, b) => b.mag - a.mag)[0];
-    document.getElementById('insight-text').innerHTML =
-      `Your raters cluster into two groups: <strong>${aligned} see your effort and performance as closely aligned</strong> (avg gap &lt;1.5). But <strong>${divergent} raters see a meaningful gap</strong> — a pattern worth exploring with your coach. <strong>${most.name}</strong> is your most divergent voice.`;
-  }
-}
+				if (raters.length <= 5) {
+					const sorted = raters
+						.map((r) => ({
+							name: r.name.split(' ')[0],
+							gapE: r.data[lastWeek].e - selfE,
+							gapP: r.data[lastWeek].p - selfP
+						}))
+						.sort(
+							(a, b) => Math.abs(b.gapE) + Math.abs(b.gapP) - (Math.abs(a.gapE) + Math.abs(a.gapP))
+						);
+					document.getElementById('insight-text').innerHTML =
+						`<strong>${sorted[0].name}</strong> consistently rates your effort ${Math.abs(sorted[0].gapE)} points higher than you rate yourself — she sees work you're discounting. <strong>${sorted[sorted.length - 1].name}</strong> tracks closest to your self-assessment, especially on performance.`;
+				} else {
+					const gaps = raters.map((r) => ({
+						name: r.name,
+						mag: (Math.abs(r.data[lastWeek].e - selfE) + Math.abs(r.data[lastWeek].p - selfP)) / 2
+					}));
+					const divergent = gaps.filter((g) => g.mag > 1.5).length;
+					const aligned = gaps.length - divergent;
+					const most = gaps.sort((a, b) => b.mag - a.mag)[0];
+					document.getElementById('insight-text').innerHTML =
+						`Your raters cluster into two groups: <strong>${aligned} see your effort and performance as closely aligned</strong> (avg gap &lt;1.5). But <strong>${divergent} raters see a meaningful gap</strong> — a pattern worth exploring with your coach. <strong>${most.name}</strong> is your most divergent voice.`;
+				}
+			}
 
-// Init
-initActiveRaters();
-updateAll();
-window.addEventListener('resize', drawChart);
-</script>
-</body>
+			// Init
+			initActiveRaters();
+			updateAll();
+			window.addEventListener('resize', drawChart);
+		</script>
+	</body>
 </html>

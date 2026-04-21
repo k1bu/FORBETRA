@@ -2,7 +2,7 @@
 
 ## A Platform Redesign Through the Lens of Warm Rationalism
 
-*Design concept by the Designer Agent -- March 2026*
+_Design concept by the Designer Agent -- March 2026_
 
 ---
 
@@ -54,38 +54,38 @@ The current Forbetra design has a genuinely strong visual foundation:
 
 ### Track A: Category Leaders
 
-| Reference | What to Steal | How to Adapt |
-|-----------|--------------|--------------|
-| **Linear** (linear.app) | Preserves information density while improving scannability. Structure felt not seen. Warmer grays, softened borders, dimmed inactive elements. Navigation recedes so content advances. | Apply Linear's "don't compete for attention you haven't earned" principle to the individual hub. The sidebar becomes near-invisible. The current state -- and only the current state -- commands attention. |
-| **Superhuman** (superhuman.com) | Treats each item as a triage decision, not a display object. Keyboard-first, single-focus. The inbox is a to-do list where you deal with items one at a time. No scanning required. | Forbetra's individual hub should adopt this philosophy: present the ONE thing the user should do right now, not the twelve things they could theoretically look at. Sequential, not simultaneous. |
-| **Oura Ring app** | Personal health metrics rendered as calm, glanceable daily summaries. Dark interface where your data is the brightest thing on screen. Long-term trends revealed through layered temporal views (daily, weekly, monthly, quarterly). | Forbetra should treat behavioral data the way Oura treats biometric data: daily snapshot is simple, weekly view adds context, cycle view reveals patterns. Same data, different focal lengths. |
-| **Whoop app** | Strain/recovery/sleep as a three-metric system that reduces complex biometric data to three numbers you can act on. The daily "readiness" score is the gateway; detail unfolds only on request. | Reduce Forbetra's metric sprawl. The individual's daily state should be expressible in two numbers (effort, performance) and one word (alignment status). Everything else is behind a deliberate tap. |
+| Reference                       | What to Steal                                                                                                                                                                                                                        | How to Adapt                                                                                                                                                                                                |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Linear** (linear.app)         | Preserves information density while improving scannability. Structure felt not seen. Warmer grays, softened borders, dimmed inactive elements. Navigation recedes so content advances.                                               | Apply Linear's "don't compete for attention you haven't earned" principle to the individual hub. The sidebar becomes near-invisible. The current state -- and only the current state -- commands attention. |
+| **Superhuman** (superhuman.com) | Treats each item as a triage decision, not a display object. Keyboard-first, single-focus. The inbox is a to-do list where you deal with items one at a time. No scanning required.                                                  | Forbetra's individual hub should adopt this philosophy: present the ONE thing the user should do right now, not the twelve things they could theoretically look at. Sequential, not simultaneous.           |
+| **Oura Ring app**               | Personal health metrics rendered as calm, glanceable daily summaries. Dark interface where your data is the brightest thing on screen. Long-term trends revealed through layered temporal views (daily, weekly, monthly, quarterly). | Forbetra should treat behavioral data the way Oura treats biometric data: daily snapshot is simple, weekly view adds context, cycle view reveals patterns. Same data, different focal lengths.              |
+| **Whoop app**                   | Strain/recovery/sleep as a three-metric system that reduces complex biometric data to three numbers you can act on. The daily "readiness" score is the gateway; detail unfolds only on request.                                      | Reduce Forbetra's metric sprawl. The individual's daily state should be expressible in two numbers (effort, performance) and one word (alignment status). Everything else is behind a deliberate tap.       |
 
 ### Track B: Design Systems & Patterns
 
-| Reference | What to Steal | How to Adapt |
-|-----------|--------------|--------------|
-| **Vercel Geist** (vercel.com/geist) | Four typographic registers: Headings, Buttons, Labels, Copy. Each with distinct line-height (Labels tight, Copy generous). Monospace as accent register for technical data. | Adopt Geist's register model. Plus Jakarta Sans at four scales: Display (cycle milestones), Heading (section titles), Body (reflections), Mono (scores, percentages, week numbers). |
-| **Arc Browser** | Progressive disclosure mastered. Features revealed exactly when needed, not before. Onboarding teaches two things in 90 seconds through hands-on experience. | Forbetra's individual hub should reveal its depth through use, not on first load. Week 1 sees a minimal surface. Week 4 sees contextual patterns emerge. Week 12 sees the full constellation. |
+| Reference                           | What to Steal                                                                                                                                                               | How to Adapt                                                                                                                                                                                  |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Vercel Geist** (vercel.com/geist) | Four typographic registers: Headings, Buttons, Labels, Copy. Each with distinct line-height (Labels tight, Copy generous). Monospace as accent register for technical data. | Adopt Geist's register model. Plus Jakarta Sans at four scales: Display (cycle milestones), Heading (section titles), Body (reflections), Mono (scores, percentages, week numbers).           |
+| **Arc Browser**                     | Progressive disclosure mastered. Features revealed exactly when needed, not before. Onboarding teaches two things in 90 seconds through hands-on experience.                | Forbetra's individual hub should reveal its depth through use, not on first load. Week 1 sees a minimal surface. Week 4 sees contextual patterns emerge. Week 12 sees the full constellation. |
 
 ### Track C: Cross-Pollination
 
-| Reference | What to Steal | Why It Elevates |
-|-----------|--------------|----------------|
-| **The therapy room** (interior design principle) | Soft warm lighting (2700-3000K equivalent), natural materials (wood, linen), deliberate emptiness that invites the client to fill the space. Safety signaled through environment, not words. Trust through restraint, not reassurance copy. | Forbetra is a coaching tool. The interface should feel like entering a therapist's office: warm, quiet, attentive. The warm stone-black palette already does this. Now extend it to information architecture: fewer things on screen = more space for reflection. The platform should feel like it's *listening*, not *talking*. |
-| **Executive boardroom** (2025 trends) | Dark timber panels, matte black pendants, Scandinavian-influenced minimalism. Calm authority and timelessness. Brass as punctuation. Recessed lighting that makes faces the brightest thing in the room. | Forbetra's amber accent plays the role of brass in a dark boardroom: warm metallic punctuation against dark surfaces. The interface should have the gravity of a boardroom but the warmth of a private study. Not a startup -- a firm. |
-| **Kinfolk magazine** (editorial design) | Custom type family with six styles serving distinct roles. 12-column grid. Brodovitch-level breathing room. Content photographed as if it matters. Every spread has one focal point. | Forbetra's AI insights and cycle reports should feel editorial, not generated. One insight per view. Generous line-height (1.7+). The text itself is the design. No decorative cards wrapping it -- just well-set type on a quiet surface. |
-| **Michelin restaurant menu** | Restrained typography, deliberate ordering (the menu structures your experience), whitespace as luxury signal, zero decoration. The food is the design; the menu just organizes access to it. | Forbetra's navigation should feel like a prix fixe menu: a curated sequence, not a buffet. The platform guides you through a rhythm (intention, check-in, review, reveal) rather than offering everything at once. |
+| Reference                                        | What to Steal                                                                                                                                                                                                                               | Why It Elevates                                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **The therapy room** (interior design principle) | Soft warm lighting (2700-3000K equivalent), natural materials (wood, linen), deliberate emptiness that invites the client to fill the space. Safety signaled through environment, not words. Trust through restraint, not reassurance copy. | Forbetra is a coaching tool. The interface should feel like entering a therapist's office: warm, quiet, attentive. The warm stone-black palette already does this. Now extend it to information architecture: fewer things on screen = more space for reflection. The platform should feel like it's _listening_, not _talking_. |
+| **Executive boardroom** (2025 trends)            | Dark timber panels, matte black pendants, Scandinavian-influenced minimalism. Calm authority and timelessness. Brass as punctuation. Recessed lighting that makes faces the brightest thing in the room.                                    | Forbetra's amber accent plays the role of brass in a dark boardroom: warm metallic punctuation against dark surfaces. The interface should have the gravity of a boardroom but the warmth of a private study. Not a startup -- a firm.                                                                                           |
+| **Kinfolk magazine** (editorial design)          | Custom type family with six styles serving distinct roles. 12-column grid. Brodovitch-level breathing room. Content photographed as if it matters. Every spread has one focal point.                                                        | Forbetra's AI insights and cycle reports should feel editorial, not generated. One insight per view. Generous line-height (1.7+). The text itself is the design. No decorative cards wrapping it -- just well-set type on a quiet surface.                                                                                       |
+| **Michelin restaurant menu**                     | Restrained typography, deliberate ordering (the menu structures your experience), whitespace as luxury signal, zero decoration. The food is the design; the menu just organizes access to it.                                               | Forbetra's navigation should feel like a prix fixe menu: a curated sequence, not a buffet. The platform guides you through a rhythm (intention, check-in, review, reveal) rather than offering everything at once.                                                                                                               |
 
 ### Track D: Anti-References -- What We Are Deliberately NOT Doing
 
-| Anti-Reference | What to Avoid | Why |
-|----------------|---------------|-----|
-| **Generic coaching SaaS** (BetterUp, CoachHub UI) | Bright white backgrounds, rounded colorful cards, corporate stock photography, progress bars as primary feedback, gamification badges. | These platforms look like HR software. Forbetra's users are executives and senior leaders. The aesthetic must signal peer, not platform. Authority, not cheerfulness. |
-| **Wellness app pastels** (Calm, Headspace visual language) | Soft gradients, illustration-heavy, pastel color palettes, nature imagery, rounded everything. | Forbetra is not a meditation app. It deals with performance, perception gaps, and behavioral accountability. The emotional register is clear-eyed honesty, not gentle reassurance. |
-| **Dashboard maximalism** (Tableau, PowerBI, analytics platforms) | Dense chart grids, rainbow color scales, 6+ chart types per screen, toolbar-heavy chrome. | Behavioral data is not business analytics. There are only two numbers (effort, performance) and their relationship over time. The visualization vocabulary should be as restrained as the data model. |
-| **Gamification patterns** (badges, levels, leaderboards, XP) | Extrinsic motivation systems that reduce developmental growth to point accumulation. | Executive coaching is not a game. Streak acknowledgment is appropriate; badges and levels are patronizing for this audience. Recognition should be quiet, not celebratory. |
-| **Emoji as design element** | Using emoji as section headers, status indicators, or decorative elements. | The current Forbetra uses emoji (trophy, seedling) as placeholder icons. These undermine the premium positioning. Replace with typographic or geometric treatments. |
+| Anti-Reference                                                   | What to Avoid                                                                                                                          | Why                                                                                                                                                                                                   |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Generic coaching SaaS** (BetterUp, CoachHub UI)                | Bright white backgrounds, rounded colorful cards, corporate stock photography, progress bars as primary feedback, gamification badges. | These platforms look like HR software. Forbetra's users are executives and senior leaders. The aesthetic must signal peer, not platform. Authority, not cheerfulness.                                 |
+| **Wellness app pastels** (Calm, Headspace visual language)       | Soft gradients, illustration-heavy, pastel color palettes, nature imagery, rounded everything.                                         | Forbetra is not a meditation app. It deals with performance, perception gaps, and behavioral accountability. The emotional register is clear-eyed honesty, not gentle reassurance.                    |
+| **Dashboard maximalism** (Tableau, PowerBI, analytics platforms) | Dense chart grids, rainbow color scales, 6+ chart types per screen, toolbar-heavy chrome.                                              | Behavioral data is not business analytics. There are only two numbers (effort, performance) and their relationship over time. The visualization vocabulary should be as restrained as the data model. |
+| **Gamification patterns** (badges, levels, leaderboards, XP)     | Extrinsic motivation systems that reduce developmental growth to point accumulation.                                                   | Executive coaching is not a game. Streak acknowledgment is appropriate; badges and levels are patronizing for this audience. Recognition should be quiet, not celebratory.                            |
+| **Emoji as design element**                                      | Using emoji as section headers, status indicators, or decorative elements.                                                             | The current Forbetra uses emoji (trophy, seedling) as placeholder icons. These undermine the premium positioning. Replace with typographic or geometric treatments.                                   |
 
 ### Track E: Deep-Dive -- How Linear Builds Calm Density
 
@@ -104,63 +104,64 @@ Forbetra operates on a weekly cycle. The emotional design must honor this cadenc
 **Monday: The Intention (Lacing Up)**
 The user opens Forbetra and sees their identity anchor -- who they said they were becoming -- rendered not as a card but as a quiet line of text at the top of the screen, like an epigraph in a book. Below it, this week's prompt. The screen is almost entirely empty: the question, a text field, space. The emotion is focused anticipation. You are choosing what to aim at.
 
-- *Haptic*: None. Silence. The intention is a contemplative act.
-- *Animation*: The prompt text fades in over 600ms with the out-expo curve. No slide. No bounce. It appears like thought arriving.
-- *Sound*: None. (Sound is deliberately absent from Forbetra. Coaching is a private act. The app never makes noise.)
+- _Haptic_: None. Silence. The intention is a contemplative act.
+- _Animation_: The prompt text fades in over 600ms with the out-expo curve. No slide. No bounce. It appears like thought arriving.
+- _Sound_: None. (Sound is deliberately absent from Forbetra. Coaching is a private act. The app never makes noise.)
 
 **Wednesday/Friday: The Check-In (The Exhale)**
 Two numbers. That is all. The screen shows two large, spaced input areas -- effort on the left, performance on the right. Each is a vertical gradient bar that fills as the user taps or drags. The gesture is upward -- you pull the level up to where it feels right. A number materializes at the top of the bar as you move.
 
 The entire interaction completes in under 30 seconds. No scrolling. No notes field visible (it reveals on tap of a subtle "Add a note" text link). No coach notes, no behavioral indicators, no previous scores cluttering the primary surface. Just: how much effort? How did you perform? Done.
 
-- *Haptic*: A single crisp tap (UIImpactFeedbackGenerator .light) when the score locks.
-- *Animation*: The gradient bar fills with a spring curve (response: 0.4, dampingFraction: 0.7). On submit, the two scores hold for 800ms, then contract into two small dots that drift to their position on a minimal week-strip at the bottom of the screen. This is Tobias Ahlin's "Pulse" concept, simplified: the data becoming part of your timeline.
-- *Reduce Motion alternative*: Scores appear instantly, dots appear in timeline with a crossfade.
+- _Haptic_: A single crisp tap (UIImpactFeedbackGenerator .light) when the score locks.
+- _Animation_: The gradient bar fills with a spring curve (response: 0.4, dampingFraction: 0.7). On submit, the two scores hold for 800ms, then contract into two small dots that drift to their position on a minimal week-strip at the bottom of the screen. This is Tobias Ahlin's "Pulse" concept, simplified: the data becoming part of your timeline.
+- _Reduce Motion alternative_: Scores appear instantly, dots appear in timeline with a crossfade.
 
 **The Reveal (Opening the Envelope)**
 When stakeholder feedback arrives, the individual does not see a number update on a dashboard. They see a single notification on their home screen: "Someone shared their perspective." No name. No score. Just the invitation.
 
 Tapping enters a three-screen micro-flow:
+
 1. **Your view**: Your own scores for this period, cleanly stated. "You rated your effort 7, your performance 5." Two numbers on a dark field. Owned. Settled.
 2. **Their view**: A single card, face-down, breathing. Tap to turn. The card rotates (CSS rotateY, 400ms) and their scores appear. The background shifts subtly: warm (within 1 point alignment) or cooler (gap of 3+). A single line of contextual text: "You see this similarly" or "There's a gap worth exploring."
 3. **The prompt**: "What might explain the difference?" A single text input at the exact moment of maximum curiosity. Optional. But placed perfectly.
 
 This is the emotional peak of the weekly cycle. It is the moment where Forbetra does something no other tool does: it shows you yourself through someone else's eyes. Design the hell out of it.
 
-- *Haptic*: The card flip triggers a medium impact tap. If scores are aligned, a subtle success pattern (two quick taps). If divergent, nothing -- silence is more powerful than alarm.
-- *Animation*: Card flip is CSS 3D transform, 400ms ease-out. Background color shift is a 1200ms transition, nearly imperceptible -- it arrives as a feeling, not a visual event.
+- _Haptic_: The card flip triggers a medium impact tap. If scores are aligned, a subtle success pattern (two quick taps). If divergent, nothing -- silence is more powerful than alarm.
+- _Animation_: Card flip is CSS 3D transform, 400ms ease-out. Background color shift is a 1200ms transition, nearly imperceptible -- it arrives as a feeling, not a visual event.
 
 **End of Cycle: The Portrait (Turning Around on the Trail)**
 After 8-16 weeks, the user receives their Behavioral Portrait. This is Giorgia Lupi's concept, executed with restraint: a radial visualization where each week is a segment, shaped by the effort/performance ratio. The identity anchor text sits in the center. Stakeholder perception traces a second, lighter contour.
 
 No two portraits look the same. This is the screenshot moment. This is the artifact a user shares with their coach, their mentor, their future self.
 
-- *Animation*: The portrait draws itself over 3 seconds, week by week, starting from week 1 and tracing the journey clockwise. Each segment materializes with a 100ms stagger. The effect is watching your own growth story unfold.
-- *Reduce Motion alternative*: Portrait appears fully rendered with a simple fade-in.
+- _Animation_: The portrait draws itself over 3 seconds, week by week, starting from week 1 and tracing the journey clockwise. Each segment materializes with a 100ms stagger. The effect is watching your own growth story unfold.
+- _Reduce Motion alternative_: Portrait appears fully rendered with a simple fade-in.
 
 ### The Sensory Score
 
-| Moment | Visual Register | Haptic | Sound | Tempo |
-|--------|----------------|--------|-------|-------|
-| Opening the app | Quiet, single-focus, identity anchor visible | None | None | Slow (600ms fade) |
-| Monday intention | Contemplative, generous whitespace, one question | None | None | Slow (type at your own pace) |
-| Check-in | Minimal, two inputs only, gradient bars | Light tap on score lock | None | Fast (under 30s total) |
-| Score submission | The Pulse -- scores contract to timeline | Light tap | None | Medium (800ms hold, then transition) |
-| Reveal notification | Single line of text, anticipatory | None | None | Pause (user-initiated) |
-| Card flip | 3D rotation, background color shift | Medium tap | None | Medium (400ms flip, 1200ms color) |
-| Reflection prompt | Open text field, generous space | None | None | Slow (user's pace) |
-| Weekly insight | Editorial typography, one insight at a time | None | None | Reading pace |
-| Cycle portrait | Radial drawing animation, 3s build | None | None | Ceremonial (3s) |
-| Streak acknowledgment | Quiet counter, momentary | Light double-tap | None | Fast (1.5s appears, holds, fades) |
+| Moment                | Visual Register                                  | Haptic                  | Sound | Tempo                                |
+| --------------------- | ------------------------------------------------ | ----------------------- | ----- | ------------------------------------ |
+| Opening the app       | Quiet, single-focus, identity anchor visible     | None                    | None  | Slow (600ms fade)                    |
+| Monday intention      | Contemplative, generous whitespace, one question | None                    | None  | Slow (type at your own pace)         |
+| Check-in              | Minimal, two inputs only, gradient bars          | Light tap on score lock | None  | Fast (under 30s total)               |
+| Score submission      | The Pulse -- scores contract to timeline         | Light tap               | None  | Medium (800ms hold, then transition) |
+| Reveal notification   | Single line of text, anticipatory                | None                    | None  | Pause (user-initiated)               |
+| Card flip             | 3D rotation, background color shift              | Medium tap              | None  | Medium (400ms flip, 1200ms color)    |
+| Reflection prompt     | Open text field, generous space                  | None                    | None  | Slow (user's pace)                   |
+| Weekly insight        | Editorial typography, one insight at a time      | None                    | None  | Reading pace                         |
+| Cycle portrait        | Radial drawing animation, 3s build               | None                    | None  | Ceremonial (3s)                      |
+| Streak acknowledgment | Quiet counter, momentary                         | Light double-tap        | None  | Fast (1.5s appears, holds, fades)    |
 
 ### Haptic Vocabulary
 
-| Pattern | Meaning | Implementation |
-|---------|---------|----------------|
-| Single light tap | Score locked, action acknowledged | UIImpactFeedbackGenerator(.light) |
-| Single medium tap | Significant reveal, card flip | UIImpactFeedbackGenerator(.medium) |
-| Double quick tap | Alignment confirmed, positive signal | Two .light taps, 80ms apart |
-| None (silence) | Contemplation, no interruption needed | Deliberate absence |
+| Pattern           | Meaning                               | Implementation                     |
+| ----------------- | ------------------------------------- | ---------------------------------- |
+| Single light tap  | Score locked, action acknowledged     | UIImpactFeedbackGenerator(.light)  |
+| Single medium tap | Significant reveal, card flip         | UIImpactFeedbackGenerator(.medium) |
+| Double quick tap  | Alignment confirmed, positive signal  | Two .light taps, 80ms apart        |
+| None (silence)    | Contemplation, no interruption needed | Deliberate absence                 |
 
 ### Sound Vocabulary
 
@@ -178,13 +179,13 @@ The Quiet Room evolves the existing token system rather than replacing it.
 
 **One typeface: Plus Jakarta Sans.** Hierarchy through size alone -- weight used sparingly.
 
-| Register | Size | Weight | Line-Height | Letter-Spacing | Usage |
-|----------|------|--------|-------------|----------------|-------|
-| Display | 32px | 700 | 1.15 | -0.025em | Cycle milestones, portrait center, onboarding headlines |
-| Heading | 20px | 600 | 1.3 | -0.015em | Section titles, page titles |
-| Body | 15px | 400 | 1.7 | -0.01em | Reflections, AI insights, descriptive text |
-| Label | 11px | 600 | 1.35 | 0.08em | UPPERCASE. Week numbers, metric labels, navigation |
-| Mono (Geist Mono) | 13px | 500 | 1.4 | 0 | Scores, percentages, dates, data values |
+| Register          | Size | Weight | Line-Height | Letter-Spacing | Usage                                                   |
+| ----------------- | ---- | ------ | ----------- | -------------- | ------------------------------------------------------- |
+| Display           | 32px | 700    | 1.15        | -0.025em       | Cycle milestones, portrait center, onboarding headlines |
+| Heading           | 20px | 600    | 1.3         | -0.015em       | Section titles, page titles                             |
+| Body              | 15px | 400    | 1.7         | -0.01em        | Reflections, AI insights, descriptive text              |
+| Label             | 11px | 600    | 1.35        | 0.08em         | UPPERCASE. Week numbers, metric labels, navigation      |
+| Mono (Geist Mono) | 13px | 500    | 1.4         | 0              | Scores, percentages, dates, data values                 |
 
 The typographic scale follows a 1.25 ratio: 11, 13, 15, 20, 25, 32. Six sizes. No more.
 
@@ -196,40 +197,40 @@ The existing palette is refined, not replaced. The critical change: resolving th
 
 **Surfaces (unchanged)**
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| `surface-base` | #0c0a09 | Page background |
-| `surface-raised` | #141210 | Cards, sidebar |
-| `surface-overlay` | #1c1917 | Elevated cards, modals |
-| `surface-subtle` | #231f1c | Hover states, active items |
+| Token             | Value   | Usage                      |
+| ----------------- | ------- | -------------------------- |
+| `surface-base`    | #0c0a09 | Page background            |
+| `surface-raised`  | #141210 | Cards, sidebar             |
+| `surface-overlay` | #1c1917 | Elevated cards, modals     |
+| `surface-subtle`  | #231f1c | Hover states, active items |
 
 **Text (unchanged)**
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| `text-primary` | rgba(250,244,237, 0.93) | Headlines, primary content |
+| Token            | Value                   | Usage                         |
+| ---------------- | ----------------------- | ----------------------------- |
+| `text-primary`   | rgba(250,244,237, 0.93) | Headlines, primary content    |
 | `text-secondary` | rgba(250,244,237, 0.55) | Supporting text, descriptions |
-| `text-tertiary` | rgba(250,244,237, 0.35) | Labels, metadata |
-| `text-muted` | rgba(250,244,237, 0.20) | Disabled, placeholder |
+| `text-tertiary`  | rgba(250,244,237, 0.35) | Labels, metadata              |
+| `text-muted`     | rgba(250,244,237, 0.20) | Disabled, placeholder         |
 
 **Accent (refined)**
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| `accent` | #d4a06a | Shifted slightly warmer and lower saturation from #e8a04a. Less orange, more burnished brass. Actions, links, the amber glow. |
-| `accent-hover` | #e0b580 | Hover state |
-| `accent-muted` | rgba(212,160,106, 0.10) | Backgrounds for accent elements |
+| Token          | Value                   | Usage                                                                                                                         |
+| -------------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `accent`       | #d4a06a                 | Shifted slightly warmer and lower saturation from #e8a04a. Less orange, more burnished brass. Actions, links, the amber glow. |
+| `accent-hover` | #e0b580                 | Hover state                                                                                                                   |
+| `accent-muted` | rgba(212,160,106, 0.10) | Backgrounds for accent elements                                                                                               |
 
 **Data Colors (new -- the critical fix)**
 
-| Token | Value | Contrast on base | Usage |
-|-------|-------|-------------------|-------|
-| `data-effort` | #94a3b8 | 5.2:1 | Effort scores and visualizations. Cool slate -- the color of steady, deliberate work. |
-| `data-effort-vivid` | #cbd5e1 | 8.1:1 | Effort in high-emphasis contexts |
-| `data-effort-muted` | rgba(148,163,184, 0.10) | -- | Effort backgrounds |
-| `data-performance` | #d4a06a | 4.8:1 | Performance scores and visualizations. Warm brass -- the color of visible result. |
-| `data-performance-vivid` | #e0b580 | 6.2:1 | Performance in high-emphasis contexts |
-| `data-performance-muted` | rgba(212,160,106, 0.10) | -- | Performance backgrounds |
+| Token                    | Value                   | Contrast on base | Usage                                                                                 |
+| ------------------------ | ----------------------- | ---------------- | ------------------------------------------------------------------------------------- |
+| `data-effort`            | #94a3b8                 | 5.2:1            | Effort scores and visualizations. Cool slate -- the color of steady, deliberate work. |
+| `data-effort-vivid`      | #cbd5e1                 | 8.1:1            | Effort in high-emphasis contexts                                                      |
+| `data-effort-muted`      | rgba(148,163,184, 0.10) | --               | Effort backgrounds                                                                    |
+| `data-performance`       | #d4a06a                 | 4.8:1            | Performance scores and visualizations. Warm brass -- the color of visible result.     |
+| `data-performance-vivid` | #e0b580                 | 6.2:1            | Performance in high-emphasis contexts                                                 |
+| `data-performance-muted` | rgba(212,160,106, 0.10) | --               | Performance backgrounds                                                               |
 
 **Why this pairing**: Effort is the internal engine -- steady, structural, cool. Performance is the external output -- visible, warm, radiant. The cool/warm duality maps to the inner/outer nature of the two metrics. Slate and brass. Structure and surface. This pairing is used universally: every chart, every score display, every visualization speaks this language. A user will internalize "cool = effort, warm = performance" within their first week.
 
@@ -237,11 +238,11 @@ The existing palette is refined, not replaced. The critical change: resolving th
 
 **Semantic Colors (simplified)**
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| `signal-aligned` | #4ade80 | Perception gap < 1 point. Self and other agree. |
-| `signal-divergent` | #f59e0b | Perception gap 1-3 points. Worth exploring. |
-| `signal-attention` | #ef4444 | Perception gap > 3 points or system error. |
+| Token              | Value   | Usage                                           |
+| ------------------ | ------- | ----------------------------------------------- |
+| `signal-aligned`   | #4ade80 | Perception gap < 1 point. Self and other agree. |
+| `signal-divergent` | #f59e0b | Perception gap 1-3 points. Worth exploring.     |
+| `signal-attention` | #ef4444 | Perception gap > 3 points or system error.      |
 
 Three semantic colors. No more. Each carries a single, unambiguous meaning.
 
@@ -249,25 +250,25 @@ Three semantic colors. No more. Each carries a single, unambiguous meaning.
 
 Following Linear's principle of "structure felt, not seen":
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| `border-default` | rgba(250,244,237, 0.04) | Reduced from 0.06. Barely visible -- structural, not decorative. |
-| `border-strong` | rgba(250,244,237, 0.08) | Reduced from 0.12. For active/focused elements. |
-| `border-accent` | rgba(250,244,237, 0.14) | Reduced from 0.20. Rare -- only for primary interactive boundaries. |
+| Token            | Value                   | Usage                                                               |
+| ---------------- | ----------------------- | ------------------------------------------------------------------- |
+| `border-default` | rgba(250,244,237, 0.04) | Reduced from 0.06. Barely visible -- structural, not decorative.    |
+| `border-strong`  | rgba(250,244,237, 0.08) | Reduced from 0.12. For active/focused elements.                     |
+| `border-accent`  | rgba(250,244,237, 0.14) | Reduced from 0.20. Rare -- only for primary interactive boundaries. |
 
 #### Spacing
 
 The 8-point grid, applied with the rigor of Noorda's Milan Metro system:
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| `space-xs` | 4px | Tight details: icon-to-label gaps |
-| `space-sm` | 8px | Compact: list item padding |
-| `space-md` | 16px | Standard: card padding, section gaps |
-| `space-lg` | 24px | Generous: between content sections |
-| `space-xl` | 32px | Breathing room: page margins on mobile |
-| `space-2xl` | 48px | Landmark: between major sections |
-| `space-3xl` | 64px | Ceremony: top padding on single-focus screens |
+| Token       | Value | Usage                                         |
+| ----------- | ----- | --------------------------------------------- |
+| `space-xs`  | 4px   | Tight details: icon-to-label gaps             |
+| `space-sm`  | 8px   | Compact: list item padding                    |
+| `space-md`  | 16px  | Standard: card padding, section gaps          |
+| `space-lg`  | 24px  | Generous: between content sections            |
+| `space-xl`  | 32px  | Breathing room: page margins on mobile        |
+| `space-2xl` | 48px  | Landmark: between major sections              |
+| `space-3xl` | 64px  | Ceremony: top padding on single-focus screens |
 
 **The 64px rule**: Every single-focus screen (intention, check-in, reveal) starts with 64px of top padding. This is the digital equivalent of the therapist's pause before speaking. It signals: this space is yours. There is no rush.
 
@@ -275,24 +276,25 @@ The 8-point grid, applied with the rigor of Noorda's Milan Metro system:
 
 The card system simplifies from three variants to two:
 
-| Variant | Treatment | Usage |
-|---------|-----------|-------|
-| `surface` | `background: surface-raised; border: 1px solid border-default; border-radius: 12px;` No inner shadow, no glow. | Data display, containers, navigation items |
-| `interactive` | Same as surface, plus: `transition: all 200ms cubic-bezier(0.16,1,0.3,1); &:hover { border-color: border-strong; }` | Tappable cards, links, buttons |
+| Variant       | Treatment                                                                                                           | Usage                                      |
+| ------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `surface`     | `background: surface-raised; border: 1px solid border-default; border-radius: 12px;` No inner shadow, no glow.      | Data display, containers, navigation items |
+| `interactive` | Same as surface, plus: `transition: all 200ms cubic-bezier(0.16,1,0.3,1); &:hover { border-color: border-strong; }` | Tappable cards, links, buttons             |
 
 Glass morphism is retired. It was impressive but added visual complexity without functional value. The Quiet Room has solid walls.
 
 #### Animation
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| `ease-out` | cubic-bezier(0.16, 1, 0.3, 1) | All transitions. One curve for the entire platform. |
-| `duration-fast` | 150ms | Hover states, toggle switches |
-| `duration-normal` | 300ms | Page transitions, card reveals |
-| `duration-slow` | 600ms | Ceremonial moments: prompt appearance, portrait segments |
-| `stagger` | 60ms | Sequential element reveals (reduced from 80ms for tighter rhythm) |
+| Token             | Value                         | Usage                                                             |
+| ----------------- | ----------------------------- | ----------------------------------------------------------------- |
+| `ease-out`        | cubic-bezier(0.16, 1, 0.3, 1) | All transitions. One curve for the entire platform.               |
+| `duration-fast`   | 150ms                         | Hover states, toggle switches                                     |
+| `duration-normal` | 300ms                         | Page transitions, card reveals                                    |
+| `duration-slow`   | 600ms                         | Ceremonial moments: prompt appearance, portrait segments          |
+| `stagger`         | 60ms                          | Sequential element reveals (reduced from 80ms for tighter rhythm) |
 
 **Reduce Motion**: All animations have explicit alternatives:
+
 - Slide-up becomes instant appearance
 - Fade-in becomes instant appearance at full opacity
 - The Pulse (score-to-timeline) becomes a crossfade
@@ -306,9 +308,10 @@ Glass morphism is retired. It was impressive but added visual complexity without
 The individual hub's 8-12 information zones collapse into three distinct views, each answering one question:
 
 **Lens 1: TODAY** (default view)
-*"What should I do right now?"*
+_"What should I do right now?"_
 
 The screen contains, at most, four elements:
+
 1. Identity anchor (one line, text-tertiary, top of screen -- like an epigraph)
 2. Week indicator (Label register: "WEEK 7 / 12")
 3. The one primary action card (check-in, set intention, or "You're caught up")
@@ -318,10 +321,10 @@ Nothing else. No charts. No metrics. No navigation cards. The sidebar handles na
 
 When there is nothing to do, the screen shows the identity anchor, the week number, and a single sentence: "You're on track. Your next check-in opens Wednesday." The emptiness is the design. It says: we respect your time. You did the work. Go.
 
-*Adapted from*: Superhuman's single-focus triage model and Linear's "don't compete for attention you haven't earned."
+_Adapted from_: Superhuman's single-focus triage model and Linear's "don't compete for attention you haven't earned."
 
 **Lens 2: PROGRESS** (second tab)
-*"How am I doing over time?"*
+_"How am I doing over time?"_
 
 A single scrolling view with three sections, in order:
 
@@ -331,10 +334,10 @@ A single scrolling view with three sections, in order:
 
 3. **AI Insight** -- the latest weekly synthesis, rendered as editorial text. No card wrapping it. No colored section headers. Just well-set type: Plus Jakarta Sans at 15px, line-height 1.7, max-width 580px. One insight per view. A "Read full report" link leads to the complete synthesis.
 
-*Adapted from*: Oura Ring's temporal layering (daily/weekly/cycle views) and Kinfolk's editorial typography.
+_Adapted from_: Oura Ring's temporal layering (daily/weekly/cycle views) and Kinfolk's editorial typography.
 
 **Lens 3: FEEDBACK** (third tab)
-*"How do others see me?"*
+_"How do others see me?"_
 
 The perception gap analysis -- the product's genuine differentiator -- gets its own dedicated space:
 
@@ -344,7 +347,7 @@ The perception gap analysis -- the product's genuine differentiator -- gets its 
 
 3. **Pending invitations and stakeholder management** -- add, remove, resend links.
 
-*Adapted from*: Whoop's three-metric system (each view has one primary question) and the Mirror concept from the UX redesign panel.
+_Adapted from_: Whoop's three-metric system (each view has one primary question) and the Mirror concept from the UX redesign panel.
 
 ### 4.3 Convention Challenge -- Killing the Dashboard
 
@@ -381,7 +384,7 @@ This is the therapy room: your reflection is the only thing that matters right n
 
 Tapping into the check-in, the screen resolves to two vertical elements, side by side, on a dark field:
 
-Two tall, narrow gradient bars -- effort on the left (slate), performance on the right (brass). Each is 40% of the viewport height. The user touches a bar and drags upward. As the finger rises, the bar fills from the bottom with its color, and a number crystallizes at the top: 1, 2, 3... The gesture is *raising* your score -- a physical metaphor for reaching toward your assessment.
+Two tall, narrow gradient bars -- effort on the left (slate), performance on the right (brass). Each is 40% of the viewport height. The user touches a bar and drags upward. As the finger rises, the bar fills from the bottom with its color, and a number crystallizes at the top: 1, 2, 3... The gesture is _raising_ your score -- a physical metaphor for reaching toward your assessment.
 
 When you release, the number locks with a light haptic tap. A quiet label below the score shifts to show its anchor text -- "Significant effort" at 7, "Full commitment" at 9. These labels appear AFTER the score is set, as confirmation rather than influence.
 
@@ -427,7 +430,7 @@ No section color coding. No emoji headers. No card borders. Just text on a dark 
 
 Below the synthesis: a "Continue the conversation" link leading to the AI chat, and "View past insights" for chronological history.
 
-*Adapted from*: Kinfolk's editorial treatment -- the content IS the design. iA Writer's principle that the interface should disappear, leaving only the text.
+_Adapted from_: Kinfolk's editorial treatment -- the content IS the design. iA Writer's principle that the interface should disappear, leaving only the text.
 
 **The Portrait -- End of Cycle**
 
@@ -512,12 +515,14 @@ The stakeholder experience is the current platform's strongest page. The Quiet R
 **Structure**: Two steps, not five. (Adapted from Luke Wroblewski's friction reduction principles.)
 
 **Step 1: Your Goal**
+
 - Template library on the left (desktop) or above (mobile). Contexts and objectives browsable as an accordion.
 - Selected objective auto-fills the title and description on the right (or below).
 - "Build your own" is a text link, not a competing button.
 - Draft auto-saves to localStorage (already implemented -- keep it).
 
 **Step 2: Your Reviewers**
+
 - 1-3 reviewers (reduced from 1-5). Three is the minimum for meaningful triangulation. More can be added later.
 - Each reviewer: name and email only. Phone removed from initial onboarding (reduces fields by 33%).
 - "Skip for now" is prominently available. Following the Arc Browser principle: let users experience value before asking them to recruit others. If they skip, prompt them again after their first check-in.
@@ -559,15 +564,15 @@ The global header simplifies to: "Forbetra" wordmark on the left (Label register
 
 ### 4.6 States -- Every State Designed
 
-| State | Treatment |
-|-------|-----------|
-| **Loading** | Skeleton shimmer using `surface-subtle` pulsing against `surface-raised`. No spinner. The shimmer follows the layout's structure so users see the page "resolve" into content. |
-| **Empty (first use)** | The Today lens shows the onboarding CTA. No empty charts, no "no data yet" messages. The emptiness is the invitation. |
-| **Empty (between actions)** | "You're on track. Your next check-in opens Wednesday." Specific, not generic. Uses the actual day name from the cycle config. |
-| **Error** | Red-tinted banner at top of content area. Explains what went wrong AND suggests the fix. "We couldn't save your check-in. Check your connection and try again." Never: "An error occurred." |
-| **Offline** | Banner: "You're offline. Your data is safe -- we'll sync when you reconnect." Check-in form remains usable (localStorage draft). |
-| **Partial data** | Progress lens shows whatever data exists. The River draws with available weeks, leaving gaps visible (dashed line segments for missing weeks). |
-| **Success** | The Pulse animation for check-ins. A quiet checkmark (16px, accent color, 300ms fade-in) for other actions. No toast notifications for routine saves -- the state change IS the confirmation. |
+| State                       | Treatment                                                                                                                                                                                     |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Loading**                 | Skeleton shimmer using `surface-subtle` pulsing against `surface-raised`. No spinner. The shimmer follows the layout's structure so users see the page "resolve" into content.                |
+| **Empty (first use)**       | The Today lens shows the onboarding CTA. No empty charts, no "no data yet" messages. The emptiness is the invitation.                                                                         |
+| **Empty (between actions)** | "You're on track. Your next check-in opens Wednesday." Specific, not generic. Uses the actual day name from the cycle config.                                                                 |
+| **Error**                   | Red-tinted banner at top of content area. Explains what went wrong AND suggests the fix. "We couldn't save your check-in. Check your connection and try again." Never: "An error occurred."   |
+| **Offline**                 | Banner: "You're offline. Your data is safe -- we'll sync when you reconnect." Check-in form remains usable (localStorage draft).                                                              |
+| **Partial data**            | Progress lens shows whatever data exists. The River draws with available weeks, leaving gaps visible (dashed line segments for missing weeks).                                                |
+| **Success**                 | The Pulse animation for check-ins. A quiet checkmark (16px, accent color, 300ms fade-in) for other actions. No toast notifications for routine saves -- the state change IS the confirmation. |
 
 ---
 
@@ -593,6 +598,7 @@ Forbetra's emails carry the design language:
 ### Push Notifications (Future)
 
 Same philosophy:
+
 - One line of text. No subtitle. No image.
 - "Your check-in is ready." Not "Don't forget to check in this week! You're on a 6-week streak!"
 - Notifications are prompts, not pitches.
@@ -600,6 +606,7 @@ Same philosophy:
 ### Shareable Artifacts
 
 The Behavioral Portrait is designed for sharing:
+
 - PNG export at 1080x1080 (Instagram-ready, LinkedIn-ready)
 - Dark background with the radial visualization centered
 - "Forbetra" wordmark in Label register at bottom, barely visible -- brand presence without brand shouting
@@ -611,16 +618,16 @@ The Behavioral Portrait is designed for sharing:
 
 ### Visual
 
-| Element | Contrast Ratio | WCAG Level | Notes |
-|---------|----------------|------------|-------|
-| `text-primary` on `surface-base` | 14.8:1 | AAA | Exceeds all requirements |
-| `text-secondary` on `surface-base` | 6.2:1 | AA | Passes for all text sizes |
-| `text-tertiary` on `surface-base` | 3.5:1 | AA Large | Passes for labels (11px bold qualifies as "large" equivalent at this weight) |
-| `accent` (#d4a06a) on `surface-base` | 5.9:1 | AA | Passes for buttons and links |
-| `data-effort` (#94a3b8) on `surface-base` | 5.2:1 | AA | Passes for score displays |
-| `data-performance` (#d4a06a) on `surface-base` | 5.9:1 | AA | Passes for score displays |
-| `signal-aligned` (#4ade80) on `surface-base` | 7.1:1 | AAA | Excellent |
-| `signal-attention` (#ef4444) on `surface-base` | 4.6:1 | AA | Passes |
+| Element                                        | Contrast Ratio | WCAG Level | Notes                                                                        |
+| ---------------------------------------------- | -------------- | ---------- | ---------------------------------------------------------------------------- |
+| `text-primary` on `surface-base`               | 14.8:1         | AAA        | Exceeds all requirements                                                     |
+| `text-secondary` on `surface-base`             | 6.2:1          | AA         | Passes for all text sizes                                                    |
+| `text-tertiary` on `surface-base`              | 3.5:1          | AA Large   | Passes for labels (11px bold qualifies as "large" equivalent at this weight) |
+| `accent` (#d4a06a) on `surface-base`           | 5.9:1          | AA         | Passes for buttons and links                                                 |
+| `data-effort` (#94a3b8) on `surface-base`      | 5.2:1          | AA         | Passes for score displays                                                    |
+| `data-performance` (#d4a06a) on `surface-base` | 5.9:1          | AA         | Passes for score displays                                                    |
+| `signal-aligned` (#4ade80) on `surface-base`   | 7.1:1          | AAA        | Excellent                                                                    |
+| `signal-attention` (#ef4444) on `surface-base` | 4.6:1          | AA         | Passes                                                                       |
 
 ### Color Independence
 
@@ -633,19 +640,20 @@ State is NEVER communicated by color alone:
 
 ### Motion
 
-| Animation | Reduce Motion Alternative |
-|-----------|--------------------------|
-| Gradient bar fill on check-in | Instant fill, number appears without transition |
+| Animation                            | Reduce Motion Alternative                               |
+| ------------------------------------ | ------------------------------------------------------- |
+| Gradient bar fill on check-in        | Instant fill, number appears without transition         |
 | The Pulse (score-to-dot contraction) | Scores fade out, dots appear in timeline with crossfade |
-| Card flip on Reveal | Card front crossfades to card back (200ms) |
-| Background color shift on Reveal | Instant color change |
-| Portrait drawing animation | Complete portrait appears with 600ms fade-in |
-| Slide-up stagger for lists | Instant appearance |
-| Skeleton shimmer | Static skeleton (no animation) |
+| Card flip on Reveal                  | Card front crossfades to card back (200ms)              |
+| Background color shift on Reveal     | Instant color change                                    |
+| Portrait drawing animation           | Complete portrait appears with 600ms fade-in            |
+| Slide-up stagger for lists           | Instant appearance                                      |
+| Skeleton shimmer                     | Static skeleton (no animation)                          |
 
 ### Screen Reader
 
 **Reading order for Today lens:**
+
 1. "Forbetra, individual hub" (landmark)
 2. Identity anchor text (heading level 2)
 3. "Week 7 of 12" (status)
@@ -653,6 +661,7 @@ State is NEVER communicated by color alone:
 5. Reveal notification if present: "New feedback from a stakeholder. Button." (live region, polite)
 
 **Reading order for Check-in:**
+
 1. "Check-in for week 7" (heading level 1)
 2. "Previous effort score: 6" (status)
 3. "Effort score, slider, current value 0, range 0 to 10" (slider role with accessible value text)
@@ -678,18 +687,18 @@ All interactive elements: minimum 44x44px touch target with 8px minimum spacing 
 
 ## 7. DELIBERATE EXCLUSIONS
 
-| Excluded Element | Reason |
-|------------------|--------|
-| **Gamification badges** | Patronizing for executive audience. Streaks are acknowledged quietly (a counter, not a badge). Growth is its own reward. |
-| **Glass morphism** | Added visual complexity without functional value. Solid surfaces are clearer and more performant. The Quiet Room has solid walls. |
-| **Emoji as UI elements** | Undermine premium positioning. Replaced with typographic treatments or Lucide icons where necessary. |
-| **Dashboard view** | The convention is wrong for this product. See Section 4.3. |
-| **Confetti/celebration animations** | Inappropriate for the emotional register. A coaching insight is not a game achievement. Acknowledgment should feel like a nod from a respected colleague, not a party. |
-| **Multi-color section coding** | The 6-color insight sections create cognitive overload. Two data colors (slate, brass) plus three signal colors (green, amber, red) is the entire palette. |
-| **Sound** | Coaching is private and reflective. The app never makes noise. |
-| **Charts with multiple types** | One visualization type per lens. The River for Progress. The Mirror for Feedback. The Portrait for cycle completion. Consistency over variety. |
-| **Toast notifications for routine saves** | The state change IS the confirmation. Toasts are reserved for errors and significant events (stakeholder feedback received). |
-| **"Save for later" on check-ins** | Two buttons create a decision point that is also an exit point. One action: Done. |
+| Excluded Element                          | Reason                                                                                                                                                                 |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Gamification badges**                   | Patronizing for executive audience. Streaks are acknowledged quietly (a counter, not a badge). Growth is its own reward.                                               |
+| **Glass morphism**                        | Added visual complexity without functional value. Solid surfaces are clearer and more performant. The Quiet Room has solid walls.                                      |
+| **Emoji as UI elements**                  | Undermine premium positioning. Replaced with typographic treatments or Lucide icons where necessary.                                                                   |
+| **Dashboard view**                        | The convention is wrong for this product. See Section 4.3.                                                                                                             |
+| **Confetti/celebration animations**       | Inappropriate for the emotional register. A coaching insight is not a game achievement. Acknowledgment should feel like a nod from a respected colleague, not a party. |
+| **Multi-color section coding**            | The 6-color insight sections create cognitive overload. Two data colors (slate, brass) plus three signal colors (green, amber, red) is the entire palette.             |
+| **Sound**                                 | Coaching is private and reflective. The app never makes noise.                                                                                                         |
+| **Charts with multiple types**            | One visualization type per lens. The River for Progress. The Mirror for Feedback. The Portrait for cycle completion. Consistency over variety.                         |
+| **Toast notifications for routine saves** | The state change IS the confirmation. Toasts are reserved for errors and significant events (stakeholder feedback received).                                           |
+| **"Save for later" on check-ins**         | Two buttons create a decision point that is also an exit point. One action: Done.                                                                                      |
 
 ---
 
@@ -698,6 +707,7 @@ All interactive elements: minimum 44x44px touch target with 8px minimum spacing 
 This is a design concept, not an implementation plan. But the recommended sequence for bringing The Quiet Room to life:
 
 **Phase 1: Foundation** (design system tokens + navigation)
+
 - Update color tokens (accent refinement, data-effort/data-performance, simplified semantics)
 - Simplify border tokens
 - Implement collapsed sidebar + bottom tab bar
@@ -705,35 +715,40 @@ This is a design concept, not an implementation plan. But the recommended sequen
 - Remove glass morphism utilities
 
 **Phase 2: The Three Lenses** (individual hub restructure)
+
 - Build Today lens (single-action focus)
 - Build Progress lens (River + numbers + insight)
 - Build Feedback lens (Mirror + stakeholder management)
 - Retire the monolithic individual hub
 
 **Phase 3: Signature Moments**
+
 - The gradient-bar check-in input
 - The Pulse (post-submission animation)
 - The Reveal (three-screen micro-flow)
 - Streak counter (quiet acknowledgment)
 
 **Phase 4: Coach Console**
+
 - Signal-sorted client list
 - Session view (prep + data + notes on one screen)
 - On-demand prep generation
 - Portfolio view
 
 **Phase 5: The Portrait**
+
 - D3/SVG radial visualization
 - Drawing animation
 - Share/export functionality
 
 **Phase 6: Onboarding Simplification**
+
 - Two-step flow
 - Remove initial ratings
 - Deferred stakeholder invitation option
 
 ---
 
-*This concept was composed through the lens of warm rationalism -- the intersection of Italian Olivetti precision and Scandinavian democratic warmth. It sits at the corporate authority end of the spectrum, with enough signature moments to prevent the clinical feel of enterprise software. The grid is always there. The restraint is deliberate. The warmth is structural, not decorative.*
+_This concept was composed through the lens of warm rationalism -- the intersection of Italian Olivetti precision and Scandinavian democratic warmth. It sits at the corporate authority end of the spectrum, with enough signature moments to prevent the clinical feel of enterprise software. The grid is always there. The restraint is deliberate. The warmth is structural, not decorative._
 
-*The highest compliment for The Quiet Room would be a user who says: "I didn't notice the interface. I just... reflected."*
+_The highest compliment for The Quiet Room would be a user who says: "I didn't notice the interface. I just... reflected."_

@@ -1,1296 +1,1480 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Forbetra — The Quiet Room</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-  :root {
-    /* Surfaces */
-    --surface-base: #0c0a09;
-    --surface-raised: #141210;
-    --surface-overlay: #1c1917;
-    --surface-subtle: #231f1c;
-
-    /* Text */
-    --text-primary: rgba(250,244,237, 0.93);
-    --text-secondary: rgba(250,244,237, 0.55);
-    --text-tertiary: rgba(250,244,237, 0.35);
-    --text-muted: rgba(250,244,237, 0.20);
-
-    /* Accent */
-    --accent: #d4a06a;
-    --accent-hover: #e0b580;
-    --accent-muted: rgba(212,160,106, 0.10);
-
-    /* Data */
-    --data-effort: #94a3b8;
-    --data-effort-vivid: #cbd5e1;
-    --data-effort-muted: rgba(148,163,184, 0.10);
-    --data-performance: #d4a06a;
-    --data-performance-vivid: #e0b580;
-    --data-performance-muted: rgba(212,160,106, 0.10);
-
-    /* Signals */
-    --signal-aligned: #4ade80;
-    --signal-divergent: #f59e0b;
-    --signal-attention: #ef4444;
-
-    /* Borders */
-    --border-default: rgba(250,244,237, 0.04);
-    --border-strong: rgba(250,244,237, 0.08);
-    --border-accent: rgba(250,244,237, 0.14);
-
-    /* Spacing */
-    --space-xs: 4px;
-    --space-sm: 8px;
-    --space-md: 16px;
-    --space-lg: 24px;
-    --space-xl: 32px;
-    --space-2xl: 48px;
-    --space-3xl: 64px;
-
-    /* Animation */
-    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    background: var(--surface-base);
-    color: var(--text-primary);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    letter-spacing: -0.01em;
-    overflow-x: hidden;
-  }
-
-  /* ===== NAVIGATION ===== */
-  .screen-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: center;
-    gap: 2px;
-    padding: 12px 16px;
-    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0));
-    background: var(--surface-raised);
-    border-top: 1px solid var(--border-default);
-    z-index: 100;
-  }
-  .screen-nav button {
-    flex: 1;
-    max-width: 160px;
-    padding: 10px 12px;
-    background: transparent;
-    border: 1px solid var(--border-default);
-    border-radius: 8px;
-    color: var(--text-muted);
-    font-family: 'Plus Jakarta Sans', system-ui;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: all 200ms var(--ease-out);
-  }
-  .screen-nav button:hover { color: var(--text-secondary); border-color: var(--border-strong); }
-  .screen-nav button.active { color: var(--accent); border-color: var(--accent); background: var(--accent-muted); }
-
-  /* ===== SCREENS ===== */
-  .screen {
-    display: none;
-    min-height: 100vh;
-    padding-bottom: 80px;
-  }
-  .screen.active { display: block; }
-
-  /* ===== SIDEBAR (desktop hint) ===== */
-  .sidebar {
-    position: fixed;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 48px;
-    background: var(--surface-raised);
-    border-right: 1px solid var(--border-default);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-top: 20px;
-    gap: 24px;
-    z-index: 50;
-  }
-  .sidebar .logo {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    color: var(--text-tertiary);
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-    transform: rotate(180deg);
-  }
-  .sidebar .nav-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 3px;
-    background: var(--text-muted);
-    cursor: pointer;
-    transition: all 200ms var(--ease-out);
-  }
-  .sidebar .nav-dot:hover { background: var(--text-secondary); }
-  .sidebar .nav-dot.active { background: var(--accent); box-shadow: 0 0 8px rgba(212,160,106,0.3); }
-
-  @media (max-width: 768px) {
-    .sidebar { display: none; }
-  }
-  @media (min-width: 769px) {
-    .screen { padding-left: 48px; }
-  }
-
-  /* ===== HEADER ===== */
-  .global-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 24px;
-    border-bottom: 1px solid var(--border-default);
-  }
-  .global-header .wordmark {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--text-tertiary);
-  }
-  .global-header .avatar {
-    width: 28px;
-    height: 28px;
-    border-radius: 14px;
-    background: var(--surface-subtle);
-    border: 1px solid var(--border-strong);
-  }
-
-  /* ===== SCREEN 1: TODAY ===== */
-  .today-content {
-    max-width: 480px;
-    margin: 0 auto;
-    padding: var(--space-3xl) var(--space-lg) 0;
-    animation: fadeIn 600ms var(--ease-out);
-  }
-  .identity-anchor {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-tertiary);
-    margin-bottom: var(--space-xs);
-  }
-  .week-indicator {
-    font-family: 'Geist Mono', 'SF Mono', 'Fira Code', monospace;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    color: var(--text-muted);
-    margin-bottom: var(--space-3xl);
-  }
-  .action-card {
-    background: var(--surface-raised);
-    border: 1px solid var(--border-default);
-    border-radius: 12px;
-    padding: var(--space-lg);
-    cursor: pointer;
-    transition: all 200ms var(--ease-out);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .action-card:hover {
-    border-color: var(--border-strong);
-    background: var(--surface-overlay);
-  }
-  .action-card h2 {
-    font-size: 20px;
-    font-weight: 600;
-    line-height: 1.3;
-    letter-spacing: -0.015em;
-    margin-bottom: 6px;
-  }
-  .action-card p {
-    font-size: 15px;
-    font-weight: 400;
-    line-height: 1.7;
-    color: var(--text-secondary);
-  }
-  .action-card .arrow {
-    font-size: 20px;
-    color: var(--accent);
-    flex-shrink: 0;
-    margin-left: var(--space-lg);
-  }
-
-  .reveal-notification {
-    margin-top: var(--space-lg);
-    padding: var(--space-md) var(--space-lg);
-    color: var(--text-secondary);
-    font-size: 15px;
-    cursor: pointer;
-    transition: color 200ms var(--ease-out);
-    border-left: 2px solid var(--accent-muted);
-  }
-  .reveal-notification:hover { color: var(--text-primary); }
-
-  .caught-up {
-    margin-top: var(--space-2xl);
-    text-align: center;
-    color: var(--text-muted);
-    font-size: 13px;
-    line-height: 1.6;
-  }
-
-  /* ===== SCREEN 2: CHECK-IN ===== */
-  .checkin-content {
-    max-width: 400px;
-    margin: 0 auto;
-    padding: var(--space-3xl) var(--space-lg) 0;
-    animation: fadeIn 600ms var(--ease-out);
-  }
-  .checkin-header {
-    text-align: center;
-    margin-bottom: var(--space-2xl);
-  }
-  .checkin-header h1 {
-    font-size: 20px;
-    font-weight: 600;
-    letter-spacing: -0.015em;
-    margin-bottom: var(--space-xs);
-  }
-  .checkin-header .week-label {
-    font-family: 'Geist Mono', monospace;
-    font-size: 11px;
-    color: var(--text-muted);
-    letter-spacing: 0.08em;
-  }
-
-  .bars-container {
-    display: flex;
-    justify-content: center;
-    gap: 48px;
-    margin-bottom: var(--space-2xl);
-    height: 320px;
-    align-items: flex-end;
-  }
-  .bar-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-sm);
-  }
-  .bar-score {
-    font-family: 'Geist Mono', monospace;
-    font-size: 32px;
-    font-weight: 500;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    transition: opacity 300ms var(--ease-out);
-  }
-  .bar-score.effort { color: var(--data-effort-vivid); }
-  .bar-score.performance { color: var(--data-performance-vivid); }
-
-  .bar-track {
-    width: 56px;
-    height: 240px;
-    border-radius: 28px;
-    background: var(--surface-raised);
-    border: 1px solid var(--border-default);
-    position: relative;
-    cursor: pointer;
-    overflow: hidden;
-  }
-  .bar-fill {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    border-radius: 28px;
-    transition: height 100ms var(--ease-out);
-  }
-  .bar-fill.effort { background: linear-gradient(to top, rgba(148,163,184,0.3), var(--data-effort)); }
-  .bar-fill.performance { background: linear-gradient(to top, rgba(212,160,106,0.3), var(--data-performance)); }
-
-  .bar-label {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-tertiary);
-  }
-  .bar-prev {
-    font-family: 'Geist Mono', monospace;
-    font-size: 11px;
-    color: var(--text-muted);
-    margin-top: 4px;
-  }
-
-  .add-note {
-    text-align: center;
-    margin-bottom: var(--space-lg);
-  }
-  .add-note a {
-    color: var(--text-tertiary);
-    font-size: 13px;
-    text-decoration: none;
-    cursor: pointer;
-    transition: color 200ms var(--ease-out);
-  }
-  .add-note a:hover { color: var(--text-secondary); }
-
-  .note-area {
-    display: none;
-    margin-bottom: var(--space-lg);
-  }
-  .note-area.visible { display: block; animation: slideUp 300ms var(--ease-out); }
-  .note-area textarea {
-    width: 100%;
-    background: var(--surface-raised);
-    border: 1px solid var(--border-default);
-    border-radius: 12px;
-    padding: var(--space-md);
-    color: var(--text-primary);
-    font-family: 'Plus Jakarta Sans', system-ui;
-    font-size: 15px;
-    line-height: 1.7;
-    resize: none;
-    height: 100px;
-    outline: none;
-    transition: border-color 200ms var(--ease-out);
-  }
-  .note-area textarea:focus { border-color: var(--border-accent); }
-  .note-area textarea::placeholder { color: var(--text-muted); }
-
-  .btn-done {
-    width: 100%;
-    height: 48px;
-    background: var(--accent);
-    color: var(--surface-base);
-    border: none;
-    border-radius: 12px;
-    font-family: 'Plus Jakarta Sans', system-ui;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 200ms var(--ease-out);
-  }
-  .btn-done:hover { background: var(--accent-hover); }
-  .btn-done:active { transform: scale(0.98); }
-
-  /* ===== SCREEN 3: PROGRESS ===== */
-  .progress-content {
-    max-width: 680px;
-    margin: 0 auto;
-    padding: var(--space-3xl) var(--space-lg) 0;
-    animation: fadeIn 600ms var(--ease-out);
-  }
-  .progress-content .identity-anchor { margin-bottom: var(--space-sm); }
-
-  /* The River */
-  .river-section {
-    margin-bottom: var(--space-2xl);
-  }
-  .river-section .section-label {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: var(--space-md);
-  }
-  .river-canvas {
-    width: 100%;
-    height: 180px;
-    background: var(--surface-raised);
-    border: 1px solid var(--border-default);
-    border-radius: 12px;
-    position: relative;
-    overflow: hidden;
-  }
-  .river-svg { width: 100%; height: 100%; }
-
-  /* Week Numbers */
-  .numbers-grid {
-    display: flex;
-    justify-content: center;
-    gap: var(--space-2xl);
-    margin-bottom: var(--space-2xl);
-  }
-  .number-block {
-    text-align: center;
-  }
-  .number-block .value {
-    font-family: 'Geist Mono', monospace;
-    font-size: 32px;
-    font-weight: 500;
-    line-height: 1;
-    margin-bottom: 6px;
-  }
-  .number-block .value.effort { color: var(--data-effort-vivid); }
-  .number-block .value.performance { color: var(--data-performance-vivid); }
-  .number-block .value.aligned { color: var(--signal-aligned); }
-  .number-block .label {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-tertiary);
-  }
-  .number-block .trend {
-    font-size: 11px;
-    color: var(--text-muted);
-    margin-top: 4px;
-  }
-
-  /* AI Insight */
-  .insight-section {
-    max-width: 580px;
-    margin: 0 auto;
-  }
-  .insight-section .section-label {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: var(--space-lg);
-  }
-  .insight-text {
-    font-size: 15px;
-    line-height: 1.7;
-    color: var(--text-secondary);
-    letter-spacing: -0.01em;
-  }
-  .insight-text strong {
-    color: var(--text-primary);
-    font-weight: 500;
-  }
-  .insight-link {
-    display: inline-block;
-    margin-top: var(--space-md);
-    color: var(--accent);
-    font-size: 13px;
-    text-decoration: none;
-    cursor: pointer;
-  }
-  .insight-link:hover { color: var(--accent-hover); }
-
-  /* ===== SCREEN 4: REVEAL ===== */
-  .reveal-content {
-    max-width: 480px;
-    margin: 0 auto;
-    padding: var(--space-3xl) var(--space-lg) 0;
-    text-align: center;
-    animation: fadeIn 600ms var(--ease-out);
-  }
-  .reveal-step { display: none; }
-  .reveal-step.active { display: block; }
-
-  .your-scores {
-    margin-bottom: var(--space-2xl);
-  }
-  .your-scores .intro {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: var(--space-2xl);
-  }
-  .score-pair {
-    display: flex;
-    justify-content: center;
-    gap: var(--space-2xl);
-    margin-bottom: var(--space-md);
-  }
-  .score-item .big-number {
-    font-family: 'Geist Mono', monospace;
-    font-size: 48px;
-    font-weight: 500;
-    line-height: 1;
-  }
-  .score-item .big-number.effort { color: var(--data-effort-vivid); }
-  .score-item .big-number.performance { color: var(--data-performance-vivid); }
-  .score-item .score-label {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-tertiary);
-    margin-top: var(--space-sm);
-  }
-  .your-scores .week-ref {
-    font-size: 13px;
-    color: var(--text-muted);
-    margin-top: var(--space-lg);
-  }
-
-  /* The Card */
-  .flip-card-container {
-    perspective: 1000px;
-    margin: var(--space-2xl) auto;
-    width: 280px;
-    height: 80px;
-    cursor: pointer;
-  }
-  .flip-card {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    transform-style: preserve-3d;
-    transition: transform 500ms var(--ease-out);
-  }
-  .flip-card.flipped { transform: rotateY(180deg); }
-  .flip-card-front, .flip-card-back {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .flip-card-front {
-    background: var(--surface-raised);
-    border: 1px solid var(--border-strong);
-    /* subtle diagonal pattern */
-    background-image: repeating-linear-gradient(
-      45deg,
-      transparent,
-      transparent 8px,
-      rgba(250,244,237,0.02) 8px,
-      rgba(250,244,237,0.02) 9px
-    );
-    animation: cardBreathe 4s ease-in-out infinite;
-  }
-  .flip-card-front span {
-    font-size: 13px;
-    color: var(--text-muted);
-  }
-  .flip-card-back {
-    background: var(--surface-overlay);
-    border: 1px solid var(--border-strong);
-    transform: rotateY(180deg);
-    flex-direction: column;
-    gap: 4px;
-  }
-  .flip-card-back .their-scores {
-    display: flex;
-    gap: var(--space-lg);
-  }
-  .flip-card-back .their-score {
-    text-align: center;
-  }
-  .flip-card-back .their-score .num {
-    font-family: 'Geist Mono', monospace;
-    font-size: 24px;
-    font-weight: 500;
-  }
-  .flip-card-back .their-score .num.effort { color: var(--data-effort-vivid); }
-  .flip-card-back .their-score .num.performance { color: var(--data-performance-vivid); }
-  .flip-card-back .their-score .lbl {
-    font-size: 9px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-tertiary);
-  }
-
-  .tap-hint {
-    font-size: 13px;
-    color: var(--text-muted);
-    margin-bottom: var(--space-lg);
-  }
-
-  .alignment-text {
-    font-size: 15px;
-    color: var(--text-secondary);
-    margin-top: var(--space-lg);
-    opacity: 0;
-    transition: opacity 600ms var(--ease-out);
-  }
-  .alignment-text.visible { opacity: 1; }
-
-  /* Background glow for alignment */
-  .reveal-screen {
-    transition: background 1200ms var(--ease-out);
-  }
-  .reveal-screen.aligned {
-    background: radial-gradient(ellipse at 50% 40%, rgba(212,160,106,0.06), transparent 70%);
-  }
-  .reveal-screen.divergent {
-    background: radial-gradient(ellipse at 50% 40%, rgba(148,163,184,0.06), transparent 70%);
-  }
-
-  /* Prompt step */
-  .prompt-step {
-    padding-top: var(--space-2xl);
-  }
-  .prompt-step .question {
-    font-size: 15px;
-    color: var(--text-secondary);
-    line-height: 1.7;
-    margin-bottom: var(--space-lg);
-  }
-  .prompt-step input {
-    width: 100%;
-    background: var(--surface-raised);
-    border: 1px solid var(--border-default);
-    border-radius: 12px;
-    padding: 14px var(--space-md);
-    color: var(--text-primary);
-    font-family: 'Plus Jakarta Sans', system-ui;
-    font-size: 15px;
-    outline: none;
-    margin-bottom: var(--space-md);
-    transition: border-color 200ms var(--ease-out);
-  }
-  .prompt-step input:focus { border-color: var(--border-accent); }
-  .prompt-step input::placeholder { color: var(--text-muted); }
-  .prompt-actions {
-    display: flex;
-    gap: var(--space-md);
-    justify-content: center;
-  }
-  .prompt-actions .skip {
-    padding: 10px 20px;
-    background: transparent;
-    border: none;
-    color: var(--text-muted);
-    font-family: 'Plus Jakarta Sans', system-ui;
-    font-size: 13px;
-    cursor: pointer;
-  }
-  .prompt-actions .save {
-    padding: 10px 24px;
-    background: var(--accent);
-    border: none;
-    border-radius: 8px;
-    color: var(--surface-base);
-    font-family: 'Plus Jakarta Sans', system-ui;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 200ms var(--ease-out);
-  }
-  .prompt-actions .save:hover { background: var(--accent-hover); }
-
-  /* ===== SCREEN 5: COACH ===== */
-  .coach-content {
-    max-width: 680px;
-    margin: 0 auto;
-    padding: var(--space-3xl) var(--space-lg) 0;
-    animation: fadeIn 600ms var(--ease-out);
-  }
-  .coach-header {
-    margin-bottom: var(--space-2xl);
-  }
-  .coach-header .greeting {
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 4px;
-  }
-  .coach-header .subtitle {
-    font-size: 13px;
-    color: var(--text-muted);
-  }
-
-  .client-list {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-  .client-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--space-md) var(--space-lg);
-    background: var(--surface-raised);
-    border: 1px solid var(--border-default);
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 200ms var(--ease-out);
-  }
-  .client-row:hover {
-    border-color: var(--border-strong);
-    background: var(--surface-overlay);
-  }
-  .client-info {
-    display: flex;
-    align-items: center;
-    gap: var(--space-md);
-  }
-  .client-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 16px;
-    background: var(--surface-subtle);
-    border: 1px solid var(--border-strong);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-tertiary);
-  }
-  .client-name {
-    font-size: 15px;
-    font-weight: 500;
-  }
-  .client-meta {
-    font-size: 11px;
-    color: var(--text-muted);
-    margin-top: 2px;
-  }
-  .client-signal {
-    width: 8px;
-    height: 8px;
-    border-radius: 4px;
-    flex-shrink: 0;
-  }
-  .client-signal.on-track { background: var(--accent); }
-  .client-signal.waiting { background: var(--data-effort); }
-  .client-signal.gap { background: var(--signal-divergent); }
-  .client-signal.attention { background: var(--signal-attention); }
-
-  /* ===== SCREEN 6: PORTRAIT ===== */
-  .portrait-content {
-    max-width: 480px;
-    margin: 0 auto;
-    padding: var(--space-3xl) var(--space-lg) 0;
-    text-align: center;
-    animation: fadeIn 600ms var(--ease-out);
-  }
-  .portrait-label {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: var(--space-2xl);
-  }
-  .portrait-svg-container {
-    width: 320px;
-    height: 320px;
-    margin: 0 auto var(--space-lg);
-  }
-  .portrait-svg-container svg {
-    width: 100%;
-    height: 100%;
-  }
-  .portrait-identity {
-    font-size: 15px;
-    color: var(--text-secondary);
-    line-height: 1.7;
-    max-width: 300px;
-    margin: 0 auto var(--space-2xl);
-  }
-  .portrait-actions {
-    display: flex;
-    gap: var(--space-md);
-    justify-content: center;
-  }
-  .portrait-actions button {
-    padding: 12px 24px;
-    border-radius: 10px;
-    font-family: 'Plus Jakarta Sans', system-ui;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 200ms var(--ease-out);
-  }
-  .portrait-actions .share-btn {
-    background: transparent;
-    border: 1px solid var(--border-strong);
-    color: var(--text-secondary);
-  }
-  .portrait-actions .share-btn:hover { border-color: var(--border-accent); color: var(--text-primary); }
-  .portrait-actions .new-cycle-btn {
-    background: var(--accent);
-    border: none;
-    color: var(--surface-base);
-  }
-  .portrait-actions .new-cycle-btn:hover { background: var(--accent-hover); }
-
-  /* ===== TIMELINE STRIP ===== */
-  .timeline-strip {
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-    padding: var(--space-md);
-    margin-top: var(--space-lg);
-  }
-  .week-dots {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
-  }
-  .week-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 4px;
-    transition: all 300ms var(--ease-out);
-  }
-  .week-dot.effort { background: var(--data-effort); }
-  .week-dot.performance { background: var(--data-performance); }
-  .week-dot.empty { background: var(--surface-subtle); }
-
-  /* ===== ANIMATIONS ===== */
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  @keyframes slideUp {
-    from { opacity: 0; transform: translateY(12px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes cardBreathe {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.02); }
-  }
-
-  /* ===== RESPONSIVE ===== */
-  @media (max-width: 768px) {
-    .bars-container { gap: 32px; height: 280px; }
-    .bar-track { height: 200px; }
-    .numbers-grid { gap: var(--space-lg); }
-    .number-block .value { font-size: 24px; }
-    .score-item .big-number { font-size: 36px; }
-  }
-</style>
-</head>
-<body>
-
-<!-- Sidebar (desktop) -->
-<div class="sidebar">
-  <div class="logo">F</div>
-  <div class="nav-dot active" title="Today"></div>
-  <div class="nav-dot" title="Progress"></div>
-  <div class="nav-dot" title="Feedback"></div>
-  <div class="nav-dot" title="Settings"></div>
-</div>
-
-<!-- ==================== SCREEN 1: TODAY ==================== -->
-<div class="screen active" id="screen-today">
-  <div class="global-header">
-    <div class="wordmark">FORBETRA</div>
-    <div class="avatar"></div>
-  </div>
-  <div class="today-content">
-    <div class="identity-anchor">I am becoming a leader who listens before deciding</div>
-    <div class="week-indicator">WEEK 7 / 12</div>
-    <div class="action-card" onclick="showScreen('screen-checkin')">
-      <div>
-        <h2>Check in</h2>
-        <p>How did you show up this week?</p>
-      </div>
-      <div class="arrow">&rarr;</div>
-    </div>
-    <div class="reveal-notification" onclick="showScreen('screen-reveal')">
-      Someone shared their perspective.
-    </div>
-  </div>
-</div>
-
-<!-- ==================== SCREEN 2: CHECK-IN ==================== -->
-<div class="screen" id="screen-checkin">
-  <div class="global-header">
-    <div class="wordmark">FORBETRA</div>
-    <div class="avatar"></div>
-  </div>
-  <div class="checkin-content">
-    <div class="checkin-header">
-      <h1>Check in</h1>
-      <div class="week-label">WEEK 7 / 12</div>
-    </div>
-
-    <div class="bars-container">
-      <div class="bar-wrapper">
-        <div class="bar-score effort" id="effort-score">&nbsp;</div>
-        <div class="bar-track" id="effort-track" onmousedown="startDrag(event, 'effort')" ontouchstart="startDrag(event, 'effort')">
-          <div class="bar-fill effort" id="effort-fill" style="height: 0%"></div>
-        </div>
-        <div class="bar-label">Effort</div>
-        <div class="bar-prev">Last: 6</div>
-      </div>
-      <div class="bar-wrapper">
-        <div class="bar-score performance" id="perf-score">&nbsp;</div>
-        <div class="bar-track" id="perf-track" onmousedown="startDrag(event, 'performance')" ontouchstart="startDrag(event, 'performance')">
-          <div class="bar-fill performance" id="perf-fill" style="height: 0%"></div>
-        </div>
-        <div class="bar-label">Performance</div>
-        <div class="bar-prev">Last: 5</div>
-      </div>
-    </div>
-
-    <div class="add-note">
-      <a onclick="toggleNote()">Add a note</a>
-    </div>
-    <div class="note-area" id="note-area">
-      <textarea placeholder="What shaped your week?"></textarea>
-    </div>
-
-    <button class="btn-done" onclick="submitCheckin()">Done</button>
-  </div>
-</div>
-
-<!-- ==================== SCREEN 3: PROGRESS ==================== -->
-<div class="screen" id="screen-progress">
-  <div class="global-header">
-    <div class="wordmark">FORBETRA</div>
-    <div class="avatar"></div>
-  </div>
-  <div class="progress-content">
-    <div class="identity-anchor">I am becoming a leader who listens before deciding</div>
-    <div class="week-indicator" style="margin-bottom: var(--space-2xl);">WEEK 7 / 12</div>
-
-    <div class="river-section">
-      <div class="section-label">THE RIVER</div>
-      <div class="river-canvas">
-        <svg class="river-svg" viewBox="0 0 680 180" preserveAspectRatio="none" id="river-svg"></svg>
-      </div>
-    </div>
-
-    <div class="numbers-grid">
-      <div class="number-block">
-        <div class="value effort">7</div>
-        <div class="label">Effort</div>
-        <div class="trend">&uarr; from 6</div>
-      </div>
-      <div class="number-block">
-        <div class="value performance">5</div>
-        <div class="label">Performance</div>
-        <div class="trend">&darr; from 7</div>
-      </div>
-      <div class="number-block">
-        <div class="value aligned">&bull;</div>
-        <div class="label">Alignment</div>
-        <div class="trend">Within 1pt</div>
-      </div>
-    </div>
-
-    <div class="insight-section">
-      <div class="section-label">WEEK 7 SYNTHESIS &mdash; MARCH 14, 2026</div>
-      <div class="insight-text">
-        <strong>Your effort continues to climb while your perceived performance has dipped.</strong> This is a pattern worth noticing: weeks where you invest the most energy don't always correlate with your best output. Your stakeholder data tells a different story, though &mdash; <strong>their performance rating has stayed steady at 7</strong>, suggesting you may be undervaluing your own impact during high-effort periods. This gap between self-perception and external perception is one of the most valuable things to explore with your coach.
-      </div>
-      <a class="insight-link">Continue the conversation &rarr;</a>
-    </div>
-  </div>
-</div>
-
-<!-- ==================== SCREEN 4: REVEAL ==================== -->
-<div class="screen reveal-screen" id="screen-reveal">
-  <div class="global-header">
-    <div class="wordmark">FORBETRA</div>
-    <div class="avatar"></div>
-  </div>
-  <div class="reveal-content">
-
-    <!-- Step 1: Your scores -->
-    <div class="reveal-step active" id="reveal-step-1">
-      <div class="your-scores">
-        <div class="intro">YOUR VIEW</div>
-        <div class="score-pair">
-          <div class="score-item">
-            <div class="big-number effort">7</div>
-            <div class="score-label">Effort</div>
-          </div>
-          <div class="score-item">
-            <div class="big-number performance">5</div>
-            <div class="score-label">Performance</div>
-          </div>
-        </div>
-        <div class="week-ref">For the week of March 10</div>
-      </div>
-      <button class="btn-done" onclick="showRevealStep(2)" style="max-width: 280px; margin: 0 auto;">See their perspective</button>
-    </div>
-
-    <!-- Step 2: The card flip -->
-    <div class="reveal-step" id="reveal-step-2">
-      <div class="your-scores" style="margin-bottom: var(--space-lg);">
-        <div class="intro">YOUR VIEW</div>
-        <div class="score-pair">
-          <div class="score-item">
-            <div class="big-number effort" style="font-size: 32px;">7</div>
-            <div class="score-label">Effort</div>
-          </div>
-          <div class="score-item">
-            <div class="big-number performance" style="font-size: 32px;">5</div>
-            <div class="score-label">Performance</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="tap-hint">Tap to see their perspective</div>
-      <div class="flip-card-container" onclick="flipCard()">
-        <div class="flip-card" id="reveal-card">
-          <div class="flip-card-front">
-            <span>Their perspective</span>
-          </div>
-          <div class="flip-card-back">
-            <div class="their-scores">
-              <div class="their-score">
-                <div class="num effort">8</div>
-                <div class="lbl">Effort</div>
-              </div>
-              <div class="their-score">
-                <div class="num performance">7</div>
-                <div class="lbl">Performance</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="alignment-text" id="alignment-text">You see this similarly. They rated you higher on performance.</div>
-      <div style="margin-top: var(--space-2xl);">
-        <button class="btn-done" onclick="showRevealStep(3)" style="max-width: 280px; margin: 0 auto;">Continue</button>
-      </div>
-    </div>
-
-    <!-- Step 3: The prompt -->
-    <div class="reveal-step" id="reveal-step-3">
-      <div class="prompt-step">
-        <div class="question">What might explain the difference?</div>
-        <input type="text" placeholder="Your reflection...">
-        <div class="prompt-actions">
-          <button class="skip" onclick="showScreen('screen-today')">Skip</button>
-          <button class="save" onclick="showScreen('screen-today')">Save</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ==================== SCREEN 5: COACH ==================== -->
-<div class="screen" id="screen-coach">
-  <div class="global-header">
-    <div class="wordmark">FORBETRA</div>
-    <div class="avatar"></div>
-  </div>
-  <div class="coach-content">
-    <div class="coach-header">
-      <div class="greeting">Good afternoon, Sarah</div>
-      <div class="subtitle">4 active clients</div>
-    </div>
-
-    <div class="client-list">
-      <div class="client-row">
-        <div class="client-info">
-          <div class="client-avatar">JM</div>
-          <div>
-            <div class="client-name">James Mitchell</div>
-            <div class="client-meta">Week 7 / 12 &middot; Checked in today</div>
-          </div>
-        </div>
-        <div class="client-signal attention"></div>
-      </div>
-      <div class="client-row">
-        <div class="client-info">
-          <div class="client-avatar">AL</div>
-          <div>
-            <div class="client-name">Ana Lucia Reyes</div>
-            <div class="client-meta">Week 10 / 12 &middot; Perception gap emerging</div>
-          </div>
-        </div>
-        <div class="client-signal gap"></div>
-      </div>
-      <div class="client-row">
-        <div class="client-info">
-          <div class="client-avatar">DK</div>
-          <div>
-            <div class="client-name">David Kim</div>
-            <div class="client-meta">Week 3 / 12 &middot; Checked in Monday</div>
-          </div>
-        </div>
-        <div class="client-signal on-track"></div>
-      </div>
-      <div class="client-row">
-        <div class="client-info">
-          <div class="client-avatar">RP</div>
-          <div>
-            <div class="client-name">Rachel Patel</div>
-            <div class="client-meta">Week 5 / 12 &middot; Awaiting check-in</div>
-          </div>
-        </div>
-        <div class="client-signal waiting"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ==================== SCREEN 6: PORTRAIT ==================== -->
-<div class="screen" id="screen-portrait">
-  <div class="global-header">
-    <div class="wordmark">FORBETRA</div>
-    <div class="avatar"></div>
-  </div>
-  <div class="portrait-content">
-    <div class="portrait-label">YOUR BEHAVIORAL PORTRAIT &mdash; CYCLE 1</div>
-    <div class="portrait-svg-container">
-      <svg viewBox="0 0 320 320" id="portrait-svg"></svg>
-    </div>
-    <div class="portrait-identity">"I am becoming a leader who listens before deciding"</div>
-    <div class="portrait-actions">
-      <button class="share-btn">Share</button>
-      <button class="new-cycle-btn">Start a new cycle</button>
-    </div>
-  </div>
-</div>
-
-<!-- ==================== BOTTOM NAV ==================== -->
-<div class="screen-nav">
-  <button class="active" onclick="showScreen('screen-today')">Today</button>
-  <button onclick="showScreen('screen-checkin')">Check-in</button>
-  <button onclick="showScreen('screen-progress')">Progress</button>
-  <button onclick="showScreen('screen-reveal')">Reveal</button>
-  <button onclick="showScreen('screen-coach')">Coach</button>
-  <button onclick="showScreen('screen-portrait')">Portrait</button>
-</div>
-
-<script>
-// ===== NAVIGATION =====
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  document.querySelectorAll('.screen-nav button').forEach(b => b.classList.remove('active'));
-  const labels = ['screen-today','screen-checkin','screen-progress','screen-reveal','screen-coach','screen-portrait'];
-  const idx = labels.indexOf(id);
-  if (idx >= 0) document.querySelectorAll('.screen-nav button')[idx].classList.add('active');
-  window.scrollTo(0, 0);
-}
-
-// ===== GRADIENT BAR INTERACTION =====
-let dragging = null;
-function startDrag(e, type) {
-  e.preventDefault();
-  dragging = type;
-  updateBar(e);
-  document.addEventListener('mousemove', updateBar);
-  document.addEventListener('mouseup', stopDrag);
-  document.addEventListener('touchmove', updateBar, { passive: false });
-  document.addEventListener('touchend', stopDrag);
-}
-function updateBar(e) {
-  if (!dragging) return;
-  e.preventDefault();
-  const track = document.getElementById(dragging === 'effort' ? 'effort-track' : 'perf-track');
-  const fill = document.getElementById(dragging === 'effort' ? 'effort-fill' : 'perf-fill');
-  const scoreEl = document.getElementById(dragging === 'effort' ? 'effort-score' : 'perf-score');
-  const rect = track.getBoundingClientRect();
-  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-  const pct = Math.max(0, Math.min(1, (rect.bottom - clientY) / rect.height));
-  const score = Math.round(pct * 10);
-  fill.style.height = (score * 10) + '%';
-  scoreEl.textContent = score;
-}
-function stopDrag() {
-  dragging = null;
-  document.removeEventListener('mousemove', updateBar);
-  document.removeEventListener('mouseup', stopDrag);
-  document.removeEventListener('touchmove', updateBar);
-  document.removeEventListener('touchend', stopDrag);
-}
-
-// ===== NOTE TOGGLE =====
-function toggleNote() {
-  document.getElementById('note-area').classList.toggle('visible');
-}
-
-// ===== CHECK-IN SUBMIT =====
-function submitCheckin() {
-  showScreen('screen-today');
-  // In real app: pulse animation here
-}
-
-// ===== REVEAL FLOW =====
-function showRevealStep(step) {
-  document.querySelectorAll('.reveal-step').forEach(s => s.classList.remove('active'));
-  document.getElementById('reveal-step-' + step).classList.add('active');
-}
-function flipCard() {
-  const card = document.getElementById('reveal-card');
-  if (card.classList.contains('flipped')) return;
-  card.classList.add('flipped');
-  // Show alignment glow
-  document.getElementById('screen-reveal').classList.add('aligned');
-  setTimeout(() => {
-    document.getElementById('alignment-text').classList.add('visible');
-  }, 600);
-}
-
-// ===== RIVER VISUALIZATION =====
-function drawRiver() {
-  const svg = document.getElementById('river-svg');
-  if (!svg) return;
-  const weeks = [
-    { e: 5, p: 4 }, { e: 6, p: 5 }, { e: 5, p: 6 },
-    { e: 7, p: 7 }, { e: 6, p: 5 }, { e: 6, p: 7 }, { e: 7, p: 5 }
-  ];
-  const w = 680, h = 180, pad = 24;
-  const xStep = (w - pad * 2) / (weeks.length - 1);
-  const yScale = (v) => h - pad - ((v / 10) * (h - pad * 2));
-
-  // Effort band
-  let effortPath = `M ${pad} ${yScale(weeks[0].e)}`;
-  weeks.forEach((wk, i) => {
-    if (i === 0) return;
-    const x = pad + i * xStep;
-    const px = pad + (i - 1) * xStep;
-    const cx = (px + x) / 2;
-    effortPath += ` C ${cx} ${yScale(weeks[i-1].e)}, ${cx} ${yScale(wk.e)}, ${x} ${yScale(wk.e)}`;
-  });
-  // Bottom path for area
-  let effortArea = effortPath;
-  for (let i = weeks.length - 1; i >= 0; i--) {
-    const x = pad + i * xStep;
-    const y = yScale(weeks[i].e) + 20;
-    if (i === weeks.length - 1) effortArea += ` L ${x} ${y}`;
-    else {
-      const nx = pad + (i + 1) * xStep;
-      const cx = (x + nx) / 2;
-      effortArea += ` C ${cx} ${yScale(weeks[i+1].e) + 20}, ${cx} ${y}, ${x} ${y}`;
-    }
-  }
-  effortArea += ' Z';
-
-  // Performance band
-  let perfPath = `M ${pad} ${yScale(weeks[0].p)}`;
-  weeks.forEach((wk, i) => {
-    if (i === 0) return;
-    const x = pad + i * xStep;
-    const px = pad + (i - 1) * xStep;
-    const cx = (px + x) / 2;
-    perfPath += ` C ${cx} ${yScale(weeks[i-1].p)}, ${cx} ${yScale(wk.p)}, ${x} ${yScale(wk.p)}`;
-  });
-  let perfArea = perfPath;
-  for (let i = weeks.length - 1; i >= 0; i--) {
-    const x = pad + i * xStep;
-    const y = yScale(weeks[i].p) + 20;
-    if (i === weeks.length - 1) perfArea += ` L ${x} ${y}`;
-    else {
-      const nx = pad + (i + 1) * xStep;
-      const cx = (x + nx) / 2;
-      perfArea += ` C ${cx} ${yScale(weeks[i+1].p) + 20}, ${cx} ${y}, ${x} ${y}`;
-    }
-  }
-  perfArea += ' Z';
-
-  svg.innerHTML = `
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Forbetra — The Quiet Room</title>
+		<link
+			href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+			rel="stylesheet"
+		/>
+		<style>
+			:root {
+				/* Surfaces */
+				--surface-base: #0c0a09;
+				--surface-raised: #141210;
+				--surface-overlay: #1c1917;
+				--surface-subtle: #231f1c;
+
+				/* Text */
+				--text-primary: rgba(250, 244, 237, 0.93);
+				--text-secondary: rgba(250, 244, 237, 0.55);
+				--text-tertiary: rgba(250, 244, 237, 0.35);
+				--text-muted: rgba(250, 244, 237, 0.2);
+
+				/* Accent */
+				--accent: #d4a06a;
+				--accent-hover: #e0b580;
+				--accent-muted: rgba(212, 160, 106, 0.1);
+
+				/* Data */
+				--data-effort: #94a3b8;
+				--data-effort-vivid: #cbd5e1;
+				--data-effort-muted: rgba(148, 163, 184, 0.1);
+				--data-performance: #d4a06a;
+				--data-performance-vivid: #e0b580;
+				--data-performance-muted: rgba(212, 160, 106, 0.1);
+
+				/* Signals */
+				--signal-aligned: #4ade80;
+				--signal-divergent: #f59e0b;
+				--signal-attention: #ef4444;
+
+				/* Borders */
+				--border-default: rgba(250, 244, 237, 0.04);
+				--border-strong: rgba(250, 244, 237, 0.08);
+				--border-accent: rgba(250, 244, 237, 0.14);
+
+				/* Spacing */
+				--space-xs: 4px;
+				--space-sm: 8px;
+				--space-md: 16px;
+				--space-lg: 24px;
+				--space-xl: 32px;
+				--space-2xl: 48px;
+				--space-3xl: 64px;
+
+				/* Animation */
+				--ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+			}
+
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+
+			body {
+				font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+				background: var(--surface-base);
+				color: var(--text-primary);
+				-webkit-font-smoothing: antialiased;
+				-moz-osx-font-smoothing: grayscale;
+				letter-spacing: -0.01em;
+				overflow-x: hidden;
+			}
+
+			/* ===== NAVIGATION ===== */
+			.screen-nav {
+				position: fixed;
+				bottom: 0;
+				left: 0;
+				right: 0;
+				display: flex;
+				justify-content: center;
+				gap: 2px;
+				padding: 12px 16px;
+				padding-bottom: calc(12px + env(safe-area-inset-bottom, 0));
+				background: var(--surface-raised);
+				border-top: 1px solid var(--border-default);
+				z-index: 100;
+			}
+			.screen-nav button {
+				flex: 1;
+				max-width: 160px;
+				padding: 10px 12px;
+				background: transparent;
+				border: 1px solid var(--border-default);
+				border-radius: 8px;
+				color: var(--text-muted);
+				font-family: 'Plus Jakarta Sans', system-ui;
+				font-size: 11px;
+				font-weight: 600;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				cursor: pointer;
+				transition: all 200ms var(--ease-out);
+			}
+			.screen-nav button:hover {
+				color: var(--text-secondary);
+				border-color: var(--border-strong);
+			}
+			.screen-nav button.active {
+				color: var(--accent);
+				border-color: var(--accent);
+				background: var(--accent-muted);
+			}
+
+			/* ===== SCREENS ===== */
+			.screen {
+				display: none;
+				min-height: 100vh;
+				padding-bottom: 80px;
+			}
+			.screen.active {
+				display: block;
+			}
+
+			/* ===== SIDEBAR (desktop hint) ===== */
+			.sidebar {
+				position: fixed;
+				left: 0;
+				top: 0;
+				bottom: 0;
+				width: 48px;
+				background: var(--surface-raised);
+				border-right: 1px solid var(--border-default);
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				padding-top: 20px;
+				gap: 24px;
+				z-index: 50;
+			}
+			.sidebar .logo {
+				font-size: 11px;
+				font-weight: 700;
+				letter-spacing: 0.12em;
+				color: var(--text-tertiary);
+				writing-mode: vertical-rl;
+				text-orientation: mixed;
+				transform: rotate(180deg);
+			}
+			.sidebar .nav-dot {
+				width: 6px;
+				height: 6px;
+				border-radius: 3px;
+				background: var(--text-muted);
+				cursor: pointer;
+				transition: all 200ms var(--ease-out);
+			}
+			.sidebar .nav-dot:hover {
+				background: var(--text-secondary);
+			}
+			.sidebar .nav-dot.active {
+				background: var(--accent);
+				box-shadow: 0 0 8px rgba(212, 160, 106, 0.3);
+			}
+
+			@media (max-width: 768px) {
+				.sidebar {
+					display: none;
+				}
+			}
+			@media (min-width: 769px) {
+				.screen {
+					padding-left: 48px;
+				}
+			}
+
+			/* ===== HEADER ===== */
+			.global-header {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 16px 24px;
+				border-bottom: 1px solid var(--border-default);
+			}
+			.global-header .wordmark {
+				font-size: 11px;
+				font-weight: 700;
+				letter-spacing: 0.12em;
+				text-transform: uppercase;
+				color: var(--text-tertiary);
+			}
+			.global-header .avatar {
+				width: 28px;
+				height: 28px;
+				border-radius: 14px;
+				background: var(--surface-subtle);
+				border: 1px solid var(--border-strong);
+			}
+
+			/* ===== SCREEN 1: TODAY ===== */
+			.today-content {
+				max-width: 480px;
+				margin: 0 auto;
+				padding: var(--space-3xl) var(--space-lg) 0;
+				animation: fadeIn 600ms var(--ease-out);
+			}
+			.identity-anchor {
+				font-size: 11px;
+				font-weight: 600;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				color: var(--text-tertiary);
+				margin-bottom: var(--space-xs);
+			}
+			.week-indicator {
+				font-family: 'Geist Mono', 'SF Mono', 'Fira Code', monospace;
+				font-size: 11px;
+				font-weight: 600;
+				letter-spacing: 0.08em;
+				color: var(--text-muted);
+				margin-bottom: var(--space-3xl);
+			}
+			.action-card {
+				background: var(--surface-raised);
+				border: 1px solid var(--border-default);
+				border-radius: 12px;
+				padding: var(--space-lg);
+				cursor: pointer;
+				transition: all 200ms var(--ease-out);
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+			}
+			.action-card:hover {
+				border-color: var(--border-strong);
+				background: var(--surface-overlay);
+			}
+			.action-card h2 {
+				font-size: 20px;
+				font-weight: 600;
+				line-height: 1.3;
+				letter-spacing: -0.015em;
+				margin-bottom: 6px;
+			}
+			.action-card p {
+				font-size: 15px;
+				font-weight: 400;
+				line-height: 1.7;
+				color: var(--text-secondary);
+			}
+			.action-card .arrow {
+				font-size: 20px;
+				color: var(--accent);
+				flex-shrink: 0;
+				margin-left: var(--space-lg);
+			}
+
+			.reveal-notification {
+				margin-top: var(--space-lg);
+				padding: var(--space-md) var(--space-lg);
+				color: var(--text-secondary);
+				font-size: 15px;
+				cursor: pointer;
+				transition: color 200ms var(--ease-out);
+				border-left: 2px solid var(--accent-muted);
+			}
+			.reveal-notification:hover {
+				color: var(--text-primary);
+			}
+
+			.caught-up {
+				margin-top: var(--space-2xl);
+				text-align: center;
+				color: var(--text-muted);
+				font-size: 13px;
+				line-height: 1.6;
+			}
+
+			/* ===== SCREEN 2: CHECK-IN ===== */
+			.checkin-content {
+				max-width: 400px;
+				margin: 0 auto;
+				padding: var(--space-3xl) var(--space-lg) 0;
+				animation: fadeIn 600ms var(--ease-out);
+			}
+			.checkin-header {
+				text-align: center;
+				margin-bottom: var(--space-2xl);
+			}
+			.checkin-header h1 {
+				font-size: 20px;
+				font-weight: 600;
+				letter-spacing: -0.015em;
+				margin-bottom: var(--space-xs);
+			}
+			.checkin-header .week-label {
+				font-family: 'Geist Mono', monospace;
+				font-size: 11px;
+				color: var(--text-muted);
+				letter-spacing: 0.08em;
+			}
+
+			.bars-container {
+				display: flex;
+				justify-content: center;
+				gap: 48px;
+				margin-bottom: var(--space-2xl);
+				height: 320px;
+				align-items: flex-end;
+			}
+			.bar-wrapper {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: var(--space-sm);
+			}
+			.bar-score {
+				font-family: 'Geist Mono', monospace;
+				font-size: 32px;
+				font-weight: 500;
+				height: 40px;
+				display: flex;
+				align-items: center;
+				transition: opacity 300ms var(--ease-out);
+			}
+			.bar-score.effort {
+				color: var(--data-effort-vivid);
+			}
+			.bar-score.performance {
+				color: var(--data-performance-vivid);
+			}
+
+			.bar-track {
+				width: 56px;
+				height: 240px;
+				border-radius: 28px;
+				background: var(--surface-raised);
+				border: 1px solid var(--border-default);
+				position: relative;
+				cursor: pointer;
+				overflow: hidden;
+			}
+			.bar-fill {
+				position: absolute;
+				bottom: 0;
+				left: 0;
+				right: 0;
+				border-radius: 28px;
+				transition: height 100ms var(--ease-out);
+			}
+			.bar-fill.effort {
+				background: linear-gradient(to top, rgba(148, 163, 184, 0.3), var(--data-effort));
+			}
+			.bar-fill.performance {
+				background: linear-gradient(to top, rgba(212, 160, 106, 0.3), var(--data-performance));
+			}
+
+			.bar-label {
+				font-size: 11px;
+				font-weight: 600;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				color: var(--text-tertiary);
+			}
+			.bar-prev {
+				font-family: 'Geist Mono', monospace;
+				font-size: 11px;
+				color: var(--text-muted);
+				margin-top: 4px;
+			}
+
+			.add-note {
+				text-align: center;
+				margin-bottom: var(--space-lg);
+			}
+			.add-note a {
+				color: var(--text-tertiary);
+				font-size: 13px;
+				text-decoration: none;
+				cursor: pointer;
+				transition: color 200ms var(--ease-out);
+			}
+			.add-note a:hover {
+				color: var(--text-secondary);
+			}
+
+			.note-area {
+				display: none;
+				margin-bottom: var(--space-lg);
+			}
+			.note-area.visible {
+				display: block;
+				animation: slideUp 300ms var(--ease-out);
+			}
+			.note-area textarea {
+				width: 100%;
+				background: var(--surface-raised);
+				border: 1px solid var(--border-default);
+				border-radius: 12px;
+				padding: var(--space-md);
+				color: var(--text-primary);
+				font-family: 'Plus Jakarta Sans', system-ui;
+				font-size: 15px;
+				line-height: 1.7;
+				resize: none;
+				height: 100px;
+				outline: none;
+				transition: border-color 200ms var(--ease-out);
+			}
+			.note-area textarea:focus {
+				border-color: var(--border-accent);
+			}
+			.note-area textarea::placeholder {
+				color: var(--text-muted);
+			}
+
+			.btn-done {
+				width: 100%;
+				height: 48px;
+				background: var(--accent);
+				color: var(--surface-base);
+				border: none;
+				border-radius: 12px;
+				font-family: 'Plus Jakarta Sans', system-ui;
+				font-size: 15px;
+				font-weight: 600;
+				cursor: pointer;
+				transition: all 200ms var(--ease-out);
+			}
+			.btn-done:hover {
+				background: var(--accent-hover);
+			}
+			.btn-done:active {
+				transform: scale(0.98);
+			}
+
+			/* ===== SCREEN 3: PROGRESS ===== */
+			.progress-content {
+				max-width: 680px;
+				margin: 0 auto;
+				padding: var(--space-3xl) var(--space-lg) 0;
+				animation: fadeIn 600ms var(--ease-out);
+			}
+			.progress-content .identity-anchor {
+				margin-bottom: var(--space-sm);
+			}
+
+			/* The River */
+			.river-section {
+				margin-bottom: var(--space-2xl);
+			}
+			.river-section .section-label {
+				font-size: 11px;
+				font-weight: 600;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				color: var(--text-muted);
+				margin-bottom: var(--space-md);
+			}
+			.river-canvas {
+				width: 100%;
+				height: 180px;
+				background: var(--surface-raised);
+				border: 1px solid var(--border-default);
+				border-radius: 12px;
+				position: relative;
+				overflow: hidden;
+			}
+			.river-svg {
+				width: 100%;
+				height: 100%;
+			}
+
+			/* Week Numbers */
+			.numbers-grid {
+				display: flex;
+				justify-content: center;
+				gap: var(--space-2xl);
+				margin-bottom: var(--space-2xl);
+			}
+			.number-block {
+				text-align: center;
+			}
+			.number-block .value {
+				font-family: 'Geist Mono', monospace;
+				font-size: 32px;
+				font-weight: 500;
+				line-height: 1;
+				margin-bottom: 6px;
+			}
+			.number-block .value.effort {
+				color: var(--data-effort-vivid);
+			}
+			.number-block .value.performance {
+				color: var(--data-performance-vivid);
+			}
+			.number-block .value.aligned {
+				color: var(--signal-aligned);
+			}
+			.number-block .label {
+				font-size: 11px;
+				font-weight: 600;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				color: var(--text-tertiary);
+			}
+			.number-block .trend {
+				font-size: 11px;
+				color: var(--text-muted);
+				margin-top: 4px;
+			}
+
+			/* AI Insight */
+			.insight-section {
+				max-width: 580px;
+				margin: 0 auto;
+			}
+			.insight-section .section-label {
+				font-size: 11px;
+				font-weight: 600;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				color: var(--text-muted);
+				margin-bottom: var(--space-lg);
+			}
+			.insight-text {
+				font-size: 15px;
+				line-height: 1.7;
+				color: var(--text-secondary);
+				letter-spacing: -0.01em;
+			}
+			.insight-text strong {
+				color: var(--text-primary);
+				font-weight: 500;
+			}
+			.insight-link {
+				display: inline-block;
+				margin-top: var(--space-md);
+				color: var(--accent);
+				font-size: 13px;
+				text-decoration: none;
+				cursor: pointer;
+			}
+			.insight-link:hover {
+				color: var(--accent-hover);
+			}
+
+			/* ===== SCREEN 4: REVEAL ===== */
+			.reveal-content {
+				max-width: 480px;
+				margin: 0 auto;
+				padding: var(--space-3xl) var(--space-lg) 0;
+				text-align: center;
+				animation: fadeIn 600ms var(--ease-out);
+			}
+			.reveal-step {
+				display: none;
+			}
+			.reveal-step.active {
+				display: block;
+			}
+
+			.your-scores {
+				margin-bottom: var(--space-2xl);
+			}
+			.your-scores .intro {
+				font-size: 11px;
+				font-weight: 600;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				color: var(--text-muted);
+				margin-bottom: var(--space-2xl);
+			}
+			.score-pair {
+				display: flex;
+				justify-content: center;
+				gap: var(--space-2xl);
+				margin-bottom: var(--space-md);
+			}
+			.score-item .big-number {
+				font-family: 'Geist Mono', monospace;
+				font-size: 48px;
+				font-weight: 500;
+				line-height: 1;
+			}
+			.score-item .big-number.effort {
+				color: var(--data-effort-vivid);
+			}
+			.score-item .big-number.performance {
+				color: var(--data-performance-vivid);
+			}
+			.score-item .score-label {
+				font-size: 11px;
+				font-weight: 600;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				color: var(--text-tertiary);
+				margin-top: var(--space-sm);
+			}
+			.your-scores .week-ref {
+				font-size: 13px;
+				color: var(--text-muted);
+				margin-top: var(--space-lg);
+			}
+
+			/* The Card */
+			.flip-card-container {
+				perspective: 1000px;
+				margin: var(--space-2xl) auto;
+				width: 280px;
+				height: 80px;
+				cursor: pointer;
+			}
+			.flip-card {
+				width: 100%;
+				height: 100%;
+				position: relative;
+				transform-style: preserve-3d;
+				transition: transform 500ms var(--ease-out);
+			}
+			.flip-card.flipped {
+				transform: rotateY(180deg);
+			}
+			.flip-card-front,
+			.flip-card-back {
+				position: absolute;
+				width: 100%;
+				height: 100%;
+				backface-visibility: hidden;
+				border-radius: 12px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+			.flip-card-front {
+				background: var(--surface-raised);
+				border: 1px solid var(--border-strong);
+				/* subtle diagonal pattern */
+				background-image: repeating-linear-gradient(
+					45deg,
+					transparent,
+					transparent 8px,
+					rgba(250, 244, 237, 0.02) 8px,
+					rgba(250, 244, 237, 0.02) 9px
+				);
+				animation: cardBreathe 4s ease-in-out infinite;
+			}
+			.flip-card-front span {
+				font-size: 13px;
+				color: var(--text-muted);
+			}
+			.flip-card-back {
+				background: var(--surface-overlay);
+				border: 1px solid var(--border-strong);
+				transform: rotateY(180deg);
+				flex-direction: column;
+				gap: 4px;
+			}
+			.flip-card-back .their-scores {
+				display: flex;
+				gap: var(--space-lg);
+			}
+			.flip-card-back .their-score {
+				text-align: center;
+			}
+			.flip-card-back .their-score .num {
+				font-family: 'Geist Mono', monospace;
+				font-size: 24px;
+				font-weight: 500;
+			}
+			.flip-card-back .their-score .num.effort {
+				color: var(--data-effort-vivid);
+			}
+			.flip-card-back .their-score .num.performance {
+				color: var(--data-performance-vivid);
+			}
+			.flip-card-back .their-score .lbl {
+				font-size: 9px;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				color: var(--text-tertiary);
+			}
+
+			.tap-hint {
+				font-size: 13px;
+				color: var(--text-muted);
+				margin-bottom: var(--space-lg);
+			}
+
+			.alignment-text {
+				font-size: 15px;
+				color: var(--text-secondary);
+				margin-top: var(--space-lg);
+				opacity: 0;
+				transition: opacity 600ms var(--ease-out);
+			}
+			.alignment-text.visible {
+				opacity: 1;
+			}
+
+			/* Background glow for alignment */
+			.reveal-screen {
+				transition: background 1200ms var(--ease-out);
+			}
+			.reveal-screen.aligned {
+				background: radial-gradient(ellipse at 50% 40%, rgba(212, 160, 106, 0.06), transparent 70%);
+			}
+			.reveal-screen.divergent {
+				background: radial-gradient(ellipse at 50% 40%, rgba(148, 163, 184, 0.06), transparent 70%);
+			}
+
+			/* Prompt step */
+			.prompt-step {
+				padding-top: var(--space-2xl);
+			}
+			.prompt-step .question {
+				font-size: 15px;
+				color: var(--text-secondary);
+				line-height: 1.7;
+				margin-bottom: var(--space-lg);
+			}
+			.prompt-step input {
+				width: 100%;
+				background: var(--surface-raised);
+				border: 1px solid var(--border-default);
+				border-radius: 12px;
+				padding: 14px var(--space-md);
+				color: var(--text-primary);
+				font-family: 'Plus Jakarta Sans', system-ui;
+				font-size: 15px;
+				outline: none;
+				margin-bottom: var(--space-md);
+				transition: border-color 200ms var(--ease-out);
+			}
+			.prompt-step input:focus {
+				border-color: var(--border-accent);
+			}
+			.prompt-step input::placeholder {
+				color: var(--text-muted);
+			}
+			.prompt-actions {
+				display: flex;
+				gap: var(--space-md);
+				justify-content: center;
+			}
+			.prompt-actions .skip {
+				padding: 10px 20px;
+				background: transparent;
+				border: none;
+				color: var(--text-muted);
+				font-family: 'Plus Jakarta Sans', system-ui;
+				font-size: 13px;
+				cursor: pointer;
+			}
+			.prompt-actions .save {
+				padding: 10px 24px;
+				background: var(--accent);
+				border: none;
+				border-radius: 8px;
+				color: var(--surface-base);
+				font-family: 'Plus Jakarta Sans', system-ui;
+				font-size: 13px;
+				font-weight: 600;
+				cursor: pointer;
+				transition: background 200ms var(--ease-out);
+			}
+			.prompt-actions .save:hover {
+				background: var(--accent-hover);
+			}
+
+			/* ===== SCREEN 5: COACH ===== */
+			.coach-content {
+				max-width: 680px;
+				margin: 0 auto;
+				padding: var(--space-3xl) var(--space-lg) 0;
+				animation: fadeIn 600ms var(--ease-out);
+			}
+			.coach-header {
+				margin-bottom: var(--space-2xl);
+			}
+			.coach-header .greeting {
+				font-size: 20px;
+				font-weight: 600;
+				color: var(--text-primary);
+				margin-bottom: 4px;
+			}
+			.coach-header .subtitle {
+				font-size: 13px;
+				color: var(--text-muted);
+			}
+
+			.client-list {
+				display: flex;
+				flex-direction: column;
+				gap: 2px;
+			}
+			.client-row {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: var(--space-md) var(--space-lg);
+				background: var(--surface-raised);
+				border: 1px solid var(--border-default);
+				border-radius: 12px;
+				cursor: pointer;
+				transition: all 200ms var(--ease-out);
+			}
+			.client-row:hover {
+				border-color: var(--border-strong);
+				background: var(--surface-overlay);
+			}
+			.client-info {
+				display: flex;
+				align-items: center;
+				gap: var(--space-md);
+			}
+			.client-avatar {
+				width: 32px;
+				height: 32px;
+				border-radius: 16px;
+				background: var(--surface-subtle);
+				border: 1px solid var(--border-strong);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 13px;
+				font-weight: 600;
+				color: var(--text-tertiary);
+			}
+			.client-name {
+				font-size: 15px;
+				font-weight: 500;
+			}
+			.client-meta {
+				font-size: 11px;
+				color: var(--text-muted);
+				margin-top: 2px;
+			}
+			.client-signal {
+				width: 8px;
+				height: 8px;
+				border-radius: 4px;
+				flex-shrink: 0;
+			}
+			.client-signal.on-track {
+				background: var(--accent);
+			}
+			.client-signal.waiting {
+				background: var(--data-effort);
+			}
+			.client-signal.gap {
+				background: var(--signal-divergent);
+			}
+			.client-signal.attention {
+				background: var(--signal-attention);
+			}
+
+			/* ===== SCREEN 6: PORTRAIT ===== */
+			.portrait-content {
+				max-width: 480px;
+				margin: 0 auto;
+				padding: var(--space-3xl) var(--space-lg) 0;
+				text-align: center;
+				animation: fadeIn 600ms var(--ease-out);
+			}
+			.portrait-label {
+				font-size: 11px;
+				font-weight: 600;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				color: var(--text-muted);
+				margin-bottom: var(--space-2xl);
+			}
+			.portrait-svg-container {
+				width: 320px;
+				height: 320px;
+				margin: 0 auto var(--space-lg);
+			}
+			.portrait-svg-container svg {
+				width: 100%;
+				height: 100%;
+			}
+			.portrait-identity {
+				font-size: 15px;
+				color: var(--text-secondary);
+				line-height: 1.7;
+				max-width: 300px;
+				margin: 0 auto var(--space-2xl);
+			}
+			.portrait-actions {
+				display: flex;
+				gap: var(--space-md);
+				justify-content: center;
+			}
+			.portrait-actions button {
+				padding: 12px 24px;
+				border-radius: 10px;
+				font-family: 'Plus Jakarta Sans', system-ui;
+				font-size: 13px;
+				font-weight: 600;
+				cursor: pointer;
+				transition: all 200ms var(--ease-out);
+			}
+			.portrait-actions .share-btn {
+				background: transparent;
+				border: 1px solid var(--border-strong);
+				color: var(--text-secondary);
+			}
+			.portrait-actions .share-btn:hover {
+				border-color: var(--border-accent);
+				color: var(--text-primary);
+			}
+			.portrait-actions .new-cycle-btn {
+				background: var(--accent);
+				border: none;
+				color: var(--surface-base);
+			}
+			.portrait-actions .new-cycle-btn:hover {
+				background: var(--accent-hover);
+			}
+
+			/* ===== TIMELINE STRIP ===== */
+			.timeline-strip {
+				display: flex;
+				justify-content: center;
+				gap: 6px;
+				padding: var(--space-md);
+				margin-top: var(--space-lg);
+			}
+			.week-dots {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 3px;
+			}
+			.week-dot {
+				width: 8px;
+				height: 8px;
+				border-radius: 4px;
+				transition: all 300ms var(--ease-out);
+			}
+			.week-dot.effort {
+				background: var(--data-effort);
+			}
+			.week-dot.performance {
+				background: var(--data-performance);
+			}
+			.week-dot.empty {
+				background: var(--surface-subtle);
+			}
+
+			/* ===== ANIMATIONS ===== */
+			@keyframes fadeIn {
+				from {
+					opacity: 0;
+				}
+				to {
+					opacity: 1;
+				}
+			}
+			@keyframes slideUp {
+				from {
+					opacity: 0;
+					transform: translateY(12px);
+				}
+				to {
+					opacity: 1;
+					transform: translateY(0);
+				}
+			}
+			@keyframes cardBreathe {
+				0%,
+				100% {
+					transform: scale(1);
+				}
+				50% {
+					transform: scale(1.02);
+				}
+			}
+
+			/* ===== RESPONSIVE ===== */
+			@media (max-width: 768px) {
+				.bars-container {
+					gap: 32px;
+					height: 280px;
+				}
+				.bar-track {
+					height: 200px;
+				}
+				.numbers-grid {
+					gap: var(--space-lg);
+				}
+				.number-block .value {
+					font-size: 24px;
+				}
+				.score-item .big-number {
+					font-size: 36px;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<!-- Sidebar (desktop) -->
+		<div class="sidebar">
+			<div class="logo">F</div>
+			<div class="nav-dot active" title="Today"></div>
+			<div class="nav-dot" title="Progress"></div>
+			<div class="nav-dot" title="Feedback"></div>
+			<div class="nav-dot" title="Settings"></div>
+		</div>
+
+		<!-- ==================== SCREEN 1: TODAY ==================== -->
+		<div class="screen active" id="screen-today">
+			<div class="global-header">
+				<div class="wordmark">FORBETRA</div>
+				<div class="avatar"></div>
+			</div>
+			<div class="today-content">
+				<div class="identity-anchor">I am becoming a leader who listens before deciding</div>
+				<div class="week-indicator">WEEK 7 / 12</div>
+				<div class="action-card" onclick="showScreen('screen-checkin')">
+					<div>
+						<h2>Check in</h2>
+						<p>How did you show up this week?</p>
+					</div>
+					<div class="arrow">&rarr;</div>
+				</div>
+				<div class="reveal-notification" onclick="showScreen('screen-reveal')">
+					Someone shared their perspective.
+				</div>
+			</div>
+		</div>
+
+		<!-- ==================== SCREEN 2: CHECK-IN ==================== -->
+		<div class="screen" id="screen-checkin">
+			<div class="global-header">
+				<div class="wordmark">FORBETRA</div>
+				<div class="avatar"></div>
+			</div>
+			<div class="checkin-content">
+				<div class="checkin-header">
+					<h1>Check in</h1>
+					<div class="week-label">WEEK 7 / 12</div>
+				</div>
+
+				<div class="bars-container">
+					<div class="bar-wrapper">
+						<div class="bar-score effort" id="effort-score">&nbsp;</div>
+						<div
+							class="bar-track"
+							id="effort-track"
+							onmousedown="startDrag(event, 'effort')"
+							ontouchstart="startDrag(event, 'effort')"
+						>
+							<div class="bar-fill effort" id="effort-fill" style="height: 0%"></div>
+						</div>
+						<div class="bar-label">Effort</div>
+						<div class="bar-prev">Last: 6</div>
+					</div>
+					<div class="bar-wrapper">
+						<div class="bar-score performance" id="perf-score">&nbsp;</div>
+						<div
+							class="bar-track"
+							id="perf-track"
+							onmousedown="startDrag(event, 'performance')"
+							ontouchstart="startDrag(event, 'performance')"
+						>
+							<div class="bar-fill performance" id="perf-fill" style="height: 0%"></div>
+						</div>
+						<div class="bar-label">Performance</div>
+						<div class="bar-prev">Last: 5</div>
+					</div>
+				</div>
+
+				<div class="add-note">
+					<a onclick="toggleNote()">Add a note</a>
+				</div>
+				<div class="note-area" id="note-area">
+					<textarea placeholder="What shaped your week?"></textarea>
+				</div>
+
+				<button class="btn-done" onclick="submitCheckin()">Done</button>
+			</div>
+		</div>
+
+		<!-- ==================== SCREEN 3: PROGRESS ==================== -->
+		<div class="screen" id="screen-progress">
+			<div class="global-header">
+				<div class="wordmark">FORBETRA</div>
+				<div class="avatar"></div>
+			</div>
+			<div class="progress-content">
+				<div class="identity-anchor">I am becoming a leader who listens before deciding</div>
+				<div class="week-indicator" style="margin-bottom: var(--space-2xl)">WEEK 7 / 12</div>
+
+				<div class="river-section">
+					<div class="section-label">THE RIVER</div>
+					<div class="river-canvas">
+						<svg
+							class="river-svg"
+							viewBox="0 0 680 180"
+							preserveAspectRatio="none"
+							id="river-svg"
+						></svg>
+					</div>
+				</div>
+
+				<div class="numbers-grid">
+					<div class="number-block">
+						<div class="value effort">7</div>
+						<div class="label">Effort</div>
+						<div class="trend">&uarr; from 6</div>
+					</div>
+					<div class="number-block">
+						<div class="value performance">5</div>
+						<div class="label">Performance</div>
+						<div class="trend">&darr; from 7</div>
+					</div>
+					<div class="number-block">
+						<div class="value aligned">&bull;</div>
+						<div class="label">Alignment</div>
+						<div class="trend">Within 1pt</div>
+					</div>
+				</div>
+
+				<div class="insight-section">
+					<div class="section-label">WEEK 7 SYNTHESIS &mdash; MARCH 14, 2026</div>
+					<div class="insight-text">
+						<strong
+							>Your effort continues to climb while your perceived performance has dipped.</strong
+						>
+						This is a pattern worth noticing: weeks where you invest the most energy don't always
+						correlate with your best output. Your stakeholder data tells a different story, though
+						&mdash; <strong>their performance rating has stayed steady at 7</strong>, suggesting you
+						may be undervaluing your own impact during high-effort periods. This gap between
+						self-perception and external perception is one of the most valuable things to explore
+						with your coach.
+					</div>
+					<a class="insight-link">Continue the conversation &rarr;</a>
+				</div>
+			</div>
+		</div>
+
+		<!-- ==================== SCREEN 4: REVEAL ==================== -->
+		<div class="screen reveal-screen" id="screen-reveal">
+			<div class="global-header">
+				<div class="wordmark">FORBETRA</div>
+				<div class="avatar"></div>
+			</div>
+			<div class="reveal-content">
+				<!-- Step 1: Your scores -->
+				<div class="reveal-step active" id="reveal-step-1">
+					<div class="your-scores">
+						<div class="intro">YOUR VIEW</div>
+						<div class="score-pair">
+							<div class="score-item">
+								<div class="big-number effort">7</div>
+								<div class="score-label">Effort</div>
+							</div>
+							<div class="score-item">
+								<div class="big-number performance">5</div>
+								<div class="score-label">Performance</div>
+							</div>
+						</div>
+						<div class="week-ref">For the week of March 10</div>
+					</div>
+					<button
+						class="btn-done"
+						onclick="showRevealStep(2)"
+						style="max-width: 280px; margin: 0 auto"
+					>
+						See their perspective
+					</button>
+				</div>
+
+				<!-- Step 2: The card flip -->
+				<div class="reveal-step" id="reveal-step-2">
+					<div class="your-scores" style="margin-bottom: var(--space-lg)">
+						<div class="intro">YOUR VIEW</div>
+						<div class="score-pair">
+							<div class="score-item">
+								<div class="big-number effort" style="font-size: 32px">7</div>
+								<div class="score-label">Effort</div>
+							</div>
+							<div class="score-item">
+								<div class="big-number performance" style="font-size: 32px">5</div>
+								<div class="score-label">Performance</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="tap-hint">Tap to see their perspective</div>
+					<div class="flip-card-container" onclick="flipCard()">
+						<div class="flip-card" id="reveal-card">
+							<div class="flip-card-front">
+								<span>Their perspective</span>
+							</div>
+							<div class="flip-card-back">
+								<div class="their-scores">
+									<div class="their-score">
+										<div class="num effort">8</div>
+										<div class="lbl">Effort</div>
+									</div>
+									<div class="their-score">
+										<div class="num performance">7</div>
+										<div class="lbl">Performance</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="alignment-text" id="alignment-text">
+						You see this similarly. They rated you higher on performance.
+					</div>
+					<div style="margin-top: var(--space-2xl)">
+						<button
+							class="btn-done"
+							onclick="showRevealStep(3)"
+							style="max-width: 280px; margin: 0 auto"
+						>
+							Continue
+						</button>
+					</div>
+				</div>
+
+				<!-- Step 3: The prompt -->
+				<div class="reveal-step" id="reveal-step-3">
+					<div class="prompt-step">
+						<div class="question">What might explain the difference?</div>
+						<input type="text" placeholder="Your reflection..." />
+						<div class="prompt-actions">
+							<button class="skip" onclick="showScreen('screen-today')">Skip</button>
+							<button class="save" onclick="showScreen('screen-today')">Save</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- ==================== SCREEN 5: COACH ==================== -->
+		<div class="screen" id="screen-coach">
+			<div class="global-header">
+				<div class="wordmark">FORBETRA</div>
+				<div class="avatar"></div>
+			</div>
+			<div class="coach-content">
+				<div class="coach-header">
+					<div class="greeting">Good afternoon, Sarah</div>
+					<div class="subtitle">4 active clients</div>
+				</div>
+
+				<div class="client-list">
+					<div class="client-row">
+						<div class="client-info">
+							<div class="client-avatar">JM</div>
+							<div>
+								<div class="client-name">James Mitchell</div>
+								<div class="client-meta">Week 7 / 12 &middot; Checked in today</div>
+							</div>
+						</div>
+						<div class="client-signal attention"></div>
+					</div>
+					<div class="client-row">
+						<div class="client-info">
+							<div class="client-avatar">AL</div>
+							<div>
+								<div class="client-name">Ana Lucia Reyes</div>
+								<div class="client-meta">Week 10 / 12 &middot; Perception gap emerging</div>
+							</div>
+						</div>
+						<div class="client-signal gap"></div>
+					</div>
+					<div class="client-row">
+						<div class="client-info">
+							<div class="client-avatar">DK</div>
+							<div>
+								<div class="client-name">David Kim</div>
+								<div class="client-meta">Week 3 / 12 &middot; Checked in Monday</div>
+							</div>
+						</div>
+						<div class="client-signal on-track"></div>
+					</div>
+					<div class="client-row">
+						<div class="client-info">
+							<div class="client-avatar">RP</div>
+							<div>
+								<div class="client-name">Rachel Patel</div>
+								<div class="client-meta">Week 5 / 12 &middot; Awaiting check-in</div>
+							</div>
+						</div>
+						<div class="client-signal waiting"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- ==================== SCREEN 6: PORTRAIT ==================== -->
+		<div class="screen" id="screen-portrait">
+			<div class="global-header">
+				<div class="wordmark">FORBETRA</div>
+				<div class="avatar"></div>
+			</div>
+			<div class="portrait-content">
+				<div class="portrait-label">YOUR BEHAVIORAL PORTRAIT &mdash; CYCLE 1</div>
+				<div class="portrait-svg-container">
+					<svg viewBox="0 0 320 320" id="portrait-svg"></svg>
+				</div>
+				<div class="portrait-identity">"I am becoming a leader who listens before deciding"</div>
+				<div class="portrait-actions">
+					<button class="share-btn">Share</button>
+					<button class="new-cycle-btn">Start a new cycle</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- ==================== BOTTOM NAV ==================== -->
+		<div class="screen-nav">
+			<button class="active" onclick="showScreen('screen-today')">Today</button>
+			<button onclick="showScreen('screen-checkin')">Check-in</button>
+			<button onclick="showScreen('screen-progress')">Progress</button>
+			<button onclick="showScreen('screen-reveal')">Reveal</button>
+			<button onclick="showScreen('screen-coach')">Coach</button>
+			<button onclick="showScreen('screen-portrait')">Portrait</button>
+		</div>
+
+		<script>
+			// ===== NAVIGATION =====
+			function showScreen(id) {
+				document.querySelectorAll('.screen').forEach((s) => s.classList.remove('active'));
+				document.getElementById(id).classList.add('active');
+				document
+					.querySelectorAll('.screen-nav button')
+					.forEach((b) => b.classList.remove('active'));
+				const labels = [
+					'screen-today',
+					'screen-checkin',
+					'screen-progress',
+					'screen-reveal',
+					'screen-coach',
+					'screen-portrait'
+				];
+				const idx = labels.indexOf(id);
+				if (idx >= 0) document.querySelectorAll('.screen-nav button')[idx].classList.add('active');
+				window.scrollTo(0, 0);
+			}
+
+			// ===== GRADIENT BAR INTERACTION =====
+			let dragging = null;
+			function startDrag(e, type) {
+				e.preventDefault();
+				dragging = type;
+				updateBar(e);
+				document.addEventListener('mousemove', updateBar);
+				document.addEventListener('mouseup', stopDrag);
+				document.addEventListener('touchmove', updateBar, { passive: false });
+				document.addEventListener('touchend', stopDrag);
+			}
+			function updateBar(e) {
+				if (!dragging) return;
+				e.preventDefault();
+				const track = document.getElementById(
+					dragging === 'effort' ? 'effort-track' : 'perf-track'
+				);
+				const fill = document.getElementById(dragging === 'effort' ? 'effort-fill' : 'perf-fill');
+				const scoreEl = document.getElementById(
+					dragging === 'effort' ? 'effort-score' : 'perf-score'
+				);
+				const rect = track.getBoundingClientRect();
+				const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+				const pct = Math.max(0, Math.min(1, (rect.bottom - clientY) / rect.height));
+				const score = Math.round(pct * 10);
+				fill.style.height = score * 10 + '%';
+				scoreEl.textContent = score;
+			}
+			function stopDrag() {
+				dragging = null;
+				document.removeEventListener('mousemove', updateBar);
+				document.removeEventListener('mouseup', stopDrag);
+				document.removeEventListener('touchmove', updateBar);
+				document.removeEventListener('touchend', stopDrag);
+			}
+
+			// ===== NOTE TOGGLE =====
+			function toggleNote() {
+				document.getElementById('note-area').classList.toggle('visible');
+			}
+
+			// ===== CHECK-IN SUBMIT =====
+			function submitCheckin() {
+				showScreen('screen-today');
+				// In real app: pulse animation here
+			}
+
+			// ===== REVEAL FLOW =====
+			function showRevealStep(step) {
+				document.querySelectorAll('.reveal-step').forEach((s) => s.classList.remove('active'));
+				document.getElementById('reveal-step-' + step).classList.add('active');
+			}
+			function flipCard() {
+				const card = document.getElementById('reveal-card');
+				if (card.classList.contains('flipped')) return;
+				card.classList.add('flipped');
+				// Show alignment glow
+				document.getElementById('screen-reveal').classList.add('aligned');
+				setTimeout(() => {
+					document.getElementById('alignment-text').classList.add('visible');
+				}, 600);
+			}
+
+			// ===== RIVER VISUALIZATION =====
+			function drawRiver() {
+				const svg = document.getElementById('river-svg');
+				if (!svg) return;
+				const weeks = [
+					{ e: 5, p: 4 },
+					{ e: 6, p: 5 },
+					{ e: 5, p: 6 },
+					{ e: 7, p: 7 },
+					{ e: 6, p: 5 },
+					{ e: 6, p: 7 },
+					{ e: 7, p: 5 }
+				];
+				const w = 680,
+					h = 180,
+					pad = 24;
+				const xStep = (w - pad * 2) / (weeks.length - 1);
+				const yScale = (v) => h - pad - (v / 10) * (h - pad * 2);
+
+				// Effort band
+				let effortPath = `M ${pad} ${yScale(weeks[0].e)}`;
+				weeks.forEach((wk, i) => {
+					if (i === 0) return;
+					const x = pad + i * xStep;
+					const px = pad + (i - 1) * xStep;
+					const cx = (px + x) / 2;
+					effortPath += ` C ${cx} ${yScale(weeks[i - 1].e)}, ${cx} ${yScale(wk.e)}, ${x} ${yScale(wk.e)}`;
+				});
+				// Bottom path for area
+				let effortArea = effortPath;
+				for (let i = weeks.length - 1; i >= 0; i--) {
+					const x = pad + i * xStep;
+					const y = yScale(weeks[i].e) + 20;
+					if (i === weeks.length - 1) effortArea += ` L ${x} ${y}`;
+					else {
+						const nx = pad + (i + 1) * xStep;
+						const cx = (x + nx) / 2;
+						effortArea += ` C ${cx} ${yScale(weeks[i + 1].e) + 20}, ${cx} ${y}, ${x} ${y}`;
+					}
+				}
+				effortArea += ' Z';
+
+				// Performance band
+				let perfPath = `M ${pad} ${yScale(weeks[0].p)}`;
+				weeks.forEach((wk, i) => {
+					if (i === 0) return;
+					const x = pad + i * xStep;
+					const px = pad + (i - 1) * xStep;
+					const cx = (px + x) / 2;
+					perfPath += ` C ${cx} ${yScale(weeks[i - 1].p)}, ${cx} ${yScale(wk.p)}, ${x} ${yScale(wk.p)}`;
+				});
+				let perfArea = perfPath;
+				for (let i = weeks.length - 1; i >= 0; i--) {
+					const x = pad + i * xStep;
+					const y = yScale(weeks[i].p) + 20;
+					if (i === weeks.length - 1) perfArea += ` L ${x} ${y}`;
+					else {
+						const nx = pad + (i + 1) * xStep;
+						const cx = (x + nx) / 2;
+						perfArea += ` C ${cx} ${yScale(weeks[i + 1].p) + 20}, ${cx} ${y}, ${x} ${y}`;
+					}
+				}
+				perfArea += ' Z';
+
+				svg.innerHTML = `
     <defs>
       <linearGradient id="effortGrad" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0%" stop-color="#94a3b8" stop-opacity="0.4"/>
@@ -1305,70 +1489,84 @@ function drawRiver() {
     <path d="${effortPath}" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/>
     <path d="${perfArea}" fill="url(#perfGrad)" />
     <path d="${perfPath}" fill="none" stroke="#d4a06a" stroke-width="2" stroke-linecap="round"/>
-    ${weeks.map((wk, i) => `
+    ${weeks
+			.map(
+				(wk, i) => `
       <circle cx="${pad + i * xStep}" cy="${yScale(wk.e)}" r="3" fill="#94a3b8"/>
       <circle cx="${pad + i * xStep}" cy="${yScale(wk.p)}" r="3" fill="#d4a06a"/>
-      <text x="${pad + i * xStep}" y="${h - 6}" text-anchor="middle" fill="rgba(250,244,237,0.2)" font-size="9" font-family="monospace">W${i+1}</text>
-    `).join('')}
+      <text x="${pad + i * xStep}" y="${h - 6}" text-anchor="middle" fill="rgba(250,244,237,0.2)" font-size="9" font-family="monospace">W${i + 1}</text>
+    `
+			)
+			.join('')}
   `;
-}
+			}
 
-// ===== PORTRAIT VISUALIZATION =====
-function drawPortrait() {
-  const svg = document.getElementById('portrait-svg');
-  if (!svg) return;
-  const cx = 160, cy = 160;
-  const weeks = [
-    { e: 5, p: 4 }, { e: 6, p: 5 }, { e: 5, p: 6 },
-    { e: 7, p: 7 }, { e: 6, p: 5 }, { e: 6, p: 7 },
-    { e: 7, p: 5 }, { e: 8, p: 6 }, { e: 7, p: 7 },
-    { e: 8, p: 8 }, { e: 9, p: 7 }, { e: 8, p: 8 }
-  ];
-  const n = weeks.length;
-  const angleStep = (2 * Math.PI) / n;
-  const minR = 30, maxR = 120;
+			// ===== PORTRAIT VISUALIZATION =====
+			function drawPortrait() {
+				const svg = document.getElementById('portrait-svg');
+				if (!svg) return;
+				const cx = 160,
+					cy = 160;
+				const weeks = [
+					{ e: 5, p: 4 },
+					{ e: 6, p: 5 },
+					{ e: 5, p: 6 },
+					{ e: 7, p: 7 },
+					{ e: 6, p: 5 },
+					{ e: 6, p: 7 },
+					{ e: 7, p: 5 },
+					{ e: 8, p: 6 },
+					{ e: 7, p: 7 },
+					{ e: 8, p: 8 },
+					{ e: 9, p: 7 },
+					{ e: 8, p: 8 }
+				];
+				const n = weeks.length;
+				const angleStep = (2 * Math.PI) / n;
+				const minR = 30,
+					maxR = 120;
 
-  let segments = '';
-  weeks.forEach((wk, i) => {
-    const a1 = -Math.PI / 2 + i * angleStep;
-    const a2 = a1 + angleStep;
-    const rEffort = minR + (wk.e / 10) * (maxR - minR);
-    const rPerf = minR + (wk.p / 10) * (maxR - minR);
+				let segments = '';
+				weeks.forEach((wk, i) => {
+					const a1 = -Math.PI / 2 + i * angleStep;
+					const a2 = a1 + angleStep;
+					const rEffort = minR + (wk.e / 10) * (maxR - minR);
+					const rPerf = minR + (wk.p / 10) * (maxR - minR);
 
-    // Effort arc (inner)
-    const eInner = minR;
-    const eOuter = rEffort;
-    const ex1 = cx + Math.cos(a1) * eInner;
-    const ey1 = cy + Math.sin(a1) * eInner;
-    const ex2 = cx + Math.cos(a1) * eOuter;
-    const ey2 = cy + Math.sin(a1) * eOuter;
-    const ex3 = cx + Math.cos(a2) * eOuter;
-    const ey3 = cy + Math.sin(a2) * eOuter;
-    const ex4 = cx + Math.cos(a2) * eInner;
-    const ey4 = cy + Math.sin(a2) * eInner;
+					// Effort arc (inner)
+					const eInner = minR;
+					const eOuter = rEffort;
+					const ex1 = cx + Math.cos(a1) * eInner;
+					const ey1 = cy + Math.sin(a1) * eInner;
+					const ex2 = cx + Math.cos(a1) * eOuter;
+					const ey2 = cy + Math.sin(a1) * eOuter;
+					const ex3 = cx + Math.cos(a2) * eOuter;
+					const ey3 = cy + Math.sin(a2) * eOuter;
+					const ex4 = cx + Math.cos(a2) * eInner;
+					const ey4 = cy + Math.sin(a2) * eInner;
 
-    segments += `<path d="M ${ex1} ${ey1} L ${ex2} ${ey2} A ${eOuter} ${eOuter} 0 0 1 ${ex3} ${ey3} L ${ex4} ${ey4} A ${eInner} ${eInner} 0 0 0 ${ex1} ${ey1} Z"
+					segments += `<path d="M ${ex1} ${ey1} L ${ex2} ${ey2} A ${eOuter} ${eOuter} 0 0 1 ${ex3} ${ey3} L ${ex4} ${ey4} A ${eInner} ${eInner} 0 0 0 ${ex1} ${ey1} Z"
       fill="rgba(148,163,184,0.25)" stroke="#94a3b8" stroke-width="1" opacity="0"
       style="animation: segFadeIn 400ms ${i * 100}ms var(--ease-out) forwards;" />`;
 
-    // Performance arc (overlay, thinner outer ring)
-    const pInner = rEffort;
-    const pOuter = rPerf > rEffort ? rPerf : rEffort + 4;
-    const px1 = cx + Math.cos(a1) * pInner;
-    const py1 = cy + Math.sin(a1) * pInner;
-    const px2 = cx + Math.cos(a1) * pOuter;
-    const py2 = cy + Math.sin(a1) * pOuter;
-    const px3 = cx + Math.cos(a2) * pOuter;
-    const py3 = cy + Math.sin(a2) * pOuter;
-    const px4 = cx + Math.cos(a2) * pInner;
-    const py4 = cy + Math.sin(a2) * pInner;
+					// Performance arc (overlay, thinner outer ring)
+					const pInner = rEffort;
+					const pOuter = rPerf > rEffort ? rPerf : rEffort + 4;
+					const px1 = cx + Math.cos(a1) * pInner;
+					const py1 = cy + Math.sin(a1) * pInner;
+					const px2 = cx + Math.cos(a1) * pOuter;
+					const py2 = cy + Math.sin(a1) * pOuter;
+					const px3 = cx + Math.cos(a2) * pOuter;
+					const py3 = cy + Math.sin(a2) * pOuter;
+					const px4 = cx + Math.cos(a2) * pInner;
+					const py4 = cy + Math.sin(a2) * pInner;
 
-    segments += `<path d="M ${px1} ${py1} L ${px2} ${py2} A ${pOuter} ${pOuter} 0 0 1 ${px3} ${py3} L ${px4} ${py4} A ${pInner} ${pInner} 0 0 0 ${px1} ${py1} Z"
+					segments += `<path d="M ${px1} ${py1} L ${px2} ${py2} A ${pOuter} ${pOuter} 0 0 1 ${px3} ${py3} L ${px4} ${py4} A ${pInner} ${pInner} 0 0 0 ${px1} ${py1} Z"
       fill="rgba(212,160,106,0.3)" stroke="#d4a06a" stroke-width="1" opacity="0"
       style="animation: segFadeIn 400ms ${i * 100 + 50}ms var(--ease-out) forwards;" />`;
-  });
+				});
 
-  svg.innerHTML = `
+				svg.innerHTML = `
     <style>
       @keyframes segFadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
@@ -1377,11 +1575,11 @@ function drawPortrait() {
     ${segments}
     <circle cx="${cx}" cy="${cy}" r="${minR - 8}" fill="var(--surface-base)"/>
   `;
-}
+			}
 
-// Init
-drawRiver();
-drawPortrait();
-</script>
-</body>
+			// Init
+			drawRiver();
+			drawPortrait();
+		</script>
+	</body>
 </html>
