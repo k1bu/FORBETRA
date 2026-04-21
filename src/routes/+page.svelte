@@ -129,10 +129,22 @@
 				</div>
 				<div class="space-y-3 text-xs text-text-tertiary md:text-sm">
 					<p>
-						By continuing, you agree to our <a
-							href="/terms"
-							class="font-medium text-text-secondary hover:text-text-primary">Terms of Use</a
-						>.
+						By creating an account, you're agreeing to our
+						<a href="/terms" class="font-medium text-text-secondary hover:text-text-primary"
+							>Terms of Use</a
+						>
+						and
+						<a href="/privacy" class="font-medium text-text-secondary hover:text-text-primary"
+							>Privacy Policy</a
+						>. If you later turn on SMS reminders, the
+						<a href="/sms-consent" class="font-medium text-text-secondary hover:text-text-primary"
+							>SMS Consent</a
+						>
+						page walks through exactly what we send, and
+						<a href="/sms-terms" class="font-medium text-text-secondary hover:text-text-primary"
+							>SMS Terms</a
+						>
+						covers opt-out and data rates.
 					</p>
 				</div>
 				<!-- eslint-enable svelte/no-navigation-without-resolve -->

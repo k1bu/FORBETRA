@@ -63,6 +63,15 @@
 				Consent to receive SMS messages is not a condition of using Forbetra. You may use the
 				platform without providing a phone number.
 			</p>
+			<p class="mt-3">
+				<!-- eslint-disable svelte/no-navigation-without-resolve -->
+				See our full
+				<a href="/sms-consent" class="font-semibold text-accent underline">SMS Consent & Opt-In</a>
+				page for a walkthrough of how consent is captured, and the
+				<a href="/sms-terms" class="font-semibold text-accent underline">SMS Messaging Terms</a>
+				for the standalone SMS policy.
+				<!-- eslint-enable svelte/no-navigation-without-resolve -->
+			</p>
 		</div>
 
 		<div>

@@ -67,6 +67,15 @@
 				can opt out of SMS messages at any time by replying <strong>STOP</strong> to any message.
 				Reply <strong>HELP</strong> for support. Consent to receive SMS is not a condition of using Forbetra.
 			</p>
+			<p class="mt-3">
+				<!-- eslint-disable svelte/no-navigation-without-resolve -->
+				See our
+				<a href="/sms-consent" class="font-semibold text-accent underline">SMS Consent & Opt-In</a>
+				page for how SMS consent is captured in-product, and the
+				<a href="/sms-terms" class="font-semibold text-accent underline">SMS Messaging Terms</a>
+				for the standalone SMS policy.
+				<!-- eslint-enable svelte/no-navigation-without-resolve -->
+			</p>
 		</div>
 
 		<div>
@@ -74,7 +83,8 @@
 			<p class="mb-2">We use the following third-party services to operate the platform:</p>
 			<ul class="ml-4 list-disc space-y-1">
 				<li><strong>Clerk:</strong> Authentication and user management.</li>
-				<li><strong>Postmark:</strong> Transactional email delivery.</li>
+				<li><strong>SendGrid:</strong> Transactional email delivery (primary).</li>
+				<li><strong>Postmark:</strong> Transactional email delivery (fallback).</li>
 				<li><strong>Twilio:</strong> SMS message delivery.</li>
 				<li><strong>Anthropic:</strong> AI-generated coaching insights.</li>
 				<li><strong>Neon:</strong> Database hosting.</li>
