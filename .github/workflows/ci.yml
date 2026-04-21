@@ -6,6 +6,14 @@ on:
   pull_request:
     branches: [main]
 
+env:
+  # `postinstall` runs `prisma generate`, which loads `prisma.config.ts` and
+  # requires `DATABASE_URL` to resolve. None of the CI jobs connect to a
+  # database — they only need the generated client for type-checking, unit
+  # tests, and build — so a placeholder URL is sufficient. If a real test
+  # database is ever added, set a `DATABASE_URL` secret and it will win.
+  DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://placeholder:placeholder@localhost:5432/placeholder' }}
+
 jobs:
   lint-and-check:
     name: Lint & Type Check
