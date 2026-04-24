@@ -198,7 +198,7 @@ export const load: PageServerLoad = async (event) => {
 		where: { userId: dbUser.id, active: true },
 		orderBy: { createdAt: 'desc' },
 		include: {
-			subgoals: { orderBy: { createdAt: 'asc' } },
+			subgoals: { where: { active: true }, orderBy: { createdAt: 'asc' } },
 			stakeholders: {
 				orderBy: { createdAt: 'asc' },
 				include: {
@@ -705,7 +705,7 @@ export const actions: Actions = {
 			where: { userId: dbUser.id, active: true },
 			orderBy: { createdAt: 'desc' },
 			include: {
-				subgoals: { orderBy: { createdAt: 'asc' } },
+				subgoals: { where: { active: true }, orderBy: { createdAt: 'asc' } },
 				cycles: { orderBy: { startDate: 'desc' }, take: 1 }
 			}
 		});

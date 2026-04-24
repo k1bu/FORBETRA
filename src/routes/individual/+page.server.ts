@@ -346,6 +346,7 @@ export const actions: Actions = {
 					take: 1
 				},
 				subgoals: {
+					where: { active: true },
 					orderBy: { createdAt: 'asc' },
 					take: 1
 				}

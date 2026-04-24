@@ -35,6 +35,7 @@ export const load: PageServerLoad = async (event) => {
 					orderBy: { createdAt: 'desc' },
 					include: {
 						subgoals: {
+							where: { active: true },
 							orderBy: { createdAt: 'asc' },
 							select: {
 								id: true,
