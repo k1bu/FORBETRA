@@ -32,10 +32,10 @@ export const load: PageServerLoad = async (event) => {
 	const { dbUser } = requireRole(event, isPreview ? ['INDIVIDUAL', 'ADMIN'] : 'INDIVIDUAL');
 
 	const existingObjective = await prisma.objective.findFirst({
-		where: { userId: dbUser.id },
+		where: { userId: dbUser.id, active: true },
 		orderBy: { createdAt: 'desc' },
 		include: {
-			subgoals: { orderBy: { createdAt: 'asc' } },
+			subgoals: { where: { active: true }, orderBy: { createdAt: 'asc' } },
 			stakeholders: { orderBy: { createdAt: 'asc' } },
 			cycles: {
 				orderBy: { startDate: 'desc' },

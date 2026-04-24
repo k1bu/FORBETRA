@@ -15,7 +15,7 @@ const generateTokenHash = (token: string) => createHash('sha256').update(token).
 const createInviteToken = () => randomBytes(32).toString('hex');
 
 export const load: PageServerLoad = async (event) => {
-	const { dbUser } = requireRole(event, 'COACH');
+	const { dbUser } = requireRole(event, ['COACH', 'ADMIN']);
 
 	// Skip onboarding if already completed
 	if (dbUser.coachOnboardingCompletedAt) {
@@ -46,7 +46,7 @@ export const load: PageServerLoad = async (event) => {
 
 export const actions: Actions = {
 	createInvite: async (event) => {
-		const { dbUser } = requireRole(event, 'COACH');
+		const { dbUser } = requireRole(event, ['COACH', 'ADMIN']);
 
 		const formData = await event.request.formData();
 		const email = String(formData.get('email') ?? '')
@@ -210,7 +210,7 @@ export const actions: Actions = {
 	},
 
 	skip: async (event) => {
-		const { dbUser } = requireRole(event, 'COACH');
+		const { dbUser } = requireRole(event, ['COACH', 'ADMIN']);
 
 		await prisma.user.update({
 			where: { id: dbUser.id },

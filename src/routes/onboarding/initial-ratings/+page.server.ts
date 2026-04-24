@@ -9,7 +9,7 @@ export const load: PageServerLoad = async (event) => {
 	const { dbUser } = requireRole(event, isPreview ? ['INDIVIDUAL', 'ADMIN'] : 'INDIVIDUAL');
 
 	const objective = await prisma.objective.findFirst({
-		where: { userId: dbUser.id },
+		where: { userId: dbUser.id, active: true },
 		orderBy: { createdAt: 'desc' },
 		include: {
 			cycles: {
@@ -17,6 +17,7 @@ export const load: PageServerLoad = async (event) => {
 				take: 1
 			},
 			subgoals: {
+				where: { active: true },
 				orderBy: { createdAt: 'asc' }
 			}
 		}
@@ -82,10 +83,9 @@ export const load: PageServerLoad = async (event) => {
 export const actions: Actions = {
 	default: async (event) => {
 		const { dbUser } = requireRole(event, 'INDIVIDUAL');
-		const isPreview = event.url.searchParams.get('preview') === 'true';
 
 		const objective = await prisma.objective.findFirst({
-			where: { userId: dbUser.id },
+			where: { userId: dbUser.id, active: true },
 			orderBy: { createdAt: 'desc' },
 			include: {
 				cycles: {
@@ -93,6 +93,7 @@ export const actions: Actions = {
 					take: 1
 				},
 				subgoals: {
+					where: { active: true },
 					orderBy: { createdAt: 'asc' },
 					take: 1
 				}

@@ -33,6 +33,17 @@ export const load: PageServerLoad = async (event) => {
 		if (dbUser.role === 'COACH') {
 			throw redirect(303, '/coach');
 		}
+
+		// Redirect admins to their dashboard
+		if (dbUser.role === 'ADMIN') {
+			throw redirect(303, '/admin');
+		}
+
+		if (dbUser.role === 'ORG_ADMIN') {
+			throw redirect(303, '/admin/organizations');
+		}
+
+		// Stakeholders use tokenized feedback links — no authenticated hub to redirect to
 	}
 
 	return {

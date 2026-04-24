@@ -4,7 +4,7 @@ import type { PageServerLoad } from './$types';
 import { buildClientSummary } from '$lib/server/buildClientSummary';
 
 export const load: PageServerLoad = async (event) => {
-	const { dbUser } = requireRole(event, 'COACH');
+	const { dbUser } = requireRole(event, ['COACH', 'ADMIN']);
 
 	const coachClients = await prisma.coachClient.findMany({
 		where: { coachId: dbUser.id },

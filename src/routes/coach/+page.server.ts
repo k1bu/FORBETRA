@@ -5,7 +5,7 @@ import type { PageServerLoad } from './$types';
 import { buildClientSummary } from '$lib/server/buildClientSummary';
 
 export const load: PageServerLoad = async (event) => {
-	const { dbUser } = requireRole(event, 'COACH');
+	const { dbUser } = requireRole(event, ['COACH', 'ADMIN']);
 
 	// Redirect new coaches to onboarding (skip if already completed or has clients)
 	if (!dbUser.coachOnboardingCompletedAt) {

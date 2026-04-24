@@ -6,7 +6,7 @@ export async function getActiveObjectiveWithCycle(userId: string) {
 		where: { userId, active: true },
 		orderBy: { createdAt: 'desc' },
 		include: {
-			subgoals: { orderBy: { createdAt: 'asc' } },
+			subgoals: { where: { active: true }, orderBy: { createdAt: 'asc' } },
 			cycles: {
 				orderBy: { startDate: 'desc' },
 				take: 1,

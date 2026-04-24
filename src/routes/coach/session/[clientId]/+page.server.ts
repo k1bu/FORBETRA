@@ -5,7 +5,7 @@ import type { Actions, PageServerLoad } from './$types';
 import { buildClientSummary } from '$lib/server/buildClientSummary';
 
 export const load: PageServerLoad = async (event) => {
-	const { dbUser } = requireRole(event, 'COACH');
+	const { dbUser } = requireRole(event, ['COACH', 'ADMIN']);
 	const clientId = event.params.clientId;
 
 	// Verify coach-client relationship
@@ -249,7 +249,7 @@ export const load: PageServerLoad = async (event) => {
 
 export const actions: Actions = {
 	createNote: async (event) => {
-		const { dbUser } = requireRole(event, 'COACH');
+		const { dbUser } = requireRole(event, ['COACH', 'ADMIN']);
 		const clientId = event.params.clientId;
 
 		const formData = await event.request.formData();
@@ -299,7 +299,7 @@ export const actions: Actions = {
 	},
 
 	editNote: async (event) => {
-		const { dbUser } = requireRole(event, 'COACH');
+		const { dbUser } = requireRole(event, ['COACH', 'ADMIN']);
 		const formData = await event.request.formData();
 		const noteId = String(formData.get('noteId') ?? '').trim();
 		const content = String(formData.get('content') ?? '').trim();
@@ -323,7 +323,7 @@ export const actions: Actions = {
 	},
 
 	deleteNote: async (event) => {
-		const { dbUser } = requireRole(event, 'COACH');
+		const { dbUser } = requireRole(event, ['COACH', 'ADMIN']);
 		const formData = await event.request.formData();
 		const noteId = String(formData.get('noteId') ?? '').trim();
 

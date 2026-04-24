@@ -78,6 +78,7 @@ export const load: PageServerLoad = async (event) => {
 				take: 1
 			},
 			subgoals: {
+				where: { active: true },
 				orderBy: { createdAt: 'asc' }
 			}
 		}
@@ -91,6 +92,10 @@ export const load: PageServerLoad = async (event) => {
 
 	if (!cycle) {
 		throw redirect(303, '/onboarding');
+	}
+
+	if (cycle.status === 'COMPLETED') {
+		throw redirect(303, '/individual');
 	}
 
 	const computedWeek = computeWeekNumber(cycle.startDate);
@@ -281,6 +286,12 @@ export const actions: Actions = {
 			return fail(400, { error: 'No active cycle found. Complete onboarding first.' });
 		}
 
+		if (cycle.status === 'COMPLETED') {
+			return fail(400, {
+				error: 'This cycle has been completed. Start a new cycle to continue checking in.'
+			});
+		}
+
 		const computedWeek = computeWeekNumber(cycle.startDate);
 		const isPreview = event.url.searchParams.get('preview') === 'true';
 
@@ -315,6 +326,7 @@ export const actions: Actions = {
 			orderBy: { createdAt: 'desc' },
 			include: {
 				subgoals: {
+					where: { active: true },
 					orderBy: { createdAt: 'asc' },
 					take: 1
 				}
