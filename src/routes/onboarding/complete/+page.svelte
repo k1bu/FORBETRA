@@ -139,12 +139,21 @@
 		>
 			Make changes
 		</a>
-		<a
-			href="/individual/checkin"
-			class="rounded-xl bg-accent px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-accent-hover"
-		>
-			Start Your First Check-in
-		</a>
+		{#if data.subgoals.length > 0}
+			<a
+				href="/individual/checkin"
+				class="rounded-xl bg-accent px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-accent-hover"
+			>
+				Start Your First Check-in
+			</a>
+		{:else}
+			<a
+				href="/onboarding"
+				class="rounded-xl bg-accent px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-accent-hover"
+			>
+				Add Focus Areas to Get Started
+			</a>
+		{/if}
 	</div>
 	<!-- eslint-enable svelte/no-navigation-without-resolve -->
 </section>

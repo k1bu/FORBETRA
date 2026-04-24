@@ -15,8 +15,9 @@ export const load: LayoutServerLoad = async (event) => {
 
 	const { objective, cycle, currentWeek } = result;
 
-	// If objective exists with cycles but no initial rating (week 0), redirect to initial-ratings
-	if (cycle) {
+	// If objective exists with cycles and subgoals but no initial rating (week 0), redirect to initial-ratings
+	// Skip this check if there are no subgoals — initial ratings require at least one subgoal
+	if (cycle && objective.subgoals.length > 0) {
 		const hasInitialRating = await prisma.reflection.findFirst({
 			where: { userId: dbUser.id, cycleId: cycle.id, weekNumber: 0 }
 		});
