@@ -121,7 +121,7 @@ async function createFeedbackToken(
 		where: { userId: dbUser.id, active: true },
 		orderBy: { createdAt: 'desc' },
 		include: {
-			subgoals: { orderBy: { createdAt: 'asc' } },
+			subgoals: { where: { active: true }, orderBy: { createdAt: 'asc' } },
 			cycles: { orderBy: { startDate: 'desc' }, take: 1 }
 		}
 	});
@@ -399,11 +399,6 @@ export const actions: Actions = {
 
 		// Send welcome email to new stakeholder
 		try {
-			const objectiveData = await prisma.objective.findUnique({
-				where: { id: objective.id },
-				select: { title: true }
-			});
-
 			const template = emailTemplates.welcomeStakeholder({
 				individualName: dbUser.name || undefined,
 				stakeholderName: name || undefined,
