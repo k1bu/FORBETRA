@@ -39,6 +39,13 @@
 
 	const prepData = $derived(freshPrep ?? data.coachPrep);
 
+	// Fix 4: count notes added since the last prep was generated
+	const notesAddedSincePrep = $derived.by((): number => {
+		if (!prepData) return 0;
+		const prepTime = new Date(prepData.createdAt).getTime();
+		return data.allCoachNotes.filter((n) => new Date(n.createdAt).getTime() > prepTime).length;
+	});
+
 	async function generatePrep() {
 		generatingPrep = true;
 		prepError = null;
@@ -348,22 +355,36 @@
 		>
 		<a
 			href="#notes"
-			class="text-2xs rounded-full border border-border-default bg-surface-raised px-2.5 py-1 font-medium text-text-muted transition-colors hover:border-accent/30 hover:text-accent"
-			>Notes</a
+			class="text-2xs inline-flex items-center gap-1 rounded-full border border-border-default bg-surface-raised px-2.5 py-1 font-medium text-text-muted transition-colors hover:border-accent/30 hover:text-accent"
 		>
+			Notes
+			{#if data.allCoachNotes.length > 0}
+				<span
+					class="flex h-4 min-w-4 items-center justify-center rounded-full bg-accent-muted px-1 font-bold text-accent"
+					>{data.allCoachNotes.length}</span
+				>
+			{/if}
+		</a>
 		{#if recentWeeks.length > 0}
 			<a
 				href="#checkins"
-				class="text-2xs rounded-full border border-border-default bg-surface-raised px-2.5 py-1 font-medium text-text-muted transition-colors hover:border-accent/30 hover:text-accent"
-				>Check-ins</a
+				class="text-2xs inline-flex items-center gap-1 rounded-full border border-border-default bg-surface-raised px-2.5 py-1 font-medium text-text-muted transition-colors hover:border-accent/30 hover:text-accent"
 			>
+				Check-ins
+				<span class="font-semibold text-accent">Wk {recentWeeks[0][0]}</span>
+			</a>
 		{/if}
 		{#if data.stakeholderTrends.length > 0}
 			<a
 				href="#feedback"
-				class="text-2xs rounded-full border border-border-default bg-surface-raised px-2.5 py-1 font-medium text-text-muted transition-colors hover:border-accent/30 hover:text-accent"
-				>Feedback</a
+				class="text-2xs inline-flex items-center gap-1 rounded-full border border-border-default bg-surface-raised px-2.5 py-1 font-medium text-text-muted transition-colors hover:border-accent/30 hover:text-accent"
 			>
+				Feedback
+				<span
+					class="flex h-4 min-w-4 items-center justify-center rounded-full bg-accent-muted px-1 font-bold text-accent"
+					>{data.stakeholderTrends.length}</span
+				>
+			</a>
 		{/if}
 		{#if data.client.visualizationData}
 			<a
@@ -398,6 +419,17 @@
 							{data.prepFreshness.newDataSince} new update{data.prepFreshness.newDataSince !== 1
 								? 's'
 								: ''}
+						</span>
+					{/if}
+					{#if notesAddedSincePrep > 0}
+						<span class="text-2xs rounded-full bg-warning/10 px-2 py-0.5 font-medium text-warning">
+							{notesAddedSincePrep} note{notesAddedSincePrep !== 1 ? 's' : ''} added since last prep —
+							<button
+								type="button"
+								onclick={generatePrep}
+								class="font-semibold underline underline-offset-2 hover:no-underline"
+								>Refresh for latest</button
+							>
 						</span>
 					{/if}
 				{/if}
@@ -435,6 +467,12 @@
 			<div class="prose prose-sm max-w-none text-text-secondary">
 				{@html renderMarkdown(prepData.content)}
 			</div>
+			{#if data.allCoachNotes.length > 0 && notesAddedSincePrep === 0}
+				<p class="mt-3 text-xs text-text-tertiary">
+					{data.allCoachNotes.length} note{data.allCoachNotes.length !== 1 ? 's' : ''} included in this
+					prep.
+				</p>
+			{/if}
 		{:else}
 			<div class="space-y-2">
 				<p class="text-sm text-text-tertiary">No prep generated yet. Click above to generate.</p>

@@ -55,6 +55,18 @@
 		}
 	};
 
+	// Per-index email errors for pre-fill stakeholder rows
+	let stakeholderEmailErrors = $state<string[]>([]);
+	const validateStakeholderEmail = (email: string, index: number) => {
+		const errors = [...stakeholderEmailErrors];
+		if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+			errors[index] = 'Please enter a valid email address.';
+		} else {
+			errors[index] = '';
+		}
+		stakeholderEmailErrors = errors;
+	};
+
 	const formatTimeFromNow = (value: string | null | undefined) => {
 		if (!value) return '—';
 		const diff = new Date(value).getTime() - Date.now();
@@ -465,32 +477,56 @@
 							>Suggested Reviewers <span class="font-normal text-text-muted">(optional)</span></span
 						>
 						{#each prefillStakeholders as stakeholder, i (i)}
-							<div class="flex gap-2">
-								<input
-									type="text"
-									name="stakeholderName{i + 1}"
-									bind:value={stakeholder.name}
-									class="flex-1 rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary transition-all focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
-									placeholder="Name"
-									maxlength="120"
-								/>
-								<input
-									type="email"
-									name="stakeholderEmail{i + 1}"
-									bind:value={stakeholder.email}
-									class="flex-1 rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary transition-all focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
-									placeholder="Email"
-								/>
-								{#if prefillStakeholders.length > 1}
-									<button
-										type="button"
-										onclick={() =>
-											(prefillStakeholders = prefillStakeholders.filter((_, idx) => idx !== i))}
-										class="shrink-0 rounded-lg border border-border-default p-2 text-text-muted transition-colors hover:border-error/30 hover:text-error"
-										aria-label="Remove reviewer"
-									>
-										<X class="h-4 w-4" />
-									</button>
+							<div class="space-y-1">
+								<div class="flex gap-2">
+									<input
+										type="text"
+										name="stakeholderName{i + 1}"
+										bind:value={stakeholder.name}
+										class="flex-1 rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-primary transition-all focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
+										placeholder="Name"
+										maxlength="120"
+									/>
+									<input
+										type="email"
+										name="stakeholderEmail{i + 1}"
+										bind:value={stakeholder.email}
+										aria-invalid={!!stakeholderEmailErrors[i]}
+										aria-describedby={stakeholderEmailErrors[i]
+											? `stakeholder-email-error-${i}`
+											: undefined}
+										class="flex-1 rounded-lg border bg-surface-raised px-3 py-2 text-sm text-text-primary transition-all focus:ring-2 focus:outline-none {stakeholderEmailErrors[
+											i
+										]
+											? 'border-error focus:border-error focus:ring-error/30'
+											: 'border-border-default focus:border-accent focus:ring-accent/30'}"
+										placeholder="Email"
+										onblur={(e) => validateStakeholderEmail(e.currentTarget.value, i)}
+										oninput={(e) => {
+											if (stakeholderEmailErrors[i])
+												validateStakeholderEmail(e.currentTarget.value, i);
+										}}
+									/>
+									{#if prefillStakeholders.length > 1}
+										<button
+											type="button"
+											onclick={() => {
+												prefillStakeholders = prefillStakeholders.filter((_, idx) => idx !== i);
+												stakeholderEmailErrors = stakeholderEmailErrors.filter(
+													(_, idx) => idx !== i
+												);
+											}}
+											class="shrink-0 rounded-lg border border-border-default p-2 text-text-muted transition-colors hover:border-error/30 hover:text-error"
+											aria-label="Remove reviewer"
+										>
+											<X class="h-4 w-4" />
+										</button>
+									{/if}
+								</div>
+								{#if stakeholderEmailErrors[i]}
+									<p id="stakeholder-email-error-{i}" class="text-xs text-error">
+										{stakeholderEmailErrors[i]}
+									</p>
 								{/if}
 							</div>
 						{/each}

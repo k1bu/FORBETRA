@@ -533,6 +533,26 @@
 											</div>
 										</div>
 									</div>
+									{#if data.previousRatings?.effortScore !== null && data.previousRatings?.effortScore !== undefined && stakeholderScores?.effortScore !== null && stakeholderScores?.effortScore !== undefined}
+										{@const effortDelta =
+											stakeholderScores.effortScore - data.previousRatings.effortScore}
+										<p class="text-xs text-text-tertiary">
+											Last time you rated effort {data.previousRatings.effortScore} —
+											{#if effortDelta > 0}
+												<span class="text-success"
+													>up {effortDelta} point{effortDelta !== 1 ? 's' : ''} this week.</span
+												>
+											{:else if effortDelta < 0}
+												<span class="text-warning"
+													>down {Math.abs(effortDelta)} point{Math.abs(effortDelta) !== 1
+														? 's'
+														: ''} this week.</span
+												>
+											{:else}
+												same as this week.
+											{/if}
+										</p>
+									{/if}
 									<div
 										class="flex items-center justify-between rounded-lg border-2 border-accent/30 bg-accent-muted px-4 py-3"
 									>
@@ -591,6 +611,25 @@
 											</div>
 										</div>
 									</div>
+									{#if data.previousRatings?.performanceScore !== null && data.previousRatings?.performanceScore !== undefined && stakeholderScores?.performanceScore !== null && stakeholderScores?.performanceScore !== undefined}
+										{@const perfDelta =
+											stakeholderScores.performanceScore - data.previousRatings.performanceScore}
+										<p class="text-xs text-text-tertiary">
+											Last time you rated performance {data.previousRatings.performanceScore} —
+											{#if perfDelta > 0}
+												<span class="text-success"
+													>up {perfDelta} point{perfDelta !== 1 ? 's' : ''} this week.</span
+												>
+											{:else if perfDelta < 0}
+												<span class="text-warning"
+													>down {Math.abs(perfDelta)} point{Math.abs(perfDelta) !== 1 ? 's' : ''} this
+													week.</span
+												>
+											{:else}
+												same as this week.
+											{/if}
+										</p>
+									{/if}
 									<div
 										class="flex items-center justify-between rounded-lg border-2 border-accent/30 bg-accent-muted px-4 py-3"
 									>
@@ -666,15 +705,40 @@
 					</div>
 				{/if}
 
-				<!-- Forward path -->
+				<!-- Forward path — personalized based on submission context -->
 				<div
 					class="rounded-xl border border-border-default bg-surface-subtle px-5 py-4 text-center"
 				>
-					<p class="text-sm font-medium text-text-primary">Thank you for your time</p>
-					<p class="mt-1 text-xs text-text-secondary">
-						Your honest perspective makes a real difference. We'll send you a quick link next week —
-						same ~60 seconds, same real impact.
-					</p>
+					{#if data.previousRatings && (data.previousRatings.effortScore !== null || data.previousRatings.performanceScore !== null) && stakeholderScores}
+						{@const effortDelta =
+							stakeholderScores.effortScore !== null && data.previousRatings.effortScore !== null
+								? stakeholderScores.effortScore - data.previousRatings.effortScore
+								: null}
+						{@const perfDelta =
+							stakeholderScores.performanceScore !== null &&
+							data.previousRatings.performanceScore !== null
+								? stakeholderScores.performanceScore - data.previousRatings.performanceScore
+								: null}
+						{@const anyHigher =
+							(effortDelta !== null && effortDelta > 0) || (perfDelta !== null && perfDelta > 0)}
+						<p class="text-sm font-medium text-text-primary">Your observation is already working</p>
+						<p class="mt-1 text-xs text-text-secondary">
+							{#if anyHigher}
+								You rated {effortDelta !== null && effortDelta > 0 ? 'effort' : 'performance'} higher
+								this week — that kind of observation is exactly what helps {data.reflection
+									.participantName}'s coach spot real momentum.
+							{:else}
+								Your consistent perspective helps {data.reflection.participantName}'s coach track
+								what's actually shifting over time.
+							{/if}
+						</p>
+					{:else}
+						<p class="text-sm font-medium text-text-primary">Your first rating is in</p>
+						<p class="mt-1 text-xs text-text-secondary">
+							{data.reflection.participantName}'s coach will use this in their next session. We'll
+							send you a quick link next week — same ~60 seconds, same real impact.
+						</p>
+					{/if}
 				</div>
 			</div>
 		{/if}
