@@ -19,7 +19,6 @@
 	const isRoleSelection = $derived(
 		($page.data as Record<string, unknown>).showRoleSelection === true
 	);
-	const displayRole = $derived(isRoleSelection ? null : (data.dbUser?.role ?? null));
 
 	const isActive = (href: string) => {
 		const pathname = $page.url.pathname;

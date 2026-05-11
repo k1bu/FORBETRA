@@ -33,7 +33,7 @@ export async function safePrismaQuery<T>(
 ): Promise<T | null> {
 	try {
 		return await queryFn();
-	} catch (error: any) {
+	} catch (error: unknown) {
 		// Log Prisma-specific errors
 		if (error instanceof Prisma.PrismaClientKnownRequestError) {
 			console.error('[prisma:error] Known request error', {
@@ -50,11 +50,13 @@ export async function safePrismaQuery<T>(
 				errorCode: error.errorCode,
 				message: error.message
 			});
-		} else {
+		} else if (error instanceof Error) {
 			console.error('[prisma:error] Unexpected error', {
-				message: error?.message,
-				stack: error?.stack
+				message: error.message,
+				stack: error.stack
 			});
+		} else {
+			console.error('[prisma:error] Unexpected non-Error thrown', { error });
 		}
 
 		// Return fallback if provided, otherwise return null

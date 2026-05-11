@@ -12,7 +12,7 @@
 		variant?: Variant;
 		children: Snippet;
 		class?: string;
-		[key: string]: any;
+		[key: string]: unknown;
 	} = $props();
 
 	const baseClasses = 'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium';

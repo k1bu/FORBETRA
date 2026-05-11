@@ -110,8 +110,13 @@ export const actions: Actions = {
 			}
 
 			return { success: true, message: 'User updated.' };
-		} catch (error: any) {
-			if (error.code === 'P2002') {
+		} catch (error: unknown) {
+			if (
+				typeof error === 'object' &&
+				error !== null &&
+				'code' in error &&
+				(error as { code: string }).code === 'P2002'
+			) {
 				return fail(400, { error: 'A user with this email already exists.' });
 			}
 			return fail(500, { error: 'Failed to update user.' });
