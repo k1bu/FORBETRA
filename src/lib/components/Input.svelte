@@ -12,7 +12,7 @@
 		id?: string;
 		disabled?: boolean;
 		class?: string;
-		[key: string]: any;
+		[key: string]: unknown;
 	} = $props();
 
 	const inputId = id || label?.toLowerCase().replace(/\s+/g, '-') || undefined;

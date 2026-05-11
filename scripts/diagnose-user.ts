@@ -116,9 +116,13 @@ async function diagnoseUser(email: string) {
 			console.log('   2. Verify the Clerk account exists and matches this clerkUserId');
 			console.log('   3. Check if there are any database constraint violations');
 		}
-	} catch (error: any) {
-		console.error('\n❌ Error:', error.message);
-		console.error('   Stack:', error.stack);
+	} catch (error: unknown) {
+		if (error instanceof Error) {
+			console.error('\n❌ Error:', error.message);
+			console.error('   Stack:', error.stack);
+		} else {
+			console.error('\n❌ Error:', error);
+		}
 		throw error;
 	} finally {
 		await prisma.$disconnect();

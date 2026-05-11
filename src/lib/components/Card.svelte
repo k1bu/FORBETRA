@@ -15,7 +15,7 @@
 		padding?: Padding;
 		children: Snippet;
 		class?: string;
-		[key: string]: any;
+		[key: string]: unknown;
 	} = $props();
 
 	const variantClasses: Record<Variant, string> = {

@@ -26,8 +26,12 @@ async function fixEmailMismatch() {
 		console.log(`   To:      demo+clerk_test@test.forbeta.com`);
 		console.log('\n💡 Now run the linking script again:');
 		console.log('   npx tsx scripts/link-clerk-to-seeded.ts');
-	} catch (error: any) {
-		console.error('\n❌ Error:', error.message);
+	} catch (error: unknown) {
+		if (error instanceof Error) {
+			console.error('\n❌ Error:', error.message);
+		} else {
+			console.error('\n❌ Error:', error);
+		}
 		throw error;
 	} finally {
 		await prisma.$disconnect();

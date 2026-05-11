@@ -56,8 +56,12 @@ async function checkUserLink() {
 
 		console.log('💡 If Clerk ID shows "NOT LINKED", sign in via Clerk to auto-link.');
 		console.log('   If no user found, run: npm run seed:test-data');
-	} catch (error: any) {
-		console.error('\n❌ Error:', error.message);
+	} catch (error: unknown) {
+		if (error instanceof Error) {
+			console.error('\n❌ Error:', error.message);
+		} else {
+			console.error('\n❌ Error:', error);
+		}
 		throw error;
 	} finally {
 		await prisma.$disconnect();

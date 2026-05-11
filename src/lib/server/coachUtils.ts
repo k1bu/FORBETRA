@@ -1,5 +1,3 @@
-import type { Prisma } from '@prisma/client';
-
 /** Number of days before a feedback token expires */
 export const FEEDBACK_TOKEN_EXPIRY_DAYS = 10;
 
